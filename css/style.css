@@ -1,0 +1,20 @@
+/* Custom CSS rules for your application */
+
+body {
+  /* Example: Add a bit of padding at the bottom */
+  padding-bottom: 50px;
+}
+
+/* Add more specific styles later, e.g., for unit cards */
+.unit-card {
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.25rem;
+}
+
+/* Style for dead/routed units maybe */
+.unit-inactive {
+  opacity: 0.6;
+  background-color: #f8f9fa;
+}
