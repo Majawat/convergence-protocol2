@@ -1,4 +1,4 @@
-// SVG Icons constant
+// SVG Icons constant (ensure this is defined or imported)
 const STAT_ICONS = {
   quality: `<svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="1em" height="1em" style="vertical-align: -0.125em; margin-right: 0.2em;">
           <path style="fill: #ad3e25" d="m8 0 1.669.864 1.858.282.842 1.68 1.337 1.32L13.4 6l.306 1.854-1.337 1.32-.842 1.68-1.858.282L8 12l-1.669-.864-1.858-.282-.842-1.68-1.337-1.32L2.6 6l-.306-1.854 1.337-1.32.842-1.68L6.331.864z"/>
@@ -7,6 +7,7 @@ const STAT_ICONS = {
   defense: `<svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="1em" height="1em" style="vertical-align: -0.125em; margin-right: 0.2em;">
           <path style="fill: #005f83" d="M5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/>
       </svg>`,
+  // Tough icon represents Total HP Pool now
   tough: `<svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="1em" height="1em" style="vertical-align: -0.125em; margin-right: 0.2em;">
           <path style="fill: #dc3545" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
       </svg>`,
@@ -14,8 +15,8 @@ const STAT_ICONS = {
 
 /**
  * Displays the army units as Bootstrap cards with detailed information.
- * Aggregates identical weapons, uses Bootstrap Icons for bases,
- * Shows XP, hides Tough(1), formats Tough display, uses icons.
+ * **MODIFIED:** Displays Total HP Pool instead of single Tough value.
+ * Aggregates identical weapons, uses Bootstrap Icons for bases, Shows XP.
  * @param {object} processedArmy - The structured army data object.
  * @param {HTMLElement} displayContainer - The HTML element to inject the cards into.
  */
@@ -29,7 +30,7 @@ function displayArmyUnits(processedArmy, displayContainer) {
   // Add Army Title
   const armyTitle = document.createElement("h2");
   armyTitle.className = "mt-4 mb-3 border-bottom pb-2";
-  armyTitle.textContent = `${processedArmy.meta.name} (${processedArmy.meta.listPoints} pts)`; // Use actual list points
+  armyTitle.textContent = `${processedArmy.meta.name} (${processedArmy.meta.listPoints} pts)`;
   displayContainer.appendChild(armyTitle);
 
   // Create row for unit cards
@@ -46,11 +47,16 @@ function displayArmyUnits(processedArmy, displayContainer) {
   // Helper function to format rules
   const formatRule = (rule) => {
     const baseName = rule.name || rule.label;
+    // Check if rating is meaningful (not null, undefined, or empty string)
     if (
       rule.rating !== null &&
       rule.rating !== undefined &&
-      String(rule.rating).length > 0
+      String(rule.rating).trim().length > 0
     ) {
+      // Special case for Tough display in rules list - use the final calculated value if available
+      if (rule.name === "Tough" && rule.finalToughValue) {
+        return `${baseName}(${rule.finalToughValue})`;
+      }
       return `${baseName}(${rule.rating})`;
     }
     return baseName;
@@ -64,7 +70,7 @@ function displayArmyUnits(processedArmy, displayContainer) {
     cardDiv.id = `unit-card-${unit.selectionId}`;
     cardDiv.className = "card h-100 unit-card shadow-sm";
 
-    // Card Header
+    // Card Header (Name, Points)
     const cardHeader = document.createElement("div");
     cardHeader.className =
       "card-header bg-light d-flex justify-content-between align-items-center";
@@ -111,13 +117,17 @@ function displayArmyUnits(processedArmy, displayContainer) {
     statsRow.appendChild(
       createStatCol(STAT_ICONS.defense || "Def", `${unit.defense}+`, "Defense")
     );
-    const toughness = unit.models.length > 0 ? unit.models[0].maxHp : 1;
-    if (toughness > 1) {
-      // Only display if Toughness > 1
-      statsRow.appendChild(
-        createStatCol(STAT_ICONS.tough || "Tough", `${toughness}`, "Tough")
-      ); // No parentheses
-    }
+
+    // **** Calculate and Display Total HP Pool ****
+    const totalHpPool = unit.models.reduce(
+      (sum, model) => sum + (model.maxHp || 1),
+      0
+    );
+    statsRow.appendChild(
+      createStatCol(STAT_ICONS.tough || "HP", `${totalHpPool}`, "Total HP Pool")
+    );
+    // **** End Total HP Pool Display ****
+
     statsRow.appendChild(createStatCol(null, unit.size, "Models"));
     statsRow.appendChild(createStatCol(null, unit.xp, "XP"));
     cardBody.appendChild(statsRow);
@@ -128,13 +138,11 @@ function displayArmyUnits(processedArmy, displayContainer) {
       baseSizeDiv.className = "mb-2 text-muted text-center small";
       let baseHtml = "";
       if (unit.bases.round) {
-        // Use Bootstrap Icons
         baseHtml += `<i class="bi bi-circle-fill"></i> ${unit.bases.round}${
           unit.bases.round.includes("mm") ? "" : "mm"
         }`;
       }
       if (unit.bases.square) {
-        // Use Bootstrap Icons
         baseHtml +=
           (baseHtml ? " | " : "") +
           `<i class="bi bi-square-fill"></i> ${unit.bases.square}${
@@ -152,10 +160,26 @@ function displayArmyUnits(processedArmy, displayContainer) {
       rulesDiv.innerHTML = `<strong class="d-block border-bottom mb-1 pb-1">Rules:</strong>`;
       const rulesList = document.createElement("span");
       rulesList.className = "text-muted";
-      rulesList.textContent = unit.rules
-        .filter((rule) => rule.name !== "Tough")
-        .map(formatRule)
+
+      // Update the Tough rule object with the final calculated value for display IF it exists
+      const finalToughValue = unit.models.length > 0 ? unit.models[0].maxHp : 1; // Get representative Tough value
+      const rulesForDisplay = unit.rules.map((rule) => {
+        if (rule.name === "Tough") {
+          // Create a copy to avoid modifying original data, update rating for display
+          return {
+            ...rule,
+            rating: finalToughValue,
+            finalToughValue: finalToughValue,
+          }; // Pass final value for formatter
+        }
+        return rule;
+      });
+
+      // Format rules, deduplicate formatted strings, sort, join
+      rulesList.textContent = rulesForDisplay
+        .map(formatRule) // Format first Name(Rating)
         .sort()
+        .filter((value, index, self) => self.indexOf(value) === index) // Keep unique strings
         .join(", ");
       rulesDiv.appendChild(rulesList);
       cardBody.appendChild(rulesDiv);
@@ -168,7 +192,7 @@ function displayArmyUnits(processedArmy, displayContainer) {
       weaponsDiv.innerHTML = `<strong class="d-block border-bottom mb-1 pb-1">Weapons:</strong>`;
       const table = document.createElement("table");
       table.className = "table table-sm table-borderless mb-0";
-      const thead = table.createTHead();
+      const thead = table.createTHead(); /* ... headers ... */
       const headerRow = thead.insertRow();
       const headers = ["Weapon", "RNG", "ATK", "AP", "Special"];
       headers.forEach((text) => {
@@ -208,14 +232,14 @@ function displayArmyUnits(processedArmy, displayContainer) {
         }
       });
 
-      // Build table rows from aggregated weapons
+      // Build table rows
       Object.values(aggregatedWeapons).forEach((aggWeapon) => {
         const weapon = aggWeapon.data;
         const row = tbody.insertRow();
         row.className = "align-middle";
         const weaponName = `${
           aggWeapon.count > 1 ? aggWeapon.count + "x " : ""
-        }${weapon.name}`; // Use .name
+        }${weapon.name}`;
         row.insertCell().textContent = weaponName;
         const rangeCell = row.insertCell();
         rangeCell.textContent = weapon.range ? `${weapon.range}"` : "-";
@@ -225,7 +249,7 @@ function displayArmyUnits(processedArmy, displayContainer) {
         attacksCell.style.textAlign = "center";
         const apCell = row.insertCell();
         apCell.textContent = aggWeapon.apValue;
-        apCell.style.textAlign = "center"; // Use precalc AP value ('-' or number)
+        apCell.style.textAlign = "center";
         row.insertCell().textContent = aggWeapon.otherRulesString;
       });
 
@@ -243,9 +267,9 @@ function displayArmyUnits(processedArmy, displayContainer) {
       unit.items.forEach((item) => {
         const li = document.createElement("li");
         li.className = "mb-1";
-        let itemText = `<strong>${item.name}${
-          item.count > 1 ? ` (x${item.count})` : ""
-        }</strong>`; // Use .name
+        let itemText = `<strong>${item.count > 1 ? item.count + "x " : ""}${
+          item.name
+        }</strong>`;
         const contentRules = (item.content || [])
           .map(formatRule)
           .sort()
@@ -263,9 +287,9 @@ function displayArmyUnits(processedArmy, displayContainer) {
     cardDiv.appendChild(cardHeader);
     cardDiv.appendChild(cardBody);
     colDiv.appendChild(cardDiv);
-    unitRow.appendChild(colDiv); // Add card column to the unit row for this army
+    unitRow.appendChild(colDiv);
   });
 }
 
-// Export the function and constants to make them available for import
+// Export the function and constants
 export { displayArmyUnits, STAT_ICONS };
