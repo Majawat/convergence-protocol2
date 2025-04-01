@@ -15,7 +15,8 @@ const STAT_ICONS = {
 
 /**
  * Displays the army units as Bootstrap cards with detailed information.
- * **MODIFIED:** Displays Total HP Pool instead of single Tough value.
+ * **MODIFIED:** Uses theme-neutral bg-body-tertiary for card header.
+ * Displays Total HP Pool instead of single Tough value.
  * Aggregates identical weapons, uses Bootstrap Icons for bases, Shows XP.
  * @param {object} processedArmy - The structured army data object.
  * @param {HTMLElement} displayContainer - The HTML element to inject the cards into.
@@ -47,7 +48,6 @@ function displayArmyUnits(processedArmy, displayContainer) {
   // Helper function to format rules
   const formatRule = (rule) => {
     const baseName = rule.name || rule.label;
-    // Check if rating is meaningful (not null, undefined, or empty string)
     if (
       rule.rating !== null &&
       rule.rating !== undefined &&
@@ -68,12 +68,14 @@ function displayArmyUnits(processedArmy, displayContainer) {
     colDiv.className = "col";
     const cardDiv = document.createElement("div");
     cardDiv.id = `unit-card-${unit.selectionId}`;
-    cardDiv.className = "card h-100 unit-card shadow-sm";
+    cardDiv.className =
+      "card h-100 unit-card shadow-sm border-secondary-subtle"; // Use theme-aware border
 
     // Card Header (Name, Points)
     const cardHeader = document.createElement("div");
+    // **** Use theme-neutral background ****
     cardHeader.className =
-      "card-header bg-light d-flex justify-content-between align-items-center";
+      "card-header bg-body-tertiary d-flex justify-content-between align-items-center";
     const headerTextDiv = document.createElement("div");
     const cardTitle = document.createElement("h5");
     cardTitle.className = "mb-0 card-title";
@@ -117,8 +119,7 @@ function displayArmyUnits(processedArmy, displayContainer) {
     statsRow.appendChild(
       createStatCol(STAT_ICONS.defense || "Def", `${unit.defense}+`, "Defense")
     );
-
-    // **** Calculate and Display Total HP Pool ****
+    // Calculate and Display Total HP Pool
     const totalHpPool = unit.models.reduce(
       (sum, model) => sum + (model.maxHp || 1),
       0
@@ -126,8 +127,6 @@ function displayArmyUnits(processedArmy, displayContainer) {
     statsRow.appendChild(
       createStatCol(STAT_ICONS.tough || "HP", `${totalHpPool}`, "Total HP Pool")
     );
-    // **** End Total HP Pool Display ****
-
     statsRow.appendChild(createStatCol(null, unit.size, "Models"));
     statsRow.appendChild(createStatCol(null, unit.xp, "XP"));
     cardBody.appendChild(statsRow);
@@ -157,9 +156,9 @@ function displayArmyUnits(processedArmy, displayContainer) {
     if (unit.rules && unit.rules.length > 0) {
       const rulesDiv = document.createElement("div");
       rulesDiv.className = "mb-2";
-      rulesDiv.innerHTML = `<strong class="d-block border-bottom mb-1 pb-1">Rules:</strong>`;
+      rulesDiv.innerHTML = `<strong class="d-block border-bottom border-secondary-subtle mb-1 pb-1">Rules:</strong>`; // Theme-aware border
       const rulesList = document.createElement("span");
-      rulesList.className = "text-muted";
+      rulesList.className = "text-body-secondary"; // Theme-aware muted text
 
       // Update the Tough rule object with the final calculated value for display IF it exists
       const finalToughValue = unit.models.length > 0 ? unit.models[0].maxHp : 1; // Get representative Tough value
@@ -189,9 +188,9 @@ function displayArmyUnits(processedArmy, displayContainer) {
     if (unit.loadout && unit.loadout.length > 0) {
       const weaponsDiv = document.createElement("div");
       weaponsDiv.className = "mb-2";
-      weaponsDiv.innerHTML = `<strong class="d-block border-bottom mb-1 pb-1">Weapons:</strong>`;
+      weaponsDiv.innerHTML = `<strong class="d-block border-bottom border-secondary-subtle mb-1 pb-1">Weapons:</strong>`; // Theme-aware border
       const table = document.createElement("table");
-      table.className = "table table-sm table-borderless mb-0";
+      table.className = "table table-sm table-borderless mb-0"; // Use table-borderless for cleaner look
       const thead = table.createTHead(); /* ... headers ... */
       const headerRow = thead.insertRow();
       const headers = ["Weapon", "RNG", "ATK", "AP", "Special"];
@@ -199,7 +198,7 @@ function displayArmyUnits(processedArmy, displayContainer) {
         const th = document.createElement("th");
         th.scope = "col";
         th.textContent = text;
-        th.className = "py-0";
+        th.className = "py-0 fw-semibold"; // Header styling
         if (["RNG", "ATK", "AP"].includes(text)) th.style.textAlign = "center";
         if (text === "Weapon") th.style.width = "40%";
         headerRow.appendChild(th);
@@ -261,21 +260,22 @@ function displayArmyUnits(processedArmy, displayContainer) {
     if (unit.items && unit.items.length > 0) {
       const itemsDiv = document.createElement("div");
       itemsDiv.className = "mb-0";
-      itemsDiv.innerHTML = `<strong class="d-block border-bottom mb-1 pb-1">Upgrades/Items:</strong>`;
+      itemsDiv.innerHTML = `<strong class="d-block border-bottom border-secondary-subtle mb-1 pb-1">Upgrades/Items:</strong>`; // Theme-aware border
       const itemList = document.createElement("ul");
-      itemList.className = "list-unstyled mb-0";
+      itemList.className = "list-unstyled mb-0 ps-2"; // Add padding start
+
       unit.items.forEach((item) => {
         const li = document.createElement("li");
         li.className = "mb-1";
-        let itemText = `<strong>${item.count > 1 ? item.count + "x " : ""}${
-          item.name
-        }</strong>`;
+        let itemText = `<span class="fw-semibold">${
+          item.count > 1 ? item.count + "x " : ""
+        }${item.name}</span>`; // Use fw-semibold
         const contentRules = (item.content || [])
           .map(formatRule)
           .sort()
           .join(", ");
         if (contentRules)
-          itemText += `: <span class="text-muted">${contentRules}</span>`;
+          itemText += `: <span class="text-body-secondary">${contentRules}</span>`; // Theme-aware muted text
         li.innerHTML = itemText;
         itemList.appendChild(li);
       });
