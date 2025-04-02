@@ -1,0 +1,102 @@
+{
+  "basePoints": 1400,
+  "campaignName": "The Convergence Protocol",
+  "armies": [
+    {
+      "player": "Cody",
+      "playerTitle": "Packlord",
+      "armyName": "The Ashen Pact",
+      "tagline": "An Uneasy Alliance Against the Iron Tide",
+      "backstory": "<h3>Origins of the Pact</h3><p>Long ago, the Blessed Sisters and the Jackals were bitter rivals. The Sisters, devout in their pursuit of purity and divine justice, saw the Jackals as rogues and heretics, while the Jackals viewed the Sisters as zealots blinded by dogma. Their skirmishes were frequent and fierce, leaving scars across the worlds they battled upon.</p><h3>The Rise of the Robot Legion</h3><P>Amidst this turmoil, a dormant force stirred—the ancient and coldly calculating Robot Legion. Awakened from their millennia-long slumber, the Legion emerged with a singular purpose: to reclaim their lost dominion and purge all organic life. Their relentless advance brought devastation, wiping out entire worlds with methodical precision.</p><h3>The First Encounter</h3><p>Both the Blessed Sisters and the Jackals suffered devastating defeats at the hands of the Robot Legion. Realizing their strength alone was insufficient, leaders from both factions, reluctantly at first, agreed to a temporary truce. In their initial combined efforts, they managed to halt the Legion's advance, though victory remained elusive.</p><h3>The Pact Forged in Ash</h3><p>Faced with the annihilation of their worlds and peoples, the leaders of the Blessed Sisters and the Jackals gathered on the ruins of a once-great city, now reduced to ashes. Here, they forged The Ashen Pact, a sacred and solemn alliance against the greater threat. The Sisters brought their unyielding faith and divine power, while the Jackals contributed their cunning, adaptability, and guerrilla warfare expertise.</p><h3>Shared Purpose</h3><p>The Robot Legion's mechanical nature and reanimation protocols presented a unique challenge. The Sisters' holy relics and sanctified weaponry were effective against the Legion's metallic bodies and the dark energies that animated them. Meanwhile, the Jackals' hit-and-run tactics disrupted the Legion's formations, targeting key nodes to slow their relentless advance.</p><h3>Ongoing Conflict</h3><p>Despite their combined efforts, tensions persist within The Ashen Pact. The Sisters struggle with the Jackals' morally ambiguous methods, while the Jackals chafe under the Sisters' rigid structure and unwavering faith. Yet, both know that unity is their only hope for survival.</p><h3>Prophecy of the Final Battle</h3><p>Legends speak of a final, apocalyptic confrontation with the Robot Legion, where only the combined might of light and shadow can bring salvation. Until that day, The Ashen Pact fights on, a beacon of hope in a galaxy overshadowed by cold, mechanical tyranny.</p>",
+      "summary": "The Ashen Pact is a fragile alliance between the dedicated Blessed Sisters, driven by a divine crusade against the Robot Legion's unholy machines, and the cunning Jackals, who seek to dismantle and repurpose the Legion's technology for their own survival, bound together by the need to combat a common, mechanical foe.",
+      "faction": [
+        { "id": "BKi_hJaJflN8ZorH", "gameSystem": "2", "name": "Jackals" },
+        {
+          "id": "7oi8zeiqfamiur21",
+          "gameSystem": "2",
+          "name": "Blessed Sisters"
+        }
+      ],
+      "image": "assets/img/armies/ashen-pact.jpg",
+      "imagePosition": "center 25%",
+      "armyURL": "the-ashen-pact",
+      "armyForgeID": "vMzljLVC6ZGv",
+      "wins": 0,
+      "losses": 2,
+      "objectives": 0,
+      "earnedVP": 0,
+      "earnedPts": 0
+    },
+
+    {
+      "player": "Alex",
+      "playerTitle": "General",
+      "armyName": "van Louen's Roughnecks",
+      "tagline": "The Imperium's Shield Against the Darkness",
+      "backstory": "<p>During the defense of Croatoas, then Captain van Louen led the 5th company, 832nd Regiment in the defense of industrial city Krassus' Point against the forces of Chaos. After being denied requested supplies and reinforcements van Louen had his forces organize a retreat from the city to an orbital defense fortress outside the city.</p><p>With the help of the superior defenses of the fortress the 5th company was able to repel repeated attacks from the Chaos forces until the siege of the planet was broken. However Colonel Drast, the commander of the 832nd regiment, viewed the retreat to a defensible position as cowardice and the loss of Krassus' Point as a dereliction of duty by van Louen.</p><p>Drast had van Louen demoted to the rank of lieutenant and van Louen has since been assigned only security patrols and other rear echelon duties. Unknown to van Louen the coming events could be the path to his rising through the ranks and regaining his honor....</p>",
+      "summary": "During the defense of Croatoas, Captain van Louen led his company in repelling Chaos forces at Krassus' Point before being forced to retreat to an orbital defense fortress after critical supplies and reinforcements were denied. Branded a coward by Colonel Drast and demoted to lieutenant, van Louen now awaits the opportunity to reclaim his honor and rise through the ranks.",
+      "faction": [
+        {
+          "id": "z65fgu0l29i4lnlu",
+          "gameSystem": "2",
+          "name": "Human Defense Force",
+          "alias": "832nd Mechanized Infantry Regiment"
+        }
+      ],
+      "image": "assets/img/armies/roughnecks.jpg",
+      "imagePosition": "center 40%",
+      "armyURL": "roughnecks",
+      "armyForgeID": "Xo19MAwQPGbs",
+      "wins": 1,
+      "losses": 1,
+      "objectives": 1,
+      "earnedVP": 0,
+      "earnedPts": 0
+    },
+    {
+      "player": "Claire",
+      "playerTitle": "Norn-Queen",
+      "armyName": "Hive Fleet Tarvos",
+      "tagline": "The Viridian Scourge",
+      "summary": "Hive Fleet Tarvos operates with a strategy of psychic disruption and attrition warfare. Unlike many Tyranid fleets that favor overwhelming swarms, Tarvos relies on precision strikes, psychic terror, and calculated ambushes. The hive mind at its core acts as a harbinger of destruction, forcing enemy commanders to react while the true threat lurks in the shadows. The fleet's emerald coloration has led Imperial forces to nickname it \"The Viridian Scourge,\" believing it to be a creeping infestation that spreads like an unnatural blight. Many planets fall before they even realize the extent of the infestation—by the time the first creatures are sighted, the world is already lost.",
+      "backstory": "<p>Hive Fleet Tarvos operates with a strategy of psychic disruption and attrition warfare. Unlike many Tyranid fleets that favor overwhelming swarms, Tarvos relies on precision strikes, psychic terror, and calculated ambushes. The hive mind at its core acts as a harbinger of destruction, forcing enemy commanders to react while the true threat lurks in the shadows.</p><p>The fleet's emerald coloration has led Imperial forces to nickname it \"The Viridian Scourge,\" believing it to be a creeping infestation that spreads like an unnatural blight. Many planets fall before they even realize the extent of the infestation—by the time the first creatures are sighted, the world is already lost.</p>",
+      "faction": [
+        {
+          "id": "w7qor7b2kuifcyvk",
+          "gameSystem": "2",
+          "name": "Alien Hives",
+          "alias": "Tyranids"
+        }
+      ],
+      "image": "assets/img/armies/hive-fleet-tarvos.jpg",
+      "imagePosition": "center 10%",
+      "armyURL": "tarvos",
+      "armyForgeID": "Un3_pRTu2xBO",
+      "wins": 0,
+      "losses": 2,
+      "objectives": 0,
+      "earnedVP": 0,
+      "earnedPts": 0
+    },
+    {
+      "player": "Victoria",
+      "playerTitle": "High Priestess",
+      "armyName": "Galdoo'o naahlk wildigitkw",
+      "image": "assets/img/armies/galdoo.jpg",
+      "imagePosition": "center 30%",
+      "tagline": "From the shadows of the forest, the arrows of vengeance fly.",
+      "summary": "The Galdoo'o naahlk wildigitkw are guardians of the ancient forests, masters of guerrilla tactics and precision strikes. Living in harmony with nature, they employ swift archers, stealthy warriors, and powerful forest spirits to protect their sacred lands from invaders. Their armies rely on mobility, ambushes, and expert marksmanship to weaken enemies before striking decisive blows.",
+      "backstory": "<p>Deep within the primeval forests dwell the enigmatic Wood Elves, a reclusive yet fiercely protective people bound to the will of nature. Their warriors move like whispers through the trees, striking swiftly and vanishing before retaliation can come. Masters of archery, their keen-eyed scouts rain down deadly volleys while nimble blades weave through the battlefield like leaves in the wind.</p><p>The Wood Elves' connection to the natural world grants them powerful allies—towering treants with bark-like armor, swarms of vengeful forest spirits, and even the forest itself seems to rise in defiance of intruders. Rather than engage in prolonged battles, the Wood Elves strike with surgical precision, cutting down key targets and disappearing before their foes can muster a proper response.</p><p>Those who underestimate the Wood Elves' mastery of the battlefield often find themselves trapped in endless ambushes, drained of resources, and surrounded by unseen threats. For the guardians of the forest, war is not just about victory—it's about ensuring their sacred groves remain untouched for generations to come.</p>",
+      "faction": [
+        { "id": "qtuyeoRfXKlNflK0", "gameSystem": "4", "name": "Wood Elves" }
+      ],
+      "armyURL": "galdoo",
+      "armyForgeID": "PzfU8vxUivqn",
+      "wins": 1,
+      "losses": 1,
+      "objectives": 1,
+      "earnedVP": 0,
+      "earnedPts": 0
+    }
+  ]
+}

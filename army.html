@@ -16,6 +16,15 @@
     />
     <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* Add specific style for modal image if needed */
+      #armyInfoImage {
+        max-height: 300px;
+        object-fit: cover; /* Cover ensures image fills space nicely */
+        width: 100%;
+        background-color: var(--bs-secondary-bg); /* Placeholder bg */
+      }
+    </style>
   </head>
   <body class="bg-body text-body">
     <nav
@@ -93,7 +102,19 @@
     </nav>
 
     <main class="container mt-4">
-      <h1 class="mb-4">Loaded Armies</h1>
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <h1 id="army-title-h1" class="flex-grow-1 mb-0">Loading Army...</h1>
+        <button
+          id="army-info-button"
+          type="button"
+          class="btn btn-sm btn-outline-info flex-shrink-0"
+          data-bs-toggle="modal"
+          data-bs-target="#armyInfoModal"
+          disabled
+        >
+          <i class="bi bi-info-circle"></i> Army Info
+        </button>
+      </div>
 
       <div
         id="army-units-container"
@@ -115,6 +136,52 @@
     <footer class="container mt-5 py-3 border-top">
       <p class="text-center text-muted">&copy; 2025 OPR Army Tracker</p>
     </footer>
+
+    <div
+      class="modal fade"
+      id="armyInfoModal"
+      tabindex="-1"
+      aria-labelledby="armyInfoModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="armyInfoModalLabel">
+              Army Information
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <img
+              id="armyInfoImage"
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              class="img-fluid rounded mb-3"
+              alt="Army Image"
+              onerror="this.style.display='none'"
+            />
+            <h6 id="armyInfoTagline" class="text-muted fst-italic mb-3"></h6>
+            <p id="armyInfoSummary" class="lead"></p>
+            <hr />
+            <div id="armyInfoBackstory"></div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
