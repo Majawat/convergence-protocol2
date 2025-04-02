@@ -1,901 +1,248 @@
-// Import functions from other modules
-import { fetchArmyData } from "./api.js";
-import { processArmyData } from "./dataProcessor.js";
+/**
+ * @fileoverview Main application entry point and orchestration.
+ * Loads data, initializes state, sets up UI, and attaches event listeners.
+ * **MODIFIED:** Fixed missing import for getCommonRulesData.
+ */
+
+// Core Imports
+import { config } from "./config.js"; // Configuration constants
+import { loadCampaignData, loadGameData } from "./dataLoader.js"; // Data fetching functions
+import { fetchArmyData } from "./api.js"; // Specific army list fetching
+import { processArmyData } from "./dataProcessor.js"; // Army list processing
 import {
-  displayArmyUnits,
-  updateModelDisplay,
-  updateTokenDisplay, // Added updateTokenDisplay
-} from "./ui.js";
+  // State Setters
+  setCampaignData,
+  setArmyBooksData,
+  setCommonRulesData,
+  setLoadedArmyData,
+  setArmyWoundStates,
+  setArmyComponentStates,
+  // State Getters
+  getCampaignData,
+  getCommonRulesData, // <<< Added missing import
+  getArmyWoundStates,
+  getArmyComponentStates,
+  getLoadedArmyData,
+  getCurrentArmyHeroTargets,
+  getCurrentArmyUnitMap,
+  getUnitData,
+  getJoinedHeroData,
+  updateGlobalWoundState,
+} from "./state.js"; // State management functions
 import {
-  saveWoundState,
   loadWoundState,
-  resetWoundState,
-  saveComponentState,
   loadComponentState,
-  resetComponentState, // Added component state functions
+  saveWoundState,
+  saveComponentState, // Storage interaction
 } from "./storage.js";
-
-// --- Global State ---
-let campaignData = null; // To store loaded campaign info
-let armyBooksData = {}; // To store loaded/cached army book data { factionId: data }
-let commonRulesData = {}; // Stores loaded/cached common rules { gameSystemId: data }
-let loadedArmiesData = {}; // Stores the single loaded army { armyId: processedArmy }
-let armyWoundStates = {}; // Stores wound states { armyId: { unitId: { modelId: currentHp, ... }, ... }, ... }
-let armyComponentStates = {}; // Added for tokens { armyId: { unitId: { tokens: T } } }
-
-// --- Constants ---
-const ARMY_BOOKS_CACHE_KEY = "oprArmyBooksCache"; // sessionStorage key
-const COMMON_RULES_CACHE_KEY_PREFIX = "oprCommonRulesCache_"; // Prefix + gameSystemId
-const MAX_SPELL_TOKENS = 6; // Define the global maximum
-
-// --- Data Loading Functions ---
-
-/**
- * Fetches the main campaign data file.
- * @returns {Promise<object|null>} The parsed campaign data or null on error.
- */
-async function loadCampaignData() {
-  try {
-    const response = await fetch("./data/campaign.json"); // Fetch from /data/ folder
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log("Campaign data loaded successfully.");
-    return data;
-  } catch (error) {
-    console.error("Error loading campaign data:", error);
-    const mainContainer = document.getElementById("army-units-container");
-    if (mainContainer) {
-      // Clear potential spinner
-      mainContainer.innerHTML = "";
-      // Display error directly
-      const errorDiv = document.createElement("div");
-      errorDiv.className = "col-12";
-      errorDiv.innerHTML =
-        '<div class="alert alert-danger m-4" role="alert">Could not load campaign data (./data/campaign.json). Please ensure the file exists and is accessible in the /data/ folder.</div>';
-      mainContainer.appendChild(errorDiv);
-    }
-    return null;
-  }
-}
-
-/**
- * Fetches Army Book data AND Common Rules data, utilizing sessionStorage.
- * Includes detailed logging for debugging cache issues.
- * @param {object} campaignData - The loaded campaign data.
- * @returns {Promise<{armyBooks: object, commonRules: object}>} Object containing the loaded data.
- */
-async function loadGameData(campaignData) {
-  if (!campaignData || !campaignData.armies)
-    return { armyBooks: {}, commonRules: {} };
-
-  let cachedBooks = {};
-  let cachedCommonRules = {};
-
-  // 1. Try loading ALL caches from sessionStorage first
-  try {
-    const cachedBooksData = sessionStorage.getItem(ARMY_BOOKS_CACHE_KEY);
-    if (cachedBooksData) {
-      cachedBooks = JSON.parse(cachedBooksData) || {}; // Ensure object even if parse fails slightly
-      console.log("Loaded Army Books cache.");
-    }
-  } catch (e) {
-    console.warn("Could not parse Army Books cache.", e);
-    cachedBooks = {};
-  }
-
-  // Try loading GF rules specifically (assuming only GF system '2' is needed for rules now)
-  const gfRulesKey = COMMON_RULES_CACHE_KEY_PREFIX + "2";
-  try {
-    const cachedGfRules = sessionStorage.getItem(gfRulesKey);
-    if (cachedGfRules) {
-      const parsedRules = JSON.parse(cachedGfRules);
-      // **VALIDATION:** Check if parsed data looks valid before accepting it
-      if (
-        parsedRules &&
-        parsedRules.rules &&
-        Array.isArray(parsedRules.rules)
-      ) {
-        cachedCommonRules["2"] = parsedRules;
-        console.log("Loaded valid GF Common Rules cache.");
-      } else {
-        console.log("Cached GF Common Rules data was invalid or empty.");
-      }
-    } else {
-      console.log("No GF Common Rules found in sessionStorage."); // Added log
-    }
-  } catch (e) {
-    console.warn("Could not parse GF Common Rules cache.", e);
-  }
-
-  const factionsToFetch = new Map();
-  const requiredGameSystems = new Set(); // Identify systems needed for rules (only '2' currently)
-
-  // 2. Determine ALL required factions and game systems from campaign
-  campaignData.armies.forEach((army) => {
-    if (army.faction) {
-      army.faction.forEach((fac) => {
-        if (fac.id && fac.gameSystem) {
-          // Check if book needs fetching
-          if (!cachedBooks[fac.id]) {
-            if (!factionsToFetch.has(fac.id)) {
-              factionsToFetch.set(fac.id, fac.gameSystem);
-            }
-          }
-          // Note required game systems for common rules (only GF '2' currently)
-          if (fac.gameSystem === 2) {
-            requiredGameSystems.add(2);
-          }
-          // Add other game systems here if needed later
-        }
-      });
-    }
-  });
-
-  const fetchPromises = [];
-
-  // 3. Queue Army Book fetches for missing ones
-  if (factionsToFetch.size > 0) {
-    console.log("Army Books to fetch:", Array.from(factionsToFetch.keys()));
-    factionsToFetch.forEach((gameSystem, factionId) => {
-      const url = `https://army-forge.onepagerules.com/api/army-books/${factionId}?gameSystem=${gameSystem}`;
-      fetchPromises.push(
-        fetch(url)
-          .then((response) => {
-            if (!response.ok)
-              throw new Error(`Book ${factionId}: ${response.status}`);
-            return response.json();
-          })
-          .then((bookData) => ({
-            type: "book",
-            factionId,
-            bookData,
-            status: "fulfilled",
-          }))
-          .catch((error) => {
-            console.error(`Fetch failed for Book ${factionId}:`, error);
-            return {
-              type: "book",
-              factionId,
-              status: "rejected",
-              reason: error,
-            };
-          })
-      );
-    });
-  } else {
-    console.log("All required Army Books already cached.");
-  }
-
-  // 4. Queue Common Rules fetches for required systems if missing from VALID cache
-  let fetchedRulesSystems = new Set(); // Track which systems we actually fetched
-  console.log(
-    `[DEBUG] Checking required game systems for rules: ${Array.from(
-      requiredGameSystems
-    )}`
-  );
-  requiredGameSystems.forEach((gsId) => {
-    console.log(`[DEBUG] Processing required system: ${gsId}`);
-    console.log(
-      `[DEBUG] Value of cachedCommonRules[${gsId}]:`,
-      cachedCommonRules[gsId]
-    );
-    // Fetch if not present in the validated cache object
-    if (!cachedCommonRules[gsId]) {
-      console.log(
-        `Common Rules for System ${gsId} not cached or invalid. Queueing fetch.`
-      );
-      const url = `https://army-forge.onepagerules.com/api/rules/common/${gsId}`;
-      fetchPromises.push(
-        fetch(url)
-          .then((response) => {
-            if (!response.ok)
-              throw new Error(`Common Rules ${gsId}: ${response.status}`);
-            return response.json();
-          })
-          .then((rulesData) => ({
-            type: "rules",
-            gameSystemId: gsId,
-            rulesData,
-            status: "fulfilled",
-          }))
-          .catch((error) => {
-            console.error(`Fetch failed for Common Rules ${gsId}:`, error);
-            return {
-              type: "rules",
-              gameSystemId: gsId,
-              status: "rejected",
-              reason: error,
-            };
-          })
-      );
-      fetchedRulesSystems.add(gsId); // Mark that we are attempting to fetch
-    } else {
-      console.log(`Valid Common Rules for System ${gsId} found in cache.`);
-    }
-  });
-  console.log(
-    `[DEBUG] Finished checking required game systems. Promises to run: ${fetchPromises.length}`
-  );
-
-  // 5. Execute all necessary fetches
-  if (fetchPromises.length > 0) {
-    console.log("[DEBUG] Executing fetches...");
-    const results = await Promise.allSettled(fetchPromises);
-    console.log("[DEBUG] Fetches complete. Processing results...");
-
-    // Process results and update in-memory caches
-    results.forEach((result) => {
-      console.log("[DEBUG] Processing fetch result:", result); // Detailed log
-
-      if (result.status === "fulfilled" && result.value) {
-        if (result.value.status === "fulfilled") {
-          if (result.value.type === "book") {
-            cachedBooks[result.value.factionId] = result.value.bookData;
-            console.log(
-              `Successfully fetched Army Book: ${result.value.factionId}`
-            );
-          } else if (result.value.type === "rules") {
-            // **VALIDATION:** Only add if fetched data looks valid
-            if (
-              result.value.rulesData &&
-              result.value.rulesData.rules &&
-              Array.isArray(result.value.rulesData.rules)
-            ) {
-              cachedCommonRules[result.value.gameSystemId] =
-                result.value.rulesData; // Update in-memory cache
-              console.log(
-                `Successfully fetched Common Rules: System ${result.value.gameSystemId}`
-              );
-            } else {
-              console.warn(
-                `Fetched Common Rules for System ${result.value.gameSystemId} appear invalid. Data:`,
-                result.value.rulesData
-              );
-              fetchedRulesSystems.delete(result.value.gameSystemId); // Don't try to save invalid data
-            }
-          }
-        } else {
-          console.warn(
-            `[DEBUG] Fetch promise fulfilled but inner status rejected:`,
-            result.value
-          );
-          if (result.value.type === "rules")
-            fetchedRulesSystems.delete(result.value.gameSystemId); // Don't save if fetch failed internally
-        }
-      } else if (result.status === "rejected") {
-        console.error(`[DEBUG] Fetch promise rejected:`, result.reason);
-        // Could try to determine if it was a rules fetch to remove from fetchedRulesSystems, but complex.
-      }
-    });
-
-    // 6. Save updated caches to sessionStorage
-    try {
-      if (factionsToFetch.size > 0) {
-        sessionStorage.setItem(
-          ARMY_BOOKS_CACHE_KEY,
-          JSON.stringify(cachedBooks)
-        );
-        console.log("Updated Army Books cache in sessionStorage.");
-      }
-      fetchedRulesSystems.forEach((gsId) => {
-        // Save only if we successfully fetched and validated the data (i.e., it exists in cachedCommonRules now)
-        if (cachedCommonRules[gsId] && cachedCommonRules[gsId].rules) {
-          sessionStorage.setItem(
-            COMMON_RULES_CACHE_KEY_PREFIX + gsId,
-            JSON.stringify(cachedCommonRules[gsId])
-          );
-          console.log(
-            `Updated Common Rules cache for System ${gsId} in sessionStorage.`
-          );
-        } else {
-          console.log(
-            `[DEBUG] Skipping saving rules cache for System ${gsId} as data is missing or invalid in memory.`
-          );
-        }
-      });
-    } catch (error) {
-      console.error("Error saving data cache to sessionStorage:", error);
-    }
-  } else {
-    console.log("[DEBUG] No fetches needed (all data cached).");
-  }
-
-  // 7. Return the complete data
-  console.log(
-    "[DEBUG] Returning from loadGameData. Common Rules object:",
-    cachedCommonRules
-  );
-  return { armyBooks: cachedBooks, commonRules: cachedCommonRules };
-}
-
-// --- Wound Allocation Logic ---
-/**
- * Finds the next model in the combined unit (base + hero) to apply a wound to automatically.
- * @param {object} baseUnit - The processed base unit data object.
- * @param {object | null} heroUnit - The processed hero unit data object, if joined.
- * @returns {object | null} The model object to wound, or null if none available.
- */
-function findTargetModelForWound(baseUnit, heroUnit = null) {
-  if (!baseUnit || !baseUnit.models) return null;
-  const combinedModels = heroUnit
-    ? [...baseUnit.models, ...heroUnit.models]
-    : [...baseUnit.models];
-  const activeModels = combinedModels.filter((m) => m.currentHp > 0);
-  if (activeModels.length === 0) return null;
-  const nonHeroNonTough = activeModels.filter((m) => !m.isHero && !m.isTough);
-  if (nonHeroNonTough.length > 0) {
-    const target = nonHeroNonTough.find((m) =>
-      baseUnit.models.some((bm) => bm.modelId === m.modelId)
-    );
-    return target || nonHeroNonTough[0];
-  }
-  const nonHeroTough = activeModels.filter((m) => !m.isHero && m.isTough);
-  if (nonHeroTough.length > 0) {
-    nonHeroTough.sort((a, b) => a.currentHp - b.currentHp);
-    return nonHeroTough[0];
-  }
-  const heroes = activeModels.filter((m) => m.isHero);
-  if (heroes.length > 0) {
-    heroes.sort((a, b) => a.currentHp - b.currentHp);
-    return heroes[0];
-  }
-  return null;
-}
-
-/** Updates the global wound state object used for saving. */
-function updateGlobalWoundState(armyId, unitId, modelId, currentHp) {
-  if (!armyWoundStates[armyId]) armyWoundStates[armyId] = {};
-  if (!armyWoundStates[armyId][unitId]) armyWoundStates[armyId][unitId] = {};
-  armyWoundStates[armyId][unitId][modelId] = currentHp;
-}
-
-/** Removes the highlight from any previously targeted model in a unit card. */
-function clearTargetHighlight(unitSelectionId) {
-  const card = document.getElementById(`unit-card-${unitSelectionId}`);
-  if (!card) return;
-  const highlighted = card.querySelector(".model-display.target-model");
-  if (highlighted) {
-    highlighted.classList.remove("target-model");
-  }
-}
-
-/** Adds a highlight to the next model that will take a wound (auto-target). */
-function highlightNextAutoTargetModel(unitSelectionId, modelId) {
-  clearTargetHighlight(unitSelectionId);
-  if (!modelId) return;
-  const modelElement = document.querySelector(`[data-model-id="${modelId}"]`);
-  if (
-    modelElement &&
-    modelElement.closest(".unit-card")?.id === `unit-card-${unitSelectionId}`
-  ) {
-    modelElement.classList.add("target-model");
-  }
-}
-
-/** Applies a wound to a specific model or uses auto-target logic. */
-function applyWound(armyId, unitId, specificModelId = null) {
-  const armyData = loadedArmiesData[armyId];
-  if (!armyData) {
-    console.error(`Army data not found for applyWound: army ${armyId}`);
-    return;
-  }
-  const unitData = armyData.unitMap[unitId]; // Base unit data
-  if (!unitData) {
-    console.error(
-      `Base unit data not found for applyWound: army ${armyId}, unit ${unitId}`
-    );
-    return;
-  }
-  const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
-    (key) => armyData.heroJoinTargets[key] === unitId
-  );
-  const heroData = heroId ? armyData.unitMap[heroId] : null;
-  let targetModel = null;
-  let modelFoundInUnitId = null;
-
-  if (specificModelId) {
-    // Manual target
-    targetModel = unitData.models.find((m) => m.modelId === specificModelId);
-    if (targetModel) {
-      modelFoundInUnitId = unitId;
-    } else if (heroData) {
-      targetModel = heroData.models.find((m) => m.modelId === specificModelId);
-      if (targetModel) {
-        modelFoundInUnitId = heroId;
-      }
-    }
-    if (targetModel && targetModel.currentHp <= 0) {
-      console.log(`Model ${specificModelId} is already removed.`);
-      targetModel = null;
-      modelFoundInUnitId = null;
-    }
-  } else {
-    // Auto target
-    targetModel = findTargetModelForWound(unitData, heroData);
-    if (targetModel) {
-      modelFoundInUnitId = targetModel.isHero ? heroId : unitId;
-    }
-  }
-
-  if (targetModel && modelFoundInUnitId) {
-    targetModel.currentHp -= 1;
-    updateGlobalWoundState(
-      armyId,
-      modelFoundInUnitId,
-      targetModel.modelId,
-      targetModel.currentHp
-    );
-    updateModelDisplay(
-      unitId,
-      targetModel.modelId,
-      targetModel.currentHp,
-      targetModel.maxHp
-    );
-    saveWoundState(armyWoundStates);
-    const nextAutoTarget = findTargetModelForWound(unitData, heroData);
-    highlightNextAutoTargetModel(
-      unitId,
-      nextAutoTarget ? nextAutoTarget.modelId : null
-    );
-  } else {
-    console.log(
-      `No models available to wound in unit ${unitId} (or specific model ${specificModelId} not found/valid).`
-    );
-    clearTargetHighlight(unitId);
-  }
-}
-
-// --- Component State Logic ---
-/** Updates the global component state object (e.g., for tokens). */
-function updateGlobalComponentState(armyId, unitId, key, value) {
-  if (!armyComponentStates[armyId]) armyComponentStates[armyId] = {};
-  if (!armyComponentStates[armyId][unitId])
-    armyComponentStates[armyId][unitId] = {};
-  armyComponentStates[armyId][unitId][key] = value;
-}
-
-/** Gets a specific component state value, returning a default if not found. */
-function getComponentStateValue(armyId, unitId, key, defaultValue) {
-  return armyComponentStates[armyId]?.[unitId]?.[key] ?? defaultValue;
-}
-
-// --- Event Handlers ---
-/** Handles clicks within the army units container */
-function handleUnitInteractionClick(event) {
-  const unitCard = event.target.closest(".unit-card");
-  if (!unitCard) return;
-  const unitId = unitCard.dataset.unitId; // Base unit ID
-  const armyId = unitCard.dataset.armyId;
-  const clickedModelElement = event.target.closest(".clickable-model");
-
-  // Wound application on model click
-  if (clickedModelElement && event.type === "click") {
-    const modelId = clickedModelElement.dataset.modelId;
-    applyWound(armyId, unitId, modelId);
-    return;
-  }
-  // Wound application via button
-  if (event.target.closest(".wound-apply-btn")) {
-    applyWound(armyId, unitId, null);
-  }
-  // Reset wounds
-  else if (event.target.closest(".wound-reset-btn")) {
-    const armyData = loadedArmiesData[armyId];
-    if (!armyData) return;
-    const unitData = armyData.unitMap[unitId];
-    if (!unitData) return;
-    const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
-      (key) => armyData.heroJoinTargets[key] === unitId
-    );
-    const heroData = heroId ? armyData.unitMap[heroId] : null;
-    console.log(
-      `Resetting wounds for unit ${unitId}` +
-        (heroId ? ` and hero ${heroId}` : "")
-    );
-    unitData.models.forEach((model) => {
-      model.currentHp = model.maxHp;
-      updateGlobalWoundState(armyId, unitId, model.modelId, model.currentHp);
-      updateModelDisplay(unitId, model.modelId, model.currentHp, model.maxHp);
-    });
-    if (heroData) {
-      heroData.models.forEach((model) => {
-        model.currentHp = model.maxHp;
-        updateGlobalWoundState(armyId, heroId, model.modelId, model.currentHp);
-        updateModelDisplay(unitId, model.modelId, model.currentHp, model.maxHp);
-      });
-    }
-    saveWoundState(armyWoundStates);
-    const nextAutoTarget = findTargetModelForWound(unitData, heroData);
-    highlightNextAutoTargetModel(
-      unitId,
-      nextAutoTarget ? nextAutoTarget.modelId : null
-    );
-  }
-  // Add Token
-  else if (event.target.closest(".token-add-btn")) {
-    const armyData = loadedArmiesData[armyId];
-    if (!armyData) return;
-    const unitData = armyData.unitMap[unitId];
-    if (!unitData) return;
-    const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
-      (key) => armyData.heroJoinTargets[key] === unitId
-    );
-    const actualCasterUnit = heroId ? armyData.unitMap[heroId] : unitData;
-
-    if (actualCasterUnit?.casterLevel > 0) {
-      const currentTokens = getComponentStateValue(
-        armyId,
-        actualCasterUnit.selectionId,
-        "tokens",
-        0
-      );
-      if (currentTokens < MAX_SPELL_TOKENS) {
-        const newTokens = currentTokens + 1;
-        updateGlobalComponentState(
-          armyId,
-          actualCasterUnit.selectionId,
-          "tokens",
-          newTokens
-        );
-        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel);
-        saveComponentState(armyComponentStates);
-      }
-    } else {
-      console.warn("Target unit is not a caster:", unitId);
-    }
-  }
-  // Remove Token
-  else if (event.target.closest(".token-remove-btn")) {
-    const armyData = loadedArmiesData[armyId];
-    if (!armyData) return;
-    const unitData = armyData.unitMap[unitId];
-    if (!unitData) return;
-    const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
-      (key) => armyData.heroJoinTargets[key] === unitId
-    );
-    const actualCasterUnit = heroId ? armyData.unitMap[heroId] : unitData;
-
-    if (actualCasterUnit?.casterLevel > 0) {
-      const currentTokens = getComponentStateValue(
-        armyId,
-        actualCasterUnit.selectionId,
-        "tokens",
-        0
-      );
-      if (currentTokens > 0) {
-        const newTokens = currentTokens - 1;
-        updateGlobalComponentState(
-          armyId,
-          actualCasterUnit.selectionId,
-          "tokens",
-          newTokens
-        );
-        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel);
-        saveComponentState(armyComponentStates);
-      }
-    } else {
-      console.warn("Target unit is not a caster:", unitId);
-    }
-  }
-  // View Spells Button
-  else if (event.target.closest(".view-spells-btn")) {
-    console.log(`View Spells clicked for unit ${unitId}`);
-    alert("Spell list display not yet implemented!");
-    // TODO: Implement spell list modal/display using armyBooksData and commonRulesData
-    // Need to find the actual caster unit (hero or baseUnit)
-    // Get its faction ID
-    // Look up spells in armyBooksData[factionId].spells
-    // Display in a modal
-  }
-}
-
-/** Displays army selection list */
-function displayArmySelection(armies, container) {
-  container.innerHTML = "";
-  const prompt = document.createElement("div");
-  prompt.className = "col-12 text-center mb-4";
-  prompt.innerHTML = `<h2>Select an Army</h2><p>No specific army was requested via URL. Please choose an army below to view its details.</p>`;
-  container.appendChild(prompt);
-  const listContainer = document.createElement("div");
-  listContainer.className = "col-12 col-md-8 col-lg-6 mx-auto";
-  const listGroup = document.createElement("div");
-  listGroup.className = "list-group";
-  if (armies && armies.length > 0) {
-    armies.forEach((army) => {
-      const link = document.createElement("a");
-      link.href = `army.html?armyId=${army.armyForgeID}`;
-      link.className =
-        "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
-      link.innerHTML = `<span><strong class="me-2">${
-        army.armyName || "Unnamed Army"
-      }</strong><small class="text-muted">(${
-        army.player || "Unknown Player"
-      })</small></span><i class="bi bi-chevron-right"></i>`;
-      listGroup.appendChild(link);
-    });
-  } else {
-    listGroup.innerHTML =
-      '<p class="text-center text-muted">No armies found in campaign data.</p>';
-  }
-  listContainer.appendChild(listGroup);
-  container.appendChild(listContainer);
-}
-
-/** Populates the Army Info Modal */
-function populateArmyInfoModal(armyInfo) {
-  if (!armyInfo) return;
-  const modalLabel = document.getElementById("armyInfoModalLabel");
-  const img = document.getElementById("armyInfoImage");
-  const tagline = document.getElementById("armyInfoTagline");
-  const summary = document.getElementById("armyInfoSummary");
-  const backstory = document.getElementById("armyInfoBackstory");
-  const infoButton = document.getElementById("army-info-button");
-  if (modalLabel)
-    modalLabel.textContent = armyInfo.armyName || "Army Information";
-  if (tagline) tagline.textContent = armyInfo.tagline || "";
-  if (summary) summary.textContent = armyInfo.summary || "";
-  if (backstory)
-    backstory.innerHTML =
-      armyInfo.backstory || "<p>No backstory available.</p>";
-  if (img) {
-    if (armyInfo.image) {
-      img.src = armyInfo.image;
-      img.alt = armyInfo.armyName || "Army Image";
-      img.style.display = "block";
-      if (armyInfo.imagePosition) {
-        img.style.objectPosition = armyInfo.imagePosition;
-      } else {
-        img.style.objectPosition = "center center";
-      }
-    } else {
-      img.style.display = "none";
-    }
-  }
-  if (infoButton) infoButton.disabled = false;
-}
-
-/** Shows a Bootstrap Toast message */
-function showToast(message) {
-  const toastElement = document.getElementById("themeToast"); // Reusing theme toast element
-  if (!toastElement) {
-    console.warn("Toast element #themeToast not found.");
-    return;
-  }
-  const toastBody = toastElement.querySelector(".toast-body");
-  if (!toastBody) {
-    console.warn("Toast body not found in #themeToast.");
-    return;
-  }
-
-  toastBody.textContent = message; // Set the message
-
-  if (typeof bootstrap !== "undefined" && bootstrap.Toast) {
-    try {
-      // Ensure the toast is properly initialized before showing
-      const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
-      toastInstance.show();
-    } catch (error) {
-      console.error("Error showing Bootstrap toast:", error);
-    }
-  } else {
-    console.warn("Bootstrap Toast component not found.");
-  }
-}
+import { displayArmyUnits } from "./ui.js"; // Core UI rendering function
+import { displayArmySelection, populateArmyInfoModal } from "./uiHelpers.js"; // Helper UI functions
+import { setupEventListeners } from "./eventHandlers.js"; // Event listener setup function
+import { findTargetModelForWound } from "./gameLogic.js"; // Game logic helper
+// Note: highlightNextAutoTargetModel is now internal to eventHandlers.js
 
 // --- Main Application Logic ---
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM fully loaded and parsed");
 
+  // Get essential HTML elements
   const mainListContainer = document.getElementById("army-units-container");
   const titleH1 = document.getElementById("army-title-h1");
   if (!mainListContainer || !titleH1) {
+    console.error(
+      "Essential HTML elements (#army-units-container or #army-title-h1) not found!"
+    );
+    document.body.innerHTML =
+      '<div class="alert alert-danger m-5">Critical Error: Page structure is missing essential elements. Cannot initialize application.</div>';
     return;
   }
+
+  // Initial loading indicator
   mainListContainer.innerHTML =
     '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading Campaign...</span></div></div></div>';
 
-  // 1. Load Campaign Data
-  campaignData = await loadCampaignData();
-  if (!campaignData) return;
+  // --- Step 1: Load Campaign Data ---
+  const campaignDataResult = await loadCampaignData();
+  setCampaignData(campaignDataResult); // Store in state module
+  if (!getCampaignData()) {
+    // Use the getter now
+    // loadCampaignData already displays an error message in the container
+    titleH1.textContent = "Error Loading Campaign";
+    return; // Stop if campaign data failed to load
+  }
 
-  // 2. Determine Army to Load
+  // --- Step 2: Determine Army to Load from URL ---
   const urlParams = new URLSearchParams(window.location.search);
   const armyIdToLoad = urlParams.get("armyId");
+  // Use the getter to access campaign data
   const armyInfo = armyIdToLoad
-    ? campaignData.armies.find((a) => a.armyForgeID === armyIdToLoad)
+    ? getCampaignData().armies.find((a) => a.armyForgeID === armyIdToLoad)
     : null;
 
-  // 3. Display Selection or Load Data
+  // --- Step 3: Display Army Selection or Proceed ---
   if (!armyIdToLoad || !armyInfo) {
-    displayArmySelection(campaignData.armies, mainListContainer);
+    // If no valid army ID, show the selection list
+    displayArmySelection(getCampaignData().armies, mainListContainer); // Use getter
     document.title = "Select Army - OPR Army Tracker";
     titleH1.textContent = "Select Army";
     const infoButton = document.getElementById("army-info-button");
-    if (infoButton) infoButton.disabled = true;
-    return;
+    if (infoButton) infoButton.disabled = true; // Disable info button if no army selected
+    return; // Stop further execution
   }
 
-  // --- Valid armyId found ---
+  // --- Valid armyId found, proceed with loading ---
   console.log(`Valid armyId found: ${armyIdToLoad}. Loading game data...`);
   mainListContainer.innerHTML =
     '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading Game Data...</span></div></div></div>';
   titleH1.textContent = `Loading ${armyInfo.armyName}...`;
 
-  // 4. Load Army Books AND Common Rules (using cache)
-  const gameData = await loadGameData(campaignData);
-  armyBooksData = gameData.armyBooks;
-  commonRulesData = gameData.commonRules;
-  console.log("Common Rules Loaded (Global):", commonRulesData);
+  // --- Step 4: Load Army Books AND Common Rules (using cache) ---
+  const gameData = await loadGameData(getCampaignData()); // Use getter
+  setArmyBooksData(gameData.armyBooks);
+  setCommonRulesData(gameData.commonRules);
+  console.log("Common Rules Loaded (Global State):", getCommonRulesData()); // Use getter
 
-  // 5. Load persisted states
-  armyWoundStates = loadWoundState() || {};
-  armyComponentStates = loadComponentState() || {}; // Load component state
+  // --- Step 5: Load Persisted States (Wounds, Tokens, etc.) ---
+  setArmyWoundStates(loadWoundState());
+  setArmyComponentStates(loadComponentState());
 
-  // 6. Fetch and Process Army Data
-  mainListContainer.innerHTML = "";
-  loadedArmiesData = {};
+  // --- Step 6: Fetch and Process the Selected Army's List Data ---
+  mainListContainer.innerHTML = ""; // Clear spinner AFTER loading game data
+  setLoadedArmyData(armyIdToLoad, null); // Clear any previous army data from state
 
   try {
     console.log(`Fetching Army List data for ${armyIdToLoad}...`);
-    const rawData = await fetchArmyData(armyIdToLoad);
+    const rawData = await fetchArmyData(armyIdToLoad); // Fetch from api.js
+
     if (rawData) {
       console.log(`Processing Army List data for ${armyIdToLoad}...`);
-      const processedArmy = processArmyData(rawData);
-      if (processedArmy) {
-        loadedArmiesData[armyIdToLoad] = processedArmy;
+      const processedArmy = processArmyData(rawData); // Process using dataProcessor.js
 
-        // Add casterLevel property and initialize component state
+      if (processedArmy) {
+        setLoadedArmyData(armyIdToLoad, processedArmy); // Store processed army in state
+
+        // Add casterLevel property and initialize component state (tokens)
         processedArmy.units.forEach((unit) => {
           const casterRule = unit.rules.find((r) => r.name === "Caster");
           unit.casterLevel = casterRule
             ? parseInt(casterRule.rating, 10) || 0
             : 0;
           // Initialize component state if needed
-          if (!armyComponentStates[armyIdToLoad])
-            armyComponentStates[armyIdToLoad] = {};
-          if (!armyComponentStates[armyIdToLoad][unit.selectionId])
-            armyComponentStates[armyIdToLoad][unit.selectionId] = {};
+          const currentArmyStates = getArmyComponentStates(); // Get current state object
+          if (!currentArmyStates[armyIdToLoad])
+            currentArmyStates[armyIdToLoad] = {};
+          if (!currentArmyStates[armyIdToLoad][unit.selectionId])
+            currentArmyStates[armyIdToLoad][unit.selectionId] = {};
+          // Default tokens to 0 ONLY if not already present in loaded state
           if (
             unit.casterLevel > 0 &&
-            armyComponentStates[armyIdToLoad][unit.selectionId].tokens ===
+            currentArmyStates[armyIdToLoad][unit.selectionId].tokens ===
               undefined
           ) {
-            // Default to 0 tokens if not found in storage
-            armyComponentStates[armyIdToLoad][unit.selectionId].tokens = 0;
+            currentArmyStates[armyIdToLoad][unit.selectionId].tokens = 0;
           }
         });
-        saveComponentState(armyComponentStates); // Save potentially initialized state
+        saveComponentState(getArmyComponentStates()); // Save potentially initialized state
 
-        // Initialize/apply wound state...
-        const savedArmyWounds = armyWoundStates[armyIdToLoad];
-        if (!savedArmyWounds) armyWoundStates[armyIdToLoad] = {};
+        // Initialize/apply wound state from storage
+        const currentWoundStates = getArmyWoundStates(); // Get current state object
+        const savedArmyWounds = currentWoundStates[armyIdToLoad];
+        if (!savedArmyWounds) currentWoundStates[armyIdToLoad] = {}; // Ensure army entry exists
         processedArmy.units.forEach((unit) => {
           const unitSpecificId = unit.selectionId;
           const savedUnitWounds =
-            armyWoundStates[armyIdToLoad]?.[unitSpecificId];
+            currentWoundStates[armyIdToLoad]?.[unitSpecificId];
           if (!savedUnitWounds)
-            armyWoundStates[armyIdToLoad][unitSpecificId] = {};
+            currentWoundStates[armyIdToLoad][unitSpecificId] = {}; // Ensure unit entry exists
           unit.models.forEach((model) => {
             if (savedUnitWounds?.hasOwnProperty(model.modelId)) {
-              model.currentHp = savedUnitWounds[model.modelId];
+              model.currentHp = savedUnitWounds[model.modelId]; // Apply saved HP
             } else {
-              armyWoundStates[armyIdToLoad][unitSpecificId][model.modelId] =
-                model.currentHp;
+              // If not in saved state, initialize it in the state object AND apply to model
+              model.currentHp = model.maxHp; // Ensure model starts at max HP if not saved
+              updateGlobalWoundState(
+                armyIdToLoad,
+                unitSpecificId,
+                model.modelId,
+                model.currentHp
+              );
             }
           });
         });
-        saveWoundState(armyWoundStates);
+        saveWoundState(getArmyWoundStates()); // Save potentially initialized wound state
 
+        // --- Step 7: Update UI ---
         document.title = `${armyInfo.armyName} - OPR Army Tracker`;
         titleH1.textContent = armyInfo.armyName;
-        populateArmyInfoModal(armyInfo);
-        console.log(`Displaying units for ${armyIdToLoad}...`);
-        // Pass component states to display function
-        displayArmyUnits(processedArmy, mainListContainer, armyComponentStates);
+        populateArmyInfoModal(armyInfo); // Populate the info modal
 
-        // Highlight initial targets...
+        console.log(`Displaying units for ${armyIdToLoad}...`);
+        // Pass the main container, processed army, and component states to the UI function
+        displayArmyUnits(
+          processedArmy,
+          mainListContainer,
+          getArmyComponentStates()
+        );
+
+        // Highlight initial wound targets
         processedArmy.units
           .filter(
-            (u) => !(u.isHero && processedArmy.heroJoinTargets[u.selectionId])
-          )
+            (u) =>
+              !(
+                u.isHero &&
+                getCurrentArmyHeroTargets(armyIdToLoad)?.[u.selectionId]
+              )
+          ) // Filter out joined heroes
           .forEach((unit) => {
-            const baseUnit = processedArmy.unitMap[unit.selectionId];
+            const baseUnit =
+              getCurrentArmyUnitMap(armyIdToLoad)?.[unit.selectionId];
             if (baseUnit) {
-              const heroId = Object.keys(
-                processedArmy.heroJoinTargets || {}
-              ).find(
-                (key) =>
-                  processedArmy.heroJoinTargets[key] === baseUnit.selectionId
+              const heroData = getJoinedHeroData(
+                armyIdToLoad,
+                baseUnit.selectionId
               );
-              const heroData = heroId ? processedArmy.unitMap[heroId] : null;
               const initialTarget = findTargetModelForWound(baseUnit, heroData);
-              highlightNextAutoTargetModel(
-                baseUnit.selectionId,
-                initialTarget ? initialTarget.modelId : null
-              );
-            }
-          });
-
-        // Setup Event Listeners
-        mainListContainer.addEventListener("click", handleUnitInteractionClick);
-
-        // Add listener for temporary "Start Round" button
-        document
-          .getElementById("start-round-button")
-          ?.addEventListener("click", () => {
-            console.log("--- Starting New Round (Generating Tokens) ---");
-            const currentArmyId = armyIdToLoad;
-            if (!loadedArmiesData[currentArmyId]) return;
-
-            let stateChanged = false;
-            let castersAffected = 0;
-            // Iterate over ALL units in the processed data, including heroes not directly displayed
-            loadedArmiesData[currentArmyId].units.forEach((unit) => {
-              if (unit.casterLevel > 0) {
-                const unitId = unit.selectionId; // Use the caster's actual unit ID
-                const currentTokens = getComponentStateValue(
-                  currentArmyId,
-                  unitId,
-                  "tokens",
-                  0
+              // Call the highlight function (now internal to eventHandlers, but we need initial highlight)
+              const targetModelElement = initialTarget
+                ? document.querySelector(
+                    `[data-model-id="${initialTarget.modelId}"]`
+                  )
+                : null;
+              if (
+                targetModelElement &&
+                targetModelElement.closest(".unit-card")?.id ===
+                  `unit-card-${baseUnit.selectionId}`
+              ) {
+                const card = document.getElementById(
+                  `unit-card-${baseUnit.selectionId}`
                 );
-                // **FIXED:** Use constant MAX_SPELL_TOKENS
-                const tokensToAdd = unit.casterLevel;
-                const newTokens = Math.min(
-                  MAX_SPELL_TOKENS,
-                  currentTokens + tokensToAdd
-                );
-
-                if (newTokens !== currentTokens) {
-                  console.log(
-                    `Adding ${tokensToAdd} tokens to ${
-                      unit.customName || unit.originalName
-                    } (${unitId}). New total: ${newTokens}`
-                  );
-                  updateGlobalComponentState(
-                    currentArmyId,
-                    unitId,
-                    "tokens",
-                    newTokens
-                  );
-                  // Find the card ID (which is the base unit ID if the caster is a joined hero)
-                  const cardUnitId = Object.keys(
-                    loadedArmiesData[currentArmyId].heroJoinTargets || {}
-                  ).find((heroKey) => heroKey === unitId)
-                    ? loadedArmiesData[currentArmyId].heroJoinTargets[unitId] // Find the unit the hero is joined to
-                    : unitId; // Otherwise, it's the unit itself
-                  updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel); // Update UI
-                  stateChanged = true;
-                  castersAffected++;
-                }
+                card
+                  ?.querySelectorAll(".model-display.target-model")
+                  .forEach((el) => el.classList.remove("target-model"));
+                targetModelElement.classList.add("target-model");
               }
-            });
-            if (stateChanged) {
-              saveComponentState(armyComponentStates); // Save updated tokens
             }
-            // **REPLACED alert with showToast**
-            showToast(
-              castersAffected > 0
-                ? `Spell tokens generated for ${castersAffected} caster(s) (max ${MAX_SPELL_TOKENS}).`
-                : "No casters found to generate tokens for."
-            );
           });
+
+        // --- Step 8: Setup Event Listeners ---
+        setupEventListeners(armyIdToLoad); // Initialize event handlers
       } else {
-        /* Error processing */ mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">Error processing data for ${armyInfo.armyName}.</div></div>`;
-        titleH1.textContent = "Error";
+        // Handle error during processing
+        mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">Error processing army list data for ${armyInfo.armyName}.</div></div>`;
+        titleH1.textContent = "Error Processing Army";
       }
     } else {
-      /* Error fetching army list */ mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning m-4" role="alert">Could not load army list data for ${armyInfo.armyName} (ID: ${armyIdToLoad}).</div></div>`;
-      titleH1.textContent = "Error";
+      // Handle error fetching raw army list
+      mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning m-4" role="alert">Could not load army list data for ${armyInfo.armyName} (ID: ${armyIdToLoad}). Check Army Forge ID and network connection.</div></div>`;
+      titleH1.textContent = "Error Loading Army List";
     }
   } catch (error) {
-    /* Catch all */ console.error(
-      `An error occurred loading/processing army ${armyIdToLoad}:`,
+    // Catch any unexpected errors during fetch/process/display
+    console.error(
+      `An unexpected error occurred loading/processing army ${armyIdToLoad}:`,
       error
     );
-    mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">An unexpected error occurred loading army ${armyIdToLoad}. Check console.</div></div>`;
-    titleH1.textContent = "Error";
+    mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">An unexpected error occurred while loading the army (${armyInfo.armyName}). Please check the console for details.</div></div>`;
+    titleH1.textContent = "Unexpected Error";
   }
 }); // End DOMContentLoaded
