@@ -10,13 +10,13 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  overflow: hidden; /* Prevent content overflow issues */
 }
 .unit-card .card-body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  /* Removed explicit font-size: small; Let default card body size apply */
+  font-size: 0.95rem; /* Slightly larger base font for card body */
 }
 .stat-icon {
   width: 1.1em;
@@ -36,18 +36,18 @@ body {
 .table > :not(caption) > * > * {
   /* Table cell content */
   padding: 0.3rem 0.3rem;
-  font-size: 0.9em; /* Slightly larger than V10 */
+  font-size: 0.9em;
   vertical-align: middle;
 }
 .table thead th {
   /* Table header */
-  font-size: 0.85em; /* Slightly larger */
+  font-size: 0.85em;
   padding: 0.2rem 0.3rem;
 }
 .card-body strong.d-block {
   /* Section headings */
   margin-bottom: 0.5rem !important;
-  font-size: 0.95em; /* Slightly larger */
+  font-size: 0.95em;
 }
 
 /* Header */
@@ -61,14 +61,28 @@ body {
   margin-right: 1rem;
 }
 .header-meta-info {
-  /* Container for Models/Points in header */
-  font-size: 0.85em; /* Slightly larger */
+  /* Container for Models/Points/XP/Base in header */
+  font-size: 0.85em;
   margin-top: 0.1rem;
+  display: flex; /* Use flex for alignment */
+  flex-wrap: wrap;
+  gap: 0.5rem; /* Add gap */
+  align-items: center;
 }
 .header-meta-info .info-separator {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  /* margin-left: 0.5rem;
+  margin-right: 0.5rem; */
+  display: none; /* Hide separators, use gap instead */
 }
+.header-meta-info .info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.header-meta-info .xp-badge {
+  font-size: 0.9em;
+}
+
 .header-button-group {
   /* Absolute positioning for wound/reset buttons */
   position: absolute;
@@ -103,6 +117,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
   gap: 0.5rem;
+  margin-top: 1rem;
   order: 10; /* Force grid to bottom */
 }
 .model-display {
@@ -130,13 +145,11 @@ body {
   box-shadow: none;
 }
 .model-display.target-model {
-  /* Auto-target highlight */
   border-width: 2px;
   border-color: var(--bs-secondary) !important;
   box-shadow: none;
 }
 .model-display .hero-icon-color svg {
-  /* Hero icon color */
   fill: var(--bs-warning);
 }
 .model-icon svg {
@@ -176,8 +189,9 @@ body {
   pointer-events: none;
 }
 .wound-apply-btn i,
-.wound-reset-btn i {
-  /* Prevent clicks on icons */
+.wound-reset-btn i,
+.token-add-btn i,
+.token-remove-btn i {
   pointer-events: none;
 }
 
@@ -199,7 +213,6 @@ body {
   margin-bottom: 0;
 }
 .sub-section h6 {
-  /* Sub-section titles */
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--bs-border-color-translucent);
@@ -207,7 +220,6 @@ body {
   font-size: 0.95em;
 }
 .sub-stats-row {
-  /* Row for Qua/Def/Tough */
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -221,13 +233,12 @@ body {
   gap: 0.3rem;
 }
 .info-line {
-  /* Row for Pts/XP/Base */
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 0.25rem;
   margin-bottom: 0.5rem;
-  font-size: 0.9em; /* Slightly larger */
+  font-size: 0.9em;
 }
 .info-line .info-item {
   display: flex;
@@ -240,7 +251,62 @@ body {
 .sub-section .table,
 .normal-unit-details .table {
   margin-top: auto;
-} /* Push table to bottom */
+}
+
+/* Caster Controls */
+.caster-section {
+  border-top: 1px solid var(--bs-border-color-translucent);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+.caster-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.caster-level-badge {
+  font-weight: bold;
+  font-size: 0.9em;
+  padding: 0.3em 0.5em;
+  background-color: var(--bs-secondary-bg);
+  border-radius: var(--bs-border-radius-sm);
+  border: 1px solid var(--bs-border-color-translucent);
+  white-space: nowrap;
+}
+.token-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--bs-border-color-translucent);
+  background-color: var(--bs-secondary-bg);
+  border-radius: var(--bs-border-radius);
+  padding: 0.1rem 0.3rem;
+}
+.token-controls .btn {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.9em;
+  line-height: 1;
+} /* Removed border: none; use outline */
+.token-count-display {
+  font-weight: bold;
+  padding: 0 0.4rem;
+  font-size: 0.9em;
+  min-width: 5ch;
+  text-align: center;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.token-icon {
+  width: 1em;
+  height: 1em;
+  fill: var(--bs-info);
+}
+.view-spells-btn {
+  margin-left: auto;
+}
 
 /* Loading Spinner */
 #army-units-container .spinner-border {

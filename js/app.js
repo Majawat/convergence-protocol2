@@ -1,17 +1,27 @@
 // Import functions from other modules
 import { fetchArmyData } from "./api.js";
 import { processArmyData } from "./dataProcessor.js";
-import { displayArmyUnits, updateModelDisplay } from "./ui.js";
-import { saveWoundState, loadWoundState, resetWoundState } from "./storage.js";
-// NOTE: We will add component state storage later for tokens etc.
+import {
+  displayArmyUnits,
+  updateModelDisplay,
+  updateTokenDisplay, // Added updateTokenDisplay
+} from "./ui.js";
+import {
+  saveWoundState,
+  loadWoundState,
+  resetWoundState,
+  saveComponentState,
+  loadComponentState,
+  resetComponentState, // Added component state functions
+} from "./storage.js";
 
 // --- Global State ---
 let campaignData = null; // To store loaded campaign info
 let armyBooksData = {}; // To store loaded/cached army book data { factionId: data }
 let commonRulesData = {}; // Stores loaded/cached common rules { gameSystemId: data }
-let loadedArmiesData = {}; // Stores full processed army data for the *currently viewed* army { armyId: processedArmy }
+let loadedArmiesData = {}; // Stores the single loaded army { armyId: processedArmy }
 let armyWoundStates = {}; // Stores wound states { armyId: { unitId: { modelId: currentHp, ... }, ... }, ... }
-// let armyComponentStates = {}; // For tokens etc. (To be added later)
+let armyComponentStates = {}; // Added for tokens { armyId: { unitId: { tokens: T } } }
 
 // --- Constants ---
 const ARMY_BOOKS_CACHE_KEY = "oprArmyBooksCache"; // sessionStorage key
@@ -255,9 +265,7 @@ async function loadGameData(campaignData) {
         }
       } else if (result.status === "rejected") {
         console.error(`[DEBUG] Fetch promise rejected:`, result.reason);
-        // Need to know if this was a rules fetch to avoid trying to save it
-        // This requires parsing the reason or adding more info to the promise chain, complex.
-        // For now, we rely on fetchedRulesSystems only containing *attempted* fetches.
+        // Could try to determine if it was a rules fetch to remove from fetchedRulesSystems, but complex.
       }
     });
 
@@ -379,7 +387,7 @@ function applyWound(armyId, unitId, specificModelId = null) {
     );
     return;
   }
-  const heroId = Object.keys(armyData.heroJoinTargets).find(
+  const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
     (key) => armyData.heroJoinTargets[key] === unitId
   );
   const heroData = heroId ? armyData.unitMap[heroId] : null;
@@ -438,31 +446,46 @@ function applyWound(armyId, unitId, specificModelId = null) {
   }
 }
 
+// --- Component State Logic ---
+/** Updates the global component state object (e.g., for tokens). */
+function updateGlobalComponentState(armyId, unitId, key, value) {
+  if (!armyComponentStates[armyId]) armyComponentStates[armyId] = {};
+  if (!armyComponentStates[armyId][unitId])
+    armyComponentStates[armyId][unitId] = {};
+  armyComponentStates[armyId][unitId][key] = value;
+}
+
+/** Gets a specific component state value, returning a default if not found. */
+function getComponentStateValue(armyId, unitId, key, defaultValue) {
+  return armyComponentStates[armyId]?.[unitId]?.[key] ?? defaultValue;
+}
+
 // --- Event Handlers ---
 /** Handles clicks within the army units container */
 function handleUnitInteractionClick(event) {
   const unitCard = event.target.closest(".unit-card");
   if (!unitCard) return;
-  const unitId = unitCard.dataset.unitId;
+  const unitId = unitCard.dataset.unitId; // Base unit ID
   const armyId = unitCard.dataset.armyId;
   const clickedModelElement = event.target.closest(".clickable-model");
 
+  // Wound application on model click
   if (clickedModelElement && event.type === "click") {
-    // Apply wound on model click
     const modelId = clickedModelElement.dataset.modelId;
     applyWound(armyId, unitId, modelId);
     return;
   }
+  // Wound application via button
   if (event.target.closest(".wound-apply-btn")) {
-    // Apply wound via button
     applyWound(armyId, unitId, null);
-  } else if (event.target.closest(".wound-reset-btn")) {
-    // Reset wounds
+  }
+  // Reset wounds
+  else if (event.target.closest(".wound-reset-btn")) {
     const armyData = loadedArmiesData[armyId];
     if (!armyData) return;
     const unitData = armyData.unitMap[unitId];
     if (!unitData) return;
-    const heroId = Object.keys(armyData.heroJoinTargets).find(
+    const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
       (key) => armyData.heroJoinTargets[key] === unitId
     );
     const heroData = heroId ? armyData.unitMap[heroId] : null;
@@ -488,6 +511,79 @@ function handleUnitInteractionClick(event) {
       unitId,
       nextAutoTarget ? nextAutoTarget.modelId : null
     );
+  }
+  // Add Token
+  else if (event.target.closest(".token-add-btn")) {
+    const armyData = loadedArmiesData[armyId];
+    if (!armyData) return;
+    const unitData = armyData.unitMap[unitId];
+    if (!unitData) return;
+    const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
+      (key) => armyData.heroJoinTargets[key] === unitId
+    );
+    const actualCasterUnit = heroId ? armyData.unitMap[heroId] : unitData; // Get the actual caster unit (hero or base)
+
+    if (actualCasterUnit?.casterLevel > 0) {
+      const currentTokens = getComponentStateValue(
+        armyId,
+        actualCasterUnit.selectionId,
+        "tokens",
+        0
+      );
+      const maxTokens = Math.min(6, actualCasterUnit.casterLevel * 2); // Max 6 rule
+      if (currentTokens < maxTokens) {
+        const newTokens = currentTokens + 1;
+        updateGlobalComponentState(
+          armyId,
+          actualCasterUnit.selectionId,
+          "tokens",
+          newTokens
+        );
+        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel); // Update UI on the card (using base unitId for card ID)
+        saveComponentState(armyComponentStates);
+      }
+    } else {
+      console.warn("Target unit is not a caster:", unitId);
+    }
+  }
+  // Remove Token
+  else if (event.target.closest(".token-remove-btn")) {
+    const armyData = loadedArmiesData[armyId];
+    if (!armyData) return;
+    const unitData = armyData.unitMap[unitId];
+    if (!unitData) return;
+    const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
+      (key) => armyData.heroJoinTargets[key] === unitId
+    );
+    const actualCasterUnit = heroId ? armyData.unitMap[heroId] : unitData;
+
+    if (actualCasterUnit?.casterLevel > 0) {
+      const currentTokens = getComponentStateValue(
+        armyId,
+        actualCasterUnit.selectionId,
+        "tokens",
+        0
+      );
+      if (currentTokens > 0) {
+        const newTokens = currentTokens - 1;
+        updateGlobalComponentState(
+          armyId,
+          actualCasterUnit.selectionId,
+          "tokens",
+          newTokens
+        );
+        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel); // Update UI on the card
+        saveComponentState(armyComponentStates);
+      }
+    } else {
+      console.warn("Target unit is not a caster:", unitId);
+    }
+  }
+  // View Spells Button
+  else if (event.target.closest(".view-spells-btn")) {
+    // TODO: Implement spell list modal/display using armyBooksData
+    console.log(`View Spells clicked for unit ${unitId}`);
+    alert("Spell list display not yet implemented!");
   }
 }
 
@@ -603,6 +699,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5. Load persisted states
   armyWoundStates = loadWoundState() || {};
+  armyComponentStates = loadComponentState() || {}; // Load component state
 
   // 6. Fetch and Process Army Data
   mainListContainer.innerHTML = "";
@@ -616,6 +713,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       const processedArmy = processArmyData(rawData);
       if (processedArmy) {
         loadedArmiesData[armyIdToLoad] = processedArmy;
+
+        // Add casterLevel property to units for easier access
+        processedArmy.units.forEach((unit) => {
+          const casterRule = unit.rules.find((r) => r.name === "Caster");
+          unit.casterLevel = casterRule
+            ? parseInt(casterRule.rating, 10) || 0
+            : 0;
+          // Initialize component state if needed
+          if (!armyComponentStates[armyIdToLoad])
+            armyComponentStates[armyIdToLoad] = {};
+          if (!armyComponentStates[armyIdToLoad][unit.selectionId])
+            armyComponentStates[armyIdToLoad][unit.selectionId] = {};
+          if (
+            unit.casterLevel > 0 &&
+            armyComponentStates[armyIdToLoad][unit.selectionId].tokens ===
+              undefined
+          ) {
+            // Default to 0 tokens if not found in storage
+            armyComponentStates[armyIdToLoad][unit.selectionId].tokens = 0;
+          }
+        });
+        saveComponentState(armyComponentStates); // Save potentially initialized state
+
         // Initialize/apply wound state...
         const savedArmyWounds = armyWoundStates[armyIdToLoad];
         if (!savedArmyWounds) armyWoundStates[armyIdToLoad] = {};
@@ -640,7 +760,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         titleH1.textContent = armyInfo.armyName;
         populateArmyInfoModal(armyInfo);
         console.log(`Displaying units for ${armyIdToLoad}...`);
-        displayArmyUnits(processedArmy, mainListContainer);
+        // Pass component states to display function
+        displayArmyUnits(processedArmy, mainListContainer, armyComponentStates);
+
         // Highlight initial targets...
         processedArmy.units
           .filter(
@@ -649,7 +771,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           .forEach((unit) => {
             const baseUnit = processedArmy.unitMap[unit.selectionId];
             if (baseUnit) {
-              const heroId = Object.keys(processedArmy.heroJoinTargets).find(
+              const heroId = Object.keys(
+                processedArmy.heroJoinTargets || {}
+              ).find(
                 (key) =>
                   processedArmy.heroJoinTargets[key] === baseUnit.selectionId
               );
@@ -661,7 +785,64 @@ document.addEventListener("DOMContentLoaded", async () => {
               );
             }
           });
+
+        // Setup Event Listeners
         mainListContainer.addEventListener("click", handleUnitInteractionClick);
+
+        // Add listener for temporary "Start Round" button
+        document
+          .getElementById("start-round-button")
+          ?.addEventListener("click", () => {
+            console.log("--- Starting New Round (Generating Tokens) ---");
+            const currentArmyId = armyIdToLoad;
+            if (!loadedArmiesData[currentArmyId]) return;
+
+            let stateChanged = false;
+            // Iterate over ALL units in the processed data, including heroes not directly displayed
+            loadedArmiesData[currentArmyId].units.forEach((unit) => {
+              if (unit.casterLevel > 0) {
+                const unitId = unit.selectionId; // Use the caster's actual unit ID
+                const currentTokens = getComponentStateValue(
+                  currentArmyId,
+                  unitId,
+                  "tokens",
+                  0
+                );
+                const maxTokens = 6; // Max 6 rule
+                const tokensToAdd = unit.casterLevel;
+                const newTokens = Math.min(
+                  maxTokens,
+                  currentTokens + tokensToAdd
+                );
+
+                if (newTokens !== currentTokens) {
+                  console.log(
+                    `Adding ${tokensToAdd} tokens to ${
+                      unit.customName || unit.originalName
+                    } (${unitId}). New total: ${newTokens}`
+                  );
+                  updateGlobalComponentState(
+                    currentArmyId,
+                    unitId,
+                    "tokens",
+                    newTokens
+                  );
+                  // Find the card ID (which is the base unit ID if the caster is a joined hero)
+                  const cardUnitId = Object.keys(
+                    loadedArmiesData[currentArmyId].heroJoinTargets || {}
+                  ).find((heroKey) => heroKey === unitId)
+                    ? loadedArmiesData[currentArmyId].heroJoinTargets[unitId] // Find the unit the hero is joined to
+                    : unitId; // Otherwise, it's the unit itself
+                  updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel);
+                  stateChanged = true;
+                }
+              }
+            });
+            if (stateChanged) {
+              saveComponentState(armyComponentStates);
+            }
+            alert("Spell tokens generated for casters (max 6).");
+          });
       } else {
         /* Error processing */ mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">Error processing data for ${armyInfo.armyName}.</div></div>`;
         titleH1.textContent = "Error";
