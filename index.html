@@ -24,6 +24,7 @@
         text-align: center;
       }
     </style>
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="bg-body text-body">
     <nav
@@ -117,20 +118,26 @@
           <ul>
             <li>Load armies from Army Forge</li>
             <li>View unit stats and details</li>
-            <li>(Coming Soon) Track wounds</li>
+            <li>Track wounds per model</li>
             <li>(Coming Soon) Track activations</li>
             <li>(Coming Soon) Morale tracking</li>
+            <li>(Coming Soon) Campaign integration</li>
           </ul>
         </div>
         <div class="col-md-6">
           <h2>How To Use</h2>
           <p>
             Currently, pre-defined army lists are loaded on the "View Armies"
-            page. Future updates will allow loading custom lists.
+            page. Click the <i class="bi bi-heartbreak"></i> button on a unit
+            card to apply a wound (following allocation rules) or click directly
+            on a model display to wound that specific model. Click Reset (<i
+              class="bi bi-arrow-clockwise"
+            ></i
+            >) to reset wounds for a unit.
           </p>
           <p>
             Navigate to <a href="army.html">View Armies</a> to see the loaded
-            data.
+            data and track wounds. Data is saved locally.
           </p>
         </div>
       </div>
@@ -145,5 +152,26 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="themeToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <strong class="me-auto">Theme Change</strong>
+          <small>Just now</small>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="toast-body"></div>
+      </div>
+    </div>
   </body>
 </html>

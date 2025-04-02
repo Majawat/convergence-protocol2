@@ -23,9 +23,6 @@
         margin-bottom: 1rem; /* Consistent spacing */
         transition: box-shadow 0.2s ease-in-out; /* Add hover effect */
       }
-      /* .unit-card:hover { */
-      /* box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* Bootstrap shadow variable */
-      /* } */
       .stat-icon {
         width: 1.1em;
         height: 1.1em;
@@ -49,63 +46,7 @@
         height: 3rem;
       }
 
-      /* Wound Tracking Styles */
-      .unit-models-grid {
-        display: grid;
-        grid-template-columns: repeat(
-          auto-fill,
-          minmax(50px, 1fr)
-        ); /* Responsive grid */
-        gap: 0.5rem;
-        margin-bottom: 0.5rem; /* Space below models */
-      }
-      .model-display {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 0.25rem;
-        border: 1px solid var(--bs-border-color-translucent);
-        border-radius: var(--bs-border-radius-sm);
-        background-color: var(--bs-tertiary-bg);
-        transition: opacity 0.3s ease, background-color 0.3s ease;
-      }
-      .model-display.model-removed {
-        opacity: 0.4;
-        /* background-color: var(--bs-secondary-bg); */ /* Maybe too much */
-        text-decoration: line-through;
-      }
-      .model-display.target-model {
-        /* Style for the next model to take a wound */
-        box-shadow: 0 0 0 2px var(--bs-danger);
-        border-color: var(--bs-danger);
-      }
-      .model-icon svg {
-        width: 1.5em;
-        height: 1.5em;
-        margin-bottom: 0.25rem;
-        fill: currentColor; /* Use text color for icons */
-      }
-      .model-hp-bar-container {
-        width: 100%;
-        height: 8px;
-        background-color: var(--bs-secondary-bg);
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 0.25rem;
-      }
-      .model-hp-bar {
-        height: 100%;
-        transition: width 0.3s ease, background-color 0.3s ease;
-      }
-      .model-hp-text {
-        font-size: 0.75em;
-        line-height: 1;
-      }
-      .wound-apply-btn i,
-      .wound-heal-btn i,
-      .wound-reset-btn i {
-        pointer-events: none; /* Ensure clicks go to the button */
-      }
+      /* Wound Tracking Styles included via style.css */
     </style>
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -210,5 +151,27 @@
     ></script>
 
     <script type="module" src="js/app.js"></script>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="themeToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <strong class="me-auto">Theme Change</strong>
+          <small>Just now</small>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="toast-body"></div>
+      </div>
+    </div>
   </body>
 </html>
