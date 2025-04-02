@@ -26,6 +26,7 @@ let armyComponentStates = {}; // Added for tokens { armyId: { unitId: { tokens: 
 // --- Constants ---
 const ARMY_BOOKS_CACHE_KEY = "oprArmyBooksCache"; // sessionStorage key
 const COMMON_RULES_CACHE_KEY_PREFIX = "oprCommonRulesCache_"; // Prefix + gameSystemId
+const MAX_SPELL_TOKENS = 6; // Define the global maximum
 
 // --- Data Loading Functions ---
 
@@ -521,7 +522,7 @@ function handleUnitInteractionClick(event) {
     const heroId = Object.keys(armyData.heroJoinTargets || {}).find(
       (key) => armyData.heroJoinTargets[key] === unitId
     );
-    const actualCasterUnit = heroId ? armyData.unitMap[heroId] : unitData; // Get the actual caster unit (hero or base)
+    const actualCasterUnit = heroId ? armyData.unitMap[heroId] : unitData;
 
     if (actualCasterUnit?.casterLevel > 0) {
       const currentTokens = getComponentStateValue(
@@ -530,8 +531,7 @@ function handleUnitInteractionClick(event) {
         "tokens",
         0
       );
-      const maxTokens = Math.min(6, actualCasterUnit.casterLevel * 2); // Max 6 rule
-      if (currentTokens < maxTokens) {
+      if (currentTokens < MAX_SPELL_TOKENS) {
         const newTokens = currentTokens + 1;
         updateGlobalComponentState(
           armyId,
@@ -539,7 +539,7 @@ function handleUnitInteractionClick(event) {
           "tokens",
           newTokens
         );
-        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel); // Update UI on the card (using base unitId for card ID)
+        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel);
         saveComponentState(armyComponentStates);
       }
     } else {
@@ -572,7 +572,7 @@ function handleUnitInteractionClick(event) {
           "tokens",
           newTokens
         );
-        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel); // Update UI on the card
+        updateTokenDisplay(unitId, newTokens, actualCasterUnit.casterLevel);
         saveComponentState(armyComponentStates);
       }
     } else {
@@ -581,9 +581,13 @@ function handleUnitInteractionClick(event) {
   }
   // View Spells Button
   else if (event.target.closest(".view-spells-btn")) {
-    // TODO: Implement spell list modal/display using armyBooksData
     console.log(`View Spells clicked for unit ${unitId}`);
     alert("Spell list display not yet implemented!");
+    // TODO: Implement spell list modal/display using armyBooksData and commonRulesData
+    // Need to find the actual caster unit (hero or baseUnit)
+    // Get its faction ID
+    // Look up spells in armyBooksData[factionId].spells
+    // Display in a modal
   }
 }
 
@@ -652,6 +656,34 @@ function populateArmyInfoModal(armyInfo) {
   if (infoButton) infoButton.disabled = false;
 }
 
+/** Shows a Bootstrap Toast message */
+function showToast(message) {
+  const toastElement = document.getElementById("themeToast"); // Reusing theme toast element
+  if (!toastElement) {
+    console.warn("Toast element #themeToast not found.");
+    return;
+  }
+  const toastBody = toastElement.querySelector(".toast-body");
+  if (!toastBody) {
+    console.warn("Toast body not found in #themeToast.");
+    return;
+  }
+
+  toastBody.textContent = message; // Set the message
+
+  if (typeof bootstrap !== "undefined" && bootstrap.Toast) {
+    try {
+      // Ensure the toast is properly initialized before showing
+      const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
+      toastInstance.show();
+    } catch (error) {
+      console.error("Error showing Bootstrap toast:", error);
+    }
+  } else {
+    console.warn("Bootstrap Toast component not found.");
+  }
+}
+
 // --- Main Application Logic ---
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM fully loaded and parsed");
@@ -714,7 +746,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (processedArmy) {
         loadedArmiesData[armyIdToLoad] = processedArmy;
 
-        // Add casterLevel property to units for easier access
+        // Add casterLevel property and initialize component state
         processedArmy.units.forEach((unit) => {
           const casterRule = unit.rules.find((r) => r.name === "Caster");
           unit.casterLevel = casterRule
@@ -798,6 +830,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!loadedArmiesData[currentArmyId]) return;
 
             let stateChanged = false;
+            let castersAffected = 0;
             // Iterate over ALL units in the processed data, including heroes not directly displayed
             loadedArmiesData[currentArmyId].units.forEach((unit) => {
               if (unit.casterLevel > 0) {
@@ -808,10 +841,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                   "tokens",
                   0
                 );
-                const maxTokens = 6; // Max 6 rule
+                // **FIXED:** Use constant MAX_SPELL_TOKENS
                 const tokensToAdd = unit.casterLevel;
                 const newTokens = Math.min(
-                  maxTokens,
+                  MAX_SPELL_TOKENS,
                   currentTokens + tokensToAdd
                 );
 
@@ -833,15 +866,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                   ).find((heroKey) => heroKey === unitId)
                     ? loadedArmiesData[currentArmyId].heroJoinTargets[unitId] // Find the unit the hero is joined to
                     : unitId; // Otherwise, it's the unit itself
-                  updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel);
+                  updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel); // Update UI
                   stateChanged = true;
+                  castersAffected++;
                 }
               }
             });
             if (stateChanged) {
-              saveComponentState(armyComponentStates);
+              saveComponentState(armyComponentStates); // Save updated tokens
             }
-            alert("Spell tokens generated for casters (max 6).");
+            // **REPLACED alert with showToast**
+            showToast(
+              castersAffected > 0
+                ? `Spell tokens generated for ${castersAffected} caster(s) (max ${MAX_SPELL_TOKENS}).`
+                : "No casters found to generate tokens for."
+            );
           });
       } else {
         /* Error processing */ mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">Error processing data for ${armyInfo.armyName}.</div></div>`;
