@@ -21,6 +21,26 @@
         width: 100%;
         background-color: var(--bs-secondary-bg);
       }
+      /* Style for spell list items */
+      #spellListContainer .list-group-item {
+        background-color: var(--bs-body-bg);
+      }
+      #spellListContainer .spell-cost {
+        font-weight: bold;
+        color: var(--bs-info);
+        margin-left: 0.5rem;
+        font-size: 0.9em;
+      }
+      #spellListContainer .spell-effect {
+        font-size: 0.9em;
+        color: var(--bs-secondary-color);
+        display: block;
+        margin-top: 0.25rem;
+      }
+      #spellListContainer .spell-info-icon {
+        cursor: help;
+        margin-left: 0.5rem;
+      } /* If using tooltips later */
     </style>
   </head>
   <body class="bg-body text-body">
@@ -93,7 +113,7 @@
 
     <main class="container mt-4">
       <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
-        <h1 id="army-title-h1" class="mb-0">Loading Army...</h1>
+        <h1 id="army-title-h1" class="flex-grow-1 mb-0">Loading Army...</h1>
         <div class="d-flex gap-2">
           <button
             id="army-info-button"
@@ -115,7 +135,6 @@
         </div>
       </div>
       <hr class="mt-2 mb-4" />
-
       <div
         id="army-units-container"
         class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"
@@ -162,6 +181,50 @@
             <p id="armyInfoSummary" class="lead"></p>
             <hr />
             <div id="armyInfoBackstory"></div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="viewSpellsModal"
+      tabindex="-1"
+      aria-labelledby="viewSpellsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="viewSpellsModalLabel">
+              Available Spells
+            </h5>
+            <span id="modalCasterTokenDisplay" class="ms-auto me-3"></span>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p id="noSpellsMessage" class="text-muted" style="display: none">
+              No spells found for this caster's faction or army book data not
+              loaded.
+            </p>
+            <ul
+              id="spellListContainer"
+              class="list-group list-group-flush"
+            ></ul>
           </div>
           <div class="modal-footer">
             <button

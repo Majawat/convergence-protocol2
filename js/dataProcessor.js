@@ -1,10 +1,6 @@
 /**
  * Processes the raw army data from the Army Forge API into a structured format.
- * **MODIFIED:** Added heuristic for Additive vs Replacement Toughness upgrades.
- * **MODIFIED:** Added isHero and isTough flags to models.
- * **MODIFIED:** Corrected logic for adding merged units to the final list.
- * @param {object} rawData - The raw JSON object returned by the API.
- * @returns {object|null} A structured object representing the army list, or null if data is invalid.
+ * **MODIFIED:** Stores unit's original factionId.
  */
 function processArmyData(rawData) {
   // Basic validation
@@ -16,35 +12,35 @@ function processArmyData(rawData) {
   // Initialize army object
   const processedArmy = {
     meta: {
-      id: rawData.id,
-      key: rawData.key,
-      name: rawData.name || "Unnamed Army",
-      gameSystem: rawData.gameSystem,
-      pointsLimit: rawData.pointsLimit || 0,
-      listPoints: rawData.listPoints || 0,
-      activationCount: rawData.activationCount || 0,
-      modelCount: rawData.modelCount || 0,
-      description: rawData.description || "",
-      rawSpecialRules: rawData.specialRules || [],
-      cloudModified: rawData.cloudModified,
-      modified: rawData.modified,
+      /* ... (same as before) ... */
     },
     units: [],
     heroJoinTargets: {},
     unitMap: {},
   };
+  processedArmy.meta = {
+    id: rawData.id,
+    key: rawData.key,
+    name: rawData.name || "Unnamed Army",
+    gameSystem: rawData.gameSystem,
+    pointsLimit: rawData.pointsLimit || 0,
+    listPoints: rawData.listPoints || 0,
+    activationCount: rawData.activationCount || 0,
+    modelCount: rawData.modelCount || 0,
+    description: rawData.description || "",
+    rawSpecialRules: rawData.specialRules || [],
+    cloudModified: rawData.cloudModified,
+    modified: rawData.modified,
+  };
 
   const tempProcessedUnits = {};
-  const unitsMergedInto = new Set(); // Keep track of units that were merged INTO another
+  const unitsMergedInto = new Set();
 
   // --- Step 1: Initial Processing & Upgrade Application ---
   rawData.units.forEach((rawUnit) => {
-    // ... (rest of Step 1 remains the same as previous version) ...
     const initialBaseDefense = parseInt(rawUnit.defense, 10) || 0;
     let baseToughValue = 1;
-    const baseToughRule = (rawUnit.rules || []).find(
-      (rule) => rule.name === "Tough"
-    );
+    const baseToughRule = (rawUnit.rules || []).find((r) => r.name === "Tough");
     if (baseToughRule && baseToughRule.rating) {
       const parsedTough = parseInt(baseToughRule.rating, 10);
       if (!isNaN(parsedTough)) baseToughValue = parsedTough;
@@ -54,14 +50,18 @@ function processArmyData(rawData) {
     );
 
     const processedUnit = {
+      // Basic Info
       id: rawUnit.id,
       selectionId: rawUnit.selectionId,
+      factionId: rawUnit.armyId, // <<< STORE FACTION ID HERE
       originalName: rawUnit.name,
       customName: rawUnit.customName || rawUnit.name,
       cost: rawUnit.cost || 0,
       size: rawUnit.size || 1,
+      // Stats
       defense: initialBaseDefense,
       quality: rawUnit.quality || 0,
+      // Details
       rules: (rawUnit.rules || []).map((rule) => ({ ...rule })),
       items: (rawUnit.items || []).map((item) => ({ ...item })),
       bases: rawUnit.bases ? { ...rawUnit.bases } : null,
@@ -70,13 +70,22 @@ function processArmyData(rawData) {
       traits: rawUnit.traits || [],
       loadout: [],
       models: [],
+      // Flags & Relations
       isHero: unitIsHero,
       canJoinUnitId: null,
       isCombined: rawUnit.combined || false,
       joinToUnitId: rawUnit.joinToUnit || null,
-      toughnessUpgrades: [],
+      toughnessUpgrades: [], // Stores upgrades granting Toughness
+      casterLevel: 0, // Initialize caster level (will be set later if applicable)
     };
 
+    // Calculate Caster Level
+    const casterRule = processedUnit.rules.find((r) => r.name === "Caster");
+    processedUnit.casterLevel = casterRule
+      ? parseInt(casterRule.rating, 10) || 0
+      : 0;
+
+    // --- Stat Accumulation & Upgrade Processing ---
     let finalQuality = processedUnit.quality;
     let finalDefense = processedUnit.defense;
     let defenseModifiedByUpgrade = false;
@@ -88,8 +97,8 @@ function processArmyData(rawData) {
     );
     const statProcessedRuleInstances = new Set();
     const toughUpgradeOptionCounts = {};
-
     (rawUnit.selectedUpgrades || []).forEach((selectedUpgrade) => {
+      /* ... (upgrade processing logic same as V16) ... */
       const option = selectedUpgrade.option;
       if (!option) return;
       const upgradeCostEntry = (option.costs || []).find(
@@ -183,12 +192,14 @@ function processArmyData(rawData) {
       upg.count = toughUpgradeOptionCounts[upg.optionUid] || 0;
     });
 
+    // --- Loadout Processing ---
     const finalLoadoutWeapons = [];
     const finalLoadoutItems = [...processedUnit.items];
     const finalLoadoutItemIdentifiers = new Set(
       processedUnit.items.map((i) => i.id || i.label || i.name)
     );
     (rawUnit.loadout || []).forEach((loadoutItem) => {
+      /* ... (loadout processing logic same as V16) ... */
       if (loadoutItem.type === "ArmyBookWeapon") {
         finalLoadoutWeapons.push({
           ...loadoutItem,
@@ -231,9 +242,9 @@ function processArmyData(rawData) {
     processedUnit.loadout = finalLoadoutWeapons;
     processedUnit.items = finalLoadoutItems;
 
+    // --- Finalize Stats & Create Models ---
     processedUnit.quality = finalQuality;
     processedUnit.defense = finalDefense;
-
     const models = [];
     const totalToughModelsNeeded = processedUnit.toughnessUpgrades.reduce(
       (sum, upg) => sum + upg.count,
@@ -244,6 +255,7 @@ function processArmyData(rawData) {
         ? processedUnit.toughnessUpgrades[0].toughValue
         : baseToughValue;
     for (let i = 0; i < processedUnit.size; i++) {
+      /* ... (model creation logic same as V16) ... */
       let modelMaxHp = baseToughValue;
       let modelIsTough = baseToughValue > 1;
       if (i < totalToughModelsNeeded) {
@@ -273,6 +285,7 @@ function processArmyData(rawData) {
     }
     processedUnit.models = models;
 
+    // --- Final Hero Check & Join Target ---
     if (processedUnit.isHero && rawUnit.joinToUnit) {
       processedUnit.canJoinUnitId = rawUnit.joinToUnit;
       processedArmy.heroJoinTargets[processedUnit.selectionId] =
@@ -284,20 +297,17 @@ function processArmyData(rawData) {
 
   // --- Step 2: Merge Combined Units ---
   Object.values(tempProcessedUnits).forEach((unitA) => {
-    // Only process if unitA is combined and points to another unit
+    /* ... (merge logic same as V16) ... */
     if (unitA.isCombined && unitA.joinToUnitId) {
       const unitB = tempProcessedUnits[unitA.joinToUnitId];
-      // Ensure unitB exists, is also combined, and hasn't already been processed as the source of a merge
       if (
         unitB &&
         unitB.isCombined &&
         !unitsMergedInto.has(unitB.selectionId)
       ) {
-        // Merge properties from unitA into unitB
-        const mergedUnit = unitB; // Modify B
-
-        mergedUnit.customName = unitA.customName; // Often the combined unit takes the name of one part
-        mergedUnit.originalName = unitA.originalName; // Keep original name consistent if custom differs
+        const mergedUnit = unitB;
+        mergedUnit.customName = unitA.customName;
+        mergedUnit.originalName = unitA.originalName;
         mergedUnit.cost += unitA.cost;
         mergedUnit.size += unitA.size;
         mergedUnit.xp += unitA.xp;
@@ -305,13 +315,8 @@ function processArmyData(rawData) {
           .filter(Boolean)
           .join("; ");
         mergedUnit.traits = [...new Set([...unitB.traits, ...unitA.traits])];
-        // Base size usually determined by one part, often the 'main' part (unitB here)
         mergedUnit.bases = unitB.bases ? { ...unitB.bases } : null;
-
-        // Combine Rules (simple concatenation, duplicates are okay for now)
         mergedUnit.rules = [...unitB.rules, ...unitA.rules];
-
-        // Aggregate Item Counts
         const combinedItemsMap = new Map();
         [...unitB.items, ...unitA.items].forEach((item) => {
           const identifier = item.id || item.label || item.name;
@@ -322,52 +327,38 @@ function processArmyData(rawData) {
             combinedItemsMap.set(identifier, {
               ...item,
               count: item.count || 1,
-            }); // Ensure count exists
+            });
           }
         });
         mergedUnit.items = Array.from(combinedItemsMap.values());
-
-        // Concatenate Loadouts & Models
         mergedUnit.loadout = [...unitB.loadout, ...unitA.loadout];
-        mergedUnit.models = [...unitB.models, ...unitA.models]; // Preserves individual model stats
-
-        // Stats: Assume unitB's Q/D are the primary stats for the combined unit
+        mergedUnit.models = [...unitB.models, ...unitA.models];
         mergedUnit.quality = unitB.quality;
         mergedUnit.defense = unitB.defense;
-        // Update baseStats ref in all merged models
         mergedUnit.models.forEach((model) => {
           model.baseStats = {
             defense: mergedUnit.defense,
             quality: mergedUnit.quality,
           };
-          model.isHero = false; // Combined units are not heroes
+          model.isHero = false;
         });
-
-        // Update flags for the merged unit (unitB)
-        mergedUnit.isCombined = true; // It remains/becomes combined
-        mergedUnit.joinToUnitId = null; // It no longer points anywhere
-        mergedUnit.isHero = false; // Combined units are not Heroes
+        mergedUnit.isCombined = true;
+        mergedUnit.joinToUnitId = null;
+        mergedUnit.isHero = false;
         mergedUnit.canJoinUnitId = null;
-
-        // Mark unitA as having been merged into another unit
         unitsMergedInto.add(unitA.selectionId);
       } else if (!unitB || !unitB.isCombined) {
-        // Handle cases where the target unit doesn't exist or isn't combined
         console.warn(
           `Combined unit ${unitA.customName} (${unitA.selectionId}) points to invalid target ${unitA.joinToUnitId}. Treating as separate.`
         );
-        // Mark unitA as processed so it doesn't get added individually later if it shouldn't be
-        // unitsMergedInto.add(unitA.selectionId); // No, don't add here, let Step 3 handle it
       }
     }
   });
 
   // --- Step 3: Add Final Units to Army ---
-  // Iterate through all initially processed units
   Object.values(tempProcessedUnits).forEach((unit) => {
-    // Add the unit ONLY IF it was NOT merged into another unit
+    /* ... (add final units logic same as V16) ... */
     if (!unitsMergedInto.has(unit.selectionId)) {
-      // Check for duplicates just in case (shouldn't happen with this logic)
       if (!processedArmy.unitMap[unit.selectionId]) {
         processedArmy.units.push(unit);
         processedArmy.unitMap[unit.selectionId] = unit;
@@ -380,12 +371,10 @@ function processArmyData(rawData) {
     (sum, unit) => sum + unit.size,
     0
   );
-  // Activation count should be the number of final units
   processedArmy.meta.activationCount = processedArmy.units.length;
 
-  // console.log("Processed Army Data (v17 - combined fix):", processedArmy);
   return processedArmy;
 }
 
-// Export the function to make it available for import
+// Export the function
 export { processArmyData };
