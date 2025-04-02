@@ -20,29 +20,94 @@
         padding-top: 56px; /* Adjust based on navbar height */
       }
       .unit-card {
-        margin-bottom: 15px; /* Space between cards */
-        /* box-shadow: 0 2px 4px rgba(0,0,0,.1); /* Subtle shadow - handled by bootstrap */
+        margin-bottom: 1rem; /* Consistent spacing */
+        transition: box-shadow 0.2s ease-in-out; /* Add hover effect */
       }
+      /* .unit-card:hover { */
+      /* box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* Bootstrap shadow variable */
+      /* } */
       .stat-icon {
-        /* Basic styling for SVG icons */
         width: 1.1em;
         height: 1.1em;
-        vertical-align: -0.175em; /* Align better with text */
+        vertical-align: -0.175em;
         margin-right: 0.2em;
       }
       .table > :not(caption) > * > * {
-        /* Reduce default table cell padding */
         padding: 0.3rem 0.3rem;
       }
       .card-body strong.d-block {
-        /* Add slight bottom margin to section headers */
         margin-bottom: 0.5rem !important;
       }
       .list-unstyled li {
-        /* Add spacing to item list */
         margin-bottom: 0.25rem !important;
       }
+      .points-badge {
+        font-size: 0.85em;
+      }
+      #army-units-container .spinner-border {
+        width: 3rem;
+        height: 3rem;
+      }
+
+      /* Wound Tracking Styles */
+      .unit-models-grid {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fill,
+          minmax(50px, 1fr)
+        ); /* Responsive grid */
+        gap: 0.5rem;
+        margin-bottom: 0.5rem; /* Space below models */
+      }
+      .model-display {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.25rem;
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: var(--bs-border-radius-sm);
+        background-color: var(--bs-tertiary-bg);
+        transition: opacity 0.3s ease, background-color 0.3s ease;
+      }
+      .model-display.model-removed {
+        opacity: 0.4;
+        /* background-color: var(--bs-secondary-bg); */ /* Maybe too much */
+        text-decoration: line-through;
+      }
+      .model-display.target-model {
+        /* Style for the next model to take a wound */
+        box-shadow: 0 0 0 2px var(--bs-danger);
+        border-color: var(--bs-danger);
+      }
+      .model-icon svg {
+        width: 1.5em;
+        height: 1.5em;
+        margin-bottom: 0.25rem;
+        fill: currentColor; /* Use text color for icons */
+      }
+      .model-hp-bar-container {
+        width: 100%;
+        height: 8px;
+        background-color: var(--bs-secondary-bg);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.25rem;
+      }
+      .model-hp-bar {
+        height: 100%;
+        transition: width 0.3s ease, background-color 0.3s ease;
+      }
+      .model-hp-text {
+        font-size: 0.75em;
+        line-height: 1;
+      }
+      .wound-apply-btn i,
+      .wound-heal-btn i,
+      .wound-reset-btn i {
+        pointer-events: none; /* Ensure clicks go to the button */
+      }
     </style>
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="bg-body text-body">
     <nav
@@ -123,8 +188,11 @@
       <h1 class="mb-4">Loaded Armies</h1>
 
       <div id="army-units-container">
-        <div class="d-flex justify-content-center mt-5">
-          <div class="spinner-border" role="status">
+        <div
+          class="d-flex justify-content-center align-items-center mt-5"
+          style="min-height: 200px"
+        >
+          <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
