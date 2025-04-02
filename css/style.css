@@ -1,63 +1,149 @@
-/* Custom CSS rules for your application */
+/* Custom CSS rules for OPR Army Tracker */
 
+/* Basic Body & Card Styles */
 body {
-  padding-bottom: 50px;
+  padding-top: 56px; /* Navbar height */
+  padding-bottom: 50px; /* Footer spacing */
+}
+.unit-card {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* Prevent content overflow issues */
+}
+.unit-card .card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.stat-icon {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.175em;
+  margin-right: 0.2em;
+  flex-shrink: 0;
+}
+.lg-stat-icon {
+  /* For Effective Stats */
+  width: 1.3em;
+  height: 1.3em;
+  vertical-align: -0.2em;
+  margin-right: 0.3em;
+  flex-shrink: 0;
+}
+.table > :not(caption) > * > * {
+  /* Table cell padding */
+  padding: 0.3rem 0.3rem;
+  font-size: 0.85em;
+  vertical-align: middle;
+}
+.table thead th {
+  /* Table header */
+  font-size: 0.8em;
+  padding: 0.2rem 0.3rem;
+}
+.card-body strong.d-block {
+  /* Section headings */
+  margin-bottom: 0.5rem !important;
+  font-size: 0.9em;
 }
 
-/* Ensure icons inside buttons are vertically aligned */
+/* Card Header */
+.card-header {
+  position: relative; /* For absolute button positioning */
+  padding-right: 5rem; /* Space for absolute buttons */
+}
+.unit-card-header-content {
+  /* Container for title/subtitle */
+  flex-grow: 1;
+  margin-right: 1rem;
+}
+.header-meta-info {
+  /* Container for Models/Points in header */
+  font-size: 0.85em;
+  margin-top: 0.1rem;
+}
+.header-meta-info .info-separator {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+.header-button-group {
+  /* Absolute positioning for wound/reset buttons */
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
 .btn i.bi {
-  vertical-align: -0.125em; /* Adjust as needed */
+  /* Align icons in buttons */
+  vertical-align: -0.125em;
 }
 
-/* Wound Tracking Styles */
+/* Effective Stats Bar */
+.effective-stats {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  background-color: var(--bs-secondary-bg);
+  border-radius: var(--bs-border-radius-sm);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  text-align: center;
+}
+.effective-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9em;
+}
+
+/* Model Grid & Display */
 .unit-models-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(50px, 1fr)
-  ); /* Responsive grid */
+  grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
   gap: 0.5rem;
-  margin-bottom: 0.5rem; /* Space below models */
+  order: 10; /* Force grid to bottom */
 }
 .model-display {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.25rem;
+  padding: 0.3rem;
   border: 1px solid var(--bs-border-color-translucent);
   border-radius: var(--bs-border-radius-sm);
   background-color: var(--bs-tertiary-bg);
-  transition: opacity 0.3s ease, background-color 0.3s ease,
-    box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 .model-display.clickable-model:hover {
-  /* Style for clickable models */
   cursor: pointer;
   background-color: var(--bs-secondary-bg);
-  box-shadow: 0 0 0 2px var(--bs-secondary); /* Highlight on hover */
+  box-shadow: 0 0 0 2px var(--bs-secondary);
 }
 .model-display.model-removed {
   opacity: 0.4;
   text-decoration: line-through;
 }
 .model-display.model-removed.clickable-model:hover {
-  /* Don't highlight removed models on hover */
   cursor: default;
   background-color: var(--bs-tertiary-bg);
   box-shadow: none;
 }
-
 .model-display.target-model {
-  /* Style for the next model to take a wound (auto-target) */
-  box-shadow: 0 0 0 2px var(--bs-warning-subtle);
-  border-color: var(--bs-warning-subtle) !important;
+  /* Auto-target highlight */
+  border-width: 2px;
+  border-color: var(--bs-secondary) !important;
+  box-shadow: none;
+}
+.model-display .hero-icon-color svg {
+  /* Hero icon color */
+  fill: var(--bs-warning);
 }
 .model-icon svg {
   width: 1.5em;
   height: 1.5em;
   margin-bottom: 0.25rem;
   fill: currentColor;
-  pointer-events: none; /* Clicks should go to the parent div */
+  pointer-events: none;
 }
 .model-hp-bar-container {
   width: 100%;
@@ -66,7 +152,7 @@ body {
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 0.25rem;
-  pointer-events: none; /* Clicks should go to the parent div */
+  pointer-events: none;
 }
 .model-hp-bar {
   height: 100%;
@@ -75,10 +161,88 @@ body {
 .model-hp-text {
   font-size: 0.75em;
   line-height: 1;
-  pointer-events: none; /* Clicks should go to the parent div */
+  pointer-events: none;
+}
+.model-name {
+  font-size: 0.7em;
+  line-height: 1.1;
+  margin-top: 0.2rem;
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 .wound-apply-btn i,
-.wound-heal-btn i,
 .wound-reset-btn i {
-  pointer-events: none; /* Ensure clicks go to the button */
+  /* Prevent clicks on icons */
+  pointer-events: none;
+}
+
+/* Sub-sections & Normal Details Container */
+.details-section {
+  margin-bottom: 1rem;
+}
+.sub-section,
+.normal-unit-details {
+  padding: 0.75rem;
+  background-color: var(--bs-tertiary-bg); /* Consistent background */
+  border: 1px solid var(--bs-border-color-translucent); /* Consistent border */
+  border-radius: var(--bs-border-radius); /* Consistent radius */
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.sub-section:last-child {
+  margin-bottom: 0;
+} /* No margin after last sub-section */
+.sub-section h6 {
+  /* Sub-section titles */
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+  font-weight: bold;
+  font-size: 0.95em;
+}
+.sub-stats-row {
+  /* Row for Qua/Def/Tough */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+  justify-content: flex-start;
+  align-items: center;
+}
+.sub-stats-row .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.info-line {
+  /* Row for Pts/XP/Base */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85em;
+}
+.info-line .info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.info-line .xp-badge {
+  font-size: 0.9em;
+}
+.sub-section .table,
+.normal-unit-details .table {
+  margin-top: auto;
+} /* Push table to bottom */
+
+/* Loading Spinner */
+#army-units-container .spinner-border {
+  width: 3rem;
+  height: 3rem;
 }
