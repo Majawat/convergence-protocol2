@@ -3,25 +3,29 @@ import { fetchArmyData } from "./api.js";
 import { processArmyData } from "./dataProcessor.js";
 import { displayArmyUnits, updateModelDisplay } from "./ui.js";
 import { saveWoundState, loadWoundState, resetWoundState } from "./storage.js";
+// NOTE: We will add component state storage later for tokens etc.
 
 // --- Global State ---
-let campaignData = null;
-let armyBooksData = {}; // Will be populated from cache or fetch
-let loadedArmiesData = {};
-let armyWoundStates = {};
+let campaignData = null; // To store loaded campaign info
+let armyBooksData = {}; // To store loaded/cached army book data { factionId: data }
+let commonRulesData = {}; // Stores loaded/cached common rules { gameSystemId: data }
+let loadedArmiesData = {}; // Stores full processed army data for the *currently viewed* army { armyId: processedArmy }
+let armyWoundStates = {}; // Stores wound states { armyId: { unitId: { modelId: currentHp, ... }, ... }, ... }
+// let armyComponentStates = {}; // For tokens etc. (To be added later)
 
 // --- Constants ---
 const ARMY_BOOKS_CACHE_KEY = "oprArmyBooksCache"; // sessionStorage key
+const COMMON_RULES_CACHE_KEY_PREFIX = "oprCommonRulesCache_"; // Prefix + gameSystemId
 
 // --- Data Loading Functions ---
 
 /**
  * Fetches the main campaign data file.
+ * @returns {Promise<object|null>} The parsed campaign data or null on error.
  */
 async function loadCampaignData() {
-  /* ... (same as V15) ... */
   try {
-    const response = await fetch("./data/campaign.json");
+    const response = await fetch("./data/campaign.json"); // Fetch from /data/ folder
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -32,7 +36,9 @@ async function loadCampaignData() {
     console.error("Error loading campaign data:", error);
     const mainContainer = document.getElementById("army-units-container");
     if (mainContainer) {
+      // Clear potential spinner
       mainContainer.innerHTML = "";
+      // Display error directly
       const errorDiv = document.createElement("div");
       errorDiv.className = "col-12";
       errorDiv.innerHTML =
@@ -44,112 +50,265 @@ async function loadCampaignData() {
 }
 
 /**
- * Fetches Army Book data for all unique factions listed in the campaign data,
- * utilizing sessionStorage for caching.
+ * Fetches Army Book data AND Common Rules data, utilizing sessionStorage.
+ * Includes detailed logging for debugging cache issues.
  * @param {object} campaignData - The loaded campaign data.
- * @returns {Promise<object>} An object containing the fetched/cached army book data, keyed by faction ID.
+ * @returns {Promise<{armyBooks: object, commonRules: object}>} Object containing the loaded data.
  */
-async function loadArmyBooks(campaignData) {
-  if (!campaignData || !campaignData.armies) return {};
+async function loadGameData(campaignData) {
+  if (!campaignData || !campaignData.armies)
+    return { armyBooks: {}, commonRules: {} };
 
   let cachedBooks = {};
-  // 1. Try loading from sessionStorage
+  let cachedCommonRules = {};
+
+  // 1. Try loading ALL caches from sessionStorage first
   try {
-    const cachedData = sessionStorage.getItem(ARMY_BOOKS_CACHE_KEY);
-    if (cachedData) {
-      cachedBooks = JSON.parse(cachedData);
-      console.log("Loaded Army Books data from sessionStorage.");
+    const cachedBooksData = sessionStorage.getItem(ARMY_BOOKS_CACHE_KEY);
+    if (cachedBooksData) {
+      cachedBooks = JSON.parse(cachedBooksData) || {}; // Ensure object even if parse fails slightly
+      console.log("Loaded Army Books cache.");
     }
-  } catch (error) {
-    console.warn(
-      "Could not load or parse Army Books data from sessionStorage:",
-      error
-    );
-    cachedBooks = {}; // Start fresh if cache is invalid
+  } catch (e) {
+    console.warn("Could not parse Army Books cache.", e);
+    cachedBooks = {};
   }
 
-  const uniqueFactions = new Map();
+  // Try loading GF rules specifically (assuming only GF system '2' is needed for rules now)
+  const gfRulesKey = COMMON_RULES_CACHE_KEY_PREFIX + "2";
+  try {
+    const cachedGfRules = sessionStorage.getItem(gfRulesKey);
+    if (cachedGfRules) {
+      const parsedRules = JSON.parse(cachedGfRules);
+      // **VALIDATION:** Check if parsed data looks valid before accepting it
+      if (
+        parsedRules &&
+        parsedRules.rules &&
+        Array.isArray(parsedRules.rules)
+      ) {
+        cachedCommonRules["2"] = parsedRules;
+        console.log("Loaded valid GF Common Rules cache.");
+      } else {
+        console.log("Cached GF Common Rules data was invalid or empty.");
+      }
+    } else {
+      console.log("No GF Common Rules found in sessionStorage."); // Added log
+    }
+  } catch (e) {
+    console.warn("Could not parse GF Common Rules cache.", e);
+  }
+
+  const factionsToFetch = new Map();
+  const requiredGameSystems = new Set(); // Identify systems needed for rules (only '2' currently)
+
+  // 2. Determine ALL required factions and game systems from campaign
   campaignData.armies.forEach((army) => {
     if (army.faction) {
       army.faction.forEach((fac) => {
         if (fac.id && fac.gameSystem) {
-          // Only consider factions NOT already in the cache
+          // Check if book needs fetching
           if (!cachedBooks[fac.id]) {
-            if (!uniqueFactions.has(fac.id)) {
-              // Ensure we only queue fetch once
-              uniqueFactions.set(fac.id, fac.gameSystem);
+            if (!factionsToFetch.has(fac.id)) {
+              factionsToFetch.set(fac.id, fac.gameSystem);
             }
           }
+          // Note required game systems for common rules (only GF '2' currently)
+          if (fac.gameSystem === 2) {
+            requiredGameSystems.add(2);
+          }
+          // Add other game systems here if needed later
         }
       });
     }
   });
 
-  if (uniqueFactions.size > 0) {
-    console.log("Factions to fetch:", Array.from(uniqueFactions.keys()));
-    const bookFetchPromises = [];
-    uniqueFactions.forEach((gameSystem, factionId) => {
+  const fetchPromises = [];
+
+  // 3. Queue Army Book fetches for missing ones
+  if (factionsToFetch.size > 0) {
+    console.log("Army Books to fetch:", Array.from(factionsToFetch.keys()));
+    factionsToFetch.forEach((gameSystem, factionId) => {
       const url = `https://army-forge.onepagerules.com/api/army-books/${factionId}?gameSystem=${gameSystem}`;
-      console.log(
-        `Queueing fetch for Army Book: ${factionId} (System: ${gameSystem})`
-      );
-      bookFetchPromises.push(
+      fetchPromises.push(
         fetch(url)
           .then((response) => {
-            if (!response.ok) {
-              throw new Error(
-                `HTTP error! Status: ${response.status} for ${factionId}`
-              );
-            }
+            if (!response.ok)
+              throw new Error(`Book ${factionId}: ${response.status}`);
             return response.json();
           })
-          .then((bookData) => ({ factionId, bookData, status: "fulfilled" }))
+          .then((bookData) => ({
+            type: "book",
+            factionId,
+            bookData,
+            status: "fulfilled",
+          }))
           .catch((error) => {
-            console.error(`Failed to fetch army book ${factionId}:`, error);
-            return { factionId, status: "rejected", reason: error };
+            console.error(`Fetch failed for Book ${factionId}:`, error);
+            return {
+              type: "book",
+              factionId,
+              status: "rejected",
+              reason: error,
+            };
           })
       );
     });
+  } else {
+    console.log("All required Army Books already cached.");
+  }
 
-    const results = await Promise.allSettled(bookFetchPromises);
+  // 4. Queue Common Rules fetches for required systems if missing from VALID cache
+  let fetchedRulesSystems = new Set(); // Track which systems we actually fetched
+  console.log(
+    `[DEBUG] Checking required game systems for rules: ${Array.from(
+      requiredGameSystems
+    )}`
+  );
+  requiredGameSystems.forEach((gsId) => {
+    console.log(`[DEBUG] Processing required system: ${gsId}`);
+    console.log(
+      `[DEBUG] Value of cachedCommonRules[${gsId}]:`,
+      cachedCommonRules[gsId]
+    );
+    // Fetch if not present in the validated cache object
+    if (!cachedCommonRules[gsId]) {
+      console.log(
+        `Common Rules for System ${gsId} not cached or invalid. Queueing fetch.`
+      );
+      const url = `https://army-forge.onepagerules.com/api/rules/common/${gsId}`;
+      fetchPromises.push(
+        fetch(url)
+          .then((response) => {
+            if (!response.ok)
+              throw new Error(`Common Rules ${gsId}: ${response.status}`);
+            return response.json();
+          })
+          .then((rulesData) => ({
+            type: "rules",
+            gameSystemId: gsId,
+            rulesData,
+            status: "fulfilled",
+          }))
+          .catch((error) => {
+            console.error(`Fetch failed for Common Rules ${gsId}:`, error);
+            return {
+              type: "rules",
+              gameSystemId: gsId,
+              status: "rejected",
+              reason: error,
+            };
+          })
+      );
+      fetchedRulesSystems.add(gsId); // Mark that we are attempting to fetch
+    } else {
+      console.log(`Valid Common Rules for System ${gsId} found in cache.`);
+    }
+  });
+  console.log(
+    `[DEBUG] Finished checking required game systems. Promises to run: ${fetchPromises.length}`
+  );
 
-    // Merge newly fetched books into our cache object
+  // 5. Execute all necessary fetches
+  if (fetchPromises.length > 0) {
+    console.log("[DEBUG] Executing fetches...");
+    const results = await Promise.allSettled(fetchPromises);
+    console.log("[DEBUG] Fetches complete. Processing results...");
+
+    // Process results and update in-memory caches
     results.forEach((result) => {
-      if (
-        result.status === "fulfilled" &&
-        result.value.status === "fulfilled"
-      ) {
-        cachedBooks[result.value.factionId] = result.value.bookData; // Add new book to cache object
-        console.log(
-          `Successfully fetched Army Book: ${result.value.factionId}`
-        );
-      } else if (
-        result.status === "fulfilled" &&
-        result.value.status === "rejected"
-      ) {
-        console.warn(
-          `Army Book fetch rejected for ${result.value.factionId}: ${result.value.reason}`
-        );
+      console.log("[DEBUG] Processing fetch result:", result); // Detailed log
+
+      if (result.status === "fulfilled" && result.value) {
+        if (result.value.status === "fulfilled") {
+          if (result.value.type === "book") {
+            cachedBooks[result.value.factionId] = result.value.bookData;
+            console.log(
+              `Successfully fetched Army Book: ${result.value.factionId}`
+            );
+          } else if (result.value.type === "rules") {
+            // **VALIDATION:** Only add if fetched data looks valid
+            if (
+              result.value.rulesData &&
+              result.value.rulesData.rules &&
+              Array.isArray(result.value.rulesData.rules)
+            ) {
+              cachedCommonRules[result.value.gameSystemId] =
+                result.value.rulesData; // Update in-memory cache
+              console.log(
+                `Successfully fetched Common Rules: System ${result.value.gameSystemId}`
+              );
+            } else {
+              console.warn(
+                `Fetched Common Rules for System ${result.value.gameSystemId} appear invalid. Data:`,
+                result.value.rulesData
+              );
+              fetchedRulesSystems.delete(result.value.gameSystemId); // Don't try to save invalid data
+            }
+          }
+        } else {
+          console.warn(
+            `[DEBUG] Fetch promise fulfilled but inner status rejected:`,
+            result.value
+          );
+          if (result.value.type === "rules")
+            fetchedRulesSystems.delete(result.value.gameSystemId); // Don't save if fetch failed internally
+        }
+      } else if (result.status === "rejected") {
+        console.error(`[DEBUG] Fetch promise rejected:`, result.reason);
+        // Need to know if this was a rules fetch to avoid trying to save it
+        // This requires parsing the reason or adding more info to the promise chain, complex.
+        // For now, we rely on fetchedRulesSystems only containing *attempted* fetches.
       }
     });
 
-    // 3. Save updated cache to sessionStorage
+    // 6. Save updated caches to sessionStorage
     try {
-      sessionStorage.setItem(ARMY_BOOKS_CACHE_KEY, JSON.stringify(cachedBooks));
-      console.log("Updated Army Books cache in sessionStorage.");
+      if (factionsToFetch.size > 0) {
+        sessionStorage.setItem(
+          ARMY_BOOKS_CACHE_KEY,
+          JSON.stringify(cachedBooks)
+        );
+        console.log("Updated Army Books cache in sessionStorage.");
+      }
+      fetchedRulesSystems.forEach((gsId) => {
+        // Save only if we successfully fetched and validated the data (i.e., it exists in cachedCommonRules now)
+        if (cachedCommonRules[gsId] && cachedCommonRules[gsId].rules) {
+          sessionStorage.setItem(
+            COMMON_RULES_CACHE_KEY_PREFIX + gsId,
+            JSON.stringify(cachedCommonRules[gsId])
+          );
+          console.log(
+            `Updated Common Rules cache for System ${gsId} in sessionStorage.`
+          );
+        } else {
+          console.log(
+            `[DEBUG] Skipping saving rules cache for System ${gsId} as data is missing or invalid in memory.`
+          );
+        }
+      });
     } catch (error) {
-      console.error("Error saving Army Books cache to sessionStorage:", error);
+      console.error("Error saving data cache to sessionStorage:", error);
     }
   } else {
-    console.log("All required Army Books found in sessionStorage cache.");
+    console.log("[DEBUG] No fetches needed (all data cached).");
   }
 
-  return cachedBooks; // Return the complete set (cached + newly fetched)
+  // 7. Return the complete data
+  console.log(
+    "[DEBUG] Returning from loadGameData. Common Rules object:",
+    cachedCommonRules
+  );
+  return { armyBooks: cachedBooks, commonRules: cachedCommonRules };
 }
 
-// --- Wound Allocation Logic --- (Same as V14)
+// --- Wound Allocation Logic ---
+/**
+ * Finds the next model in the combined unit (base + hero) to apply a wound to automatically.
+ * @param {object} baseUnit - The processed base unit data object.
+ * @param {object | null} heroUnit - The processed hero unit data object, if joined.
+ * @returns {object | null} The model object to wound, or null if none available.
+ */
 function findTargetModelForWound(baseUnit, heroUnit = null) {
-  /* ... */
   if (!baseUnit || !baseUnit.models) return null;
   const combinedModels = heroUnit
     ? [...baseUnit.models, ...heroUnit.models]
@@ -175,14 +334,16 @@ function findTargetModelForWound(baseUnit, heroUnit = null) {
   }
   return null;
 }
+
+/** Updates the global wound state object used for saving. */
 function updateGlobalWoundState(armyId, unitId, modelId, currentHp) {
-  /* ... */
   if (!armyWoundStates[armyId]) armyWoundStates[armyId] = {};
   if (!armyWoundStates[armyId][unitId]) armyWoundStates[armyId][unitId] = {};
   armyWoundStates[armyId][unitId][modelId] = currentHp;
 }
+
+/** Removes the highlight from any previously targeted model in a unit card. */
 function clearTargetHighlight(unitSelectionId) {
-  /* ... */
   const card = document.getElementById(`unit-card-${unitSelectionId}`);
   if (!card) return;
   const highlighted = card.querySelector(".model-display.target-model");
@@ -190,8 +351,9 @@ function clearTargetHighlight(unitSelectionId) {
     highlighted.classList.remove("target-model");
   }
 }
+
+/** Adds a highlight to the next model that will take a wound (auto-target). */
 function highlightNextAutoTargetModel(unitSelectionId, modelId) {
-  /* ... */
   clearTargetHighlight(unitSelectionId);
   if (!modelId) return;
   const modelElement = document.querySelector(`[data-model-id="${modelId}"]`);
@@ -202,14 +364,19 @@ function highlightNextAutoTargetModel(unitSelectionId, modelId) {
     modelElement.classList.add("target-model");
   }
 }
+
+/** Applies a wound to a specific model or uses auto-target logic. */
 function applyWound(armyId, unitId, specificModelId = null) {
-  /* ... (same as V14) ... */
   const armyData = loadedArmiesData[armyId];
   if (!armyData) {
+    console.error(`Army data not found for applyWound: army ${armyId}`);
     return;
   }
-  const unitData = armyData.unitMap[unitId];
+  const unitData = armyData.unitMap[unitId]; // Base unit data
   if (!unitData) {
+    console.error(
+      `Base unit data not found for applyWound: army ${armyId}, unit ${unitId}`
+    );
     return;
   }
   const heroId = Object.keys(armyData.heroJoinTargets).find(
@@ -218,7 +385,9 @@ function applyWound(armyId, unitId, specificModelId = null) {
   const heroData = heroId ? armyData.unitMap[heroId] : null;
   let targetModel = null;
   let modelFoundInUnitId = null;
+
   if (specificModelId) {
+    // Manual target
     targetModel = unitData.models.find((m) => m.modelId === specificModelId);
     if (targetModel) {
       modelFoundInUnitId = unitId;
@@ -229,15 +398,18 @@ function applyWound(armyId, unitId, specificModelId = null) {
       }
     }
     if (targetModel && targetModel.currentHp <= 0) {
+      console.log(`Model ${specificModelId} is already removed.`);
       targetModel = null;
       modelFoundInUnitId = null;
     }
   } else {
+    // Auto target
     targetModel = findTargetModelForWound(unitData, heroData);
     if (targetModel) {
       modelFoundInUnitId = targetModel.isHero ? heroId : unitId;
     }
   }
+
   if (targetModel && modelFoundInUnitId) {
     targetModel.currentHp -= 1;
     updateGlobalWoundState(
@@ -267,21 +439,25 @@ function applyWound(armyId, unitId, specificModelId = null) {
 }
 
 // --- Event Handlers ---
+/** Handles clicks within the army units container */
 function handleUnitInteractionClick(event) {
-  /* ... (same as V14) ... */
   const unitCard = event.target.closest(".unit-card");
   if (!unitCard) return;
   const unitId = unitCard.dataset.unitId;
   const armyId = unitCard.dataset.armyId;
   const clickedModelElement = event.target.closest(".clickable-model");
+
   if (clickedModelElement && event.type === "click") {
+    // Apply wound on model click
     const modelId = clickedModelElement.dataset.modelId;
     applyWound(armyId, unitId, modelId);
     return;
   }
   if (event.target.closest(".wound-apply-btn")) {
+    // Apply wound via button
     applyWound(armyId, unitId, null);
   } else if (event.target.closest(".wound-reset-btn")) {
+    // Reset wounds
     const armyData = loadedArmiesData[armyId];
     if (!armyData) return;
     const unitData = armyData.unitMap[unitId];
@@ -317,7 +493,6 @@ function handleUnitInteractionClick(event) {
 
 /** Displays army selection list */
 function displayArmySelection(armies, container) {
-  /* ... (same as V14) ... */
   container.innerHTML = "";
   const prompt = document.createElement("div");
   prompt.className = "col-12 text-center mb-4";
@@ -350,7 +525,6 @@ function displayArmySelection(armies, container) {
 
 /** Populates the Army Info Modal */
 function populateArmyInfoModal(armyInfo) {
-  /* ... (same as V14) ... */
   if (!armyInfo) return;
   const modalLabel = document.getElementById("armyInfoModalLabel");
   const img = document.getElementById("armyInfoImage");
@@ -394,15 +568,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   mainListContainer.innerHTML =
     '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading Campaign...</span></div></div></div>';
 
+  // 1. Load Campaign Data
   campaignData = await loadCampaignData();
   if (!campaignData) return;
 
+  // 2. Determine Army to Load
   const urlParams = new URLSearchParams(window.location.search);
   const armyIdToLoad = urlParams.get("armyId");
   const armyInfo = armyIdToLoad
     ? campaignData.armies.find((a) => a.armyForgeID === armyIdToLoad)
     : null;
 
+  // 3. Display Selection or Load Data
   if (!armyIdToLoad || !armyInfo) {
     displayArmySelection(campaignData.armies, mainListContainer);
     document.title = "Select Army - OPR Army Tracker";
@@ -412,24 +589,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  console.log(`Valid armyId found: ${armyIdToLoad}. Loading data...`);
+  // --- Valid armyId found ---
+  console.log(`Valid armyId found: ${armyIdToLoad}. Loading game data...`);
   mainListContainer.innerHTML =
-    '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading Data...</span></div></div></div>';
+    '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading Game Data...</span></div></div></div>';
   titleH1.textContent = `Loading ${armyInfo.armyName}...`;
 
-  // Load Army Books (using cache)
-  armyBooksData = await loadArmyBooks(campaignData);
+  // 4. Load Army Books AND Common Rules (using cache)
+  const gameData = await loadGameData(campaignData);
+  armyBooksData = gameData.armyBooks;
+  commonRulesData = gameData.commonRules;
+  console.log("Common Rules Loaded (Global):", commonRulesData);
 
-  // Load persisted states
+  // 5. Load persisted states
   armyWoundStates = loadWoundState() || {};
 
-  // Fetch and Process Army Data
+  // 6. Fetch and Process Army Data
   mainListContainer.innerHTML = "";
   loadedArmiesData = {};
 
   try {
+    console.log(`Fetching Army List data for ${armyIdToLoad}...`);
     const rawData = await fetchArmyData(armyIdToLoad);
     if (rawData) {
+      console.log(`Processing Army List data for ${armyIdToLoad}...`);
       const processedArmy = processArmyData(rawData);
       if (processedArmy) {
         loadedArmiesData[armyIdToLoad] = processedArmy;
@@ -456,6 +639,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.title = `${armyInfo.armyName} - OPR Army Tracker`;
         titleH1.textContent = armyInfo.armyName;
         populateArmyInfoModal(armyInfo);
+        console.log(`Displaying units for ${armyIdToLoad}...`);
         displayArmyUnits(processedArmy, mainListContainer);
         // Highlight initial targets...
         processedArmy.units
@@ -479,12 +663,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         mainListContainer.addEventListener("click", handleUnitInteractionClick);
       } else {
-        /* Error processing */
+        /* Error processing */ mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">Error processing data for ${armyInfo.armyName}.</div></div>`;
+        titleH1.textContent = "Error";
       }
     } else {
-      /* Error fetching army list */
+      /* Error fetching army list */ mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning m-4" role="alert">Could not load army list data for ${armyInfo.armyName} (ID: ${armyIdToLoad}).</div></div>`;
+      titleH1.textContent = "Error";
     }
   } catch (error) {
-    /* Catch all */
+    /* Catch all */ console.error(
+      `An error occurred loading/processing army ${armyIdToLoad}:`,
+      error
+    );
+    mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">An unexpected error occurred loading army ${armyIdToLoad}. Check console.</div></div>`;
+    titleH1.textContent = "Error";
   }
 }); // End DOMContentLoaded
