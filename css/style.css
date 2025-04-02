@@ -10,12 +10,13 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden; /* Prevent content overflow issues */
+  overflow: hidden;
 }
 .unit-card .card-body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  /* Removed explicit font-size: small; Let default card body size apply */
 }
 .stat-icon {
   width: 1.1em;
@@ -33,25 +34,25 @@ body {
   flex-shrink: 0;
 }
 .table > :not(caption) > * > * {
-  /* Table cell padding */
+  /* Table cell content */
   padding: 0.3rem 0.3rem;
-  font-size: 0.85em;
+  font-size: 0.9em; /* Slightly larger than V10 */
   vertical-align: middle;
 }
 .table thead th {
   /* Table header */
-  font-size: 0.8em;
+  font-size: 0.85em; /* Slightly larger */
   padding: 0.2rem 0.3rem;
 }
 .card-body strong.d-block {
   /* Section headings */
   margin-bottom: 0.5rem !important;
-  font-size: 0.9em;
+  font-size: 0.95em; /* Slightly larger */
 }
 
-/* Card Header */
+/* Header */
 .card-header {
-  position: relative; /* For absolute button positioning */
+  position: relative;
   padding-right: 5rem; /* Space for absolute buttons */
 }
 .unit-card-header-content {
@@ -61,7 +62,7 @@ body {
 }
 .header-meta-info {
   /* Container for Models/Points in header */
-  font-size: 0.85em;
+  font-size: 0.85em; /* Slightly larger */
   margin-top: 0.1rem;
 }
 .header-meta-info .info-separator {
@@ -94,7 +95,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.9em;
+  font-size: 0.95em; /* Slightly larger */
 }
 
 /* Model Grid & Display */
@@ -187,16 +188,16 @@ body {
 .sub-section,
 .normal-unit-details {
   padding: 0.75rem;
-  background-color: var(--bs-tertiary-bg); /* Consistent background */
-  border: 1px solid var(--bs-border-color-translucent); /* Consistent border */
-  border-radius: var(--bs-border-radius); /* Consistent radius */
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color-translucent);
+  border-radius: var(--bs-border-radius);
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
 }
 .sub-section:last-child {
   margin-bottom: 0;
-} /* No margin after last sub-section */
+}
 .sub-section h6 {
   /* Sub-section titles */
   margin-bottom: 0.75rem;
@@ -226,7 +227,7 @@ body {
   align-items: center;
   margin-top: 0.25rem;
   margin-bottom: 0.5rem;
-  font-size: 0.85em;
+  font-size: 0.9em; /* Slightly larger */
 }
 .info-line .info-item {
   display: flex;

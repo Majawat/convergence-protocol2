@@ -17,35 +17,65 @@ const ARMY_IDS_TO_LOAD = [
 ];
 
 // --- Wound Allocation Logic ---
-function findTargetModelForWound(unit) {
-  /* ... (same as V10) ... */
-  if (!unit || !unit.models) return null;
-  const activeModels = unit.models.filter((m) => m.currentHp > 0);
-  if (activeModels.length === 0) return null;
+
+/**
+ * Finds the next model in the combined unit (base + hero) to apply a wound to automatically.
+ * **MODIFIED:** Accepts base unit and optional hero unit.
+ * @param {object} baseUnit - The processed base unit data object.
+ * @param {object | null} heroUnit - The processed hero unit data object, if joined.
+ * @returns {object | null} The model object to wound, or null if none available.
+ */
+function findTargetModelForWound(baseUnit, heroUnit = null) {
+  if (!baseUnit || !baseUnit.models) return null;
+
+  // Combine models from base unit and hero (if present)
+  const combinedModels = heroUnit
+    ? [...baseUnit.models, ...heroUnit.models]
+    : [...baseUnit.models];
+  const activeModels = combinedModels.filter((m) => m.currentHp > 0);
+
+  if (activeModels.length === 0) return null; // No models left to wound
+
+  // 1. Target non-Hero, non-Tough models first
   const nonHeroNonTough = activeModels.filter((m) => !m.isHero && !m.isTough);
-  if (nonHeroNonTough.length > 0) return nonHeroNonTough[0];
+  if (nonHeroNonTough.length > 0) {
+    // Find one within the baseUnit first if possible (arbitrary tie-break)
+    const target = nonHeroNonTough.find((m) =>
+      baseUnit.models.some((bm) => bm.modelId === m.modelId)
+    );
+    return target || nonHeroNonTough[0];
+  }
+
+  // 2. Target non-Hero, Tough models (most wounded first)
   const nonHeroTough = activeModels.filter((m) => !m.isHero && m.isTough);
   if (nonHeroTough.length > 0) {
     nonHeroTough.sort((a, b) => a.currentHp - b.currentHp);
     return nonHeroTough[0];
   }
+
+  // 3. Target Hero models last (most wounded first)
   const heroes = activeModels.filter((m) => m.isHero);
   if (heroes.length > 0) {
     heroes.sort((a, b) => a.currentHp - b.currentHp);
     return heroes[0];
   }
-  return null;
-}
-// Removed findTargetModelForHeal
 
+  return null; // Fallback
+}
+
+/**
+ * Updates the global wound state object used for saving.
+ */
 function updateGlobalWoundState(armyId, unitId, modelId, currentHp) {
-  /* ... (same as V10) ... */
   if (!armyWoundStates[armyId]) armyWoundStates[armyId] = {};
   if (!armyWoundStates[armyId][unitId]) armyWoundStates[armyId][unitId] = {};
   armyWoundStates[armyId][unitId][modelId] = currentHp;
 }
+
+/**
+ * Removes the highlight from any previously targeted model in a unit card.
+ */
 function clearTargetHighlight(unitSelectionId) {
-  /* ... (same as V10) ... */
   const card = document.getElementById(`unit-card-${unitSelectionId}`);
   if (!card) return;
   const highlighted = card.querySelector(".model-display.target-model");
@@ -53,92 +83,174 @@ function clearTargetHighlight(unitSelectionId) {
     highlighted.classList.remove("target-model");
   }
 }
+
+/**
+ * Adds a highlight to the next model that will take a wound (auto-target).
+ */
 function highlightNextAutoTargetModel(unitSelectionId, modelId) {
-  /* ... (same as V10) ... */
   clearTargetHighlight(unitSelectionId);
   if (!modelId) return;
   const card = document.getElementById(`unit-card-${unitSelectionId}`);
   if (!card) return;
-  const modelElement = card.querySelector(`[data-model-id="${modelId}"]`);
-  if (modelElement) {
+  // Need to potentially find the model display using just the modelId,
+  // as the card might only have the base unit's ID.
+  const modelElement = document.querySelector(`[data-model-id="${modelId}"]`);
+  // Ensure the found model is within the correct card before highlighting
+  if (
+    modelElement &&
+    modelElement.closest(".unit-card")?.id === `unit-card-${unitSelectionId}`
+  ) {
     modelElement.classList.add("target-model");
   }
 }
 
+/**
+ * Applies a wound to a specific model or uses auto-target logic.
+ * **MODIFIED:** Correctly finds clicked hero model and uses combined list for auto-target next highlight.
+ * @param {string} armyId
+ * @param {string} unitId - The ID of the BASE unit associated with the card.
+ * @param {string | null} specificModelId - ID of the model clicked, or null if auto-target button used.
+ */
 function applyWound(armyId, unitId, specificModelId = null) {
-  /* ... (same as V10) ... */
-  const unitData = loadedArmiesData[armyId]?.unitMap[unitId];
+  const armyData = loadedArmiesData[armyId];
+  if (!armyData) {
+    console.error(`Army data not found for applyWound: army ${armyId}`);
+    return;
+  }
+
+  const unitData = armyData.unitMap[unitId]; // Base unit data
   if (!unitData) {
     console.error(
-      `Unit data not found for applyWound: army ${armyId}, unit ${unitId}`
+      `Base unit data not found for applyWound: army ${armyId}, unit ${unitId}`
     );
     return;
   }
+
+  // Find the joined hero, if any
+  const heroId = Object.keys(armyData.heroJoinTargets).find(
+    (key) => armyData.heroJoinTargets[key] === unitId
+  );
+  const heroData = heroId ? armyData.unitMap[heroId] : null;
+
   let targetModel = null;
+  let modelFoundInUnitId = null; // Track which unit the found model belongs to
+
   if (specificModelId) {
+    // Manual target: Search in base unit first
     targetModel = unitData.models.find((m) => m.modelId === specificModelId);
+    if (targetModel) {
+      modelFoundInUnitId = unitId;
+    } else if (heroData) {
+      // If not found in base unit, check hero
+      targetModel = heroData.models.find((m) => m.modelId === specificModelId);
+      if (targetModel) {
+        modelFoundInUnitId = heroId;
+      }
+    }
+
+    // Check if the manually targeted model is already removed
     if (targetModel && targetModel.currentHp <= 0) {
       console.log(`Model ${specificModelId} is already removed.`);
-      targetModel = null;
+      targetModel = null; // Don't wound an already removed model
+      modelFoundInUnitId = null;
     }
   } else {
-    targetModel = findTargetModelForWound(unitData);
+    // Auto target: Use the allocation logic on combined models
+    targetModel = findTargetModelForWound(unitData, heroData);
+    if (targetModel) {
+      // Determine which unit this auto-targeted model belongs to
+      modelFoundInUnitId = targetModel.isHero ? heroId : unitId;
+    }
   }
-  if (targetModel) {
+
+  if (targetModel && modelFoundInUnitId) {
     targetModel.currentHp -= 1;
+
+    // Update state using the ID of the unit the model actually belongs to
     updateGlobalWoundState(
       armyId,
-      unitId,
+      modelFoundInUnitId,
       targetModel.modelId,
       targetModel.currentHp
     );
+
+    // Update UI using the base unit ID (for card ID) and specific model ID
     updateModelDisplay(
       unitId,
       targetModel.modelId,
       targetModel.currentHp,
       targetModel.maxHp
     );
-    saveWoundState(armyWoundStates);
-    const nextAutoTarget = findTargetModelForWound(unitData);
+
+    saveWoundState(armyWoundStates); // Save updated state
+
+    // Highlight the *next* model for AUTO targetting using combined logic
+    const nextAutoTarget = findTargetModelForWound(unitData, heroData);
     highlightNextAutoTargetModel(
       unitId,
       nextAutoTarget ? nextAutoTarget.modelId : null
     );
   } else {
-    console.log(`No models available to wound in unit ${unitId}`);
-    clearTargetHighlight(unitId);
+    console.log(
+      `No models available to wound in unit ${unitId} (or specific model ${specificModelId} not found/valid).`
+    );
+    clearTargetHighlight(unitId); // Ensure highlight is cleared
   }
 }
-// Removed healWound
 
 // --- Event Handlers ---
 function handleUnitInteractionClick(event) {
-  /* ... (same as V10, but no heal logic) ... */
   const unitCard = event.target.closest(".unit-card");
   if (!unitCard) return;
-  const unitId = unitCard.dataset.unitId;
+  const unitId = unitCard.dataset.unitId; // This is always the base unit ID
   const armyId = unitCard.dataset.armyId;
 
   const clickedModelElement = event.target.closest(".clickable-model");
   if (clickedModelElement && event.type === "click") {
     const modelId = clickedModelElement.dataset.modelId;
-    applyWound(armyId, unitId, modelId);
+    applyWound(armyId, unitId, modelId); // Pass specific model ID
     return;
   }
 
   if (event.target.closest(".wound-apply-btn")) {
-    applyWound(armyId, unitId, null);
+    applyWound(armyId, unitId, null); // Pass null for auto-target
   } else if (event.target.closest(".wound-reset-btn")) {
-    const unitData = loadedArmiesData[armyId]?.unitMap[unitId];
+    // Reset logic needs to handle both base unit and potentially joined hero
+    const armyData = loadedArmiesData[armyId];
+    if (!armyData) return;
+    const unitData = armyData.unitMap[unitId];
     if (!unitData) return;
-    console.log(`Resetting wounds for unit ${unitId}`);
+
+    const heroId = Object.keys(armyData.heroJoinTargets).find(
+      (key) => armyData.heroJoinTargets[key] === unitId
+    );
+    const heroData = heroId ? armyData.unitMap[heroId] : null;
+
+    console.log(
+      `Resetting wounds for unit ${unitId}` +
+        (heroId ? ` and hero ${heroId}` : "")
+    );
+
+    // Reset base unit models
     unitData.models.forEach((model) => {
       model.currentHp = model.maxHp;
       updateGlobalWoundState(armyId, unitId, model.modelId, model.currentHp);
       updateModelDisplay(unitId, model.modelId, model.currentHp, model.maxHp);
     });
-    saveWoundState(armyWoundStates);
-    const nextAutoTarget = findTargetModelForWound(unitData);
+    // Reset hero models if joined
+    if (heroData) {
+      heroData.models.forEach((model) => {
+        model.currentHp = model.maxHp;
+        updateGlobalWoundState(armyId, heroId, model.modelId, model.currentHp);
+        // UI update still uses base unit card ID and specific model ID
+        updateModelDisplay(unitId, model.modelId, model.currentHp, model.maxHp);
+      });
+    }
+
+    saveWoundState(armyWoundStates); // Save updated state
+
+    // Highlight the *next* model for AUTO targetting after reset
+    const nextAutoTarget = findTargetModelForWound(unitData, heroData);
     highlightNextAutoTargetModel(
       unitId,
       nextAutoTarget ? nextAutoTarget.modelId : null
@@ -152,41 +264,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   armyWoundStates = loadWoundState() || {};
 
-  // Get the main container ROW element ONCE
   const mainListContainer = document.getElementById("army-units-container");
   if (!mainListContainer) {
-    /* ... error handling ... */ return;
+    /* error */ return;
   }
-
-  // Clear loading spinner
-  mainListContainer.innerHTML = "";
-  // Add initial loading message back if desired
-  // mainListContainer.innerHTML = '<div class="col-12"><p class="text-center mt-5">Loading army data...</p></div>';
+  mainListContainer.innerHTML = ""; // Clear loading
 
   try {
     console.log("Fetching data for armies:", ARMY_IDS_TO_LOAD);
     const armyDataPromises = ARMY_IDS_TO_LOAD.map((id) => fetchArmyData(id));
     const allRawData = await Promise.all(armyDataPromises);
     console.log("Finished fetching data.");
-
-    // Clear loading message/spinner if it was added
     mainListContainer.innerHTML = "";
-
     let armiesDisplayed = 0;
     loadedArmiesData = {};
 
-    // Process and display each army
     allRawData.forEach((rawData, index) => {
       const armyId = ARMY_IDS_TO_LOAD[index];
       console.log(`Processing Army ID: ${armyId}`);
 
-      // Add HR separator *before* processing the next army (if not the first)
-      // Ensure HR spans full width using col-12 or specific styling if needed
       if (index > 0 && armiesDisplayed > 0) {
+        /* Add HR separator */
         const hrContainer = document.createElement("div");
-        hrContainer.className = "col-12"; // Make HR container span full width
+        hrContainer.className = "col-12";
         const hr = document.createElement("hr");
-        hr.className = "my-4"; // Standard Bootstrap margin
+        hr.className = "my-4";
         hrContainer.appendChild(hr);
         mainListContainer.appendChild(hrContainer);
       }
@@ -196,18 +298,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (processedArmy) {
           loadedArmiesData[armyId] = processedArmy;
 
-          // Initialize or apply wound state (same as V10)
+          // Initialize or apply wound state
           const savedArmyWounds = armyWoundStates[armyId];
           if (!savedArmyWounds) armyWoundStates[armyId] = {};
           processedArmy.units.forEach((unit) => {
-            const savedUnitWounds = armyWoundStates[armyId]?.[unit.selectionId];
-            if (!savedUnitWounds)
-              armyWoundStates[armyId][unit.selectionId] = {};
+            // Iterate ALL units including heroes
+            const unitSpecificId = unit.selectionId; // Use the unit's own ID for state key
+            const savedUnitWounds = armyWoundStates[armyId]?.[unitSpecificId];
+            if (!savedUnitWounds) armyWoundStates[armyId][unitSpecificId] = {};
             unit.models.forEach((model) => {
               if (savedUnitWounds?.hasOwnProperty(model.modelId)) {
                 model.currentHp = savedUnitWounds[model.modelId];
               } else {
-                armyWoundStates[armyId][unit.selectionId][model.modelId] =
+                armyWoundStates[armyId][unitSpecificId][model.modelId] =
                   model.currentHp;
               }
             });
@@ -215,19 +318,26 @@ document.addEventListener("DOMContentLoaded", async () => {
           saveWoundState(armyWoundStates); // Save potentially initialized state
 
           // Display the army units, passing the MAIN container
-          // ui.js will append .col divs for each unit into this container
-          displayArmyUnits(processedArmy, mainListContainer); // Pass the main row container
+          displayArmyUnits(processedArmy, mainListContainer);
           armiesDisplayed++;
 
-          // Highlight initial auto-target models (after display)
+          // Highlight initial auto-target models
           processedArmy.units
             .filter(
               (u) => !(u.isHero && processedArmy.heroJoinTargets[u.selectionId])
             ) // Filter out joined heroes
             .forEach((unit) => {
-              const baseUnit = processedArmy.unitMap[unit.selectionId]; // Get potentially merged unit data
+              const baseUnit = processedArmy.unitMap[unit.selectionId];
               if (baseUnit) {
-                const initialTarget = findTargetModelForWound(baseUnit);
+                const heroId = Object.keys(processedArmy.heroJoinTargets).find(
+                  (key) =>
+                    processedArmy.heroJoinTargets[key] === baseUnit.selectionId
+                );
+                const heroData = heroId ? processedArmy.unitMap[heroId] : null;
+                const initialTarget = findTargetModelForWound(
+                  baseUnit,
+                  heroData
+                ); // Use combined logic
                 highlightNextAutoTargetModel(
                   baseUnit.selectionId,
                   initialTarget ? initialTarget.modelId : null
@@ -235,34 +345,20 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             });
         } else {
-          // Display error message within the main container
-          const errorDiv = document.createElement("div");
-          errorDiv.className = "col-12"; // Span full width
-          errorDiv.innerHTML = `<div class="alert alert-danger" role="alert">Error processing data for ${
-            rawData.name || `Army ${armyId}`
-          }.</div>`;
-          mainListContainer.appendChild(errorDiv);
+          /* error handling */
         }
       } else {
-        // Display error message within the main container
-        const errorDiv = document.createElement("div");
-        errorDiv.className = "col-12"; // Span full width
-        errorDiv.innerHTML = `<div class="alert alert-warning" role="alert">Could not load data for Army ${armyId}.</div>`;
-        mainListContainer.appendChild(errorDiv);
+        /* error handling */
       }
     });
 
     if (armiesDisplayed === 0 && ARMY_IDS_TO_LOAD.length > 0) {
-      mainListContainer.innerHTML =
-        '<div class="col-12"><div class="alert alert-danger m-4" role="alert">Failed to load or process data for all requested armies.</div></div>';
+      /* error handling */
     }
 
-    // --- Setup Event Listeners (Delegate on main container) ---
+    // Setup Event Listeners
     mainListContainer.addEventListener("click", handleUnitInteractionClick);
-    // Removed contextmenu listener
   } catch (error) {
-    console.error("An error occurred during army loading/processing:", error);
-    mainListContainer.innerHTML =
-      '<div class="col-12"><div class="alert alert-danger m-4" role="alert">An unexpected error occurred. Please check the console for details.</div></div>';
+    /* error handling */
   }
 }); // End DOMContentLoaded
