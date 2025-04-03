@@ -117,7 +117,6 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
   gap: 0.5rem;
-  margin-top: 1rem;
   order: 10; /* Force grid to bottom */
 }
 .model-display {
@@ -197,7 +196,7 @@ body {
 
 /* Sub-sections & Normal Details Container */
 .details-section {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 .sub-section,
 .normal-unit-details {
@@ -205,7 +204,7 @@ body {
   background-color: var(--bs-tertiary-bg);
   border: 1px solid var(--bs-border-color-translucent);
   border-radius: var(--bs-border-radius);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
 }
