@@ -5,7 +5,7 @@
  */
 
 // Imports from other modules
-import { config } from "./config.js";
+import { config, STAT_ICONS } from "./config.js";
 import {
   getLoadedArmyData,
   getUnitData,
@@ -21,7 +21,7 @@ import {
 import { saveWoundState, saveComponentState } from "./storage.js";
 import { findTargetModelForWound } from "./gameLogic.js";
 import { updateModelDisplay, updateTokenDisplay } from "./ui.js";
-import { showToast, populateAndShowSpellModal } from "./uiHelpers.js";
+import { showToast, populateAndShowSpellModal } from "./uiHelpers.js"; // showToast is already imported
 
 // --- Internal Helper Functions ---
 
@@ -49,16 +49,12 @@ function _highlightNextAutoTargetModel(unitSelectionId, modelId) {
   _clearTargetHighlight(unitSelectionId); // Clear previous highlight first
   if (!modelId) return; // If no model ID, just clear
 
-  // Find the model element using its unique ID
   const modelElement = document.querySelector(`[data-model-id="${modelId}"]`);
-
-  // Ensure the found model is within the correct card before highlighting
   if (
     modelElement &&
     modelElement.closest(".unit-card")?.id === `unit-card-${unitSelectionId}`
   ) {
     modelElement.classList.add("target-model");
-    // console.log(`Highlighting model ${modelId} on card ${unitSelectionId}`);
   } else {
     console.warn(
       `Could not find model ${modelId} within card ${unitSelectionId} to highlight.`
@@ -75,19 +71,14 @@ function _highlightNextAutoTargetModel(unitSelectionId, modelId) {
  */
 function _findActualCaster(armyId, cardUnitId) {
   const unitData = getUnitData(armyId, cardUnitId);
-  // This check might be redundant if cardUnitId always refers to a base unit,
-  // but it's safer to handle the case where the card ID *could* be a hero ID directly.
   if (unitData?.casterLevel > 0) {
     return unitData;
   }
-
-  // If the base unit isn't the caster, check for a joined hero
   const heroData = getJoinedHeroData(armyId, cardUnitId);
   if (heroData?.casterLevel > 0) {
     return heroData;
   }
-
-  return null; // No caster found for this card
+  return null;
 }
 
 // --- Action Functions ---
@@ -101,93 +92,64 @@ function _findActualCaster(armyId, cardUnitId) {
  */
 function applyWound(armyId, cardUnitId, specificModelId = null) {
   const armyData = getLoadedArmyData(armyId);
-  if (!armyData) {
-    console.error(`Army data not found for applyWound: army ${armyId}`);
-    return;
-  }
-  const baseUnitData = getUnitData(armyId, cardUnitId); // Get base unit data from the card
-  if (!baseUnitData) {
-    console.error(
-      `Base unit data not found for applyWound: army ${armyId}, unit ${cardUnitId}`
-    );
-    return;
-  }
-  const heroData = getJoinedHeroData(armyId, cardUnitId); // Get joined hero data, if any
+  if (!armyData) return;
+  const baseUnitData = getUnitData(armyId, cardUnitId);
+  if (!baseUnitData) return;
+  const heroData = getJoinedHeroData(armyId, cardUnitId);
 
   let targetModel = null;
-  let modelUnitId = null; // The actual selectionId of the unit the target model belongs to
+  let modelUnitId = null;
 
   if (specificModelId) {
-    // --- Manual Targeting ---
-    // Search in base unit first
     targetModel = baseUnitData.models.find(
       (m) => m.modelId === specificModelId
     );
     if (targetModel) {
-      modelUnitId = cardUnitId; // Model found in the base unit
-    }
-    // If not found in base unit, check hero (if hero exists)
-    else if (heroData) {
+      modelUnitId = cardUnitId;
+    } else if (heroData) {
       targetModel = heroData.models.find((m) => m.modelId === specificModelId);
       if (targetModel) {
-        modelUnitId = heroData.selectionId; // Model found in the hero unit
+        modelUnitId = heroData.selectionId;
       }
     }
 
-    // Check if the manually targeted model is already removed (HP <= 0)
     if (targetModel && targetModel.currentHp <= 0) {
-      console.log(`Model ${specificModelId} is already removed.`);
       showToast(
         `Model ${targetModel.modelId.split("_").pop()} is already removed.`
       );
-      targetModel = null; // Don't proceed
+      targetModel = null;
       modelUnitId = null;
     }
   } else {
-    // --- Auto Targeting ---
-    targetModel = findTargetModelForWound(baseUnitData, heroData); // Use game logic
+    targetModel = findTargetModelForWound(baseUnitData, heroData);
     if (targetModel) {
-      // Determine which unit the auto-targeted model belongs to for state update
       modelUnitId = targetModel.isHero ? heroData.selectionId : cardUnitId;
     }
   }
 
-  // --- Apply Wound if Target Found ---
   if (targetModel && modelUnitId) {
-    targetModel.currentHp -= 1; // Apply wound to the model object in memory
-
-    // Update the global state object using the model's actual unit ID
+    targetModel.currentHp -= 1;
     updateGlobalWoundState(
       armyId,
       modelUnitId,
       targetModel.modelId,
       targetModel.currentHp
     );
-
-    // Update the UI display for that specific model on the card (identified by cardUnitId)
     updateModelDisplay(
       cardUnitId,
       targetModel.modelId,
       targetModel.currentHp,
       targetModel.maxHp
     );
-
-    // Save the entire updated wound state to storage
     saveWoundState(getArmyWoundStates());
-
-    // Highlight the next model that *would* be targeted automatically
     const nextAutoTarget = findTargetModelForWound(baseUnitData, heroData);
     _highlightNextAutoTargetModel(
       cardUnitId,
       nextAutoTarget ? nextAutoTarget.modelId : null
     );
   } else {
-    // Log if no valid target found
-    console.log(
-      `No models available to wound in unit ${cardUnitId} (or specific model ${specificModelId} not found/valid).`
-    );
     showToast("All models in unit removed.");
-    _clearTargetHighlight(cardUnitId); // Clear any existing highlight
+    _clearTargetHighlight(cardUnitId);
   }
 }
 
@@ -199,78 +161,59 @@ function handleStartRoundClick(armyId) {
   console.log("--- Starting New Round (Generating Tokens) ---");
   const currentArmy = getLoadedArmyData(armyId);
   if (!currentArmy || !currentArmy.units) {
-    console.warn("Cannot start round: Army data not loaded.");
     showToast("Error: Army data not loaded.");
     return;
   }
 
   let stateChanged = false;
-  const casterUpdates = []; // Array to store info for the toast
-  const heroTargets = getCurrentArmyHeroTargets(armyId) || {}; // Get hero targets for UI lookup
+  const casterUpdates = [];
+  const heroTargets = getCurrentArmyHeroTargets(armyId) || {};
 
-  // Iterate over ALL units in the processed data (including joined heroes not directly on cards)
   currentArmy.units.forEach((unit) => {
-    // Check if the unit itself has caster level > 0
     if (unit.casterLevel > 0) {
-      const casterUnitId = unit.selectionId; // Use the caster's actual unit ID for state
+      const casterUnitId = unit.selectionId;
       const currentTokens = getComponentStateValue(
         armyId,
         casterUnitId,
         "tokens",
-        0 // Default to 0 if not found
+        0
       );
       const tokensToAdd = unit.casterLevel;
       const newTokens = Math.min(
         config.MAX_SPELL_TOKENS,
         currentTokens + tokensToAdd
       );
-      const actualTokensAdded = newTokens - currentTokens; // Calculate how many were actually added
+      const actualTokensAdded = newTokens - currentTokens;
 
       if (actualTokensAdded > 0) {
-        // Check if tokens actually changed
-        console.log(
-          `Adding ${actualTokensAdded} tokens to ${
-            unit.customName || unit.originalName
-          } (${casterUnitId}). New total: ${newTokens}`
-        );
-        // Update state using the caster's actual ID
         updateGlobalComponentState(armyId, casterUnitId, "tokens", newTokens);
-
-        // Store details for the toast message
         casterUpdates.push({
           name: unit.customName || unit.originalName,
           added: actualTokensAdded,
           total: newTokens,
         });
-
-        // Find the card ID to update the UI
-        // If this caster is a hero joined to another unit, find the base unit's ID
         const cardUnitId = heroTargets[casterUnitId] || casterUnitId;
-        updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel); // Update UI on correct card
-
+        updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel);
         stateChanged = true;
       }
     }
   });
 
   if (stateChanged) {
-    saveComponentState(getArmyComponentStates()); // Save updated tokens
+    saveComponentState(getArmyComponentStates());
   }
 
-  // Format the toast message
-  let toastMessage = "";
+  let toastMessage = "Spell Tokens Generated:";
   if (casterUpdates.length > 0) {
     casterUpdates.forEach((update) => {
-      // Use non-breaking space for "+X" to prevent awkward wrapping
-      toastMessage += `${update.name}: +${update.added
+      toastMessage += `\n- ${update.name}: +${update.added
         .toString()
-        .padStart(1, "\u00A0")}, now ${update.total}\n`;
+        .padStart(1, "\u00A0")}, now ${update.total}`;
     });
   } else {
     toastMessage = "No casters required token updates.";
   }
-  // Use the showToast helper function
-  showToast(toastMessage, "Spell Tokens Generated");
+  showToast(toastMessage, "Round Start"); // Use custom title
 }
 
 // --- Specific Click Handlers ---
@@ -285,7 +228,7 @@ function handleStartRoundClick(armyId) {
 function _handleModelWoundClick(targetElement, armyId, cardUnitId) {
   const modelId = targetElement.dataset.modelId;
   if (modelId) {
-    applyWound(armyId, cardUnitId, modelId); // Apply wound to the specific model
+    applyWound(armyId, cardUnitId, modelId);
   } else {
     console.warn("Clicked model element missing data-model-id attribute.");
   }
@@ -299,7 +242,7 @@ function _handleModelWoundClick(targetElement, armyId, cardUnitId) {
  * @private
  */
 function _handleAutoWoundButtonClick(targetElement, armyId, cardUnitId) {
-  applyWound(armyId, cardUnitId, null); // Pass null for auto-target
+  applyWound(armyId, cardUnitId, null);
 }
 
 /**
@@ -317,25 +260,18 @@ function _handleResetWoundsClick(targetElement, armyId, cardUnitId) {
   const heroData = getJoinedHeroData(armyId, cardUnitId);
   const heroId = heroData ? heroData.selectionId : null;
 
-  console.log(
-    `Resetting wounds for card unit ${cardUnitId}` +
-      (heroId ? ` (and joined hero ${heroId})` : "")
-  );
-
   let stateChanged = false;
 
   // Reset base unit models
   baseUnitData.models.forEach((model) => {
     if (model.currentHp !== model.maxHp) {
       model.currentHp = model.maxHp;
-      // Update state using base unit ID
       updateGlobalWoundState(
         armyId,
         cardUnitId,
         model.modelId,
         model.currentHp
       );
-      // Update UI on the card
       updateModelDisplay(
         cardUnitId,
         model.modelId,
@@ -351,9 +287,7 @@ function _handleResetWoundsClick(targetElement, armyId, cardUnitId) {
     heroData.models.forEach((model) => {
       if (model.currentHp !== model.maxHp) {
         model.currentHp = model.maxHp;
-        // Update state using the HERO's ID
         updateGlobalWoundState(armyId, heroId, model.modelId, model.currentHp);
-        // Update UI on the card (using cardUnitId)
         updateModelDisplay(
           cardUnitId,
           model.modelId,
@@ -366,16 +300,14 @@ function _handleResetWoundsClick(targetElement, armyId, cardUnitId) {
   }
 
   if (stateChanged) {
-    saveWoundState(getArmyWoundStates()); // Save the entire wound state
+    saveWoundState(getArmyWoundStates());
     showToast(
       `Wounds reset for ${
         baseUnitData.customName || baseUnitData.originalName
-      }.`,
-      "Wounds Reset"
+      }.`
     );
   }
 
-  // Highlight next target after reset
   const nextAutoTarget = findTargetModelForWound(baseUnitData, heroData);
   _highlightNextAutoTargetModel(
     cardUnitId,
@@ -393,12 +325,11 @@ function _handleResetWoundsClick(targetElement, armyId, cardUnitId) {
 function _handleAddTokenClick(targetElement, armyId, cardUnitId) {
   const actualCasterUnit = _findActualCaster(armyId, cardUnitId);
   if (!actualCasterUnit) {
-    console.warn("Add token clicked on non-caster card:", cardUnitId);
     showToast("This unit is not a caster.");
     return;
   }
 
-  const casterUnitId = actualCasterUnit.selectionId; // ID for state
+  const casterUnitId = actualCasterUnit.selectionId;
   const currentTokens = getComponentStateValue(
     armyId,
     casterUnitId,
@@ -408,9 +339,7 @@ function _handleAddTokenClick(targetElement, armyId, cardUnitId) {
 
   if (currentTokens < config.MAX_SPELL_TOKENS) {
     const newTokens = currentTokens + 1;
-    // Update state using caster's actual ID
     updateGlobalComponentState(armyId, casterUnitId, "tokens", newTokens);
-    // Update UI on the card using card's ID
     updateTokenDisplay(cardUnitId, newTokens, actualCasterUnit.casterLevel);
     saveComponentState(getArmyComponentStates());
   } else {
@@ -428,12 +357,11 @@ function _handleAddTokenClick(targetElement, armyId, cardUnitId) {
 function _handleRemoveTokenClick(targetElement, armyId, cardUnitId) {
   const actualCasterUnit = _findActualCaster(armyId, cardUnitId);
   if (!actualCasterUnit) {
-    console.warn("Remove token clicked on non-caster card:", cardUnitId);
     showToast("This unit is not a caster.");
     return;
   }
 
-  const casterUnitId = actualCasterUnit.selectionId; // ID for state
+  const casterUnitId = actualCasterUnit.selectionId;
   const currentTokens = getComponentStateValue(
     armyId,
     casterUnitId,
@@ -443,9 +371,7 @@ function _handleRemoveTokenClick(targetElement, armyId, cardUnitId) {
 
   if (currentTokens > 0) {
     const newTokens = currentTokens - 1;
-    // Update state using caster's actual ID
     updateGlobalComponentState(armyId, casterUnitId, "tokens", newTokens);
-    // Update UI on the card using card's ID
     updateTokenDisplay(cardUnitId, newTokens, actualCasterUnit.casterLevel);
     saveComponentState(getArmyComponentStates());
   }
@@ -461,15 +387,14 @@ function _handleRemoveTokenClick(targetElement, armyId, cardUnitId) {
 function _handleViewSpellsClick(targetElement, armyId, cardUnitId) {
   const actualCasterUnit = _findActualCaster(armyId, cardUnitId);
   if (!actualCasterUnit) {
-    console.warn("View spells clicked for non-caster card:", cardUnitId);
     showToast("This unit is not a caster.");
     return;
   }
 
-  const casterUnitId = actualCasterUnit.selectionId; // ID for state
+  const casterUnitId = actualCasterUnit.selectionId;
   const casterFactionId = actualCasterUnit.factionId;
-  const armyBooks = getArmyBooksData(); // Get loaded army book data from state
-  const spellList = armyBooks[casterFactionId]?.spells || null; // Find spells for the caster's faction
+  const armyBooks = getArmyBooksData();
+  const spellList = armyBooks[casterFactionId]?.spells || null;
   const currentTokens = getComponentStateValue(
     armyId,
     casterUnitId,
@@ -477,53 +402,124 @@ function _handleViewSpellsClick(targetElement, armyId, cardUnitId) {
     0
   );
 
-  console.log(
-    `Caster: ${actualCasterUnit.customName}, Faction: ${casterFactionId}, Tokens: ${currentTokens}`
-  );
-
-  // Call the UI helper function to populate and show the modal
   populateAndShowSpellModal(actualCasterUnit, spellList, currentTokens);
 }
+
+// ****** START NEW CODE ******
+/**
+ * Handles clicks on the "Cast" button within the spell modal.
+ * @param {HTMLElement} buttonElement - The clicked button element.
+ * @private
+ */
+function _handleCastSpellClick(buttonElement) {
+  const spellCost = parseInt(buttonElement.dataset.spellCost, 10);
+  const spellName = decodeURIComponent(buttonElement.dataset.spellName);
+  const casterId = buttonElement.dataset.casterId;
+  const armyId = buttonElement.dataset.armyId;
+
+  if (isNaN(spellCost) || !casterId || !armyId) {
+    console.error("Cast button missing required data attributes.");
+    showToast("Error casting spell: Missing data.", "Error");
+    return;
+  }
+
+  const currentTokens = getComponentStateValue(armyId, casterId, "tokens", 0);
+
+  if (currentTokens >= spellCost) {
+    const newTokens = currentTokens - spellCost;
+
+    // 1. Update State
+    updateGlobalComponentState(armyId, casterId, "tokens", newTokens);
+    saveComponentState(getArmyComponentStates());
+
+    // 2. Update UI
+    // Find the card this caster belongs to (could be the caster itself or the unit it joined)
+    const heroTargets = getCurrentArmyHeroTargets(armyId) || {};
+    const cardUnitId = Object.keys(heroTargets).find(
+      (hero) => hero === casterId
+    )
+      ? heroTargets[casterId] // If caster is a hero, find the unit it joined
+      : casterId; // Otherwise, the caster is the base unit
+
+    const casterUnitData = getUnitData(armyId, casterId); // Get caster data for level
+    if (casterUnitData) {
+      updateTokenDisplay(cardUnitId, newTokens, casterUnitData.casterLevel); // Update main card display
+    }
+
+    // Update token display inside the modal
+    const modalTokenDisplay = document.getElementById(
+      "modalCasterTokenDisplay"
+    );
+    if (modalTokenDisplay) {
+      modalTokenDisplay.innerHTML = `${STAT_ICONS.spellTokens} Tokens: <span class="fw-bold">${newTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
+    }
+
+    // Update buttons within the modal (disable unaffordable ones)
+    const modalElement = document.getElementById("viewSpellsModal");
+    if (modalElement) {
+      modalElement.querySelectorAll(".cast-spell-btn").forEach((btn) => {
+        const cost = parseInt(btn.dataset.spellCost, 10);
+        if (!isNaN(cost)) {
+          btn.disabled = newTokens < cost;
+        }
+      });
+    }
+
+    // 3. Show Feedback Toast
+    showToast(
+      `Casting ${spellName}!\nRoll 4+ to succeed. Other Casters within 18" may spend a Spell Token to modify this roll.`,
+      "Spell Cast"
+    );
+  } else {
+    console.warn(`Attempted to cast ${spellName} but not enough tokens.`);
+    showToast(`Not enough tokens to cast ${spellName}.`, "Cast Failed");
+  }
+}
+// ****** END NEW CODE ******
 
 // --- Main Event Listener & Setup ---
 
 /**
- * Handles clicks delegated from the main unit container, dispatching to specific handlers.
+ * Handles clicks delegated from the main unit container or the spell modal.
+ * Dispatches to specific handlers based on the clicked element.
  * @param {Event} event - The click event object.
  */
-function handleUnitInteractionClick(event) {
+function handleInteractionClick(event) {
+  // Renamed for broader scope
   const unitCard = event.target.closest(".unit-card");
-  if (!unitCard) return; // Exit if click wasn't inside a unit card
+  const spellModal = event.target.closest("#viewSpellsModal"); // Check if click is inside spell modal
 
-  // Extract IDs from the card's dataset
-  const cardUnitId = unitCard.dataset.unitId; // This is always the base unit ID from the card
-  const armyId = unitCard.dataset.armyId;
+  if (unitCard) {
+    // --- Handle Clicks within Unit Cards ---
+    const cardUnitId = unitCard.dataset.unitId;
+    const armyId = unitCard.dataset.armyId;
+    if (!cardUnitId || !armyId) return;
 
-  if (!cardUnitId || !armyId) {
-    console.error("Card missing data-unit-id or data-army-id");
-    return;
-  }
+    const modelElement = event.target.closest(".clickable-model");
+    const woundButton = event.target.closest(".wound-apply-btn");
+    const resetButton = event.target.closest(".wound-reset-btn");
+    const addTokenButton = event.target.closest(".token-add-btn");
+    const removeTokenButton = event.target.closest(".token-remove-btn");
+    const viewSpellsButton = event.target.closest(".view-spells-btn");
 
-  // Delegate based on the clicked element
-  const modelElement = event.target.closest(".clickable-model");
-  const woundButton = event.target.closest(".wound-apply-btn");
-  const resetButton = event.target.closest(".wound-reset-btn");
-  const addTokenButton = event.target.closest(".token-add-btn");
-  const removeTokenButton = event.target.closest(".token-remove-btn");
-  const viewSpellsButton = event.target.closest(".view-spells-btn");
-
-  if (modelElement) {
-    _handleModelWoundClick(modelElement, armyId, cardUnitId);
-  } else if (woundButton) {
-    _handleAutoWoundButtonClick(woundButton, armyId, cardUnitId);
-  } else if (resetButton) {
-    _handleResetWoundsClick(resetButton, armyId, cardUnitId);
-  } else if (addTokenButton) {
-    _handleAddTokenClick(addTokenButton, armyId, cardUnitId);
-  } else if (removeTokenButton) {
-    _handleRemoveTokenClick(removeTokenButton, armyId, cardUnitId);
-  } else if (viewSpellsButton) {
-    _handleViewSpellsClick(viewSpellsButton, armyId, cardUnitId);
+    if (modelElement) _handleModelWoundClick(modelElement, armyId, cardUnitId);
+    else if (woundButton)
+      _handleAutoWoundButtonClick(woundButton, armyId, cardUnitId);
+    else if (resetButton)
+      _handleResetWoundsClick(resetButton, armyId, cardUnitId);
+    else if (addTokenButton)
+      _handleAddTokenClick(addTokenButton, armyId, cardUnitId);
+    else if (removeTokenButton)
+      _handleRemoveTokenClick(removeTokenButton, armyId, cardUnitId);
+    else if (viewSpellsButton)
+      _handleViewSpellsClick(viewSpellsButton, armyId, cardUnitId);
+  } else if (spellModal) {
+    // --- Handle Clicks within Spell Modal ---
+    const castButton = event.target.closest(".cast-spell-btn");
+    if (castButton) {
+      _handleCastSpellClick(castButton);
+    }
+    // Add handlers for other modal interactions here if needed
   }
 }
 
@@ -532,33 +528,17 @@ function handleUnitInteractionClick(event) {
  * @param {string} armyId - The ID of the currently loaded army, needed for the start round button.
  */
 export function setupEventListeners(armyId) {
-  const mainListContainer = document.getElementById("army-units-container");
-  if (mainListContainer) {
-    // Use event delegation for unit card interactions
-    // Remove listener first to prevent duplicates if called multiple times
-    mainListContainer.removeEventListener(
-      "click",
-      handleUnitInteractionClick,
-      false
-    );
-    // Add the listener
-    mainListContainer.addEventListener(
-      "click",
-      handleUnitInteractionClick,
-      false
-    );
-    console.log("Main unit interaction listener attached.");
-  } else {
-    console.error("Could not find mainListContainer to attach listeners.");
-  }
+  // Use event delegation on the document body for broader coverage,
+  // including dynamically added modals.
+  document.body.removeEventListener("click", handleInteractionClick); // Remove previous listener if any
+  document.body.addEventListener("click", handleInteractionClick);
+  console.log("Global interaction click listener attached to document body.");
 
-  // Add listener for the global "Start Round" button
+  // Add listener for the global "Start Round" button (no change here)
   const startRoundButton = document.getElementById("start-round-button");
   if (startRoundButton) {
-    // Clone and replace to remove any previous listeners safely
     const newButton = startRoundButton.cloneNode(true);
     startRoundButton.parentNode.replaceChild(newButton, startRoundButton);
-    // Add the new listener
     newButton.addEventListener("click", () => handleStartRoundClick(armyId));
     console.log("Start Round button listener attached.");
   } else {

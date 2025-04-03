@@ -5,11 +5,10 @@
 
 // Import constants if needed (e.g., from config)
 import { config, STAT_ICONS } from "./config.js";
+import { getCurrentArmyId } from "./state.js"; // Import needed to get armyId
 
-// ****** START NEW CODE ******
 // Variable to store the element that triggered the spell modal
 let spellModalTriggerElement = null;
-// ****** END NEW CODE ******
 
 /**
  * Displays a list of armies from the campaign data for selection when no armyId is provided.
@@ -107,8 +106,10 @@ export function populateArmyInfoModal(armyInfo) {
  * Shows a Bootstrap Toast message using the #themeToast element.
  * Reuses the theme toast element for simplicity.
  * @param {string} message - The message to display.
+ * @param {string} [title='Update'] - Optional title for the toast.
  */
-export function showToast(message, headerText) {
+export function showToast(message, title = "Update") {
+  // Added optional title parameter
   const toastElement = document.getElementById("themeToast"); // Reusing theme toast element
   if (!toastElement) {
     console.warn("Toast element #themeToast not found.");
@@ -125,7 +126,7 @@ export function showToast(message, headerText) {
   }
 
   // Update title and body
-  toastHeader.textContent = headerText || "Update"; // Set a generic title or customize as needed
+  toastHeader.textContent = title; // Use the provided title
   toastBody.textContent = message; // Set the message
   // Ensure white-space style allows line breaks for multi-line messages
   toastBody.style.whiteSpace = "pre-wrap";
@@ -162,19 +163,11 @@ export function populateAndShowSpellModal(
   }
 
   // --- Focus Management Setup ---
-  // Remove previous listeners to prevent duplicates if this function is called again
-  // before the modal fully hides and the 'once' listener fires.
   modalElement.removeEventListener("show.bs.modal", handleSpellModalShow);
   modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden);
-
-  // Add listener for when modal is *about* to show
-  // Use { once: true } so the listener automatically removes itself after firing.
   modalElement.addEventListener("show.bs.modal", handleSpellModalShow, {
     once: true,
   });
-
-  // Add listener for when modal has *finished* hiding
-  // Use { once: true } so the listener automatically removes itself after firing.
   modalElement.addEventListener("hidden.bs.modal", handleSpellModalHidden, {
     once: true,
   });
@@ -190,7 +183,6 @@ export function populateAndShowSpellModal(
       casterUnit.customName || casterUnit.originalName
     }`;
   if (tokenDisplay) {
-    // Use the helper icon definition
     tokenDisplay.innerHTML = `${STAT_ICONS.spellTokens} Tokens: <span class="fw-bold">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
   }
 
@@ -198,28 +190,42 @@ export function populateAndShowSpellModal(
   if (spellListContainer) spellListContainer.innerHTML = "";
   if (noSpellsMessage) noSpellsMessage.style.display = "none";
 
+  // Get current army ID (needed for data attributes on buttons)
+  const armyId = getCurrentArmyId(); // Hacky way to get current army ID
+
   // Populate spell list
   if (spellList && spellList.length > 0 && spellListContainer) {
     spellList.forEach((spell) => {
       const listItem = document.createElement("li");
+      // Use flexbox for better alignment
       listItem.className =
-        "list-group-item d-flex justify-content-between align-items-start";
+        "list-group-item d-flex justify-content-between align-items-start flex-wrap"; // Added flex-wrap
 
-      const spellCost = spell.threshold || 0; // Assuming threshold is cost
+      const spellCost = spell.threshold || 0;
       const canCast = currentTokens >= spellCost;
+      const spellName = spell.name || "Unnamed Spell";
 
-      // Basic structure - Tooltips/Casting button added later
+      // ****** START MODIFIED CODE for list item content ******
       listItem.innerHTML = `
-                <div class="flex-grow-1 me-2">
-                    <span class="fw-bold spell-name">${
-                      spell.name || "Unnamed Spell"
-                    }</span>
+                <div class="me-auto mb-1"> <span class="fw-bold spell-name">${spellName}</span>
                     <small class="spell-effect d-block text-muted">${
                       spell.effect || "No description."
                     }</small>
                 </div>
-                <span class="badge bg-info rounded-pill spell-cost-badge" title="Token Cost">${spellCost}</span>
+                <div class="d-flex align-items-center gap-2"> <span class="badge bg-info rounded-pill spell-cost-badge" title="Token Cost">${spellCost}</span>
+                    <button type="button"
+                            class="btn btn-sm btn-success cast-spell-btn"
+                            title="Cast ${spellName}"
+                            data-spell-cost="${spellCost}"
+                            data-spell-name="${encodeURIComponent(spellName)}"
+                            data-caster-id="${casterUnit.selectionId}"
+                            data-army-id="${armyId}"
+                            ${!canCast ? "disabled" : ""}>
+                        <i class="bi bi-magic"></i> Cast
+                    </button>
+                </div>
                 `;
+      // ****** END MODIFIED CODE ******
       spellListContainer.appendChild(listItem);
     });
   } else if (noSpellsMessage) {
@@ -234,7 +240,6 @@ export function populateAndShowSpellModal(
       modalInstance.show();
     } catch (error) {
       console.error("Error showing spell modal:", error);
-      // Clean up listeners if showing fails
       modalElement.removeEventListener("show.bs.modal", handleSpellModalShow);
       modalElement.removeEventListener(
         "hidden.bs.modal",
@@ -243,7 +248,6 @@ export function populateAndShowSpellModal(
     }
   } else {
     console.warn("Bootstrap Modal component not found.");
-    // Clean up listeners if bootstrap isn't found
     modalElement.removeEventListener("show.bs.modal", handleSpellModalShow);
     modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden);
   }
@@ -255,14 +259,10 @@ export function populateAndShowSpellModal(
  * @param {Event} event The Bootstrap modal event.
  */
 function handleSpellModalShow(event) {
-  // event.relatedTarget is the element that triggered the modal
   if (event.relatedTarget) {
     spellModalTriggerElement = event.relatedTarget;
-    // console.log("Spell modal triggered by:", spellModalTriggerElement);
   } else {
-    // Fallback if relatedTarget isn't available (e.g., modal shown programmatically without a trigger)
     spellModalTriggerElement = document.activeElement;
-    // console.log("Spell modal trigger not found, using active element:", spellModalTriggerElement);
   }
 }
 
@@ -271,26 +271,19 @@ function handleSpellModalShow(event) {
  * Returns focus to the triggering element if possible.
  */
 function handleSpellModalHidden() {
-  // Check if the stored trigger element is still valid and focusable
   if (
     spellModalTriggerElement &&
     typeof spellModalTriggerElement.focus === "function"
   ) {
-    // console.log("Returning focus to:", spellModalTriggerElement);
-    // Use a slight delay with requestAnimationFrame to ensure the modal is fully hidden
-    // and the element is potentially re-enabled before focusing.
     requestAnimationFrame(() => {
       try {
         spellModalTriggerElement.focus();
       } catch (e) {
         console.warn("Could not focus stored trigger element:", e);
-        // Optional: Fallback focus if needed, e.g., document.body.focus();
       }
-      spellModalTriggerElement = null; // Clear the reference after attempting focus
+      spellModalTriggerElement = null;
     });
   } else {
-    // console.log("Spell modal hidden, but no valid trigger element stored or it's not focusable.");
-    spellModalTriggerElement = null; // Clear the reference
-    // Optional: Fallback focus if needed, e.g., document.body.focus();
+    spellModalTriggerElement = null;
   }
 }
