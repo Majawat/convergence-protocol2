@@ -124,7 +124,7 @@ function _createCasterControlsHTML(casterLevel, initialTokens) {
                  <div class="token-controls">
                      <button type="button" class="btn btn-sm btn-outline-info token-remove-btn" title="Spend Token" ${removeDisabled}><i class="bi bi-dash"></i></button>
                      <span class="token-count-display" title="Spell Tokens">
-                         ${STAT_ICONS.tokens}
+                         ${STAT_ICONS.spellTokens}
                          <span class="token-count">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span>
                      </span>
                      <button type="button" class="btn btn-sm btn-outline-info token-add-btn" title="Add Token" ${addDisabled}><i class="bi bi-plus"></i></button>

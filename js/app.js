@@ -31,6 +31,7 @@ import {
 } from "./state.js";
 import {
   loadWoundState,
+  saveWoundState,
   loadComponentState,
   saveComponentState,
 } from "./storage.js";
