@@ -24,18 +24,20 @@ export async function loadCampaignData() {
 }
 
 /**
- * Fetches Army Book data AND Common Rules data, utilizing sessionStorage.
- * @param {object} campaignData - The loaded campaign data.
+ * Fetches Army Book data AND Common Rules data for the GAME_SYSTEM_ID, utilizing sessionStorage.
+ * @param {object} campaignData - The loaded campaign data (used only for identifying army books).
  * @returns {Promise<{armyBooks: object, commonRules: object}>} Object containing the loaded data.
  */
 export async function loadGameData(campaignData) {
-  if (!campaignData || !campaignData.armies)
+  if (!campaignData || !campaignData.armies) {
+    console.warn("No campaign data or armies found for loading game data.");
     return { armyBooks: {}, commonRules: {} };
+  }
 
   let cachedBooks = {};
-  let cachedCommonRules = {};
+  let cachedCommonRules = {}; // Will only hold rules for the required system ID
 
-  // 1. Try loading ALL caches from sessionStorage first
+  // --- Step 1: Load Army Books Cache ---
   try {
     const cachedBooksData = sessionStorage.getItem(config.ARMY_BOOKS_CACHE_KEY);
     if (cachedBooksData) {
@@ -47,53 +49,67 @@ export async function loadGameData(campaignData) {
     cachedBooks = {};
   }
 
-  const gfRulesKey =
-    config.COMMON_RULES_CACHE_KEY_PREFIX + config.DEFAULT_GAME_SYSTEM; // Hardcoding GF for now
-  try {
-    const cachedGfRules = sessionStorage.getItem(gfRulesKey);
-    if (cachedGfRules) {
-      const parsedRules = JSON.parse(cachedGfRules);
-      if (
-        parsedRules &&
-        parsedRules.rules &&
-        Array.isArray(parsedRules.rules)
-      ) {
-        cachedCommonRules["2"] = parsedRules;
-        console.log("Loaded valid GF Common Rules cache.");
-      } else {
-        console.log("Cached GF Common Rules data was invalid or empty.");
-      }
-    } else {
-      console.log("No GF Common Rules found in sessionStorage.");
-    }
-  } catch (e) {
-    console.warn("Could not parse GF Common Rules cache.", e);
-  }
-
-  const factionsToFetch = new Map();
-  const requiredGameSystems = new Set();
-
-  // 2. Determine required factions and game systems
+  // --- Step 2: Identify Required Factions (for Army Books) ---
+  const factionsToFetch = new Map(); // { factionId: gameSystemId }
   campaignData.armies.forEach((army) => {
     if (army.faction) {
       army.faction.forEach((fac) => {
         if (fac.id && fac.gameSystem) {
+          // Check if army book needs fetching
           if (!cachedBooks[fac.id]) {
             if (!factionsToFetch.has(fac.id)) {
               factionsToFetch.set(fac.id, fac.gameSystem);
             }
-          }
-          if (fac.gameSystem === 2) {
-            requiredGameSystems.add(2);
           }
         }
       });
     }
   });
 
+  // --- Step 3: Load Required Common Rules Cache ---
+  const requiredGsId = config.GAME_SYSTEM_ID;
+  const rulesCacheKey = config.COMMON_RULES_CACHE_KEY_PREFIX + requiredGsId;
+  let commonRulesNeedFetching = true; // Assume fetch is needed initially
+
+  console.log(
+    `Attempting to load Common Rules cache for System ${requiredGsId}...`
+  );
+  try {
+    const cachedRulesData = sessionStorage.getItem(rulesCacheKey);
+    if (cachedRulesData) {
+      const parsedRules = JSON.parse(cachedRulesData);
+      // Validate the cached data structure
+      if (
+        parsedRules &&
+        parsedRules.rules &&
+        Array.isArray(parsedRules.rules)
+      ) {
+        cachedCommonRules[requiredGsId] = parsedRules; // Store in the object with the correct key
+        commonRulesNeedFetching = false; // Cache is valid, no fetch needed
+        console.log(
+          `Loaded valid Common Rules cache for System ${requiredGsId}.`
+        );
+      } else {
+        console.log(
+          `Cached Common Rules data for System ${requiredGsId} was invalid or empty.`
+        );
+        sessionStorage.removeItem(rulesCacheKey); // Remove invalid cache entry
+      }
+    } else {
+      console.log(`No Common Rules cache found for System ${requiredGsId}.`);
+    }
+  } catch (e) {
+    console.warn(
+      `Could not parse Common Rules cache for System ${requiredGsId}.`,
+      e
+    );
+    sessionStorage.removeItem(rulesCacheKey); // Remove potentially corrupted cache entry
+  }
+
+  // --- Step 4: Queue Fetches for Missing Data ---
   const fetchPromises = [];
 
-  // 3. Queue Army Book fetches
+  // Queue Army Book fetches
   if (factionsToFetch.size > 0) {
     console.log("Army Books to fetch:", Array.from(factionsToFetch.keys()));
     factionsToFetch.forEach((gameSystem, factionId) => {
@@ -102,7 +118,9 @@ export async function loadGameData(campaignData) {
         fetch(url)
           .then((response) => {
             if (!response.ok)
-              throw new Error(`Book ${factionId}: ${response.status}`);
+              throw new Error(
+                `Book ${factionId}: ${response.statusText} (${response.status})`
+              );
             return response.json();
           })
           .then((bookData) => ({
@@ -126,104 +144,101 @@ export async function loadGameData(campaignData) {
     console.log("All required Army Books already cached.");
   }
 
-  // 4. Queue Common Rules fetches
-  let fetchedRulesSystems = new Set();
-  console.log(
-    `[DEBUG] Checking required game systems for rules: ${Array.from(
-      requiredGameSystems
-    )}`
-  );
-  requiredGameSystems.forEach((gsId) => {
-    console.log(`[DEBUG] Processing required system: ${gsId}`);
+  // Queue Common Rules fetch (only if needed)
+  let rulesWereFetched = false;
+  if (commonRulesNeedFetching) {
     console.log(
-      `[DEBUG] Value of cachedCommonRules[${gsId}]:`,
-      cachedCommonRules[gsId]
+      `Common Rules for System ${requiredGsId} not cached or invalid. Queueing fetch.`
     );
-    if (!cachedCommonRules[gsId]) {
-      console.log(
-        `Common Rules for System ${gsId} not cached or invalid. Queueing fetch.`
-      );
-      const url = `${config.ARMYFORGE_COMMON_RULES_API_URL_BASE}${gsId}`;
-      fetchPromises.push(
-        fetch(url)
-          .then((response) => {
-            if (!response.ok)
-              throw new Error(`Common Rules ${gsId}: ${response.status}`);
-            return response.json();
-          })
-          .then((rulesData) => ({
-            type: "rules",
-            gameSystemId: gsId,
-            rulesData,
-            status: "fulfilled",
-          }))
-          .catch((error) => {
-            console.error(`Fetch failed for Common Rules ${gsId}:`, error);
-            return {
-              type: "rules",
-              gameSystemId: gsId,
-              status: "rejected",
-              reason: error,
-            };
-          })
-      );
-      fetchedRulesSystems.add(gsId);
-    } else {
-      console.log(`Valid Common Rules for System ${gsId} found in cache.`);
-    }
-  });
-  console.log(
-    `[DEBUG] Finished checking required game systems. Promises to run: ${fetchPromises.length}`
-  );
-
-  // 5. Execute fetches
-  if (fetchPromises.length > 0) {
-    console.log("[DEBUG] Executing fetches...");
-    const results = await Promise.allSettled(fetchPromises);
-    console.log("[DEBUG] Fetches complete. Processing results...");
-    results.forEach((result) => {
-      console.log("[DEBUG] Processing fetch result:", result);
-      if (result.status === "fulfilled" && result.value) {
-        if (result.value.status === "fulfilled") {
-          if (result.value.type === "book") {
-            cachedBooks[result.value.factionId] = result.value.bookData;
-            console.log(
-              `Successfully fetched Army Book: ${result.value.factionId}`
+    const url = `${config.ARMYFORGE_COMMON_RULES_API_URL_BASE}${requiredGsId}`;
+    fetchPromises.push(
+      fetch(url)
+        .then((response) => {
+          if (!response.ok)
+            throw new Error(
+              `Common Rules ${requiredGsId}: ${response.statusText} (${response.status})`
             );
-          } else if (result.value.type === "rules") {
+          return response.json();
+        })
+        .then((rulesData) => ({
+          type: "rules",
+          gameSystemId: requiredGsId,
+          rulesData,
+          status: "fulfilled",
+        }))
+        .catch((error) => {
+          console.error(
+            `Fetch failed for Common Rules ${requiredGsId}:`,
+            error
+          );
+          return {
+            type: "rules",
+            gameSystemId: requiredGsId,
+            status: "rejected",
+            reason: error,
+          };
+        })
+    );
+    rulesWereFetched = true; // Mark that we attempted to fetch rules
+  } else {
+    console.log(
+      `Valid Common Rules for System ${requiredGsId} already loaded.`
+    );
+  }
+
+  // --- Step 5: Execute Fetches ---
+  if (fetchPromises.length > 0) {
+    console.log(`Executing ${fetchPromises.length} fetches...`);
+    const results = await Promise.allSettled(fetchPromises);
+    console.log("Fetches complete. Processing results...");
+
+    let fetchedRulesAreValid = false; // Track if the fetched rules (if any) are valid
+
+    results.forEach((result) => {
+      if (result.status === "fulfilled" && result.value) {
+        const data = result.value;
+        if (data.status === "fulfilled") {
+          if (data.type === "book") {
+            cachedBooks[data.factionId] = data.bookData;
+            console.log(`Successfully fetched Army Book: ${data.factionId}`);
+          } else if (
+            data.type === "rules" &&
+            data.gameSystemId === requiredGsId
+          ) {
+            // Validate fetched rules data
             if (
-              result.value.rulesData &&
-              result.value.rulesData.rules &&
-              Array.isArray(result.value.rulesData.rules)
+              data.rulesData &&
+              data.rulesData.rules &&
+              Array.isArray(data.rulesData.rules)
             ) {
-              cachedCommonRules[result.value.gameSystemId] =
-                result.value.rulesData;
+              cachedCommonRules[data.gameSystemId] = data.rulesData;
+              fetchedRulesAreValid = true; // Mark fetched rules as valid
               console.log(
-                `Successfully fetched Common Rules: System ${result.value.gameSystemId}`
+                `Successfully fetched Common Rules: System ${data.gameSystemId}`
               );
             } else {
               console.warn(
-                `Fetched Common Rules for System ${result.value.gameSystemId} appear invalid. Data:`,
-                result.value.rulesData
+                `Fetched Common Rules for System ${data.gameSystemId} appear invalid. Data:`,
+                data.rulesData
               );
-              fetchedRulesSystems.delete(result.value.gameSystemId);
             }
           }
         } else {
           console.warn(
-            `[DEBUG] Fetch promise fulfilled but inner status rejected:`,
-            result.value
+            `Fetch promise fulfilled but operation failed for ${data.type} ${
+              data.factionId || data.gameSystemId
+            }:`,
+            data.reason
           );
-          if (result.value.type === "rules")
-            fetchedRulesSystems.delete(result.value.gameSystemId);
         }
       } else if (result.status === "rejected") {
-        console.error(`[DEBUG] Fetch promise rejected:`, result.reason);
+        console.error(`Fetch promise rejected:`, result.reason);
       }
     });
 
-    // 6. Save updated caches
+    // --- Step 6: Save Updated Caches ---
     try {
+      // Save Army Books if any were fetched
       if (factionsToFetch.size > 0) {
         sessionStorage.setItem(
           config.ARMY_BOOKS_CACHE_KEY,
@@ -231,32 +246,32 @@ export async function loadGameData(campaignData) {
         );
         console.log("Updated Army Books cache in sessionStorage.");
       }
-      fetchedRulesSystems.forEach((gsId) => {
-        if (cachedCommonRules[gsId] && cachedCommonRules[gsId].rules) {
-          sessionStorage.setItem(
-            config.COMMON_RULES_CACHE_KEY_PREFIX + gsId,
-            JSON.stringify(cachedCommonRules[gsId])
-          );
-          console.log(
-            `Updated Common Rules cache for System ${gsId} in sessionStorage.`
-          );
-        } else {
-          console.log(
-            `[DEBUG] Skipping saving rules cache for System ${gsId} as data is missing or invalid in memory.`
-          );
-        }
-      });
+      // Save Common Rules ONLY if they were successfully fetched AND validated
+      if (rulesWereFetched && fetchedRulesAreValid) {
+        sessionStorage.setItem(
+          rulesCacheKey,
+          JSON.stringify(cachedCommonRules[requiredGsId])
+        );
+        console.log(
+          `Updated Common Rules cache for System ${requiredGsId} in sessionStorage.`
+        );
+      } else if (rulesWereFetched && !fetchedRulesAreValid) {
+        console.log(
+          `Skipping saving rules cache for System ${requiredGsId} as fetched data was invalid.`
+        );
+      }
     } catch (error) {
       console.error("Error saving data cache to sessionStorage:", error);
     }
   } else {
-    console.log("[DEBUG] No fetches needed (all data cached).");
+    console.log("No fetches needed (all required data was cached).");
   }
 
-  // 7. Return data
-  console.log(
-    "[DEBUG] Returning from loadGameData. Common Rules object:",
-    cachedCommonRules
-  );
-  return { armyBooks: cachedBooks, commonRules: cachedCommonRules };
+  // --- Step 7: Return Loaded Data ---
+  // Ensure the returned object uses the specific required GsId as the key if rules exist
+  const finalCommonRules = cachedCommonRules[requiredGsId]
+    ? { [requiredGsId]: cachedCommonRules[requiredGsId] }
+    : {};
+  console.log("Returning game data. Common Rules object:", finalCommonRules);
+  return { armyBooks: cachedBooks, commonRules: finalCommonRules };
 }

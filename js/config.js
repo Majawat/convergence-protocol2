@@ -23,7 +23,7 @@ export const config = {
     "https://army-forge.onepagerules.com/api/rules/common/", // Append {gameSystemId}
 
   // Other settings
-  DEFAULT_GAME_SYSTEM: 2, // Default to Grimdark Future if not specified
+  GAME_SYSTEM_ID: 2, // Default to Grimdark Future if not specified
 };
 
 export const STAT_ICONS = {
