@@ -1,98 +1,110 @@
 /**
- * @fileoverview Handles saving and loading game state to localStorage.
+ * @fileoverview Handles saving and loading game state to localStorage using per-army keys.
  */
 
 import { config } from "./config.js";
 
-// --- Wound State ---
-
 /**
- * Saves the entire wound state for all armies to localStorage.
- * @param {object} woundState - Example: { armyId1: { unitId1: { modelId1: currentHp, ... }, ... }, ... }
+ * Creates the localStorage key for a specific army's state.
+ * @param {string} armyId - The ID of the army.
+ * @returns {string} The localStorage key.
  */
-function saveWoundState(woundState) {
-  try {
-    localStorage.setItem(config.WOUND_STATE_KEY, JSON.stringify(woundState));
-  } catch (error) {
-    console.error("Error saving wound state to localStorage:", error);
+function getArmyStateKey(armyId) {
+  if (!armyId) {
+    console.error("Cannot generate army state key without armyId.");
+    return null; // Or throw an error
   }
+  return `${config.ARMY_STATE_KEY_PREFIX}${armyId}`;
 }
 
 /**
- * Loads the entire wound state from localStorage.
- * @returns {object | null} The loaded wound state object, or null.
+ * Saves the state object for a specific army to localStorage.
+ * The state object should contain listPoints, woundState, componentState, etc.
+ * @param {string} armyId - The ID of the army whose state is being saved.
+ * @param {object} armyState - The complete state object for the army.
  */
-function loadWoundState() {
-  try {
-    const storedState = localStorage.getItem(config.WOUND_STATE_KEY);
-    return storedState ? JSON.parse(storedState) : null;
-  } catch (error) {
-    console.error("Error loading wound state from localStorage:", error);
-    return null;
+function saveArmyState(armyId, armyState) {
+  const key = getArmyStateKey(armyId);
+  if (!key || !armyState) {
+    console.error("Missing armyId or armyState for saveArmyState.", {
+      armyId,
+      armyState,
+    });
+    return;
   }
-}
-
-/** Resets (clears) the saved wound state from localStorage. */
-function resetWoundState() {
   try {
-    localStorage.removeItem(config.WOUND_STATE_KEY);
-    console.log("Saved wound state reset.");
+    localStorage.setItem(key, JSON.stringify(armyState));
+    // console.log(`Saved state for army ${armyId}:`, armyState);
   } catch (error) {
-    console.error("Error resetting wound state in localStorage:", error);
-  }
-}
-
-// --- Component State (Tokens, etc.) ---
-
-/**
- * Saves the entire component state (tokens, etc.) for all armies to localStorage.
- * @param {object} componentState - Example: { armyId1: { unitId1: { tokens: T }, ... }, ... }
- */
-function saveComponentState(componentState) {
-  try {
-    localStorage.setItem(
-      config.COMPONENT_STATE_KEY,
-      JSON.stringify(componentState)
+    console.error(
+      `Error saving state for army ${armyId} to localStorage:`,
+      error
     );
-    // console.log('Component state saved:', componentState);
-  } catch (error) {
-    console.error("Error saving component state to localStorage:", error);
   }
 }
 
 /**
- * Loads the entire component state from localStorage.
- * @returns {object | null} The loaded component state object, or null.
+ * Loads the state object for a specific army from localStorage.
+ * @param {string} armyId - The ID of the army whose state is being loaded.
+ * @returns {object | null} The loaded state object, or null if not found or error occurs.
  */
-function loadComponentState() {
+function loadArmyState(armyId) {
+  const key = getArmyStateKey(armyId);
+  if (!key) return null;
+
   try {
-    const storedState = localStorage.getItem(config.COMPONENT_STATE_KEY);
-    // console.log('Loaded component state string:', storedState);
-    const parsedState = storedState ? JSON.parse(storedState) : null;
-    // console.log('Parsed component state:', parsedState);
-    return parsedState;
+    const storedState = localStorage.getItem(key);
+    if (storedState) {
+      const parsedState = JSON.parse(storedState);
+      // Basic validation - ensure it's an object
+      if (typeof parsedState === "object" && parsedState !== null) {
+        // console.log(`Loaded state for army ${armyId}:`, parsedState);
+        return parsedState;
+      } else {
+        console.warn(`Invalid state data found for army ${armyId}. Removing.`);
+        localStorage.removeItem(key);
+        return null;
+      }
+    }
+    return null; // No state found for this army
   } catch (error) {
-    console.error("Error loading component state from localStorage:", error);
+    console.error(
+      `Error loading state for army ${armyId} from localStorage:`,
+      error
+    );
+    // Attempt to remove potentially corrupted data
+    try {
+      localStorage.removeItem(key);
+    } catch (removeError) {
+      /* Ignore */
+    }
     return null;
   }
 }
 
-/** Resets (clears) the saved component state from localStorage. */
-function resetComponentState() {
+/**
+ * Resets (clears) the saved state for a specific army from localStorage.
+ * @param {string} armyId - The ID of the army whose state should be reset.
+ * */
+function resetArmyState(armyId) {
+  const key = getArmyStateKey(armyId);
+  if (!key) return;
+
   try {
-    localStorage.removeItem(config.COMPONENT_STATE_KEY);
-    console.log("Saved component state reset.");
+    localStorage.removeItem(key);
+    console.log(`Saved state reset for army ${armyId}.`);
   } catch (error) {
-    console.error("Error resetting component state in localStorage:", error);
+    console.error(
+      `Error resetting state for army ${armyId} in localStorage:`,
+      error
+    );
   }
 }
 
-// Export all functions
+// Export the new functions
 export {
-  saveWoundState,
-  loadWoundState,
-  resetWoundState,
-  saveComponentState,
-  loadComponentState,
-  resetComponentState,
+  saveArmyState,
+  loadArmyState,
+  resetArmyState,
+  getArmyStateKey, // Export helper if needed elsewhere, though maybe not
 };
