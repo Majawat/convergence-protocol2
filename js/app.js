@@ -1,14 +1,14 @@
 /**
  * @fileoverview Main application entry point and orchestration.
  * Loads data, initializes state, sets up UI, and attaches event listeners.
- * **MODIFIED:** Fixed missing import for getCommonRulesData.
+ * Refactored for clarity, added comments, and isolated initial highlighting.
  */
 
 // Core Imports
-import { config } from "./config.js"; // Configuration constants
-import { loadCampaignData, loadGameData } from "./dataLoader.js"; // Data fetching functions
-import { fetchArmyData } from "./api.js"; // Specific army list fetching
-import { processArmyData } from "./dataProcessor.js"; // Army list processing
+import { config } from "./config.js";
+import { loadCampaignData, loadGameData } from "./dataLoader.js";
+import { fetchArmyData } from "./api.js";
+import { processArmyData } from "./dataProcessor.js";
 import {
   // State Setters
   setCampaignData,
@@ -19,7 +19,7 @@ import {
   setArmyComponentStates,
   // State Getters
   getCampaignData,
-  getCommonRulesData, // <<< Added missing import
+  getCommonRulesData,
   getArmyWoundStates,
   getArmyComponentStates,
   getLoadedArmyData,
@@ -28,33 +28,187 @@ import {
   getUnitData,
   getJoinedHeroData,
   updateGlobalWoundState,
-} from "./state.js"; // State management functions
+} from "./state.js";
 import {
   loadWoundState,
   loadComponentState,
-  saveWoundState,
-  saveComponentState, // Storage interaction
+  saveComponentState,
 } from "./storage.js";
-import { displayArmyUnits } from "./ui.js"; // Core UI rendering function
-import { displayArmySelection, populateArmyInfoModal } from "./uiHelpers.js"; // Helper UI functions
-import { setupEventListeners } from "./eventHandlers.js"; // Event listener setup function
-import { findTargetModelForWound } from "./gameLogic.js"; // Game logic helper
-// Note: highlightNextAutoTargetModel is now internal to eventHandlers.js
+import { displayArmyUnits } from "./ui.js";
+import { displayArmySelection, populateArmyInfoModal } from "./uiHelpers.js";
+import { setupEventListeners } from "./eventHandlers.js";
+import { findTargetModelForWound } from "./gameLogic.js";
+
+// --- Helper Functions ---
+
+/**
+ * Initializes the highlighting for the next model to take a wound on each unit card.
+ * Should be called after `displayArmyUnits`.
+ * @param {object} processedArmy - The fully processed army data.
+ * @private
+ */
+function _initializeWoundHighlights(processedArmy) {
+  if (!processedArmy || !processedArmy.units) return;
+  const armyId = processedArmy.meta.id;
+
+  console.log("Initializing wound highlights...");
+
+  // Iterate through units that are displayed as cards (not joined heroes)
+  processedArmy.units
+    .filter(
+      (u) => !(u.isHero && getCurrentArmyHeroTargets(armyId)?.[u.selectionId])
+    )
+    .forEach((baseUnit) => {
+      const cardUnitId = baseUnit.selectionId;
+      const heroData = getJoinedHeroData(armyId, cardUnitId);
+
+      // Find the initial target model using game logic
+      const initialTargetModel = findTargetModelForWound(baseUnit, heroData);
+
+      if (initialTargetModel) {
+        // Find the corresponding DOM element on the card
+        const targetModelElement = document.querySelector(
+          `#unit-card-${cardUnitId} [data-model-id="${initialTargetModel.modelId}"]`
+        );
+        if (targetModelElement) {
+          // Clear any existing highlight first (safety)
+          const card = targetModelElement.closest(".unit-card");
+          card
+            ?.querySelectorAll(".model-display.target-model")
+            .forEach((el) => el.classList.remove("target-model"));
+          // Add the highlight class
+          targetModelElement.classList.add("target-model");
+          console.log(
+            `Initial highlight set for model ${initialTargetModel.modelId} on card ${cardUnitId}`
+          );
+        } else {
+          console.warn(
+            `Could not find element for initial target model ${initialTargetModel.modelId} on card ${cardUnitId}`
+          );
+        }
+      } else {
+        console.log(`No initial target model found for card ${cardUnitId}`);
+      }
+    });
+}
+
+/**
+ * Initializes the component state (e.g., tokens) for an army if not already present in loaded state.
+ * @param {string} armyId - The ID of the army.
+ * @param {object} processedArmy - The processed army data.
+ * @private
+ */
+function _initializeComponentStateIfNeeded(armyId, processedArmy) {
+  let stateChanged = false;
+  const currentArmyStates = getArmyComponentStates(); // Get current global component state
+
+  // Ensure army entry exists in the state
+  if (!currentArmyStates[armyId]) {
+    currentArmyStates[armyId] = {};
+    stateChanged = true; // State structure changed
+  }
+
+  processedArmy.units.forEach((unit) => {
+    // Ensure unit entry exists for this army
+    if (!currentArmyStates[armyId][unit.selectionId]) {
+      currentArmyStates[armyId][unit.selectionId] = {};
+      stateChanged = true; // State structure changed
+    }
+
+    // Initialize tokens to 0 only if the unit is a caster AND tokens are not already set
+    if (
+      unit.casterLevel > 0 &&
+      currentArmyStates[armyId][unit.selectionId].tokens === undefined
+    ) {
+      console.log(
+        `Initializing tokens for caster ${unit.selectionId} in army ${armyId}`
+      );
+      currentArmyStates[armyId][unit.selectionId].tokens = 0;
+      stateChanged = true; // State value changed
+    }
+    // Add initialization for other component states here if needed
+  });
+
+  // Save the state back to storage only if something was actually initialized
+  if (stateChanged) {
+    console.log("Saving initialized/updated component state.");
+    saveComponentState(currentArmyStates);
+  }
+}
+
+/**
+ * Initializes or applies wound state from storage to the processed army data.
+ * Ensures every model in the processed army has a corresponding entry in the global wound state.
+ * @param {string} armyId - The ID of the army.
+ * @param {object} processedArmy - The processed army data (models will be updated with currentHp).
+ * @private
+ */
+function _initializeWoundState(armyId, processedArmy) {
+  let stateChanged = false;
+  const currentWoundStates = getArmyWoundStates(); // Get current global wound state
+
+  // Ensure army entry exists
+  if (!currentWoundStates[armyId]) {
+    currentWoundStates[armyId] = {};
+    stateChanged = true;
+  }
+
+  processedArmy.units.forEach((unit) => {
+    const unitSpecificId = unit.selectionId;
+
+    // Ensure unit entry exists for this army
+    if (!currentWoundStates[armyId][unitSpecificId]) {
+      currentWoundStates[armyId][unitSpecificId] = {};
+      stateChanged = true;
+    }
+
+    // Iterate through models in the *processed* unit data
+    unit.models.forEach((model) => {
+      // Check if this model exists in the loaded state
+      if (
+        currentWoundStates[armyId][unitSpecificId]?.hasOwnProperty(
+          model.modelId
+        )
+      ) {
+        // Apply saved HP to the model object in memory
+        model.currentHp =
+          currentWoundStates[armyId][unitSpecificId][model.modelId];
+      } else {
+        // Model not found in saved state - initialize it
+        console.log(
+          `Initializing wound state for model ${model.modelId} in unit ${unitSpecificId}`
+        );
+        model.currentHp = model.maxHp; // Start at max HP
+        // Update the global state object directly
+        currentWoundStates[armyId][unitSpecificId][model.modelId] =
+          model.currentHp;
+        stateChanged = true;
+      }
+    });
+  });
+
+  // Save the state back to storage only if something was initialized or structure changed
+  if (stateChanged) {
+    console.log("Saving initialized/updated wound state.");
+    saveWoundState(currentWoundStates);
+  }
+}
 
 // --- Main Application Logic ---
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM fully loaded and parsed");
 
-  // Get essential HTML elements
+  // --- Get Essential HTML Elements ---
   const mainListContainer = document.getElementById("army-units-container");
   const titleH1 = document.getElementById("army-title-h1");
   if (!mainListContainer || !titleH1) {
     console.error(
       "Essential HTML elements (#army-units-container or #army-title-h1) not found!"
     );
+    // Display critical error message to the user
     document.body.innerHTML =
       '<div class="alert alert-danger m-5">Critical Error: Page structure is missing essential elements. Cannot initialize application.</div>';
-    return;
+    return; // Stop execution
   }
 
   // Initial loading indicator
@@ -62,187 +216,135 @@ document.addEventListener("DOMContentLoaded", async () => {
     '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading Campaign...</span></div></div></div>';
 
   // --- Step 1: Load Campaign Data ---
+  console.log("Step 1: Loading campaign data...");
   const campaignDataResult = await loadCampaignData();
   setCampaignData(campaignDataResult); // Store in state module
   if (!getCampaignData()) {
-    // Use the getter now
-    // loadCampaignData already displays an error message in the container
+    // loadCampaignData handles logging the error
     titleH1.textContent = "Error Loading Campaign";
+    mainListContainer.innerHTML =
+      '<div class="col-12"><div class="alert alert-danger m-4">Failed to load campaign data. Please check console and network connection.</div></div>';
     return; // Stop if campaign data failed to load
   }
+  console.log("Campaign data loaded.");
 
   // --- Step 2: Determine Army to Load from URL ---
+  console.log("Step 2: Determining army to load...");
   const urlParams = new URLSearchParams(window.location.search);
   const armyIdToLoad = urlParams.get("armyId");
-  // Use the getter to access campaign data
+  const campaignArmies = getCampaignData()?.armies || [];
   const armyInfo = armyIdToLoad
-    ? getCampaignData().armies.find((a) => a.armyForgeID === armyIdToLoad)
+    ? campaignArmies.find((a) => a.armyForgeID === armyIdToLoad)
     : null;
+  console.log(
+    `Army ID from URL: ${armyIdToLoad}`,
+    armyInfo ? `(Found: ${armyInfo.armyName})` : "(Not found or no ID)"
+  );
 
   // --- Step 3: Display Army Selection or Proceed ---
   if (!armyIdToLoad || !armyInfo) {
-    // If no valid army ID, show the selection list
-    displayArmySelection(getCampaignData().armies, mainListContainer); // Use getter
+    console.log("Step 3: No valid army ID found, displaying selection list.");
+    displayArmySelection(campaignArmies, mainListContainer);
     document.title = "Select Army - OPR Army Tracker";
     titleH1.textContent = "Select Army";
     const infoButton = document.getElementById("army-info-button");
-    if (infoButton) infoButton.disabled = true; // Disable info button if no army selected
+    if (infoButton) infoButton.disabled = true; // Disable info button
     return; // Stop further execution
   }
 
   // --- Valid armyId found, proceed with loading ---
-  console.log(`Valid armyId found: ${armyIdToLoad}. Loading game data...`);
+  console.log(`Step 3: Valid armyId found (${armyIdToLoad}). Proceeding...`);
   mainListContainer.innerHTML =
     '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading Game Data...</span></div></div></div>';
   titleH1.textContent = `Loading ${armyInfo.armyName}...`;
 
-  // --- Step 4: Load Army Books AND Common Rules (using cache) ---
-  const gameData = await loadGameData(getCampaignData()); // Use getter
-  setArmyBooksData(gameData.armyBooks);
-  setCommonRulesData(gameData.commonRules);
-  console.log("Common Rules Loaded (Global State):", getCommonRulesData()); // Use getter
-
-  // --- Step 5: Load Persisted States (Wounds, Tokens, etc.) ---
-  setArmyWoundStates(loadWoundState());
-  setArmyComponentStates(loadComponentState());
-
-  // --- Step 6: Fetch and Process the Selected Army's List Data ---
-  mainListContainer.innerHTML = ""; // Clear spinner AFTER loading game data
-  setLoadedArmyData(armyIdToLoad, null); // Clear any previous army data from state
-
   try {
-    console.log(`Fetching Army List data for ${armyIdToLoad}...`);
+    // --- Step 4: Load Army Books AND Common Rules (using cache) ---
+    console.log("Step 4: Loading game data (Army Books & Common Rules)...");
+    const gameData = await loadGameData(getCampaignData());
+    setArmyBooksData(gameData.armyBooks);
+    setCommonRulesData(gameData.commonRules);
+    console.log("Game data loaded.", "Common Rules:", getCommonRulesData());
+
+    // --- Step 5: Load Persisted States (Wounds, Components) ---
+    console.log("Step 5: Loading persisted state from localStorage...");
+    // Load existing states into the global state variables
+    setArmyWoundStates(loadWoundState());
+    setArmyComponentStates(loadComponentState());
+    console.log("Persisted state loaded.");
+
+    // --- Step 6: Fetch and Process the Selected Army's List Data ---
+    console.log(
+      `Step 6: Fetching and processing army list for ${armyIdToLoad}...`
+    );
+    mainListContainer.innerHTML = ""; // Clear spinner *before* processing
+    setLoadedArmyData(armyIdToLoad, null); // Clear any previous army data from state
+
     const rawData = await fetchArmyData(armyIdToLoad); // Fetch from api.js
-
-    if (rawData) {
-      console.log(`Processing Army List data for ${armyIdToLoad}...`);
-      const processedArmy = processArmyData(rawData); // Process using dataProcessor.js
-
-      if (processedArmy) {
-        setLoadedArmyData(armyIdToLoad, processedArmy); // Store processed army in state
-
-        // Add casterLevel property and initialize component state (tokens)
-        processedArmy.units.forEach((unit) => {
-          const casterRule = unit.rules.find((r) => r.name === "Caster");
-          unit.casterLevel = casterRule
-            ? parseInt(casterRule.rating, 10) || 0
-            : 0;
-          // Initialize component state if needed
-          const currentArmyStates = getArmyComponentStates(); // Get current state object
-          if (!currentArmyStates[armyIdToLoad])
-            currentArmyStates[armyIdToLoad] = {};
-          if (!currentArmyStates[armyIdToLoad][unit.selectionId])
-            currentArmyStates[armyIdToLoad][unit.selectionId] = {};
-          // Default tokens to 0 ONLY if not already present in loaded state
-          if (
-            unit.casterLevel > 0 &&
-            currentArmyStates[armyIdToLoad][unit.selectionId].tokens ===
-              undefined
-          ) {
-            currentArmyStates[armyIdToLoad][unit.selectionId].tokens = 0;
-          }
-        });
-        saveComponentState(getArmyComponentStates()); // Save potentially initialized state
-
-        // Initialize/apply wound state from storage
-        const currentWoundStates = getArmyWoundStates(); // Get current state object
-        const savedArmyWounds = currentWoundStates[armyIdToLoad];
-        if (!savedArmyWounds) currentWoundStates[armyIdToLoad] = {}; // Ensure army entry exists
-        processedArmy.units.forEach((unit) => {
-          const unitSpecificId = unit.selectionId;
-          const savedUnitWounds =
-            currentWoundStates[armyIdToLoad]?.[unitSpecificId];
-          if (!savedUnitWounds)
-            currentWoundStates[armyIdToLoad][unitSpecificId] = {}; // Ensure unit entry exists
-          unit.models.forEach((model) => {
-            if (savedUnitWounds?.hasOwnProperty(model.modelId)) {
-              model.currentHp = savedUnitWounds[model.modelId]; // Apply saved HP
-            } else {
-              // If not in saved state, initialize it in the state object AND apply to model
-              model.currentHp = model.maxHp; // Ensure model starts at max HP if not saved
-              updateGlobalWoundState(
-                armyIdToLoad,
-                unitSpecificId,
-                model.modelId,
-                model.currentHp
-              );
-            }
-          });
-        });
-        saveWoundState(getArmyWoundStates()); // Save potentially initialized wound state
-
-        // --- Step 7: Update UI ---
-        document.title = `${armyInfo.armyName} - OPR Army Tracker`;
-        titleH1.textContent = armyInfo.armyName;
-        populateArmyInfoModal(armyInfo); // Populate the info modal
-
-        console.log(`Displaying units for ${armyIdToLoad}...`);
-        // Pass the main container, processed army, and component states to the UI function
-        displayArmyUnits(
-          processedArmy,
-          mainListContainer,
-          getArmyComponentStates()
-        );
-
-        // Highlight initial wound targets
-        processedArmy.units
-          .filter(
-            (u) =>
-              !(
-                u.isHero &&
-                getCurrentArmyHeroTargets(armyIdToLoad)?.[u.selectionId]
-              )
-          ) // Filter out joined heroes
-          .forEach((unit) => {
-            const baseUnit =
-              getCurrentArmyUnitMap(armyIdToLoad)?.[unit.selectionId];
-            if (baseUnit) {
-              const heroData = getJoinedHeroData(
-                armyIdToLoad,
-                baseUnit.selectionId
-              );
-              const initialTarget = findTargetModelForWound(baseUnit, heroData);
-              // Call the highlight function (now internal to eventHandlers, but we need initial highlight)
-              const targetModelElement = initialTarget
-                ? document.querySelector(
-                    `[data-model-id="${initialTarget.modelId}"]`
-                  )
-                : null;
-              if (
-                targetModelElement &&
-                targetModelElement.closest(".unit-card")?.id ===
-                  `unit-card-${baseUnit.selectionId}`
-              ) {
-                const card = document.getElementById(
-                  `unit-card-${baseUnit.selectionId}`
-                );
-                card
-                  ?.querySelectorAll(".model-display.target-model")
-                  .forEach((el) => el.classList.remove("target-model"));
-                targetModelElement.classList.add("target-model");
-              }
-            }
-          });
-
-        // --- Step 8: Setup Event Listeners ---
-        setupEventListeners(armyIdToLoad); // Initialize event handlers
-      } else {
-        // Handle error during processing
-        mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">Error processing army list data for ${armyInfo.armyName}.</div></div>`;
-        titleH1.textContent = "Error Processing Army";
-      }
-    } else {
-      // Handle error fetching raw army list
-      mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning m-4" role="alert">Could not load army list data for ${armyInfo.armyName} (ID: ${armyIdToLoad}). Check Army Forge ID and network connection.</div></div>`;
-      titleH1.textContent = "Error Loading Army List";
+    if (!rawData) {
+      throw new Error(`Could not fetch army list data for ID: ${armyIdToLoad}`);
     }
+    console.log(`Raw army list data fetched for ${armyIdToLoad}.`);
+
+    const processedArmy = processArmyData(rawData); // Process using dataProcessor.js
+    if (!processedArmy) {
+      throw new Error(
+        `Failed to process army list data for ${armyInfo.armyName}.`
+      );
+    }
+    console.log(`Army list processed for ${armyInfo.armyName}.`);
+
+    // Store the fully processed army data in the state
+    setLoadedArmyData(armyIdToLoad, processedArmy);
+
+    // --- Step 7: Initialize State & Update UI ---
+    console.log("Step 7: Initializing state and updating UI...");
+
+    // Ensure component state (tokens) is initialized for casters if needed
+    _initializeComponentStateIfNeeded(armyIdToLoad, processedArmy);
+
+    // Initialize wound state (apply saved HP or set to maxHP)
+    // This also updates the model objects in processedArmy
+    _initializeWoundState(armyIdToLoad, processedArmy);
+
+    // Update page title and header
+    document.title = `${armyInfo.armyName} - OPR Army Tracker`;
+    titleH1.textContent = armyInfo.armyName;
+
+    // Populate the info modal (but don't show it)
+    populateArmyInfoModal(armyInfo);
+
+    // Display the processed units on the page
+    console.log(`Displaying units for ${armyIdToLoad}...`);
+    displayArmyUnits(
+      processedArmy,
+      mainListContainer,
+      getArmyComponentStates() // Pass current component state for initial token display
+    );
+
+    // Set initial wound target highlights after rendering
+    _initializeWoundHighlights(processedArmy);
+
+    console.log("UI updated.");
+
+    // --- Step 8: Setup Event Listeners ---
+    console.log("Step 8: Setting up event listeners...");
+    setupEventListeners(armyIdToLoad);
+    console.log("Event listeners attached.");
+
+    console.log("Application initialization complete.");
   } catch (error) {
-    // Catch any unexpected errors during fetch/process/display
+    // Catch any errors during the loading/processing steps
     console.error(
-      `An unexpected error occurred loading/processing army ${armyIdToLoad}:`,
+      `An error occurred during initialization for army ${armyIdToLoad}:`,
       error
     );
-    mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">An unexpected error occurred while loading the army (${armyInfo.armyName}). Please check the console for details.</div></div>`;
-    titleH1.textContent = "Unexpected Error";
+    // Display error message to the user
+    mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">An error occurred while loading the army (${
+      armyInfo?.armyName || armyIdToLoad
+    }). Please check the console for details. Error: ${
+      error.message
+    }</div></div>`;
+    titleH1.textContent = "Error Loading Army";
   }
 }); // End DOMContentLoaded

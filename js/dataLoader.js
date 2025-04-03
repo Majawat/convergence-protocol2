@@ -47,7 +47,8 @@ export async function loadGameData(campaignData) {
     cachedBooks = {};
   }
 
-  const gfRulesKey = config.COMMON_RULES_CACHE_KEY_PREFIX + "2"; // Hardcoding GF for now
+  const gfRulesKey =
+    config.COMMON_RULES_CACHE_KEY_PREFIX + config.DEFAULT_GAME_SYSTEM; // Hardcoding GF for now
   try {
     const cachedGfRules = sessionStorage.getItem(gfRulesKey);
     if (cachedGfRules) {

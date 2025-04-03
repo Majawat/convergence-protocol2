@@ -2,8 +2,7 @@
  * @fileoverview Handles saving and loading game state to localStorage.
  */
 
-const WOUND_STATE_KEY = "oprArmyTracker_woundState";
-const COMPONENT_STATE_KEY = "oprArmyTracker_componentState"; // For tokens, etc.
+import { config } from "./config.js";
 
 // --- Wound State ---
 
@@ -13,7 +12,7 @@ const COMPONENT_STATE_KEY = "oprArmyTracker_componentState"; // For tokens, etc.
  */
 function saveWoundState(woundState) {
   try {
-    localStorage.setItem(WOUND_STATE_KEY, JSON.stringify(woundState));
+    localStorage.setItem(config.WOUND_STATE_KEY, JSON.stringify(woundState));
   } catch (error) {
     console.error("Error saving wound state to localStorage:", error);
   }
@@ -25,7 +24,7 @@ function saveWoundState(woundState) {
  */
 function loadWoundState() {
   try {
-    const storedState = localStorage.getItem(WOUND_STATE_KEY);
+    const storedState = localStorage.getItem(config.WOUND_STATE_KEY);
     return storedState ? JSON.parse(storedState) : null;
   } catch (error) {
     console.error("Error loading wound state from localStorage:", error);
@@ -36,7 +35,7 @@ function loadWoundState() {
 /** Resets (clears) the saved wound state from localStorage. */
 function resetWoundState() {
   try {
-    localStorage.removeItem(WOUND_STATE_KEY);
+    localStorage.removeItem(config.WOUND_STATE_KEY);
     console.log("Saved wound state reset.");
   } catch (error) {
     console.error("Error resetting wound state in localStorage:", error);
@@ -51,7 +50,10 @@ function resetWoundState() {
  */
 function saveComponentState(componentState) {
   try {
-    localStorage.setItem(COMPONENT_STATE_KEY, JSON.stringify(componentState));
+    localStorage.setItem(
+      config.COMPONENT_STATE_KEY,
+      JSON.stringify(componentState)
+    );
     // console.log('Component state saved:', componentState);
   } catch (error) {
     console.error("Error saving component state to localStorage:", error);
@@ -64,7 +66,7 @@ function saveComponentState(componentState) {
  */
 function loadComponentState() {
   try {
-    const storedState = localStorage.getItem(COMPONENT_STATE_KEY);
+    const storedState = localStorage.getItem(config.COMPONENT_STATE_KEY);
     // console.log('Loaded component state string:', storedState);
     const parsedState = storedState ? JSON.parse(storedState) : null;
     // console.log('Parsed component state:', parsedState);
@@ -78,7 +80,7 @@ function loadComponentState() {
 /** Resets (clears) the saved component state from localStorage. */
 function resetComponentState() {
   try {
-    localStorage.removeItem(COMPONENT_STATE_KEY);
+    localStorage.removeItem(config.COMPONENT_STATE_KEY);
     console.log("Saved component state reset.");
   } catch (error) {
     console.error("Error resetting component state in localStorage:", error);

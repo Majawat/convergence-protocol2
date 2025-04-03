@@ -5,23 +5,23 @@
  * Modified to default to dark, simplify, and add theme change toast notification.
  */
 
+import { config } from './config.js';
+
 (() => {
   "use strict";
-
-  const THEME_STORAGE_KEY = "theme";
 
   /**
    * Gets the theme stored in localStorage.
    * @returns {string|null} The stored theme ('light', 'dark') or null.
    */
-  const getStoredTheme = () => localStorage.getItem(THEME_STORAGE_KEY);
+  const getStoredTheme = () => localStorage.getItem(config.THEME_STORAGE_KEY);
 
   /**
    * Stores the theme preference in localStorage.
    * @param {string} theme - The theme to store ('light', 'dark').
    */
   const setStoredTheme = (theme) =>
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    localStorage.setItem(config.THEME_STORAGE_KEY, theme);
 
   /**
    * Determines the preferred theme based on storage or OS preference.
@@ -116,7 +116,7 @@
       toggle.addEventListener("click", () => {
         const theme = toggle.getAttribute("data-bs-theme-value");
         if (theme === "auto") {
-          localStorage.removeItem(THEME_STORAGE_KEY);
+          localStorage.removeItem(config.THEME_STORAGE_KEY);
         } else {
           setStoredTheme(theme);
         }
