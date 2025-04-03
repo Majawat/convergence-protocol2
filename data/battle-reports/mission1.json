@@ -1,0 +1,62 @@
+{
+  "missionId": 1,
+  "title": "The Battle for the Axiom Shard",
+  "participants": [
+    {
+      "player": "Alex",
+      "army": "van Louen's Roughnecks",
+      "result": "winner"
+    },
+    {
+      "player": "Cody",
+      "army": "The Ashen Pact",
+      "result": "participant"
+    },
+    {
+      "player": "Claire",
+      "army": "Hive Fleet Tarvos",
+      "result": "participant"
+    }
+  ],
+  "rounds": [
+    {
+      "number": 1,
+      "title": "The Opening Salvos",
+      "description": "As the armies deployed without the luxury of ambush, tension immediately gripped the field. Alex's Roughnecks opened the engagement with a missile salvo—one stray shot missing its mark but still tearing through three of Claire's smaller units. In response, Claire advanced her mysterious \"braken thing\" while Cody's Ashen Pact defenders rushed forward to meet the threat.\n\nIn Turn 2, Alex's front-line force moved up, unleashing 20 shots at a psychic target. Although only two connected—costing him one \"little guy\"—Claire's forces countered by advancing her Emerald Tide, prompting Cody to reposition his Dustborn to block the assault.\n\nAs the battle wore on, turrets were fired upon, Zerek Thal and beast riders repositioned for cover, and psychic powers clashed with raw firepower. In one unforgettable moment amid the chaos, a Roughneck model literally runs like a bitch in a desperate bid to close the gap—a vivid reminder of the unpredictable nature of war."
+    },
+    {
+      "number": 2,
+      "title": "Turning the Tide",
+      "description": "The fog thickened as new psychic energies and aggressive charges redefined the conflict. Claire's psycher cast Animate Flora, gifting her units flight and decimating a large enemy group. Not to be outdone, Cody's Radiant Guard retaliated with a combination of flame and pistol fire that sliced through the enemy ranks, evening the balance."
+    },
+    {
+      "number": 3,
+      "title": "The Nexus Gambit",
+      "description": "In a high-stakes contest for the Mechanist Nexus, heroes clashed and strategies collided. Claire's hero, finding himself surrounded, charged desperately against Cody's dawnbringers—only to fall into fatigue. Seizing the moment, Cody eliminated the beleaguered hero while Alex stormed the objective, picking up the Mechanist Nexus and boarding his tank in a last-minute dash."
+    },
+    {
+      "number": 4,
+      "title": "The Alien Cannon's Arrival",
+      "description": "Just when the battle reached its boiling point, an alien cannon emerged—a weapon as enigmatic as it was devastating. In a movie-esque climax, Cody's final, decisive shot obliterated Alex's tank. Even so, in a display of raw survival instinct, the crew managed to leap clear of the explosion at the last second.\n\nThis day of clashing titans, strategic gambits, and moments of absurdity will be remembered—especially that unforgettable instance when someone runs like a bitch."
+    }
+  ],
+  "keyMoments": [
+    {
+      "title": "Missile Strike",
+      "description": "Alex's Roughnecks scored a devastating hit with their missile salvo, eliminating three of Claire's units."
+    },
+    {
+      "title": "Psychic Assault",
+      "description": "Claire's psycher cast Animate Flora, giving her units flight capabilities and decimating enemy forces."
+    },
+    {
+      "title": "Objective Secured",
+      "description": "Alex managed to capture the Mechanist Nexus artifact and board his tank."
+    },
+    {
+      "title": "Tank Explosion",
+      "description": "Cody's forces destroyed Alex's tank, but the crew survived the explosion."
+    }
+  ],
+  "conclusion": "Despite the destruction of his tank, Alex's forces managed to secure the Mechanist Nexus artifact, claiming victory in the first mission."
+}

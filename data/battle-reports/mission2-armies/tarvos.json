@@ -1,0 +1,1666 @@
+{
+  "id": "Un3_pRTu2xBO",
+  "key": "7kB0oW9CrUWCJHxKcKjUP",
+  "name": "Hive Fleet Tarvos",
+  "isCloud": false,
+  "forceOrg": true,
+  "modified": "2025-03-23T14:33:09.397Z",
+  "gameSystem": "gf",
+  "modelCount": 26,
+  "description": "",
+  "pointsLimit": 1450,
+  "campaignMode": true,
+  "cloudModified": "2025-03-23T14:28:26.918Z",
+  "narrativeMode": false,
+  "activationCount": 5,
+  "units": [
+    {
+      "id": "_LXFoO9",
+      "cost": 110,
+      "name": "Assault Grunts",
+      "size": 10,
+      "bases": { "round": "25", "square": "25" },
+      "items": [],
+      "rules": [
+        { "id": "KdgwlPb8LuD2", "name": "Fast", "label": "Fast" },
+        { "id": "JSKVyurtWIyW", "name": "Strider", "label": "Strider" }
+      ],
+      "valid": true,
+      "defense": 5,
+      "quality": 5,
+      "weapons": [
+        {
+          "id": "DfidZY7Z",
+          "name": "Razor Claws",
+          "type": "ArmyBookWeapon",
+          "attacks": 2,
+          "weaponId": "DfidZY7Z",
+          "specialRules": [],
+          "label": "Razor Claws (A2)",
+          "count": 10,
+          "originalCount": 10
+        }
+      ],
+      "upgrades": ["D1", "F1"],
+      "hasCustomRule": false,
+      "disabledSections": [],
+      "hasBalanceInvalid": false,
+      "disabledUpgradeSections": [],
+      "armyId": "w7qor7b2kuifcyvk",
+      "xp": 0,
+      "notes": null,
+      "traits": [],
+      "combined": true,
+      "customName": "The Emerald Tide",
+      "joinToUnit": null,
+      "selectionId": "1hUcX",
+      "selectedUpgrades": [
+        {
+          "instanceId": "l4SNpEbp6",
+          "upgrade": {
+            "id": "PPYfO8k",
+            "uid": "3wJarRx",
+            "label": "Upgrade all models with one",
+            "parentPackageUid": "D1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "upgrade",
+            "model": true,
+            "affects": { "type": "all" },
+            "select": { "type": "exactly", "value": 1 }
+          },
+          "option": {
+            "uid": "1ewDpNQ",
+            "cost": 5,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 15, "unitId": "_LXFoO9" },
+              { "cost": 10, "unitId": "CMADHYi" },
+              { "cost": 10, "unitId": "vuuKwqD" },
+              { "cost": 5, "unitId": "6oOZMAA" },
+              { "cost": 5, "unitId": "_c1518l" }
+            ],
+            "gains": [
+              {
+                "name": "Heavy Bite",
+                "type": "ArmyBookItem",
+                "label": "Heavy Bite (Furious)",
+                "content": [
+                  {
+                    "id": "JoOCVPx1xT1G",
+                    "name": "Furious",
+                    "type": "ArmyBookRule",
+                    "dependencies": []
+                  }
+                ],
+                "count": 1,
+                "dependencies": []
+              }
+            ],
+            "label": "Heavy Bite (Furious)",
+            "parentPackageUid": "D1",
+            "parentSectionUid": "3wJarRx",
+            "parentSectionId": "3wJarRx",
+            "id": "1ewDpNQ"
+          }
+        }
+      ],
+      "loadout": [
+        {
+          "id": "DfidZY7Z",
+          "name": "Razor Claws",
+          "type": "ArmyBookWeapon",
+          "attacks": 2,
+          "weaponId": "DfidZY7Z",
+          "specialRules": [],
+          "label": "Razor Claws (A2)",
+          "count": 10,
+          "originalCount": 10
+        },
+        {
+          "name": "Heavy Bite",
+          "type": "ArmyBookItem",
+          "label": "Heavy Bite (Furious)",
+          "content": [
+            {
+              "id": "JoOCVPx1xT1G",
+              "name": "Furious",
+              "type": "ArmyBookRule",
+              "dependencies": [],
+              "count": 10
+            }
+          ],
+          "count": 10,
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "_LXFoO9",
+      "cost": 110,
+      "name": "Assault Grunts",
+      "size": 10,
+      "bases": { "round": "25", "square": "25" },
+      "items": [],
+      "rules": [
+        { "id": "KdgwlPb8LuD2", "name": "Fast", "label": "Fast" },
+        { "id": "JSKVyurtWIyW", "name": "Strider", "label": "Strider" }
+      ],
+      "valid": true,
+      "defense": 5,
+      "quality": 5,
+      "weapons": [
+        {
+          "id": "DfidZY7Z",
+          "name": "Razor Claws",
+          "type": "ArmyBookWeapon",
+          "attacks": 2,
+          "weaponId": "DfidZY7Z",
+          "specialRules": [],
+          "label": "Razor Claws (A2)",
+          "count": 10,
+          "originalCount": 10
+        }
+      ],
+      "upgrades": ["D1", "F1"],
+      "hasCustomRule": false,
+      "disabledSections": [],
+      "hasBalanceInvalid": false,
+      "disabledUpgradeSections": [],
+      "armyId": "w7qor7b2kuifcyvk",
+      "xp": 0,
+      "notes": null,
+      "traits": [],
+      "combined": true,
+      "customName": "The Emerald Tide",
+      "joinToUnit": "1hUcX",
+      "selectionId": "FaRfF",
+      "selectedUpgrades": [
+        {
+          "instanceId": "vHBo-D_o8",
+          "upgrade": {
+            "id": "PPYfO8k",
+            "uid": "3wJarRx",
+            "label": "Upgrade all models with one",
+            "parentPackageUid": "D1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "upgrade",
+            "model": true,
+            "affects": { "type": "all" },
+            "select": { "type": "exactly", "value": 1 }
+          },
+          "option": {
+            "uid": "1ewDpNQ",
+            "cost": 5,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 15, "unitId": "_LXFoO9" },
+              { "cost": 10, "unitId": "CMADHYi" },
+              { "cost": 10, "unitId": "vuuKwqD" },
+              { "cost": 5, "unitId": "6oOZMAA" },
+              { "cost": 5, "unitId": "_c1518l" }
+            ],
+            "gains": [
+              {
+                "name": "Heavy Bite",
+                "type": "ArmyBookItem",
+                "label": "Heavy Bite (Furious)",
+                "content": [
+                  {
+                    "id": "JoOCVPx1xT1G",
+                    "name": "Furious",
+                    "type": "ArmyBookRule",
+                    "dependencies": []
+                  }
+                ],
+                "count": 1,
+                "dependencies": []
+              }
+            ],
+            "label": "Heavy Bite (Furious)",
+            "parentPackageUid": "D1",
+            "parentSectionUid": "3wJarRx",
+            "parentSectionId": "3wJarRx",
+            "id": "1ewDpNQ"
+          }
+        }
+      ],
+      "loadout": [
+        {
+          "id": "DfidZY7Z",
+          "name": "Razor Claws",
+          "type": "ArmyBookWeapon",
+          "attacks": 2,
+          "weaponId": "DfidZY7Z",
+          "specialRules": [],
+          "label": "Razor Claws (A2)",
+          "count": 10,
+          "originalCount": 10
+        },
+        {
+          "name": "Heavy Bite",
+          "type": "ArmyBookItem",
+          "label": "Heavy Bite (Furious)",
+          "content": [
+            {
+              "id": "JoOCVPx1xT1G",
+              "name": "Furious",
+              "type": "ArmyBookRule",
+              "dependencies": [],
+              "count": 10
+            }
+          ],
+          "count": 10,
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "YbEEu7h",
+      "cost": 300,
+      "name": "Carnivo-Rex",
+      "size": 1,
+      "bases": { "round": "120x92", "square": "150x100" },
+      "items": [],
+      "rules": [
+        {
+          "id": "dIQ3SGl2J2Ew",
+          "name": "Fear",
+          "rating": 2,
+          "label": "Fear(2)"
+        },
+        { "id": "2atvlmICQSCV", "name": "Fearless", "label": "Fearless" },
+        {
+          "id": "a0YtInGiUDd6",
+          "name": "Tough",
+          "rating": 12,
+          "label": "Tough(12)"
+        }
+      ],
+      "valid": true,
+      "defense": 2,
+      "quality": 4,
+      "weapons": [
+        {
+          "id": "PIp7xyja",
+          "name": "Heavy Razor Claws",
+          "type": "ArmyBookWeapon",
+          "count": 3,
+          "attacks": 3,
+          "weaponId": "PIp7xyja",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            }
+          ],
+          "label": "3x Heavy Razor Claws (A3, AP(1))",
+          "originalCount": 3,
+          "dependencies": [
+            {
+              "upgradeInstanceId": "bKEQ7cSuy",
+              "count": 1,
+              "variant": "replace"
+            },
+            {
+              "upgradeInstanceId": "Vbd8ETR1S",
+              "count": 1,
+              "variant": "replace"
+            },
+            {
+              "upgradeInstanceId": "wy0W3XFx8",
+              "count": 1,
+              "variant": "replace"
+            }
+          ]
+        },
+        {
+          "id": "nBd2jiPk",
+          "name": "Stomp",
+          "type": "ArmyBookWeapon",
+          "range": 0,
+          "attacks": 4,
+          "weaponId": "l9ncuAr5",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            }
+          ],
+          "label": "Stomp (A4, AP(1))",
+          "count": 1,
+          "originalCount": 1
+        }
+      ],
+      "upgrades": ["C2", "8R8Jo", "A2"],
+      "hasCustomRule": false,
+      "disabledSections": [],
+      "hasBalanceInvalid": false,
+      "disabledUpgradeSections": [],
+      "armyId": "w7qor7b2kuifcyvk",
+      "xp": 1,
+      "notes": null,
+      "traits": [],
+      "combined": false,
+      "customName": "Splintermaw",
+      "joinToUnit": null,
+      "selectionId": "b71yY",
+      "selectedUpgrades": [
+        {
+          "instanceId": "bKEQ7cSuy",
+          "upgrade": {
+            "id": "xIe1EBd",
+            "uid": "jGBmYru",
+            "label": "Replace any Heavy Razor Claws",
+            "parentPackageUid": "A2",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "affects": { "type": "any" },
+            "targets": ["Heavy Razor Claws"]
+          },
+          "option": {
+            "uid": "DMcODOj",
+            "cost": 5,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 5, "unitId": "YbEEu7h" },
+              { "cost": 5, "unitId": "laQL0iJ" },
+              { "cost": 5, "unitId": "ntetDg-" }
+            ],
+            "gains": [
+              {
+                "id": "0-VS7Cvs",
+                "name": "Piercing Claws",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 0,
+                "attacks": 1,
+                "weaponId": "0-VS7Cvs",
+                "specialRules": [
+                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 2 },
+                  { "id": "_mrPya5SXSqW", "name": "Deadly", "rating": 3 }
+                ],
+                "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+                "dependencies": []
+              }
+            ],
+            "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+            "parentPackageUid": "A2",
+            "parentSectionUid": "jGBmYru",
+            "parentSectionId": "jGBmYru",
+            "id": "DMcODOj"
+          }
+        },
+        {
+          "instanceId": "Vbd8ETR1S",
+          "upgrade": {
+            "id": "xIe1EBd",
+            "uid": "jGBmYru",
+            "label": "Replace any Heavy Razor Claws",
+            "parentPackageUid": "A2",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "affects": { "type": "any" },
+            "targets": ["Heavy Razor Claws"]
+          },
+          "option": {
+            "uid": "DMcODOj",
+            "cost": 5,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 5, "unitId": "YbEEu7h" },
+              { "cost": 5, "unitId": "laQL0iJ" },
+              { "cost": 5, "unitId": "ntetDg-" }
+            ],
+            "gains": [
+              {
+                "id": "0-VS7Cvs",
+                "name": "Piercing Claws",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 0,
+                "attacks": 1,
+                "weaponId": "0-VS7Cvs",
+                "specialRules": [
+                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 2 },
+                  { "id": "_mrPya5SXSqW", "name": "Deadly", "rating": 3 }
+                ],
+                "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+                "dependencies": []
+              }
+            ],
+            "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+            "parentPackageUid": "A2",
+            "parentSectionUid": "jGBmYru",
+            "parentSectionId": "jGBmYru",
+            "id": "DMcODOj"
+          }
+        },
+        {
+          "instanceId": "wy0W3XFx8",
+          "upgrade": {
+            "id": "xIe1EBd",
+            "uid": "jGBmYru",
+            "label": "Replace any Heavy Razor Claws",
+            "parentPackageUid": "A2",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "affects": { "type": "any" },
+            "targets": ["Heavy Razor Claws"]
+          },
+          "option": {
+            "uid": "DMcODOj",
+            "cost": 5,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 5, "unitId": "YbEEu7h" },
+              { "cost": 5, "unitId": "laQL0iJ" },
+              { "cost": 5, "unitId": "ntetDg-" }
+            ],
+            "gains": [
+              {
+                "id": "0-VS7Cvs",
+                "name": "Piercing Claws",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 0,
+                "attacks": 1,
+                "weaponId": "0-VS7Cvs",
+                "specialRules": [
+                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 2 },
+                  { "id": "_mrPya5SXSqW", "name": "Deadly", "rating": 3 }
+                ],
+                "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+                "dependencies": []
+              }
+            ],
+            "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+            "parentPackageUid": "A2",
+            "parentSectionUid": "jGBmYru",
+            "parentSectionId": "jGBmYru",
+            "id": "DMcODOj"
+          }
+        }
+      ],
+      "loadout": [
+        {
+          "id": "nBd2jiPk",
+          "name": "Stomp",
+          "type": "ArmyBookWeapon",
+          "range": 0,
+          "attacks": 4,
+          "weaponId": "l9ncuAr5",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            }
+          ],
+          "label": "Stomp (A4, AP(1))",
+          "count": 1,
+          "originalCount": 1
+        },
+        {
+          "id": "0-VS7Cvs",
+          "name": "Piercing Claws",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": 1,
+          "weaponId": "0-VS7Cvs",
+          "specialRules": [
+            { "id": "17crjK7P6_w6", "name": "AP", "rating": 2 },
+            { "id": "_mrPya5SXSqW", "name": "Deadly", "rating": 3 }
+          ],
+          "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+          "dependencies": []
+        },
+        {
+          "id": "0-VS7Cvs",
+          "name": "Piercing Claws",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": 1,
+          "weaponId": "0-VS7Cvs",
+          "specialRules": [
+            { "id": "17crjK7P6_w6", "name": "AP", "rating": 2 },
+            { "id": "_mrPya5SXSqW", "name": "Deadly", "rating": 3 }
+          ],
+          "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+          "dependencies": []
+        },
+        {
+          "id": "0-VS7Cvs",
+          "name": "Piercing Claws",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": 1,
+          "weaponId": "0-VS7Cvs",
+          "specialRules": [
+            { "id": "17crjK7P6_w6", "name": "AP", "rating": 2 },
+            { "id": "_mrPya5SXSqW", "name": "Deadly", "rating": 3 }
+          ],
+          "label": "Piercing Claws (A1, AP(2), Deadly(3))",
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "go9isSI",
+      "cost": 180,
+      "name": "Synapse Tyrant",
+      "size": 1,
+      "bases": { "round": "50", "square": "50" },
+      "items": [],
+      "rules": [
+        {
+          "id": "47CAqf7ySlfc",
+          "name": "Caster",
+          "rating": 3,
+          "label": "Caster(3)"
+        },
+        { "id": "T08VkBuVmNZ_", "name": "Hero", "label": "Hero" },
+        { "id": "9jyvRoBODD-O", "name": "Stealth", "label": "Stealth" },
+        {
+          "id": "a0YtInGiUDd6",
+          "name": "Tough",
+          "rating": 6,
+          "label": "Tough(6)"
+        }
+      ],
+      "valid": true,
+      "defense": 4,
+      "quality": 4,
+      "weapons": [
+        {
+          "id": "hBIsG",
+          "name": "Heavy Psy-Torrent",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 9,
+          "attacks": 2,
+          "weaponId": "IS0vq6jU",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            },
+            {
+              "type": "ArmyBookRule",
+              "id": "w_vX0mi58KKt",
+              "name": "Blast",
+              "rating": 3,
+              "label": "Blast(3)"
+            },
+            {
+              "type": "ArmyBookRule",
+              "id": "Zx4mWN0SbmK8",
+              "name": "Reliable",
+              "label": "Reliable"
+            }
+          ],
+          "label": "Heavy Psy-Torrent (9\", A2, AP(1), Blast(3), Reliable)",
+          "originalCount": 1,
+          "dependencies": [
+            {
+              "upgradeInstanceId": "nzPT6zo58",
+              "count": 1,
+              "variant": "replace"
+            }
+          ]
+        },
+        {
+          "id": "O_6k1",
+          "name": "Psy-Shock",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": "3",
+          "weaponId": "sxkUISIg",
+          "specialRules": [],
+          "label": "Psy-Shock (A3)",
+          "originalCount": 1
+        }
+      ],
+      "upgrades": ["r1AkY", "C1"],
+      "isNarrative": false,
+      "hasCustomRule": false,
+      "hasBalanceInvalid": false,
+      "disabledUpgradeSections": [],
+      "armyId": "w7qor7b2kuifcyvk",
+      "xp": 1,
+      "notes": null,
+      "traits": [],
+      "combined": false,
+      "customName": "Mindworm",
+      "joinToUnit": null,
+      "selectionId": "_b9zU",
+      "selectedUpgrades": [
+        {
+          "instanceId": "nzPT6zo58",
+          "upgrade": {
+            "id": "aix7ZGD",
+            "uid": "Ffzwz",
+            "label": "Replace Heavy Psy-Torrent",
+            "parentPackageUid": "r1AkY",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "targets": ["Heavy Psy-Torrent"]
+          },
+          "option": {
+            "uid": "xMLIE",
+            "type": "ArmyBookUpgradeOption",
+            "costs": [{ "cost": 5, "unitId": "go9isSI" }],
+            "gains": [
+              {
+                "name": "Heavy Psy-Blast",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 18,
+                "attacks": 2,
+                "weaponId": "WSkJKBlp",
+                "specialRules": [
+                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 },
+                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
+                ],
+                "label": "Heavy Psy-Blast (18\", A2, AP(1), Blast(3))",
+                "dependencies": []
+              }
+            ],
+            "label": "Heavy Psy-Blast (18\", A2, AP(1), Blast(3))",
+            "parentPackageUid": "r1AkY",
+            "parentSectionUid": "Ffzwz",
+            "parentSectionId": "Ffzwz",
+            "id": "xMLIE"
+          }
+        }
+      ],
+      "loadout": [
+        {
+          "id": "O_6k1",
+          "name": "Psy-Shock",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": "3",
+          "weaponId": "sxkUISIg",
+          "specialRules": [],
+          "label": "Psy-Shock (A3)",
+          "originalCount": 1
+        },
+        {
+          "name": "Heavy Psy-Blast",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 18,
+          "attacks": 2,
+          "weaponId": "WSkJKBlp",
+          "specialRules": [
+            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 },
+            { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
+          ],
+          "label": "Heavy Psy-Blast (18\", A2, AP(1), Blast(3))",
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "lmZtl0E",
+      "cost": 360,
+      "name": "Hive Lord",
+      "size": 1,
+      "bases": { "round": "120x92", "square": "100x60" },
+      "items": [],
+      "rules": [
+        {
+          "id": "dIQ3SGl2J2Ew",
+          "name": "Fear",
+          "rating": 2,
+          "label": "Fear(2)"
+        },
+        { "id": "2atvlmICQSCV", "name": "Fearless", "label": "Fearless" },
+        { "id": "T08VkBuVmNZ_", "name": "Hero", "label": "Hero" },
+        {
+          "id": "a0YtInGiUDd6",
+          "name": "Tough",
+          "rating": 12,
+          "label": "Tough(12)"
+        }
+      ],
+      "valid": true,
+      "defense": 2,
+      "quality": 3,
+      "weapons": [
+        {
+          "id": "PIp7xyja",
+          "name": "Heavy Razor Claws",
+          "type": "ArmyBookWeapon",
+          "count": 4,
+          "attacks": 3,
+          "weaponId": "PIp7xyja",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            }
+          ],
+          "label": "4x Heavy Razor Claws (A3, AP(1))",
+          "originalCount": 4,
+          "dependencies": [
+            {
+              "upgradeInstanceId": "B7dqXLezb",
+              "count": 1,
+              "variant": "replace"
+            }
+          ]
+        },
+        {
+          "id": "nBd2jiPk",
+          "name": "Stomp",
+          "type": "ArmyBookWeapon",
+          "range": 0,
+          "attacks": 4,
+          "weaponId": "l9ncuAr5",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            }
+          ],
+          "label": "Stomp (A4, AP(1))",
+          "count": 1,
+          "originalCount": 1
+        }
+      ],
+      "upgrades": ["A1", "C1"],
+      "hasCustomRule": false,
+      "disabledSections": [],
+      "hasBalanceInvalid": false,
+      "disabledUpgradeSections": [],
+      "armyId": "w7qor7b2kuifcyvk",
+      "xp": 0,
+      "notes": null,
+      "traits": [],
+      "combined": false,
+      "customName": "Bracken Lord",
+      "joinToUnit": null,
+      "selectionId": "wNnEw",
+      "selectedUpgrades": [
+        {
+          "instanceId": "B7dqXLezb",
+          "upgrade": {
+            "id": "0zIQ8wD",
+            "uid": "9ZOE5",
+            "label": "Replace 2x Heavy Razor Claws",
+            "parentPackageUid": "A1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "targets": ["2x Heavy Razor Claws"]
+          },
+          "option": {
+            "uid": "6x55-nX",
+            "cost": 35,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [{ "cost": 40, "unitId": "lmZtl0E" }],
+            "gains": [
+              {
+                "id": "Xr5Y4Q6n",
+                "name": "Heavy Slashing Blade",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 0,
+                "attacks": 6,
+                "weaponId": "Xr5Y4Q6n",
+                "specialRules": [
+                  {
+                    "id": "17crjK7P6_w6",
+                    "name": "AP",
+                    "type": "ArmyBookRule",
+                    "rating": 1
+                  },
+                  {
+                    "id": "cavWDboL4ubs",
+                    "name": "Rending",
+                    "type": "ArmyBookRule"
+                  },
+                  {
+                    "id": "Zx4mWN0SbmK8",
+                    "name": "Reliable",
+                    "type": "ArmyBookRule"
+                  }
+                ],
+                "label": "Heavy Slashing Blade (A6, AP(1), Reliable, Rending)",
+                "dependencies": []
+              }
+            ],
+            "label": "Heavy Slashing Blade (A6, AP(1), Reliable, Rending)",
+            "parentPackageUid": "A1",
+            "parentSectionUid": "9ZOE5",
+            "parentSectionId": "9ZOE5",
+            "id": "6x55-nX"
+          }
+        },
+        {
+          "instanceId": "ty6vsbsbJ",
+          "upgrade": {
+            "id": "kkguQkG",
+            "uid": "HawCg",
+            "label": "Upgrade with any",
+            "isHeroUpgrade": false,
+            "parentPackageUid": "A1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "upgrade",
+            "select": { "type": "any" }
+          },
+          "option": {
+            "uid": "a7-Dy",
+            "cost": 65,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [{ "cost": 60, "unitId": "lmZtl0E" }],
+            "gains": [
+              {
+                "name": "Wings",
+                "type": "ArmyBookItem",
+                "label": "Wings (Ambush, Flying)",
+                "content": [
+                  {
+                    "id": "6mJw5IdqSqNC",
+                    "name": "Ambush",
+                    "type": "ArmyBookRule",
+                    "dependencies": []
+                  },
+                  {
+                    "id": "-QJdqJEKjIpE",
+                    "name": "Flying",
+                    "type": "ArmyBookRule",
+                    "dependencies": []
+                  }
+                ],
+                "count": 1,
+                "dependencies": []
+              }
+            ],
+            "label": "Wings (Ambush, Flying)",
+            "parentPackageUid": "A1",
+            "parentSectionUid": "HawCg",
+            "parentSectionId": "HawCg",
+            "id": "a7-Dy"
+          }
+        }
+      ],
+      "loadout": [
+        {
+          "id": "PIp7xyja",
+          "name": "Heavy Razor Claws",
+          "type": "ArmyBookWeapon",
+          "count": 2,
+          "attacks": 3,
+          "weaponId": "PIp7xyja",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            }
+          ],
+          "label": "4x Heavy Razor Claws (A3, AP(1))",
+          "originalCount": 4,
+          "dependencies": [
+            {
+              "upgradeInstanceId": "B7dqXLezb",
+              "count": 1,
+              "variant": "replace"
+            }
+          ]
+        },
+        {
+          "id": "nBd2jiPk",
+          "name": "Stomp",
+          "type": "ArmyBookWeapon",
+          "range": 0,
+          "attacks": 4,
+          "weaponId": "l9ncuAr5",
+          "specialRules": [
+            {
+              "type": "ArmyBookRule",
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "rating": 1,
+              "label": "AP(1)"
+            }
+          ],
+          "label": "Stomp (A4, AP(1))",
+          "count": 1,
+          "originalCount": 1
+        },
+        {
+          "id": "Xr5Y4Q6n",
+          "name": "Heavy Slashing Blade",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": 6,
+          "weaponId": "Xr5Y4Q6n",
+          "specialRules": [
+            {
+              "id": "17crjK7P6_w6",
+              "name": "AP",
+              "type": "ArmyBookRule",
+              "rating": 1
+            },
+            { "id": "cavWDboL4ubs", "name": "Rending", "type": "ArmyBookRule" },
+            { "id": "Zx4mWN0SbmK8", "name": "Reliable", "type": "ArmyBookRule" }
+          ],
+          "label": "Heavy Slashing Blade (A6, AP(1), Reliable, Rending)",
+          "dependencies": []
+        },
+        {
+          "name": "Wings",
+          "type": "ArmyBookItem",
+          "label": "Wings (Ambush, Flying)",
+          "content": [
+            {
+              "id": "6mJw5IdqSqNC",
+              "name": "Ambush",
+              "type": "ArmyBookRule",
+              "dependencies": [],
+              "count": 1
+            },
+            {
+              "id": "-QJdqJEKjIpE",
+              "name": "Flying",
+              "type": "ArmyBookRule",
+              "dependencies": [],
+              "count": 1
+            }
+          ],
+          "count": 1,
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "Fvllq03",
+      "cost": 130,
+      "name": "Hive Warriors",
+      "size": 3,
+      "bases": { "round": "40", "square": "40" },
+      "items": [],
+      "rules": [
+        { "id": "2atvlmICQSCV", "name": "Fearless", "label": "Fearless" },
+        {
+          "id": "a0YtInGiUDd6",
+          "name": "Tough",
+          "rating": 3,
+          "label": "Tough(3)"
+        }
+      ],
+      "valid": true,
+      "defense": 4,
+      "quality": 4,
+      "weapons": [
+        {
+          "id": "EJxewz_6",
+          "name": "Razor Claws",
+          "type": "ArmyBookWeapon",
+          "count": 6,
+          "attacks": 2,
+          "weaponId": "DfidZY7Z",
+          "specialRules": [],
+          "label": "2x Razor Claws (A2)",
+          "originalCount": 6,
+          "dependencies": [
+            {
+              "upgradeInstanceId": "U4cmrzoFK",
+              "count": 1,
+              "variant": "replace"
+            },
+            {
+              "upgradeInstanceId": "4Hg4jwsAn",
+              "count": 1,
+              "variant": "replace"
+            },
+            {
+              "upgradeInstanceId": "NVxwNNh4V",
+              "count": 1,
+              "variant": "replace"
+            },
+            {
+              "upgradeInstanceId": "vpObKBpHh",
+              "count": 1,
+              "variant": "replace"
+            },
+            {
+              "upgradeInstanceId": "39SCimjth",
+              "count": 1,
+              "variant": "replace"
+            },
+            {
+              "upgradeInstanceId": "o8Q9sYXp3",
+              "count": 1,
+              "variant": "replace"
+            }
+          ]
+        }
+      ],
+      "upgrades": ["I1", "J1"],
+      "hasCustomRule": false,
+      "disabledSections": [],
+      "hasBalanceInvalid": false,
+      "disabledUpgradeSections": [],
+      "armyId": "w7qor7b2kuifcyvk",
+      "xp": 0,
+      "notes": null,
+      "traits": [],
+      "combined": false,
+      "customName": "Mossbacks",
+      "joinToUnit": null,
+      "selectionId": "oD70w",
+      "selectedUpgrades": [
+        {
+          "instanceId": "U4cmrzoFK",
+          "upgrade": {
+            "id": "hAYsC7o",
+            "uid": "HcgSsOq",
+            "label": "Replace any Razor Claws",
+            "parentPackageUid": "I1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "affects": { "type": "any" },
+            "targets": ["Razor Claws"]
+          },
+          "option": {
+            "uid": "nOtx_Bj",
+            "cost": 10,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 10, "unitId": "Fvllq03" },
+              { "cost": 10, "unitId": "LYBGBaU" },
+              { "cost": 10, "unitId": "tLoLwnZ" },
+              { "cost": 10, "unitId": "tbvpeyi" }
+            ],
+            "gains": [
+              {
+                "id": "Z3giJCLK",
+                "name": "Razor Whip",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 0,
+                "attacks": 2,
+                "weaponId": "Z3giJCLK",
+                "specialRules": [
+                  {
+                    "id": "Naqc5mga9Uha",
+                    "name": "Poison",
+                    "type": "ArmyBookRule"
+                  },
+                  {
+                    "id": "Zx4mWN0SbmK8",
+                    "name": "Reliable",
+                    "type": "ArmyBookRule"
+                  }
+                ],
+                "label": "Razor Whip (A2, Poison, Reliable)",
+                "dependencies": []
+              }
+            ],
+            "label": "Razor Whip (A2, Poison, Reliable)",
+            "parentPackageUid": "I1",
+            "parentSectionUid": "HcgSsOq",
+            "parentSectionId": "HcgSsOq",
+            "id": "nOtx_Bj"
+          }
+        },
+        {
+          "instanceId": "4Hg4jwsAn",
+          "upgrade": {
+            "id": "hAYsC7o",
+            "uid": "HcgSsOq",
+            "label": "Replace any Razor Claws",
+            "parentPackageUid": "I1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "affects": { "type": "any" },
+            "targets": ["Razor Claws"]
+          },
+          "option": {
+            "uid": "nOtx_Bj",
+            "cost": 10,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 10, "unitId": "Fvllq03" },
+              { "cost": 10, "unitId": "LYBGBaU" },
+              { "cost": 10, "unitId": "tLoLwnZ" },
+              { "cost": 10, "unitId": "tbvpeyi" }
+            ],
+            "gains": [
+              {
+                "id": "Z3giJCLK",
+                "name": "Razor Whip",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 0,
+                "attacks": 2,
+                "weaponId": "Z3giJCLK",
+                "specialRules": [
+                  {
+                    "id": "Naqc5mga9Uha",
+                    "name": "Poison",
+                    "type": "ArmyBookRule"
+                  },
+                  {
+                    "id": "Zx4mWN0SbmK8",
+                    "name": "Reliable",
+                    "type": "ArmyBookRule"
+                  }
+                ],
+                "label": "Razor Whip (A2, Poison, Reliable)",
+                "dependencies": []
+              }
+            ],
+            "label": "Razor Whip (A2, Poison, Reliable)",
+            "parentPackageUid": "I1",
+            "parentSectionUid": "HcgSsOq",
+            "parentSectionId": "HcgSsOq",
+            "id": "nOtx_Bj"
+          }
+        },
+        {
+          "instanceId": "NVxwNNh4V",
+          "upgrade": {
+            "id": "hAYsC7o",
+            "uid": "HcgSsOq",
+            "label": "Replace any Razor Claws",
+            "parentPackageUid": "I1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "affects": { "type": "any" },
+            "targets": ["Razor Claws"]
+          },
+          "option": {
+            "uid": "nOtx_Bj",
+            "cost": 10,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [
+              { "cost": 10, "unitId": "Fvllq03" },
+              { "cost": 10, "unitId": "LYBGBaU" },
+              { "cost": 10, "unitId": "tLoLwnZ" },
+              { "cost": 10, "unitId": "tbvpeyi" }
+            ],
+            "gains": [
+              {
+                "id": "Z3giJCLK",
+                "name": "Razor Whip",
+                "type": "ArmyBookWeapon",
+                "count": 1,
+                "range": 0,
+                "attacks": 2,
+                "weaponId": "Z3giJCLK",
+                "specialRules": [
+                  {
+                    "id": "Naqc5mga9Uha",
+                    "name": "Poison",
+                    "type": "ArmyBookRule"
+                  },
+                  {
+                    "id": "Zx4mWN0SbmK8",
+                    "name": "Reliable",
+                    "type": "ArmyBookRule"
+                  }
+                ],
+                "label": "Razor Whip (A2, Poison, Reliable)",
+                "dependencies": []
+              }
+            ],
+            "label": "Razor Whip (A2, Poison, Reliable)",
+            "parentPackageUid": "I1",
+            "parentSectionUid": "HcgSsOq",
+            "parentSectionId": "HcgSsOq",
+            "id": "nOtx_Bj"
+          }
+        },
+        {
+          "instanceId": "3T0DjVE1j",
+          "upgrade": {
+            "id": "Dfr2ZPF",
+            "uid": "OFogXML",
+            "label": "Upgrade all models with",
+            "parentPackageUid": "J1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "upgrade",
+            "model": true,
+            "affects": { "type": "all" }
+          },
+          "option": {
+            "uid": "pRH6ELq",
+            "cost": 35,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [{ "cost": 35, "unitId": "Fvllq03" }],
+            "gains": [
+              {
+                "name": "Wings",
+                "type": "ArmyBookItem",
+                "label": "Wings (Ambush, Flying)",
+                "content": [
+                  {
+                    "id": "6mJw5IdqSqNC",
+                    "name": "Ambush",
+                    "type": "ArmyBookRule",
+                    "dependencies": []
+                  },
+                  {
+                    "id": "-QJdqJEKjIpE",
+                    "name": "Flying",
+                    "type": "ArmyBookRule",
+                    "dependencies": []
+                  }
+                ],
+                "count": 1,
+                "dependencies": []
+              }
+            ],
+            "label": "Wings (Ambush, Flying)",
+            "parentPackageUid": "J1",
+            "parentSectionUid": "OFogXML",
+            "parentSectionId": "OFogXML",
+            "id": "pRH6ELq"
+          }
+        },
+        {
+          "instanceId": "vpObKBpHh",
+          "upgrade": {
+            "id": "HMze3Hw",
+            "uid": "S3YuiRt",
+            "label": "Any model may replace one Razor Claws",
+            "parentPackageUid": "J1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "select": { "type": "any" },
+            "affects": { "type": "exactly", "value": 1 },
+            "model": true,
+            "targets": ["Razor Claws"]
+          },
+          "option": {
+            "uid": "BrBlA",
+            "cost": 10,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [{ "cost": 15, "unitId": "Fvllq03" }],
+            "gains": [
+              {
+                "id": "Byi27DL3",
+                "name": "Spitter Gun",
+                "type": "ArmyBookWeapon",
+                "range": 24,
+                "attacks": 1,
+                "weaponId": "Byi27DL3",
+                "specialRules": [
+                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
+                ],
+                "label": "Spitter Gun (24\", A1, Blast(3))",
+                "count": 1,
+                "dependencies": []
+              }
+            ],
+            "label": "Spitter Gun (24\", A1, Blast(3))",
+            "parentPackageUid": "J1",
+            "parentSectionUid": "S3YuiRt",
+            "parentSectionId": "S3YuiRt",
+            "id": "BrBlA"
+          }
+        },
+        {
+          "instanceId": "39SCimjth",
+          "upgrade": {
+            "id": "HMze3Hw",
+            "uid": "S3YuiRt",
+            "label": "Any model may replace one Razor Claws",
+            "parentPackageUid": "J1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "select": { "type": "any" },
+            "affects": { "type": "exactly", "value": 1 },
+            "model": true,
+            "targets": ["Razor Claws"]
+          },
+          "option": {
+            "uid": "BrBlA",
+            "cost": 10,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [{ "cost": 15, "unitId": "Fvllq03" }],
+            "gains": [
+              {
+                "id": "Byi27DL3",
+                "name": "Spitter Gun",
+                "type": "ArmyBookWeapon",
+                "range": 24,
+                "attacks": 1,
+                "weaponId": "Byi27DL3",
+                "specialRules": [
+                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
+                ],
+                "label": "Spitter Gun (24\", A1, Blast(3))",
+                "count": 1,
+                "dependencies": []
+              }
+            ],
+            "label": "Spitter Gun (24\", A1, Blast(3))",
+            "parentPackageUid": "J1",
+            "parentSectionUid": "S3YuiRt",
+            "parentSectionId": "S3YuiRt",
+            "id": "BrBlA"
+          }
+        },
+        {
+          "instanceId": "o8Q9sYXp3",
+          "upgrade": {
+            "id": "HMze3Hw",
+            "uid": "S3YuiRt",
+            "label": "Any model may replace one Razor Claws",
+            "parentPackageUid": "J1",
+            "type": "ArmyBookUpgradeSection",
+            "variant": "replace",
+            "select": { "type": "any" },
+            "affects": { "type": "exactly", "value": 1 },
+            "model": true,
+            "targets": ["Razor Claws"]
+          },
+          "option": {
+            "uid": "BrBlA",
+            "cost": 10,
+            "type": "ArmyBookUpgradeOption",
+            "costs": [{ "cost": 15, "unitId": "Fvllq03" }],
+            "gains": [
+              {
+                "id": "Byi27DL3",
+                "name": "Spitter Gun",
+                "type": "ArmyBookWeapon",
+                "range": 24,
+                "attacks": 1,
+                "weaponId": "Byi27DL3",
+                "specialRules": [
+                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
+                ],
+                "label": "Spitter Gun (24\", A1, Blast(3))",
+                "count": 1,
+                "dependencies": []
+              }
+            ],
+            "label": "Spitter Gun (24\", A1, Blast(3))",
+            "parentPackageUid": "J1",
+            "parentSectionUid": "S3YuiRt",
+            "parentSectionId": "S3YuiRt",
+            "id": "BrBlA"
+          }
+        }
+      ],
+      "loadout": [
+        {
+          "id": "Z3giJCLK",
+          "name": "Razor Whip",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": 2,
+          "weaponId": "Z3giJCLK",
+          "specialRules": [
+            { "id": "Naqc5mga9Uha", "name": "Poison", "type": "ArmyBookRule" },
+            { "id": "Zx4mWN0SbmK8", "name": "Reliable", "type": "ArmyBookRule" }
+          ],
+          "label": "Razor Whip (A2, Poison, Reliable)",
+          "dependencies": []
+        },
+        {
+          "id": "Z3giJCLK",
+          "name": "Razor Whip",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": 2,
+          "weaponId": "Z3giJCLK",
+          "specialRules": [
+            { "id": "Naqc5mga9Uha", "name": "Poison", "type": "ArmyBookRule" },
+            { "id": "Zx4mWN0SbmK8", "name": "Reliable", "type": "ArmyBookRule" }
+          ],
+          "label": "Razor Whip (A2, Poison, Reliable)",
+          "dependencies": []
+        },
+        {
+          "id": "Z3giJCLK",
+          "name": "Razor Whip",
+          "type": "ArmyBookWeapon",
+          "count": 1,
+          "range": 0,
+          "attacks": 2,
+          "weaponId": "Z3giJCLK",
+          "specialRules": [
+            { "id": "Naqc5mga9Uha", "name": "Poison", "type": "ArmyBookRule" },
+            { "id": "Zx4mWN0SbmK8", "name": "Reliable", "type": "ArmyBookRule" }
+          ],
+          "label": "Razor Whip (A2, Poison, Reliable)",
+          "dependencies": []
+        },
+        {
+          "name": "Wings",
+          "type": "ArmyBookItem",
+          "label": "Wings (Ambush, Flying)",
+          "content": [
+            {
+              "id": "6mJw5IdqSqNC",
+              "name": "Ambush",
+              "type": "ArmyBookRule",
+              "dependencies": [],
+              "count": 3
+            },
+            {
+              "id": "-QJdqJEKjIpE",
+              "name": "Flying",
+              "type": "ArmyBookRule",
+              "dependencies": [],
+              "count": 3
+            }
+          ],
+          "count": 3,
+          "dependencies": []
+        },
+        {
+          "id": "Byi27DL3",
+          "name": "Spitter Gun",
+          "type": "ArmyBookWeapon",
+          "range": 24,
+          "attacks": 1,
+          "weaponId": "Byi27DL3",
+          "specialRules": [
+            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
+          ],
+          "label": "Spitter Gun (24\", A1, Blast(3))",
+          "count": 1,
+          "dependencies": []
+        },
+        {
+          "id": "Byi27DL3",
+          "name": "Spitter Gun",
+          "type": "ArmyBookWeapon",
+          "range": 24,
+          "attacks": 1,
+          "weaponId": "Byi27DL3",
+          "specialRules": [
+            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
+          ],
+          "label": "Spitter Gun (24\", A1, Blast(3))",
+          "count": 1,
+          "dependencies": []
+        },
+        {
+          "id": "Byi27DL3",
+          "name": "Spitter Gun",
+          "type": "ArmyBookWeapon",
+          "range": 24,
+          "attacks": 1,
+          "weaponId": "Byi27DL3",
+          "specialRules": [
+            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
+          ],
+          "label": "Spitter Gun (24\", A1, Blast(3))",
+          "count": 1,
+          "dependencies": []
+        }
+      ]
+    }
+  ],
+  "specialRules": [
+    {
+      "id": "4Nay818dLPu2",
+      "name": "Poison Mist",
+      "aliasedRuleId": null,
+      "description": "Once per this unit's activation, before attacking, roll one die. On a 4+ two enemy units within 6\" take 1 hit with Blast(6) and Poison.",
+      "hasRating": null
+    },
+    {
+      "id": "gr5L7YfDaYyO",
+      "name": "For the Hive!",
+      "description": "Once per this unit's activation, pick 2 friendly units within 12\", which get Furious next time they charge. If they already had Furious, they get extra hits from Furious on unmodified rolls of 5-6 to hit instead.",
+      "hasRating": false,
+      "aliasedRuleId": "RSi9ftRd-hvr"
+    },
+    {
+      "id": "6iDumjvyoQq8",
+      "name": "Born for War",
+      "description": "For each unmodified roll of 6 to hit in melee, this model may roll +1 attack with that weapon. This rule doesn’t apply to newly generated attacks.",
+      "hasRating": false,
+      "aliasedRuleId": "sCmjgdwkLiGT"
+    },
+    {
+      "id": "F_1wfmpAyYwT",
+      "name": "Explode",
+      "aliasedRuleId": null,
+      "description": "If this model is killed in melee, the attacking unit takes X hits. If this model survives melee, after both sides have finished attacking, it is immediately killed, and the enemy unit takes X hits.",
+      "hasRating": true
+    },
+    {
+      "id": "y9VfjbfGVI7R",
+      "name": "Exploding Spores",
+      "description": "Enemies that roll to block hits from this weapon take one extra wound for each unmodified result of 1 that they roll.",
+      "hasRating": false,
+      "aliasedRuleId": "IEJp3a4vE0CB"
+    },
+    {
+      "id": "NU_zB3p0uJIP",
+      "name": "Spell Warden",
+      "aliasedRuleId": null,
+      "description": "Once per this unit's activation, pick one friendly Caster within 12\", which gets +1 to its next spell casting roll.",
+      "hasRating": false
+    },
+    {
+      "id": "pJUW586Zs6FJ",
+      "name": "Pheromones",
+      "description": "Once per this unit's activation, before attacking, pick one other friendly unit within 12\", which may move by up to 6\".",
+      "hasRating": false,
+      "aliasedRuleId": "5XvPNuYy1sW1"
+    },
+    {
+      "id": "E0Lp0CO-Hk7u",
+      "name": "Psychic Synapse",
+      "description": "Pick one model in this unit to have Caster(X), where X is the total number of models in this unit. If the model is killed, pick another to be the new caster, and transfer all spell tokens to it. The caster loses all unspent spell tokens at the end of the round.",
+      "hasRating": false,
+      "aliasedRuleId": "nLQCr5OiSlYz"
+    },
+    {
+      "id": "eyMkgYDVrP7C",
+      "name": "Takedown",
+      "aliasedRuleId": null,
+      "description": "Once per game, when this model attacks in melee, you may pick one model in the unit as its target, and make 1 attack at Quality 2+ with AP(1) and Deadly(3), which is resolved as if it's a unit of 1.",
+      "hasRating": false
+    },
+    {
+      "id": "zCjAFXut7Gsg",
+      "name": "Corrosive",
+      "aliasedRuleId": null,
+      "description": "Whenever this model takes a wound in melee, the attacker takes 1 hit.",
+      "hasRating": false
+    },
+    {
+      "id": "z9JPDwiGd3u0",
+      "name": "Regenerator",
+      "aliasedRuleId": null,
+      "description": "Once per this unit's activation, pick one friendly unit within 12\", which gets +1 to Regeneration rolls next time it takes wounds.",
+      "hasRating": false
+    },
+    {
+      "id": "rqBYj1yANC3J",
+      "name": "Unique",
+      "aliasedRuleId": null,
+      "description": "This unit may only be taken once per army.",
+      "hasRating": false
+    },
+    {
+      "id": "UDzzxUT_N1cp",
+      "name": "Psy-Barrier",
+      "description": "When taking a wound, roll one die, and on a 6+ it is ignored. If the wound was from a spell, then it is ignored on a 2+ instead.",
+      "hasRating": false,
+      "aliasedRuleId": "h-Cj1XrX00JE"
+    },
+    {
+      "id": "KcMHa5eppGL0",
+      "name": "No Retreat",
+      "description": "Whenever a unit where most models have this rule fails a morale test that causes it to be Shaken or Routed, the test counts as passed instead. Then, roll as many dice as the number of wounds it would take to fully destroy it, and for each result of 1-3 the unit takes one wound, which can't be ignored.",
+      "hasRating": false,
+      "aliasedRuleId": "O2Cd7OibBBA5"
+    },
+    {
+      "id": "cnKvLv8ErzIc",
+      "name": "Shrouding Mist",
+      "aliasedRuleId": null,
+      "description": "Once per this unit's activation, pick 2 friendly units within 12\", which get Stealth next time they are shot at.",
+      "hasRating": false
+    },
+    {
+      "id": "h-Cj1XrX00JE",
+      "name": "Resistance",
+      "aliasedRuleId": null,
+      "description": "When taking a wound, roll one die, and on a 6+ it is ignored. If the wound was from a spell, then it is ignored on a 2+ instead.",
+      "hasRating": false
+    },
+    {
+      "id": "fHg1uKwkuiBP",
+      "name": "Breath Attack",
+      "aliasedRuleId": null,
+      "description": "Once per this model's activation, before attacking, roll one die. On a 2+ one enemy unit within 6\" in line of sight takes 1 hit with Blast(3) and AP(1).",
+      "hasRating": false
+    },
+    {
+      "id": "ZHykLbU6nUWl",
+      "name": "Spawn",
+      "aliasedRuleId": null,
+      "description": "Once per game, when this model is activated, you may place a new unit of X fully within 6\" of it.",
+      "hasRating": true
+    },
+    {
+      "id": "99DXMN96LnI8",
+      "name": "Surprise Attack",
+      "aliasedRuleId": null,
+      "description": "This model counts as having Ambush, and may be deployed up to 1\" away from enemy units. Once deployed, roll X dice. For each 2+ one enemy unit within 3” takes 2 hits with AP(1).",
+      "hasRating": true
+    }
+  ]
+}

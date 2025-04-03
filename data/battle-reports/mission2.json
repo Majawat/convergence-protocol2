@@ -1,0 +1,76 @@
+{
+  "missionId": 2,
+  "title": "Battle for the Storm Vault",
+  "participants": [
+    {
+      "player": "Victoria",
+      "army": "Galdoo'o naahlk wildigitkw",
+      "result": "winner"
+    },
+    {
+      "player": "Alex",
+      "army": "van Louen's Roughnecks",
+      "result": "participant"
+    },
+    {
+      "player": "Cody",
+      "army": "The Ashen Pact",
+      "result": "participant"
+    },
+    {
+      "player": "Claire",
+      "army": "Hive Fleet Tarvos",
+      "result": "participant"
+    }
+  ],
+  "rounds": [
+    {
+      "number": 1,
+      "title": "Weathering the Storm",
+      "description": "As battle commenced, an electrical storm surged across the battlefield. Claire's Emerald Tide advanced rapidly but suffered heavy casualties, losing four warriors to dangerous terrain tests as lightning arced through their forms. They managed to locate a valuable data terminal, gaining intelligence for future battles.\n\nCody's Nightfang Sentinels pushed forward to locate a security terminal, obtaining the first access codes needed to unlock the central vault. However, Alex's Longshanks combat walker targeted the exposed Sentinels, using an underdog point to improve accuracy and completely eliminating them.\n\nVictoria activated her treemen to find a storm control terminal in her deployment zone, establishing a safe haven shielded from the electrical disturbances. As the round progressed, both Claire's Mindworm and Alex's Command Squad discovered additional data terminals, gaining valuable experience points."
+    },
+    {
+      "number": 2,
+      "title": "Ambush and Counter-Ambush",
+      "description": "With the storm temporarily subsided, the battlefield erupted in calculated ambushes. Claire deployed her Mossbacks to threaten Cody's Hallowed Breakers, prompting Cody to counter-ambush with Seraphine. Alex positioned RT Acreage near Claire's Mindworm, while Cody's Zerek Thal infiltrated directly into position near the vault.\n\nAlex seized the initiative, with RT Acreage inflicting damage on the Mindworm. The most spectacular clash occurred between Cody's Stormfang Riders and Victoria's Eternal Hunters, with the Hunters inflicting all nine wounds needed to completely destroy the Riders in a devastating counter-attack.\n\nElsewhere, Claire's Splintermaw engaged Victoria's beetle-mounted champion, with both creatures inflicting a single wound on each other in a tense standoff. Victoria's Eternal Revenants fired into the Dustborn ranks, killing two models, while her Tree Giant lashed out with whip-like roots for three more wounds. Claire's Mindworm demonstrated its psychic might with spells and bio-weapon fire that severely damaged Alex's RT Acreage forces."
+    },
+    {
+      "number": 3,
+      "title": "The Vault Breached",
+      "description": "With the storm still calm, Claire made a bold move by ambushing with her Hive Lord directly into the vault building. Claire's Mindworm continued assaulting RT Acreage, dealing enough damage to shake their resolve, while Alex's damaged APC was forced to retreat from the front lines.\n\nIn this critical moment, Victoria's Eternal Hunters managed to reach the vault and secure the precious Axiom component! Meanwhile, Cody's Seraphine cast a powerful spell that extended her allies' weapon range by 18 inches, dramatically increasing the threat range of their fusion rifles and flamers across the battlefield.\n\nCody's forces engaged Claire's Mossbacks, eliminating two but failing to break their morale as the resilient creatures held their ground against the onslaught."
+    },
+    {
+      "number": 4,
+      "title": "The Chase Begins",
+      "description": "With the Axiom component in Victoria's possession, the battlefield descended into chaos as her forces attempted to extract the prize while everyone else gave chase. Claire's massive Hive Lord intercepted Victoria's Eternal Hunters in a brutal assault, overwhelming them with savage attacks that forced them to drop the precious objective.\n\nVictoria's beetle commander attempted to stop this with a dragon breath attack, initially missing but using an underdog point to force the hit through. In a display of remarkable courage and timing, Cody's Zerek Thal swooped in and grabbed the objective from directly beneath the distracted Hive Lord, setting up a thrilling final round."
+    },
+    {
+      "number": 5,
+      "title": "Final Gambit",
+      "description": "As the final round began, the electrical storm returned with renewed fury. Victoria's Tree Giant eliminated Cody's last Dustborn warrior, while Claire's Bracken Lord charged through dangerous terrain, suffering two wounds from lightning strikes as it moved to engage Zerek Thal. The Bracken Lord's attack was ferocious, landing eight powerful hits on Zerek.\n\nThe battle reached its climactic conclusion with Claire's Hive Lord securing the shard amidst the raging storm, taking damage from lightning strikes in the process. Due to time constraints, the commanders agreed to a narrative resolution: Claire's Hive Lord grabbed the component, but in the final moments, Cody and Victoria's forces united to defeat the massive creature, with Victoria narrowly claiming the Axiom component for the Wood Elves!"
+    }
+  ],
+  "keyMoments": [
+    {
+      "title": "Storm Casualties",
+      "description": "Claire's Emerald Tide lost four models to dangerous terrain tests caused by the electrical storm."
+    },
+    {
+      "title": "Perfect Counter-Attack",
+      "description": "Victoria's Eternal Hunters eliminated Cody's Stormfang Riders with a devastating response, inflicting all nine wounds in a single attack."
+    },
+    {
+      "title": "Component Secured",
+      "description": "Victoria's Eternal Hunters successfully reached the vault and retrieved the Axiom component."
+    },
+    {
+      "title": "Component Dropped",
+      "description": "Claire's Hive Lord forced Victoria's Eternal Hunters to drop the component during a brutal assault."
+    },
+    {
+      "title": "Final Alliance",
+      "description": "Cody and Victoria's forces joined together in the final moments to defeat Claire's Hive Lord, allowing Victoria to claim the component."
+    }
+  ],
+  "conclusion": "After a hard-fought battle amid electrical storms and shifting fortunes, Victoria's Wood Elves secured the Axiom component, claiming victory in the second mission. This triumph positions Victoria's forces with newfound knowledge and power as they prepare for the challenges that await in Mission 3."
+}
