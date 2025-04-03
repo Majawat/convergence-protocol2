@@ -58,7 +58,7 @@ function _highlightNextAutoTargetModel(unitSelectionId, modelId) {
     modelElement.closest(".unit-card")?.id === `unit-card-${unitSelectionId}`
   ) {
     modelElement.classList.add("target-model");
-    console.log(`Highlighting model ${modelId} on card ${unitSelectionId}`);
+    // console.log(`Highlighting model ${modelId} on card ${unitSelectionId}`);
   } else {
     console.warn(
       `Could not find model ${modelId} within card ${unitSelectionId} to highlight.`
@@ -75,15 +75,18 @@ function _highlightNextAutoTargetModel(unitSelectionId, modelId) {
  */
 function _findActualCaster(armyId, cardUnitId) {
   const unitData = getUnitData(armyId, cardUnitId);
-  if (!unitData) return null;
-  const heroData = getJoinedHeroData(armyId, cardUnitId);
-
-  // Determine which unit actually has the Caster(X) rule
-  if (heroData?.casterLevel > 0) {
-    return heroData;
-  } else if (unitData?.casterLevel > 0) {
+  // This check might be redundant if cardUnitId always refers to a base unit,
+  // but it's safer to handle the case where the card ID *could* be a hero ID directly.
+  if (unitData?.casterLevel > 0) {
     return unitData;
   }
+
+  // If the base unit isn't the caster, check for a joined hero
+  const heroData = getJoinedHeroData(armyId, cardUnitId);
+  if (heroData?.casterLevel > 0) {
+    return heroData;
+  }
+
   return null; // No caster found for this card
 }
 
@@ -202,33 +205,43 @@ function handleStartRoundClick(armyId) {
   }
 
   let stateChanged = false;
-  let castersAffected = 0;
+  const casterUpdates = []; // Array to store info for the toast
   const heroTargets = getCurrentArmyHeroTargets(armyId) || {}; // Get hero targets for UI lookup
 
   // Iterate over ALL units in the processed data (including joined heroes not directly on cards)
   currentArmy.units.forEach((unit) => {
+    // Check if the unit itself has caster level > 0
     if (unit.casterLevel > 0) {
       const casterUnitId = unit.selectionId; // Use the caster's actual unit ID for state
       const currentTokens = getComponentStateValue(
         armyId,
         casterUnitId,
         "tokens",
-        0
+        0 // Default to 0 if not found
       );
       const tokensToAdd = unit.casterLevel;
       const newTokens = Math.min(
         config.MAX_SPELL_TOKENS,
         currentTokens + tokensToAdd
       );
+      const actualTokensAdded = newTokens - currentTokens; // Calculate how many were actually added
 
-      if (newTokens !== currentTokens) {
+      if (actualTokensAdded > 0) {
+        // Check if tokens actually changed
         console.log(
-          `Adding ${tokensToAdd} tokens to ${
+          `Adding ${actualTokensAdded} tokens to ${
             unit.customName || unit.originalName
           } (${casterUnitId}). New total: ${newTokens}`
         );
         // Update state using the caster's actual ID
         updateGlobalComponentState(armyId, casterUnitId, "tokens", newTokens);
+
+        // Store details for the toast message
+        casterUpdates.push({
+          name: unit.customName || unit.originalName,
+          added: actualTokensAdded,
+          total: newTokens,
+        });
 
         // Find the card ID to update the UI
         // If this caster is a hero joined to another unit, find the base unit's ID
@@ -236,7 +249,6 @@ function handleStartRoundClick(armyId) {
         updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel); // Update UI on correct card
 
         stateChanged = true;
-        castersAffected++;
       }
     }
   });
@@ -245,11 +257,20 @@ function handleStartRoundClick(armyId) {
     saveComponentState(getArmyComponentStates()); // Save updated tokens
   }
 
-  showToast(
-    castersAffected > 0
-      ? `Spell tokens generated for ${castersAffected} caster(s) (max ${config.MAX_SPELL_TOKENS}).`
-      : "No casters found to generate tokens for."
-  );
+  // Format the toast message
+  let toastMessage = "";
+  if (casterUpdates.length > 0) {
+    casterUpdates.forEach((update) => {
+      // Use non-breaking space for "+X" to prevent awkward wrapping
+      toastMessage += `${update.name}: +${update.added
+        .toString()
+        .padStart(1, "\u00A0")}, now ${update.total}\n`;
+    });
+  } else {
+    toastMessage = "No casters required token updates.";
+  }
+  // Use the showToast helper function
+  showToast(toastMessage, "Spell Tokens Generated");
 }
 
 // --- Specific Click Handlers ---
@@ -349,7 +370,8 @@ function _handleResetWoundsClick(targetElement, armyId, cardUnitId) {
     showToast(
       `Wounds reset for ${
         baseUnitData.customName || baseUnitData.originalName
-      }.`
+      }.`,
+      "Wounds Reset"
     );
   }
 

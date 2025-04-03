@@ -6,6 +6,11 @@
 // Import constants if needed (e.g., from config)
 import { config, STAT_ICONS } from "./config.js";
 
+// ****** START NEW CODE ******
+// Variable to store the element that triggered the spell modal
+let spellModalTriggerElement = null;
+// ****** END NEW CODE ******
+
 /**
  * Displays a list of armies from the campaign data for selection when no armyId is provided.
  * @param {Array} armies - The list of army objects from campaignData.
@@ -100,21 +105,30 @@ export function populateArmyInfoModal(armyInfo) {
 
 /**
  * Shows a Bootstrap Toast message using the #themeToast element.
+ * Reuses the theme toast element for simplicity.
  * @param {string} message - The message to display.
  */
-export function showToast(message) {
+export function showToast(message, headerText) {
   const toastElement = document.getElementById("themeToast"); // Reusing theme toast element
   if (!toastElement) {
     console.warn("Toast element #themeToast not found.");
     return;
   }
   const toastBody = toastElement.querySelector(".toast-body");
-  if (!toastBody) {
-    console.warn("Toast body not found in #themeToast.");
+  const toastHeader = toastElement.querySelector(".toast-header strong"); // Get the title element
+
+  if (!toastBody || !toastHeader) {
+    console.warn(
+      "Toast body or header strong element not found in #themeToast."
+    );
     return;
   }
 
+  // Update title and body
+  toastHeader.textContent = headerText || "Update"; // Set a generic title or customize as needed
   toastBody.textContent = message; // Set the message
+  // Ensure white-space style allows line breaks for multi-line messages
+  toastBody.style.whiteSpace = "pre-wrap";
 
   // Ensure Bootstrap object exists
   if (typeof bootstrap !== "undefined" && bootstrap.Toast) {
@@ -131,6 +145,7 @@ export function showToast(message) {
 
 /**
  * Populates and shows the spell list modal (#viewSpellsModal).
+ * Also sets up listeners to handle focus management on hide.
  * @param {object} casterUnit - The processed caster unit data (hero or base unit).
  * @param {Array | null} spellList - The list of spell objects from the army book, or null.
  * @param {number} currentTokens - The caster's current token count.
@@ -145,6 +160,24 @@ export function populateAndShowSpellModal(
     console.error("Spell modal element #viewSpellsModal not found!");
     return;
   }
+
+  // --- Focus Management Setup ---
+  // Remove previous listeners to prevent duplicates if this function is called again
+  // before the modal fully hides and the 'once' listener fires.
+  modalElement.removeEventListener("show.bs.modal", handleSpellModalShow);
+  modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden);
+
+  // Add listener for when modal is *about* to show
+  // Use { once: true } so the listener automatically removes itself after firing.
+  modalElement.addEventListener("show.bs.modal", handleSpellModalShow, {
+    once: true,
+  });
+
+  // Add listener for when modal has *finished* hiding
+  // Use { once: true } so the listener automatically removes itself after firing.
+  modalElement.addEventListener("hidden.bs.modal", handleSpellModalHidden, {
+    once: true,
+  });
 
   const modalTitle = document.getElementById("viewSpellsModalLabel");
   const tokenDisplay = document.getElementById("modalCasterTokenDisplay");
@@ -201,8 +234,63 @@ export function populateAndShowSpellModal(
       modalInstance.show();
     } catch (error) {
       console.error("Error showing spell modal:", error);
+      // Clean up listeners if showing fails
+      modalElement.removeEventListener("show.bs.modal", handleSpellModalShow);
+      modalElement.removeEventListener(
+        "hidden.bs.modal",
+        handleSpellModalHidden
+      );
     }
   } else {
     console.warn("Bootstrap Modal component not found.");
+    // Clean up listeners if bootstrap isn't found
+    modalElement.removeEventListener("show.bs.modal", handleSpellModalShow);
+    modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden);
+  }
+}
+
+/**
+ * Event handler for when the spell modal is about to be shown.
+ * Stores the triggering element.
+ * @param {Event} event The Bootstrap modal event.
+ */
+function handleSpellModalShow(event) {
+  // event.relatedTarget is the element that triggered the modal
+  if (event.relatedTarget) {
+    spellModalTriggerElement = event.relatedTarget;
+    // console.log("Spell modal triggered by:", spellModalTriggerElement);
+  } else {
+    // Fallback if relatedTarget isn't available (e.g., modal shown programmatically without a trigger)
+    spellModalTriggerElement = document.activeElement;
+    // console.log("Spell modal trigger not found, using active element:", spellModalTriggerElement);
+  }
+}
+
+/**
+ * Event handler for when the spell modal has finished hiding.
+ * Returns focus to the triggering element if possible.
+ */
+function handleSpellModalHidden() {
+  // Check if the stored trigger element is still valid and focusable
+  if (
+    spellModalTriggerElement &&
+    typeof spellModalTriggerElement.focus === "function"
+  ) {
+    // console.log("Returning focus to:", spellModalTriggerElement);
+    // Use a slight delay with requestAnimationFrame to ensure the modal is fully hidden
+    // and the element is potentially re-enabled before focusing.
+    requestAnimationFrame(() => {
+      try {
+        spellModalTriggerElement.focus();
+      } catch (e) {
+        console.warn("Could not focus stored trigger element:", e);
+        // Optional: Fallback focus if needed, e.g., document.body.focus();
+      }
+      spellModalTriggerElement = null; // Clear the reference after attempting focus
+    });
+  } else {
+    // console.log("Spell modal hidden, but no valid trigger element stored or it's not focusable.");
+    spellModalTriggerElement = null; // Clear the reference
+    // Optional: Fallback focus if needed, e.g., document.body.focus();
   }
 }

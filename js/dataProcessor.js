@@ -54,7 +54,7 @@ function _initializeProcessedUnit(rawUnit) {
     _baseToughValue: baseToughValue, // Store for reference
   };
 
-  // Calculate Caster Level
+  // Calculate Caster Level *from base rules* initially
   const casterRule = processedUnit.rules.find((r) => r.name === "Caster");
   processedUnit.casterLevel = casterRule
     ? parseInt(casterRule.rating, 10) || 0
@@ -106,21 +106,37 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
       // Unique key for this specific gain instance to avoid double-counting stat changes from the same source
       const gainInstanceKey = `upg_${selectedUpgrade.instanceId}_opt_${
         option.uid
-      }_gain_${gain.name || gain.label}`;
+      }_gain_${gain.name || gain.label || gain.id || Math.random()}`; // Use unique identifier
 
       /** Helper to process a gained rule */
       const processGainedRule = (rule, instanceKey) => {
         const ruleIdentifier = rule.id || rule.label || rule.name;
+        if (!ruleIdentifier) return; // Skip if rule has no identifier
+
         // Add rule to unit if not already present
         if (!addedRuleIdentifiers.has(ruleIdentifier)) {
           processedUnit.rules.push({ ...rule });
           addedRuleIdentifiers.add(ruleIdentifier);
+          // console.log(`Added rule "${ruleIdentifier}" to ${processedUnit.selectionId}`);
         }
 
         // Process stat changes only once per instance
         if (!statProcessedRuleInstances.has(instanceKey)) {
           const ratingValue = parseInt(rule.rating, 10);
-          if (rule.name === "Tough" && !isNaN(ratingValue)) {
+
+          // ****** START MODIFIED SECTION ******
+          if (rule.name === "Caster" && !isNaN(ratingValue)) {
+            // Explicitly handle Caster rule from upgrades
+            // This will overwrite the base caster level if an upgrade provides it.
+            // Assumes only one Caster upgrade applies; adjust if stacking is possible.
+            processedUnit.casterLevel = ratingValue;
+            statProcessedRuleInstances.add(instanceKey); // Mark as processed
+            console.log(
+              `Applied Caster(${ratingValue}) upgrade to ${processedUnit.selectionId}`
+            );
+          }
+          // ****** END MODIFIED SECTION ******
+          else if (rule.name === "Tough" && !isNaN(ratingValue)) {
             optionGrantsTough = true;
             optionToughValue = ratingValue;
             statProcessedRuleInstances.add(instanceKey);
@@ -129,7 +145,6 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
             !isNaN(ratingValue) &&
             !defenseModifiedByUpgrade // Only apply the first Defense upgrade found
           ) {
-            // Defense upgrades typically grant a bonus (e.g., Defense(1) means +1 save, so decrease the target number)
             finalDefense = Math.max(
               2,
               processedUnit._initialBaseDefense - ratingValue
@@ -137,7 +152,6 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
             defenseModifiedByUpgrade = true;
             statProcessedRuleInstances.add(instanceKey);
           } else if (rule.name === "Quality" && !isNaN(ratingValue)) {
-            // Quality upgrades typically set the value directly
             finalQuality = ratingValue;
             statProcessedRuleInstances.add(instanceKey);
           }
@@ -162,14 +176,28 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
           processedUnit.items.push(newItem);
           addedItemIdentifiers.add(itemIdentifier);
           // Process rules granted by the item
-          newItem.content.forEach((rule, idx) =>
-            processGainedRule(rule, `${gainInstanceKey}_content_${idx}`)
-          );
+          newItem.content.forEach((contentRule, idx) => {
+            if (contentRule.type === "ArmyBookRule") {
+              // Ensure it's a rule before processing
+              processGainedRule(
+                contentRule,
+                `${gainInstanceKey}_content_${idx}`
+              );
+            }
+            // Handle other content types like weapons if needed
+          });
         } else {
           // Item already exists, just process its rules (in case this upgrade adds rules not present before)
-          (gain.content || []).forEach((rule, idx) =>
-            processGainedRule(rule, `${gainInstanceKey}_content_${idx}`)
-          );
+          (gain.content || []).forEach((contentRule, idx) => {
+            if (contentRule.type === "ArmyBookRule") {
+              // Ensure it's a rule before processing
+              processGainedRule(
+                contentRule,
+                `${gainInstanceKey}_content_${idx}`
+              );
+            }
+            // Handle other content types like weapons if needed
+          });
         }
       } else if (gain.type === "ArmyBookRule") {
         processGainedRule(gain, gainInstanceKey);
@@ -203,6 +231,11 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
   // Apply final calculated stats
   processedUnit.quality = finalQuality;
   processedUnit.defense = finalDefense;
+
+  // Final check: Log the caster level after upgrades are applied
+  console.log(
+    `Final Caster Level for ${processedUnit.selectionId}: ${processedUnit.casterLevel}`
+  );
 }
 
 /**
