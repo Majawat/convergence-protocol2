@@ -2,6 +2,7 @@
  * @fileoverview Manages application state, interacting with per-army storage.
  */
 import { loadArmyState, saveArmyState } from "./storage.js";
+import { config } from "./config.js"; // Import config for defaults like MAX_SPELL_TOKENS
 
 // --- Global Non-Persistent State ---
 let campaignData = null;
@@ -18,13 +19,13 @@ export function getArmyBooksData() {
   return armyBooksData;
 }
 export function getCommonRulesData() {
-  // Return the whole object, loadGameData ensures it only contains the required system
-  return commonRulesData;
+  return commonRulesData; // Assumes loadGameData populates this correctly
 }
 
 /** Gets the processed data object for the currently loaded army */
-export function getLoadedArmyData(armyId) {
-  const currentId = armyId || getCurrentArmyId();
+export function getLoadedArmyData() {
+  // Removed armyId param - only one army loaded
+  const currentId = getCurrentArmyId();
   return currentId ? loadedArmiesData[currentId] : null;
 }
 
@@ -38,41 +39,85 @@ export function getCurrentArmyId() {
 
 /**
  * Gets the complete state object for a specific army from storage.
- * @param {string} armyId - The ID of the army.
- * @returns {object | null} The army's state object or null.
+ * Returns a default structure if no state is found.
+ * @param {string} [armyId] - The ID of the army. Defaults to current army.
+ * @returns {object} The army's state object (never null, provides default).
  */
 function getArmyState(armyId) {
   if (!armyId) armyId = getCurrentArmyId();
-  if (!armyId) return null;
-  return loadArmyState(armyId);
+  if (!armyId) return { listPoints: 0, units: {} }; // Return default if no ID
+
+  const state = loadArmyState(armyId);
+  // Return loaded state or a default structure if null/undefined
+  return state || { listPoints: 0, units: {} };
 }
 
-/** Gets the wound state part for a specific army. */
-export function getArmyWoundStates(armyId) {
-  if (!armyId) armyId = getCurrentArmyId();
-  const state = getArmyState(armyId);
-  return state?.woundState || {}; // Return empty object if no state or no woundState
+/**
+ * Gets a specific unit's state object from a specific army's state.
+ * Returns a default structure if the unit is not found.
+ * @param {string} armyId - The ID of the army.
+ * @param {string} unitId - The ID of the unit.
+ * @returns {object} The unit's state object.
+ */
+function getUnitState(armyId, unitId) {
+  const armyState = getArmyState(armyId);
+  // Return existing unit state or a default structure
+  return (
+    armyState.units[unitId] || {
+      status: "active",
+      shaken: false,
+      fatigued: false,
+      action: null,
+      limitedWeaponUsed: false,
+      tokens: 0,
+      models: {},
+    }
+  );
 }
 
-/** Gets the component state part for a specific army. */
-export function getArmyComponentStates(armyId) {
-  if (!armyId) armyId = getCurrentArmyId();
-  const state = getArmyState(armyId);
-  return state?.componentState || {}; // Return empty object if no state or no componentState
-}
-
-/** Gets a specific component state value for a specific army, returning a default if not found. */
-export function getComponentStateValue(armyId, unitId, key, defaultValue) {
-  if (!armyId) armyId = getCurrentArmyId();
-  const components = getArmyComponentStates(armyId);
-  return components[unitId]?.[key] ?? defaultValue;
+/**
+ * Gets a specific model's state object from a specific unit's state.
+ * Returns a default structure if the model is not found.
+ * @param {string} armyId - The ID of the army.
+ * @param {string} unitId - The ID of the unit.
+ * @param {string} modelId - The ID of the model.
+ * @returns {object} The model's state object.
+ */
+function getModelState(armyId, unitId, modelId) {
+  const unitState = getUnitState(armyId, unitId);
+  // Return existing model state or a default structure
+  return (
+    unitState.models[modelId] || {
+      currentHp: 1, // Default to 1 HP if not found? Or look up maxHP? Needs thought.
+      // Let's assume initialization handles setting correct HP. Default needed if accessed before init.
+      name: null,
+    }
+  );
 }
 
 /** Gets the list points for a specific army from its saved state. */
 export function getArmyListPoints(armyId) {
+  // Keep armyId param for potential external use
   if (!armyId) armyId = getCurrentArmyId();
-  const state = getArmyState(armyId);
-  return state?.listPoints || 0; // Return 0 if not found
+  if (!armyId) return 0;
+  const state = getArmyState(armyId); // getArmyState provides default
+  return state.listPoints;
+}
+
+/** Gets a specific unit state value (e.g., shaken, fatigued, tokens). */
+export function getUnitStateValue(armyId, unitId, key, defaultValue) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId || !unitId || !key) return defaultValue;
+  const unitState = getUnitState(armyId, unitId); // getUnitState provides default
+  return unitState.hasOwnProperty(key) ? unitState[key] : defaultValue;
+}
+
+/** Gets a specific model state value (e.g., currentHp, name). */
+export function getModelStateValue(armyId, unitId, modelId, key, defaultValue) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId || !unitId || !modelId || !key) return defaultValue;
+  const modelState = getModelState(armyId, unitId, modelId); // getModelState provides default
+  return modelState.hasOwnProperty(key) ? modelState[key] : defaultValue;
 }
 
 // --- Setters ---
@@ -81,37 +126,40 @@ export function setCampaignData(data) {
   campaignData = data;
 }
 export function setArmyBooksData(data) {
-  armyBooksData = data;
+  armyBooksData = data || {};
 }
 export function setCommonRulesData(data) {
-  // Assumes data is already structured correctly { requiredGsId: rulesData }
   commonRulesData = data || {};
 }
 
-/** Stores the processed army data in memory and initializes its state in localStorage */
+/** Stores the processed army data in memory and initializes/updates its state in localStorage */
 export function setLoadedArmyData(armyId, processedData) {
   loadedArmiesData = {}; // Clear previous armies
   if (armyId && processedData) {
     loadedArmiesData[armyId] = processedData;
 
     // Initialize state in localStorage if it doesn't exist, or just update points
-    let currentState = loadArmyState(armyId);
+    let currentState = loadArmyState(armyId); // Load existing state if present
+    const defaultState = {
+      // Define default structure
+      listPoints: processedData.meta.listPoints || 0,
+      units: {},
+    };
+
     if (!currentState) {
-      // Create initial state structure
-      currentState = {
-        listPoints: processedData.meta.listPoints || 0,
-        woundState: {},
-        componentState: {},
-        // Add other initial state fields here if needed
-      };
+      currentState = defaultState;
       console.log(`Initializing new state for army ${armyId} in localStorage.`);
     } else {
-      // Update list points in existing state
+      // Ensure listPoints is updated, keep existing units structure
       currentState.listPoints =
         processedData.meta.listPoints || currentState.listPoints || 0;
-      console.log(`Updating list points for army ${armyId} in localStorage.`);
+      // Ensure units object exists if it was missing in old data
+      if (!currentState.units) currentState.units = {};
+      console.log(
+        `Loaded existing state for army ${armyId}, updated list points.`
+      );
     }
-    saveArmyState(armyId, currentState);
+    saveArmyState(armyId, currentState); // Save the initial/updated basic state
   } else {
     console.warn("Attempted to set loaded army data with invalid ID or data.");
   }
@@ -119,46 +167,88 @@ export function setLoadedArmyData(armyId, processedData) {
 
 // --- Per-Army State Updaters (Load, Modify, Save) ---
 
-/** Updates a specific component state value for an army and saves. */
-export function updateArmyComponentState(armyId, unitId, key, value) {
+/**
+ * Updates a specific unit state value (e.g., shaken, fatigued, action, tokens, status) and saves.
+ * @param {string} armyId - The ID of the army.
+ * @param {string} unitId - The ID of the unit.
+ * @param {string} key - The state key to update (e.g., 'shaken', 'tokens').
+ * @param {*} value - The new value for the key.
+ */
+export function updateUnitStateValue(armyId, unitId, key, value) {
   if (!armyId) armyId = getCurrentArmyId();
-  if (!armyId) return; // Cannot update without ID
+  if (!armyId || !unitId || !key) return;
 
-  const currentState = loadArmyState(armyId) || {
-    listPoints: getArmyListPoints(armyId),
-    woundState: {},
-    componentState: {},
-  }; // Load or initialize
+  const currentState = getArmyState(armyId); // getArmyState loads or provides default
 
-  // Ensure nested structure exists
-  if (!currentState.componentState) currentState.componentState = {};
-  if (!currentState.componentState[unitId])
-    currentState.componentState[unitId] = {};
+  // Ensure unit exists in state
+  if (!currentState.units[unitId]) {
+    // Initialize unit state if it doesn't exist
+    currentState.units[unitId] = {
+      status: "active",
+      shaken: false,
+      fatigued: false,
+      action: null,
+      limitedWeaponUsed: false,
+      tokens: 0,
+      models: {},
+    };
+    console.warn(`Initialized missing unit state for ${unitId} during update.`);
+  }
 
-  // Update the value
-  currentState.componentState[unitId][key] = value;
+  // Update the specific value
+  currentState.units[unitId][key] = value;
 
   // Save the entire updated state object
   saveArmyState(armyId, currentState);
 }
 
-/** Updates a specific model's wound state for an army and saves. */
-export function updateArmyWoundState(armyId, unitId, modelId, currentHp) {
+/**
+ * Updates a specific model state value (e.g., currentHp, name) and saves.
+ * @param {string} armyId - The ID of the army.
+ * @param {string} unitId - The ID of the unit.
+ * @param {string} modelId - The ID of the model.
+ * @param {string} key - The state key to update (e.g., 'currentHp', 'name').
+ * @param {*} value - The new value for the key.
+ */
+export function updateModelStateValue(armyId, unitId, modelId, key, value) {
   if (!armyId) armyId = getCurrentArmyId();
-  if (!armyId) return; // Cannot update without ID
+  if (!armyId || !unitId || !modelId || !key) return;
 
-  const currentState = loadArmyState(armyId) || {
-    listPoints: getArmyListPoints(armyId),
-    woundState: {},
-    componentState: {},
-  }; // Load or initialize
+  const currentState = getArmyState(armyId); // getArmyState loads or provides default
 
-  // Ensure nested structure exists
-  if (!currentState.woundState) currentState.woundState = {};
-  if (!currentState.woundState[unitId]) currentState.woundState[unitId] = {};
+  // Ensure unit exists
+  if (!currentState.units[unitId]) {
+    currentState.units[unitId] = {
+      status: "active",
+      shaken: false,
+      fatigued: false,
+      action: null,
+      limitedWeaponUsed: false,
+      tokens: 0,
+      models: {},
+    };
+  }
+  // Ensure models object exists
+  if (!currentState.units[unitId].models) {
+    currentState.units[unitId].models = {};
+  }
+  // Ensure model exists
+  if (!currentState.units[unitId].models[modelId]) {
+    currentState.units[unitId].models[modelId] = { currentHp: 1, name: null }; // Provide default if missing
+    console.warn(
+      `Initialized missing model state for ${modelId} in unit ${unitId} during update.`
+    );
+    // Try to get maxHp if possible to set a better default currentHp
+    const modelData = getLoadedArmyData()?.unitMap?.[unitId]?.models?.find(
+      (m) => m.modelId === modelId
+    );
+    if (modelData) {
+      currentState.units[unitId].models[modelId].currentHp = modelData.maxHp;
+    }
+  }
 
-  // Update the value
-  currentState.woundState[unitId][modelId] = currentHp;
+  // Update the specific value
+  currentState.units[unitId].models[modelId][key] = value;
 
   // Save the entire updated state object
   saveArmyState(armyId, currentState);
@@ -167,16 +257,12 @@ export function updateArmyWoundState(armyId, unitId, modelId, currentHp) {
 /** Updates the list points for an army and saves. */
 export function updateArmyListPoints(armyId, points) {
   if (!armyId) armyId = getCurrentArmyId();
-  if (!armyId || typeof points !== "number") return; // Cannot update without ID or valid points
+  if (!armyId || typeof points !== "number") return;
 
-  const currentState = loadArmyState(armyId) || {
-    listPoints: 0,
-    woundState: {},
-    componentState: {},
-  }; // Load or initialize
+  const currentState = getArmyState(armyId); // getArmyState loads or provides default
   currentState.listPoints = points;
   saveArmyState(armyId, currentState);
-  console.log(`Updated list points for army ${armyId} to ${points}.`);
+  // console.log(`Updated list points for army ${armyId} to ${points}.`);
 }
 
 // --- Utility Getters using Current Army Context ---

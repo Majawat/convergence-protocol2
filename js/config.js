@@ -11,7 +11,7 @@ export const config = {
 
   // Game Rules
   MAX_SPELL_TOKENS: 6,
-  REQUIRED_GAME_SYSTEM_ID: 2, // 2 = Grimdark Future
+  GAME_SYSTEM_ID: 2,
 
   // API Endpoints (using relative paths or full URLs if needed)
   CAMPAIGN_DATA_URL: "./data/campaign.json",
@@ -21,9 +21,6 @@ export const config = {
     "https://army-forge.onepagerules.com/api/army-books/", // Append {factionId}?gameSystem={gameSystemId}
   ARMYFORGE_COMMON_RULES_API_URL_BASE:
     "https://army-forge.onepagerules.com/api/rules/common/", // Append {gameSystemId}
-
-  // Other settings
-  GAME_SYSTEM_ID: 2,
 };
 
 // STAT_ICONS remain the same
