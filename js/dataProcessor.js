@@ -398,8 +398,27 @@ function _mergeCombinedUnits(unitA, unitB) {
   // Use base unit's base size (arbitrary choice, usually consistent)
   mergedUnit.bases = unitB.bases ? { ...unitB.bases } : null;
 
-  // Combine rules (duplicates are acceptable here, UI can filter if needed)
-  mergedUnit.rules = [...unitB.rules, ...unitA.rules];
+  // Combine rules and remove duplicates based on ID or name/label
+  const combinedRules = [...unitB.rules, ...unitA.rules];
+  mergedUnit.rules = combinedRules.filter(
+    (rule, index, self) =>
+      index ===
+      self.findIndex(
+        (r) =>
+          // Prioritize ID for uniqueness, fall back to name or label
+          (r.id && rule.id && r.id === rule.id) ||
+          (!r.id && !rule.id && r.name && rule.name && r.name === rule.name) ||
+          (!r.id &&
+            !rule.id &&
+            !r.name &&
+            !rule.name &&
+            r.label &&
+            rule.label &&
+            r.label === rule.label)
+      )
+  );
+  // Note: Consider refining the fallback logic if rules might have same name/label but different ratings etc.
+  // This implementation keeps the *first* occurrence of a rule based on the identifier hierarchy.
 
   // Combine items, aggregating counts
   const combinedItemsMap = new Map();
