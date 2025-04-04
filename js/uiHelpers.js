@@ -4,7 +4,7 @@
  */
 
 // Import constants if needed (e.g., from config)
-import { config, STAT_ICONS } from "./config.js";
+import { config, UI_ICONS } from "./config.js";
 import { getCurrentArmyId } from "./state.js"; // Import needed to get armyId
 
 // Variable to store the element that triggered the spell modal
@@ -183,7 +183,7 @@ export function populateAndShowSpellModal(
       casterUnit.customName || casterUnit.originalName
     }`;
   if (tokenDisplay) {
-    tokenDisplay.innerHTML = `${STAT_ICONS.spellTokens} Tokens: <span class="fw-bold">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
+    tokenDisplay.innerHTML = `${UI_ICONS.spellTokens} Tokens: <span class="fw-bold">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
   }
 
   // Clear previous spell list and hide no spells message

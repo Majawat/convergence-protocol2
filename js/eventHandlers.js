@@ -3,7 +3,7 @@
  */
 
 // Imports from other modules
-import { config, STAT_ICONS } from "./config.js";
+import { config, UI_ICONS } from "./config.js";
 import {
   // State Getters
   getLoadedArmyData,
@@ -560,7 +560,7 @@ function _handleCastSpellClick(buttonElement) {
       "modalCasterTokenDisplay"
     );
     if (modalTokenDisplay) {
-      modalTokenDisplay.innerHTML = `${STAT_ICONS.spellTokens} Tokens: <span class="fw-bold">${newTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
+      modalTokenDisplay.innerHTML = `${UI_ICONS.spellTokens} Tokens: <span class="fw-bold">${newTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
     }
 
     // Update buttons within the modal

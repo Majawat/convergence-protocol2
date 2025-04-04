@@ -4,7 +4,7 @@
  * Added JSDoc comments and inline explanations.
  */
 
-import { config, STAT_ICONS } from "./config.js"; // Configuration constants
+import { config, UI_ICONS } from "./config.js"; // Configuration constants
 import { calculateMovement } from "./gameLogic.js"; // Import the new function
 
 // --- Helper Functions ---
@@ -128,7 +128,7 @@ function _createCasterControlsHTML(casterLevel, initialTokens) {
                  <div class="token-controls">
                      <button type="button" class="btn btn-sm btn-outline-info token-remove-btn" title="Spend Token" ${removeDisabled}><i class="bi bi-dash"></i></button>
                      <span class="token-count-display" title="Spell Tokens">
-                         ${STAT_ICONS.spellTokens}
+                         ${UI_ICONS.spellTokens}
                          <span class="token-count">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span>
                      </span>
                      <button type="button" class="btn btn-sm btn-outline-info token-add-btn" title="Add Token" ${addDisabled}><i class="bi bi-plus"></i></button>
@@ -166,7 +166,7 @@ function _createUnitCardHeaderHTML(baseUnit, hero) {
       baseUnit.xp || 0
     }</span></span>`;
     metaHtml += `<span class="info-separator">|</span><span class="info-item base-info">${
-      STAT_ICONS.base
+      UI_ICONS.base
     } ${unitBase ? unitBase + "mm" : "N/A"}</span>`;
   }
 
@@ -203,10 +203,10 @@ function _createEffectiveStatsHTML(baseUnit, hero) {
   return `
         <div class="effective-stats">
             <div class="stat-item" title="Effective Quality (Used for Morale)">
-                ${STAT_ICONS.quality}<span>${effectiveQuality}+</span>
+                ${UI_ICONS.quality}<span>${effectiveQuality}+</span>
             </div>
             <div class="stat-item" title="Effective Defense">
-                ${STAT_ICONS.defense}<span>${effectiveDefense}+</span>
+                ${UI_ICONS.defense}<span>${effectiveDefense}+</span>
             </div>
         </div>
     `;
@@ -276,10 +276,10 @@ function createModelsDisplay(unit, hero = null) {
     // Determine icon and color
     const isHeroModel = model.isHero;
     const modelIcon = isHeroModel
-      ? STAT_ICONS.hero
+      ? UI_ICONS.hero
       : model.isTough
-      ? STAT_ICONS.tough
-      : STAT_ICONS.hero; // Default icon
+      ? UI_ICONS.tough
+      : UI_ICONS.hero; // Default icon
     const heroColorClass = isHeroModel ? "hero-icon-color" : "";
 
     // Determine model name
@@ -569,17 +569,15 @@ function displayArmyUnits(
                 <div class="sub-section">
                     <h6>${hero.customName || hero.originalName}</h6>
                     <div class="sub-stats-row">
-                        <div class="stat-item">${STAT_ICONS.quality} <span>${
+                        <div class="stat-item">${UI_ICONS.quality} <span>${
         hero.quality
       }+</span></div>
-                        <div class="stat-item">${STAT_ICONS.defense} <span>${
+                        <div class="stat-item">${UI_ICONS.defense} <span>${
         hero.defense
       }+</span></div>
                         ${
                           hero.rules.find((r) => r.name === "Tough")
-                            ? `<div class="stat-item">${
-                                STAT_ICONS.tough
-                              } <span>${
+                            ? `<div class="stat-item">${UI_ICONS.tough} <span>${
                                 hero.rules.find((r) => r.name === "Tough")
                                   ?.rating ?? "?"
                               }</span></div>`
@@ -591,7 +589,7 @@ function displayArmyUnits(
                         <span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
                           hero.xp || 0
                         }</span></span>
-                        <span class="info-item base-info">${STAT_ICONS.base} ${
+                        <span class="info-item base-info">${UI_ICONS.base} ${
         heroBase ? heroBase + "mm" : "N/A"
       }</span>
                     </div>
@@ -619,16 +617,16 @@ function displayArmyUnits(
                 <div class="sub-section">
                     <h6>${baseUnit.customName || baseUnit.originalName}</h6>
                     <div class="sub-stats-row">
-                         <div class="stat-item">${STAT_ICONS.quality} <span>${
+                         <div class="stat-item">${UI_ICONS.quality} <span>${
         baseUnit.quality
       }+</span></div>
-                         <div class="stat-item">${STAT_ICONS.defense} <span>${
+                         <div class="stat-item">${UI_ICONS.defense} <span>${
         baseUnit.defense
       }+</span></div>
                          ${
                            baseUnit.rules.find((r) => r.name === "Tough")
                              ? `<div class="stat-item">${
-                                 STAT_ICONS.tough
+                                 UI_ICONS.tough
                                } <span>${
                                  baseUnit.rules.find((r) => r.name === "Tough")
                                    ?.rating ?? "?"
@@ -641,7 +639,7 @@ function displayArmyUnits(
                         <span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
                           baseUnit.xp || 0
                         }</span></span>
-                        <span class="info-item base-info">${STAT_ICONS.base} ${
+                        <span class="info-item base-info">${UI_ICONS.base} ${
         unitBase ? unitBase + "mm" : "N/A"
       }</span>
                     </div>
