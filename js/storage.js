@@ -1,8 +1,10 @@
 /**
- * @fileoverview Handles saving and loading game state to localStorage using per-army keys.
+ * @fileoverview Handles saving and loading game state to localStorage using per-army keys and a global game state key.
  */
 
 import { config } from "./config.js";
+
+// --- Army State ---
 
 /**
  * Creates the localStorage key for a specific army's state.
@@ -127,10 +129,65 @@ function resetArmyState(armyId) {
   }
 }
 
-// Export the new functions
+// --- Global Game State ---
+
+/**
+ * Loads the global game state from localStorage.
+ * @returns {object} The loaded game state object, or a default object if not found/invalid.
+ */
+function loadGameState() {
+  try {
+    const storedState = localStorage.getItem(config.GAME_STATE_KEY);
+    if (storedState) {
+      const parsedState = JSON.parse(storedState);
+      // Basic validation
+      if (
+        typeof parsedState === "object" &&
+        parsedState !== null &&
+        typeof parsedState.currentRound === "number"
+      ) {
+        return parsedState;
+      } else {
+        console.warn(
+          "Invalid global game state data found. Resetting to default."
+        );
+        localStorage.removeItem(config.GAME_STATE_KEY);
+        return { currentRound: 0 }; // Default state
+      }
+    }
+    return { currentRound: 0 }; // Default state if nothing stored
+  } catch (error) {
+    console.error("Error loading global game state:", error);
+    return { currentRound: 0 }; // Default on error
+  }
+}
+
+/**
+ * Saves the global game state to localStorage.
+ * @param {object} gameState - The game state object (e.g., { currentRound: number }).
+ */
+function saveGameState(gameState) {
+  if (
+    !gameState ||
+    typeof gameState !== "object" ||
+    typeof gameState.currentRound !== "number"
+  ) {
+    console.error("Attempted to save invalid global game state:", gameState);
+    return;
+  }
+  try {
+    localStorage.setItem(config.GAME_STATE_KEY, JSON.stringify(gameState));
+  } catch (error) {
+    console.error("Error saving global game state:", error);
+  }
+}
+
+// Export the new and existing functions
 export {
   saveArmyState,
   loadArmyState,
   resetArmyState,
-  getArmyStateKey, // Export helper maybe useful for debugging or advanced features
+  getArmyStateKey,
+  loadGameState, // Export new game state functions
+  saveGameState, // Export new game state functions
 };

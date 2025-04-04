@@ -46,4 +46,44 @@ export function findTargetModelForWound(baseUnit, heroUnit = null) {
   return null; // Fallback
 }
 
-// Add other game logic functions here later (e.g., morale checks, activation logic)
+/**
+ * Calculates the movement distance for a unit based on the action type and unit rules.
+ * Considers Fast/Slow rules. Base movement speeds: Hold=0", Advance=6", Rush/Charge=12".
+ * @param {object} unitData - The processed unit data (either base unit or joined hero if applicable for movement).
+ * @param {'Hold' | 'Advance' | 'Rush' | 'Charge'} actionType - The type of action being taken.
+ * @returns {number} The calculated movement distance in inches.
+ */
+export function calculateMovement(unitData, actionType) {
+  if (!unitData) return 0;
+
+  let baseMovement = 0;
+  switch (actionType) {
+    case "Advance":
+      baseMovement = 6;
+      break;
+    case "Rush":
+    case "Charge":
+      baseMovement = 12;
+      break;
+    case "Hold":
+    default:
+      baseMovement = 0;
+      break;
+  }
+
+  if (baseMovement === 0) return 0; // No modifiers for Hold
+
+  // Check for Fast/Slow rules [cite: 224, 253]
+  const hasFast = unitData.rules?.some((rule) => rule.name === "Fast");
+  const hasSlow = unitData.rules?.some((rule) => rule.name === "Slow");
+
+  if (hasFast) {
+    return baseMovement === 6 ? baseMovement + 2 : baseMovement + 4; // Advance +2", Rush/Charge +4"
+  } else if (hasSlow) {
+    return baseMovement === 6 ? baseMovement - 2 : baseMovement - 4; // Advance -2", Rush/Charge -4"
+  } else {
+    return baseMovement;
+  }
+}
+
+// Add other game logic functions here later (e.g., morale checks)

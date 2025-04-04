@@ -8,6 +8,7 @@ export const config = {
   COMMON_RULES_CACHE_KEY_PREFIX: "oprCommonRulesCache_", // Append game system ID
   ARMY_STATE_KEY_PREFIX: "oprArmyTracker_state_", // Prefix for per-army state keys
   THEME_STORAGE_KEY: "theme",
+  GAME_STATE_KEY: "oprArmyTracker_gameState",
 
   // Game Rules
   MAX_SPELL_TOKENS: 6,

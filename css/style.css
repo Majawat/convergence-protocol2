@@ -312,3 +312,46 @@ body {
   width: 3rem;
   height: 3rem;
 }
+
+/* --- Activation Styles --- */
+
+/* Action Controls Container */
+.action-controls {
+  margin-top: 0.5rem; /* Space below effective stats */
+  margin-bottom: 1rem; /* Space above details/models */
+}
+
+/* Ensure button group takes full width */
+.action-controls .btn-group {
+  width: 100%;
+}
+
+/* Individual Action Buttons */
+.action-controls .action-btn {
+  flex-grow: 1; /* Make buttons fill available space */
+  font-size: 0.85em; /* Slightly smaller text */
+  padding: 0.4rem 0.2rem; /* Adjust padding */
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Selected Action Button Highlight */
+.action-btn.action-selected {
+  /* Uses btn-primary from ui.js, but we can add specifics */
+  font-weight: bold;
+  box-shadow: inset 0 0 0 2px var(--bs-primary-border-subtle); /* Inner glow effect */
+}
+
+/* Activated Unit Card Styling */
+.unit-card.unit-activated {
+  opacity: 0.85; /* Dim the card slightly */
+  border-color: var(--bs-primary); /* Highlight border */
+  box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.5); /* Subtle glow */
+}
+
+/* Disabled buttons when activated */
+.unit-activated .action-btn:disabled:not(.action-selected) {
+  opacity: 0.5; /* Make disabled non-selected buttons more faded */
+  cursor: not-allowed;
+}

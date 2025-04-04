@@ -9,19 +9,25 @@ import {
   getLoadedArmyData,
   getUnitData,
   getJoinedHeroData,
-  getUnitStateValue, // Use new specific getter
+  getUnitStateValue,
   getArmyBooksData,
   getCurrentArmyHeroTargets,
-  getCurrentArmyId, // Use to get current army ID
-  // State Updaters (These now handle load/save implicitly)
+  getCurrentArmyId,
+  getCurrentRound, // Import new getter
+  // State Updaters
   updateModelStateValue,
   updateUnitStateValue,
+  incrementCurrentRound, // Import new updater
 } from "./state.js";
-// Removed storage imports as saving is implicit now
+import { loadArmyState, saveArmyState } from "./storage.js"; // Keep for round start reset logic
 import { findTargetModelForWound } from "./gameLogic.js";
-import { updateModelDisplay, updateTokenDisplay } from "./ui.js";
+import {
+  updateModelDisplay,
+  updateTokenDisplay,
+  updateActionButtonsUI, // Import new UI updater
+  resetAllActionButtonsUI, // Import new UI resetter
+} from "./ui.js";
 import { showToast, populateAndShowSpellModal } from "./uiHelpers.js";
-import { loadArmyState, saveArmyState } from "./storage.js"; // Need load/save for round start reset
 
 // --- Internal Helper Functions ---
 
@@ -176,12 +182,37 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
 
 /**
  * Handles the 'Start New Round' button click.
+ * Increments the round counter.
  * Resets 'action' and 'fatigued' status for all units.
  * Generates spell tokens for casters.
  * @param {string} armyId - The ID of the current army.
  */
 function handleStartRoundClick(armyId) {
   console.log(`--- Starting New Round for Army ${armyId} ---`);
+
+  // 1. Increment Round Counter
+  const newRound = incrementCurrentRound();
+  console.log(`Round incremented to ${newRound}`);
+
+  // Update Round Display UI (Assume an element with id="round-display" exists)
+  const roundDisplayElement = document.getElementById("round-display");
+  if (roundDisplayElement) {
+    roundDisplayElement.textContent = `Round ${newRound}`;
+  } else {
+    // Create the element if it doesn't exist (e.g., add it near the H1 title)
+    const titleH1 = document.getElementById("army-title-h1");
+    if (titleH1) {
+      let displaySpan = document.getElementById("round-display");
+      if (!displaySpan) {
+        displaySpan = document.createElement("span");
+        displaySpan.id = "round-display";
+        displaySpan.className = "ms-3 badge bg-info align-middle"; // Style as a badge
+        titleH1.parentNode.insertBefore(displaySpan, titleH1.nextSibling); // Insert after H1
+      }
+      displaySpan.textContent = `Round ${newRound}`;
+    }
+  }
+
   const currentArmyProcessedData = getLoadedArmyData(); // Get processed data for unit iteration
   if (!currentArmyProcessedData || !currentArmyProcessedData.units) {
     showToast("Error: Army data not loaded.", "Error");
@@ -227,7 +258,7 @@ function handleStartRoundClick(armyId) {
       stateChanged = true;
     }
     if (unitState.fatigued !== false) {
-      unitState.fatigued = false;
+      unitState.fatigued = false; // Reset fatigue
       stateChanged = true;
     }
 
@@ -251,7 +282,8 @@ function handleStartRoundClick(armyId) {
         // Find card ID for UI update
         const heroTargets = getCurrentArmyHeroTargets();
         const cardUnitId = heroTargets?.[unitId] || unitId;
-        updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel);
+        // Update token display on the card (will happen below via resetAllActionButtonsUI if needed, or can be explicit)
+        updateTokenDisplay(cardUnitId, newTokens, unit.casterLevel); // Explicit call if needed
         stateChanged = true;
       }
     }
@@ -261,15 +293,39 @@ function handleStartRoundClick(armyId) {
   if (stateChanged) {
     saveArmyState(armyId, armyState);
     console.log(
-      `State updated and saved for start of round for army ${armyId}.`
+      `State updated and saved for start of round ${newRound} for army ${armyId}.`
     );
   }
 
+  // Reset Action Button UI for all cards
+  resetAllActionButtonsUI();
+
   // Format and show toast message
-  let toastMessage = "All Unit Actions reset"; // Add confirmation
+  let toastMessage = `Round ${newRound} Started!`; // Add confirmation
+  toastMessage += "\nAll Unit Actions & Fatigue reset.";
   if (casterUpdates.length > 0) {
     toastMessage += "\nSpell Tokens Generated:";
     casterUpdates.forEach((update) => {
+      // Find card ID for UI update (needed here for the token display update after reset)
+      const heroTargets = getCurrentArmyHeroTargets();
+      const casterUnitData = getUnitData(
+        Object.keys(armyState.units).find(
+          (uid) =>
+            (armyState.units[uid].customName ||
+              armyState.units[uid].originalName) === update.name
+        )
+      );
+      if (casterUnitData) {
+        const cardUnitId =
+          heroTargets?.[casterUnitData.selectionId] ||
+          casterUnitData.selectionId;
+        updateTokenDisplay(
+          cardUnitId,
+          update.total,
+          casterUnitData.casterLevel
+        );
+      }
+
       toastMessage += `\n- ${update.name}: +${update.added
         .toString()
         .padStart(1, "\u00A0")}, now ${update.total}`;
@@ -277,7 +333,7 @@ function handleStartRoundClick(armyId) {
   } else {
     toastMessage += "\nNo casters required token updates.";
   }
-  showToast(toastMessage, "New Round Starte");
+  showToast(toastMessage, `Round ${newRound}`);
 }
 
 // --- Specific Click Handlers ---
@@ -528,6 +584,42 @@ function _handleCastSpellClick(buttonElement) {
   }
 }
 
+/**
+ * Handles clicks on the action buttons ("Hold", "Advance", etc.).
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The current army ID.
+ * @param {string} cardUnitId - The selectionId of the card.
+ * @private
+ */
+function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
+  const actionType = targetElement.dataset.action; // e.g., 'Hold', 'Advance'
+  if (!actionType) {
+    console.warn("Action button missing data-action attribute.");
+    return;
+  }
+
+  // Check current state
+  const currentAction = getUnitStateValue(armyId, cardUnitId, "action", null);
+
+  let newAction = null;
+  if (currentAction === actionType) {
+    // Clicked the currently active action - deactivate
+    newAction = null;
+    console.log(`Unit ${cardUnitId} deactivated.`);
+    // Can potentially set fatigued = true here if deactivating from certain actions, TBD rule clarification
+  } else {
+    // Clicked a new action - activate
+    newAction = actionType;
+    console.log(`Unit ${cardUnitId} activated with action: ${newAction}`);
+  }
+
+  // Update state (this saves implicitly)
+  updateUnitStateValue(armyId, cardUnitId, "action", newAction);
+
+  // Update UI
+  updateActionButtonsUI(cardUnitId, newAction);
+}
+
 // --- Main Event Listener & Setup ---
 
 /**
@@ -550,6 +642,7 @@ function handleInteractionClick(event) {
     const addTokenButton = event.target.closest(".token-add-btn");
     const removeTokenButton = event.target.closest(".token-remove-btn");
     const viewSpellsButton = event.target.closest(".view-spells-btn");
+    const actionButton = event.target.closest(".action-btn"); // Added
 
     if (modelElement) _handleModelWoundClick(modelElement, armyId, cardUnitId);
     else if (woundButton)
@@ -562,6 +655,8 @@ function handleInteractionClick(event) {
       _handleRemoveTokenClick(removeTokenButton, armyId, cardUnitId);
     else if (viewSpellsButton)
       _handleViewSpellsClick(viewSpellsButton, armyId, cardUnitId);
+    else if (actionButton)
+      _handleActionButtonClick(actionButton, armyId, cardUnitId); // Added handler call
   } else if (spellModal) {
     const castButton = event.target.closest(".cast-spell-btn");
     if (castButton) {
@@ -583,11 +678,31 @@ export function setupEventListeners(armyId) {
   // Add listener for the global "Start Round" button
   const startRoundButton = document.getElementById("start-round-button");
   if (startRoundButton) {
-    const newButton = startRoundButton.cloneNode(true);
+    const newButton = startRoundButton.cloneNode(true); // Clone to remove old listeners
     startRoundButton.parentNode.replaceChild(newButton, startRoundButton);
     newButton.addEventListener("click", () => handleStartRoundClick(armyId)); // Pass armyId here
     console.log("Start Round button listener attached.");
   } else {
     console.warn("Start Round button not found.");
+  }
+
+  // Initialize Round Display on load
+  const initialRound = getCurrentRound();
+  const roundDisplayElement = document.getElementById("round-display");
+  if (roundDisplayElement) {
+    roundDisplayElement.textContent = `Round ${initialRound}`;
+  } else {
+    // Create if doesn't exist
+    const titleH1 = document.getElementById("army-title-h1");
+    if (titleH1) {
+      let displaySpan = document.getElementById("round-display");
+      if (!displaySpan) {
+        displaySpan = document.createElement("span");
+        displaySpan.id = "round-display";
+        displaySpan.className = "ms-3 badge bg-info align-middle"; // Style as a badge
+        titleH1.parentNode.insertBefore(displaySpan, titleH1.nextSibling);
+      }
+      displaySpan.textContent = `Round ${initialRound}`;
+    }
   }
 }

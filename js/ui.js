@@ -5,6 +5,7 @@
  */
 
 import { config, STAT_ICONS } from "./config.js"; // Configuration constants
+import { calculateMovement } from "./gameLogic.js"; // Import the new function
 
 // --- Helper Functions ---
 
@@ -22,6 +23,9 @@ function _formatRule(rule, filterCaster) {
   // Filter out rules handled explicitly by UI elements
   if (rule.name === "Tough") return null;
   if (filterCaster && rule.name === "Caster") return null;
+
+  // Filter out movement rules handled by calculateMovement
+  if (rule.name === "Fast" || rule.name === "Slow") return null;
 
   // Format with rating if present
   if (
@@ -209,7 +213,41 @@ function _createEffectiveStatsHTML(baseUnit, hero) {
 }
 
 /**
+ * Creates the HTML string for the unit action controls.
+ * @param {object} baseUnit - The processed base unit data.
+ * @param {object | null} hero - The processed hero data if joined.
+ * @returns {string} HTML string for the action controls.
+ * @private
+ */
+function _createActionControlsHTML(baseUnit, hero) {
+  // Use hero stats if present for movement calculation, otherwise base unit
+  const movementUnit = hero || baseUnit;
+
+  const holdAction = "Hold";
+  const advanceAction = "Advance";
+  const rushAction = "Rush";
+  const chargeAction = "Charge";
+
+  // Calculate movement distances using the new function
+  const advanceMove = calculateMovement(movementUnit, advanceAction);
+  const rushMove = calculateMovement(movementUnit, rushAction);
+  const chargeMove = calculateMovement(movementUnit, chargeAction);
+
+  return `
+        <div class="action-controls">
+            <div class="btn-group w-100" role="group" aria-label="Unit Actions">
+                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${holdAction}">${holdAction}</button>
+                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${advanceAction}">Adv (${advanceMove}")</button>
+                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${rushAction}">Rush (${rushMove}")</button>
+                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${chargeAction}">Chg (${chargeMove}")</button>
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Creates the HTML string for displaying individual models within a unit card.
+ * Ensures model list structure matches the original request.
  * @param {object} unit - The processed unit data for the base unit.
  * @param {object | null} hero - The processed hero data if joined, otherwise null.
  * @returns {string} HTML string for the models section.
@@ -260,7 +298,7 @@ function createModelsDisplay(unit, hero = null) {
       modelBaseName = `Model ${modelCounter++}`; // Numbered regular model
     }
 
-    // Build model HTML
+    // Build model HTML - Structure kept identical to original request for consistency
     modelsHtml += `
             <div class="model-display clickable-model ${
               isRemoved ? "model-removed" : ""
@@ -289,6 +327,7 @@ function createModelsDisplay(unit, hero = null) {
 
 /**
  * Updates the visual representation of a single model's HP on its display element.
+ * Ensures structure remains consistent.
  * @param {string} unitSelectionId - The selectionId of the unit card containing the model. (Used for potential context, though modelId should be unique).
  * @param {string} modelId - The unique ID of the model element (`data-model-id`).
  * @param {number} currentHp - The model's current HP.
@@ -357,13 +396,73 @@ function updateTokenDisplay(unitId, currentTokens, casterLevel) {
   if (removeButton) removeButton.disabled = currentTokens <= 0;
 }
 
+/**
+ * Updates the UI state of the action buttons on a unit card.
+ * @param {string} unitId - The selectionId of the unit card to update.
+ * @param {string | null} activeAction - The currently active action ('Hold', 'Advance', etc.), or null if deactivated.
+ */
+function updateActionButtonsUI(unitId, activeAction) {
+  const cardElement = document.getElementById(`unit-card-${unitId}`);
+  if (!cardElement) {
+    // This might still log if called very rapidly before DOM settles, but should be less frequent.
+    // console.warn(`Card element not found for action button update: ${unitId}`);
+    return;
+  }
+
+  const actionButtons = cardElement.querySelectorAll(".action-btn");
+
+  // Add/remove activated class to the card
+  cardElement.classList.toggle("unit-activated", !!activeAction);
+
+  actionButtons.forEach((button) => {
+    const buttonAction = button.dataset.action;
+
+    if (activeAction) {
+      // An action is selected
+      if (buttonAction === activeAction) {
+        // This is the selected button
+        button.classList.add("action-selected");
+        button.classList.remove("btn-outline-secondary"); // Make it look primary/selected
+        button.classList.add("btn-primary");
+        button.disabled = false; // Keep it enabled to allow deactivation
+      } else {
+        // This is one of the other buttons
+        button.classList.remove("action-selected");
+        button.classList.add("btn-outline-secondary");
+        button.classList.remove("btn-primary");
+        button.disabled = true; // Disable other buttons
+      }
+    } else {
+      // No action selected - reset all buttons
+      button.classList.remove("action-selected");
+      button.classList.add("btn-outline-secondary");
+      button.classList.remove("btn-primary");
+      button.disabled = false; // Enable all buttons
+    }
+  });
+}
+
+/**
+ * Resets the action buttons UI for all cards on the page.
+ * Used typically at the start of a round.
+ */
+function resetAllActionButtonsUI() {
+  const allCards = document.querySelectorAll(".unit-card");
+  allCards.forEach((card) => {
+    const unitId = card.dataset.unitId;
+    if (unitId) {
+      updateActionButtonsUI(unitId, null); // Call update with null action
+    }
+  });
+}
+
 // --- Main Display Function ---
 
 /**
  * Displays the army units by creating and appending unit cards to the container.
  * @param {object} processedArmy - The structured army data object from processArmyData.
  * @param {HTMLElement} displayContainerRow - The HTML ROW element to inject the card columns into.
- * @param {object} initialComponentStates - The loaded component states { armyId: { unitId: { tokens: T } } }
+ * @param {object} initialComponentStates - The loaded component states { armyId: { unitId: { tokens: T, action: A } } }
  */
 function displayArmyUnits(
   processedArmy,
@@ -383,12 +482,13 @@ function displayArmyUnits(
 
   // Clear previous content (like loading spinners or old cards)
   displayContainerRow.innerHTML = "";
+  const initialStatesToApply = []; // Store unitId and initialAction
 
   processedArmy.units.forEach((currentUnit) => {
     // Skip rendering heroes that are joined to another unit (they are rendered as part of the base unit's card)
     if (
       currentUnit.isHero &&
-      processedArmy.heroJoinTargets[currentUnit.selectionId]
+      processedArmy.heroJoinTargets?.[currentUnit.selectionId]
     ) {
       return;
     }
@@ -398,7 +498,7 @@ function displayArmyUnits(
     const joinedHeroId = Object.keys(processedArmy.heroJoinTargets || {}).find(
       (key) => processedArmy.heroJoinTargets[key] === currentUnit.selectionId
     );
-    if (joinedHeroId && processedArmy.unitMap[joinedHeroId]) {
+    if (joinedHeroId && processedArmy.unitMap?.[joinedHeroId]) {
       hero = processedArmy.unitMap[joinedHeroId];
     }
     const baseUnit = currentUnit; // The unit being iterated is always the base card unit
@@ -408,7 +508,7 @@ function displayArmyUnits(
     let unitIsCaster = false;
     let actualCasterUnitId = null; // The selectionId of the unit that actually has the Caster rule
 
-    if (hero && hero.casterLevel > 0) {
+    if (hero?.casterLevel > 0) {
       casterLevel = hero.casterLevel;
       unitIsCaster = true;
       actualCasterUnitId = hero.selectionId;
@@ -418,10 +518,19 @@ function displayArmyUnits(
       actualCasterUnitId = baseUnit.selectionId;
     }
 
-    // Get initial token count for the actual caster unit
-    const initialTokens =
-      initialComponentStates[processedArmy.meta.id]?.[actualCasterUnitId]
-        ?.tokens ?? 0;
+    // Get initial component states for this unit (using baseUnit.selectionId as the key)
+    const armyState = initialComponentStates[processedArmy.meta.id] || {};
+    const unitState = armyState[baseUnit.selectionId] || {};
+    const initialTokens = unitState.tokens ?? 0;
+    const initialAction = unitState.action ?? null; // Get initial action state
+
+    // Store initial action state to apply AFTER DOM insertion
+    if (initialAction) {
+      initialStatesToApply.push({
+        unitId: baseUnit.selectionId,
+        action: initialAction,
+      });
+    }
 
     // --- Create Card Structure ---
     const colDiv = document.createElement("div");
@@ -433,17 +542,18 @@ function displayArmyUnits(
     cardDiv.dataset.unitId = baseUnit.selectionId; // Store base unit ID for event handling
     cardDiv.className =
       "card unit-card shadow-sm border-secondary-subtle flex-fill"; // flex-fill for equal height
+    // Initial activation class will be added later
 
     // --- Generate Card Content using Helpers ---
     const cardHeaderHTML = _createUnitCardHeaderHTML(baseUnit, hero);
     const effectiveStatsHTML = _createEffectiveStatsHTML(baseUnit, hero);
+    const actionControlsHTML = _createActionControlsHTML(baseUnit, hero); // Generate Action Buttons
     const modelsHTML = createModelsDisplay(baseUnit, hero); // Use existing function
 
     // Build Card Body Content
     let cardBodyContentHTML = `<div class="details-section">`;
     if (hero) {
       // --- Joined Unit Display ---
-      // Section for Hero
       const heroBase = hero.bases?.round || hero.bases?.square;
       const heroRules = hero.rules
         .map((rule) =>
@@ -451,7 +561,7 @@ function displayArmyUnits(
             rule,
             unitIsCaster && actualCasterUnitId === hero.selectionId
           )
-        ) // Filter Caster only if hero is the caster
+        )
         .filter(Boolean)
         .sort()
         .join(", ");
@@ -471,7 +581,7 @@ function displayArmyUnits(
                                 STAT_ICONS.tough
                               } <span>${
                                 hero.rules.find((r) => r.name === "Tough")
-                                  .rating
+                                  ?.rating ?? "?"
                               }</span></div>`
                             : ""
                         }
@@ -499,10 +609,9 @@ function displayArmyUnits(
                     )}</div>
                 </div>`;
 
-      // Section for Base Unit
       const unitBase = baseUnit.bases?.round || baseUnit.bases?.square;
       const unitRules = baseUnit.rules
-        .map((rule) => _formatRule(rule, false)) // Never filter Caster for base unit display here
+        .map((rule) => _formatRule(rule, false))
         .filter(Boolean)
         .sort()
         .join(", ");
@@ -522,7 +631,7 @@ function displayArmyUnits(
                                  STAT_ICONS.tough
                                } <span>${
                                  baseUnit.rules.find((r) => r.name === "Tough")
-                                   .rating
+                                   ?.rating ?? "?"
                                }</span></div>`
                              : ""
                          }
@@ -547,7 +656,7 @@ function displayArmyUnits(
     } else {
       // --- Normal (Non-Joined) Unit Display ---
       const unitRules = baseUnit.rules
-        .map((rule) => _formatRule(rule, unitIsCaster)) // Filter Caster only if this unit is the caster
+        .map((rule) => _formatRule(rule, unitIsCaster))
         .filter(Boolean)
         .sort()
         .join(", ");
@@ -572,7 +681,11 @@ function displayArmyUnits(
     // --- Assemble Card Body ---
     const cardBody = document.createElement("div");
     cardBody.className = "card-body";
-    cardBody.innerHTML = effectiveStatsHTML + cardBodyContentHTML + modelsHTML; // Add models grid last
+    cardBody.innerHTML =
+      effectiveStatsHTML +
+      actionControlsHTML +
+      cardBodyContentHTML +
+      modelsHTML;
 
     // --- Append Header and Body to Card ---
     cardDiv.innerHTML = cardHeaderHTML; // Set header HTML
@@ -582,7 +695,22 @@ function displayArmyUnits(
     colDiv.appendChild(cardDiv);
     displayContainerRow.appendChild(colDiv);
   }); // End forEach unit
-}
 
-// Export the necessary functions
-export { displayArmyUnits, updateModelDisplay, updateTokenDisplay };
+  // --- Apply Initial Action Button States AFTER DOM insertion ---
+  // Use requestAnimationFrame to ensure the DOM has updated
+  requestAnimationFrame(() => {
+    initialStatesToApply.forEach(({ unitId, action }) => {
+      updateActionButtonsUI(unitId, action);
+    });
+  });
+} // End displayArmyUnits
+
+// Corrected Exports
+export {
+  displayArmyUnits,
+  updateModelDisplay,
+  updateTokenDisplay,
+  createModelsDisplay,
+  updateActionButtonsUI,
+  resetAllActionButtonsUI,
+};

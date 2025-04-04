@@ -1,7 +1,12 @@
 /**
- * @fileoverview Manages application state, interacting with per-army storage.
+ * @fileoverview Manages application state, interacting with per-army and global storage.
  */
-import { loadArmyState, saveArmyState } from "./storage.js";
+import {
+  loadArmyState,
+  saveArmyState,
+  loadGameState,
+  saveGameState,
+} from "./storage.js";
 import { config } from "./config.js"; // Import config for defaults like MAX_SPELL_TOKENS
 
 // --- Global Non-Persistent State ---
@@ -9,6 +14,9 @@ let campaignData = null;
 let armyBooksData = {}; // { factionId: data } - Still global cache
 let commonRulesData = {}; // { gameSystemId: data } - Still global cache
 let loadedArmiesData = {}; // { armyId: processedArmy } - Stores the *processed* data for the currently loaded army
+
+// --- Global Persistent State (Managed via storage functions) ---
+// Game state like currentRound is loaded/saved directly when needed
 
 // --- Getters ---
 
@@ -63,7 +71,7 @@ function getUnitState(armyId, unitId) {
   const armyState = getArmyState(armyId);
   // Return existing unit state or a default structure
   return (
-    armyState.units[unitId] || {
+    armyState.units?.[unitId] || {
       status: "active",
       shaken: false,
       fatigued: false,
@@ -87,7 +95,7 @@ function getModelState(armyId, unitId, modelId) {
   const unitState = getUnitState(armyId, unitId);
   // Return existing model state or a default structure
   return (
-    unitState.models[modelId] || {
+    unitState.models?.[modelId] || {
       currentHp: 1, // Default to 1 HP if not found? Or look up maxHP? Needs thought.
       // Let's assume initialization handles setting correct HP. Default needed if accessed before init.
       name: null,
@@ -104,7 +112,7 @@ export function getArmyListPoints(armyId) {
   return state.listPoints;
 }
 
-/** Gets a specific unit state value (e.g., shaken, fatigued, tokens). */
+/** Gets a specific unit state value (e.g., shaken, fatigued, tokens, action). */
 export function getUnitStateValue(armyId, unitId, key, defaultValue) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId || !unitId || !key) return defaultValue;
@@ -118,6 +126,32 @@ export function getModelStateValue(armyId, unitId, modelId, key, defaultValue) {
   if (!armyId || !unitId || !modelId || !key) return defaultValue;
   const modelState = getModelState(armyId, unitId, modelId); // getModelState provides default
   return modelState.hasOwnProperty(key) ? modelState[key] : defaultValue;
+}
+
+// --- Global Game State Getters/Setters ---
+
+/** Gets the current round number from global game state. */
+export function getCurrentRound() {
+  const gameState = loadGameState();
+  return gameState.currentRound;
+}
+
+/** Sets the current round number in global game state. */
+export function setCurrentRound(roundNumber) {
+  if (typeof roundNumber !== "number" || roundNumber < 0) {
+    console.error("Invalid round number provided to setCurrentRound.");
+    return;
+  }
+  const gameState = loadGameState(); // Load current state
+  gameState.currentRound = roundNumber;
+  saveGameState(gameState); // Save updated state
+}
+
+/** Increments the current round number and saves it. */
+export function incrementCurrentRound() {
+  const currentRound = getCurrentRound();
+  setCurrentRound(currentRound + 1);
+  return currentRound + 1; // Return the new round number
 }
 
 // --- Setters ---
@@ -171,7 +205,7 @@ export function setLoadedArmyData(armyId, processedData) {
  * Updates a specific unit state value (e.g., shaken, fatigued, action, tokens, status) and saves.
  * @param {string} armyId - The ID of the army.
  * @param {string} unitId - The ID of the unit.
- * @param {string} key - The state key to update (e.g., 'shaken', 'tokens').
+ * @param {string} key - The state key to update (e.g., 'shaken', 'tokens', 'action').
  * @param {*} value - The new value for the key.
  */
 export function updateUnitStateValue(armyId, unitId, key, value) {
