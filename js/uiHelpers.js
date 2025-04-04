@@ -46,7 +46,7 @@ export function displayArmySelection(armies, container) {
                       army.player || "Unknown Player"
                     })</small>
                 </span>
-                <i class="bi bi-chevron-right"></i>
+                ${UI_ICONS.selectItem}
             `;
       listGroup.appendChild(link);
     });
@@ -221,7 +221,7 @@ export function populateAndShowSpellModal(
                             data-caster-id="${casterUnit.selectionId}"
                             data-army-id="${armyId}"
                             ${!canCast ? "disabled" : ""}>
-                        <i class="bi bi-magic"></i> Cast
+                        ${UI_ICONS.castSpell} Cast
                     </button>
                 </div>
                 `;

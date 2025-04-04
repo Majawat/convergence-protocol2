@@ -4,7 +4,7 @@
  * Added JSDoc comments and inline explanations.
  */
 
-import { config, UI_ICONS } from "./config.js"; // Configuration constants
+import { config, UI_ICONS, ACTION_BUTTON_CONFIG } from "./config.js"; // Configuration constants
 import { calculateMovement } from "./gameLogic.js"; // Import the new function
 
 // --- Helper Functions ---
@@ -25,7 +25,7 @@ function _formatRule(rule, filterCaster) {
   if (filterCaster && rule.name === "Caster") return null;
 
   // Filter out movement rules handled by calculateMovement
-  if (rule.name === "Fast" || rule.name === "Slow") return null;
+  // if (rule.name === "Fast" || rule.name === "Slow") return null;
 
   // Format with rating if present
   if (
@@ -126,14 +126,14 @@ function _createCasterControlsHTML(casterLevel, initialTokens) {
              <div class="caster-controls">
                  <span class="caster-level-badge me-2">Caster(${casterLevel})</span>
                  <div class="token-controls">
-                     <button type="button" class="btn btn-sm btn-outline-info token-remove-btn" title="Spend Token" ${removeDisabled}><i class="bi bi-dash"></i></button>
+                     <button type="button" class="btn btn-sm btn-outline-info token-remove-btn" title="Spend Token" ${removeDisabled}>${UI_ICONS.tokenRemove}</button>
                      <span class="token-count-display" title="Spell Tokens">
                          ${UI_ICONS.spellTokens}
                          <span class="token-count">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span>
                      </span>
-                     <button type="button" class="btn btn-sm btn-outline-info token-add-btn" title="Add Token" ${addDisabled}><i class="bi bi-plus"></i></button>
+                     <button type="button" class="btn btn-sm btn-outline-info token-add-btn" title="Add Token" ${addDisabled}>${UI_ICONS.tokenAdd}</button>
                  </div>
-                 <button type="button" class="btn btn-sm btn-outline-info view-spells-btn" title="View Spells"><i class="bi bi-book"></i> View Spells</button>
+                 <button type="button" class="btn btn-sm btn-outline-info view-spells-btn" title="View Spells">${UI_ICONS.viewSpells} View Spells</button>
              </div>
         </div>
     `;
@@ -180,8 +180,8 @@ function _createUnitCardHeaderHTML(baseUnit, hero) {
                 </div>
             </div>
             <div class="btn-group btn-group-sm header-button-group">
-                <button type="button" class="btn btn-outline-danger wound-apply-btn" title="Apply Wound (Auto-Target)"><i class="bi bi-heartbreak"></i></button>
-                <button type="button" class="btn btn-outline-secondary wound-reset-btn" title="Reset Wounds"><i class="bi bi-arrow-clockwise"></i></button>
+                <button type="button" class="btn btn-outline-danger wound-apply-btn" title="Apply Wound (Auto-Target)">${UI_ICONS.woundApply}</button>
+                <button type="button" class="btn btn-outline-secondary wound-reset-btn" title="Reset Wounds">${UI_ICONS.woundReset}</button>
             </div>
         </div>
     `;
@@ -214,32 +214,45 @@ function _createEffectiveStatsHTML(baseUnit, hero) {
 
 /**
  * Creates the HTML string for the unit action controls.
+ * Uses ACTION_BUTTON_CONFIG and UI_ICONS.
  * @param {object} baseUnit - The processed base unit data.
  * @param {object | null} hero - The processed hero data if joined.
  * @returns {string} HTML string for the action controls.
  * @private
  */
 function _createActionControlsHTML(baseUnit, hero) {
-  // Use hero stats if present for movement calculation, otherwise base unit
   const movementUnit = hero || baseUnit;
 
-  const holdAction = "Hold";
-  const advanceAction = "Advance";
-  const rushAction = "Rush";
-  const chargeAction = "Charge";
+  const actionNames = ["Hold", "Advance", "Rush", "Charge"];
+  let buttonsHTML = "";
 
-  // Calculate movement distances using the new function
-  const advanceMove = calculateMovement(movementUnit, advanceAction);
-  const rushMove = calculateMovement(movementUnit, rushAction);
-  const chargeMove = calculateMovement(movementUnit, chargeAction);
+  actionNames.forEach((actionName) => {
+    const config = ACTION_BUTTON_CONFIG[actionName];
+    if (!config) return; // Skip if action not configured
+
+    const icon = UI_ICONS[config.iconKey] || ""; // Get icon SVG from UI_ICONS
+    let text = config.baseText;
+
+    // Add dynamic movement value for relevant actions
+    if (
+      actionName === "Advance" ||
+      actionName === "Rush" ||
+      actionName === "Charge"
+    ) {
+      const moveValue = calculateMovement(movementUnit, actionName);
+      text += ` (${moveValue}")`;
+    }
+
+    buttonsHTML += `<button type="button" class="btn btn-outline-${config.colorTheme} action-btn" data-action="${actionName}" title="${actionName}">
+                        ${icon}
+                        <span class="action-text">${text}</span>
+                    </button>`;
+  });
 
   return `
         <div class="action-controls">
             <div class="btn-group w-100" role="group" aria-label="Unit Actions">
-                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${holdAction}">${holdAction}</button>
-                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${advanceAction}">Adv (${advanceMove}")</button>
-                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${rushAction}">Rush (${rushMove}")</button>
-                <button type="button" class="btn btn-outline-secondary action-btn" data-action="${chargeAction}">Chg (${chargeMove}")</button>
+                ${buttonsHTML}
             </div>
         </div>
     `;
@@ -398,46 +411,45 @@ function updateTokenDisplay(unitId, currentTokens, casterLevel) {
 
 /**
  * Updates the UI state of the action buttons on a unit card.
+ * Uses ACTION_BUTTON_CONFIG to apply correct background/outline colors.
  * @param {string} unitId - The selectionId of the unit card to update.
  * @param {string | null} activeAction - The currently active action ('Hold', 'Advance', etc.), or null if deactivated.
  */
 function updateActionButtonsUI(unitId, activeAction) {
   const cardElement = document.getElementById(`unit-card-${unitId}`);
   if (!cardElement) {
-    // This might still log if called very rapidly before DOM settles, but should be less frequent.
     // console.warn(`Card element not found for action button update: ${unitId}`);
     return;
   }
 
   const actionButtons = cardElement.querySelectorAll(".action-btn");
 
-  // Add/remove activated class to the card
   cardElement.classList.toggle("unit-activated", !!activeAction);
 
   actionButtons.forEach((button) => {
     const buttonAction = button.dataset.action;
+    // Get color theme from ACTION_BUTTON_CONFIG
+    const colorTheme =
+      ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary"; // Use config, fallback
+
+    // Reset classes first
+    button.classList.remove(
+      "action-selected",
+      `btn-${colorTheme}`,
+      `btn-outline-${colorTheme}`
+    );
 
     if (activeAction) {
-      // An action is selected
       if (buttonAction === activeAction) {
-        // This is the selected button
-        button.classList.add("action-selected");
-        button.classList.remove("btn-outline-secondary"); // Make it look primary/selected
-        button.classList.add("btn-primary");
-        button.disabled = false; // Keep it enabled to allow deactivation
+        button.classList.add("action-selected", `btn-${colorTheme}`); // Solid background
+        button.disabled = false;
       } else {
-        // This is one of the other buttons
-        button.classList.remove("action-selected");
-        button.classList.add("btn-outline-secondary");
-        button.classList.remove("btn-primary");
-        button.disabled = true; // Disable other buttons
+        button.classList.add(`btn-outline-${colorTheme}`); // Outline background
+        button.disabled = true;
       }
     } else {
-      // No action selected - reset all buttons
-      button.classList.remove("action-selected");
-      button.classList.add("btn-outline-secondary");
-      button.classList.remove("btn-primary");
-      button.disabled = false; // Enable all buttons
+      button.classList.add(`btn-outline-${colorTheme}`); // Outline background
+      button.disabled = false;
     }
   });
 }
