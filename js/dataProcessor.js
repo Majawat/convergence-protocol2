@@ -417,8 +417,6 @@ function _mergeCombinedUnits(unitA, unitB) {
             r.label === rule.label)
       )
   );
-  // Note: Consider refining the fallback logic if rules might have same name/label but different ratings etc.
-  // This implementation keeps the *first* occurrence of a rule based on the identifier hierarchy.
 
   // Combine items, aggregating counts
   const combinedItemsMap = new Map();
