@@ -11,12 +11,14 @@ body {
   flex-direction: column;
   height: 100%;
   overflow: hidden; /* Prevent content overflow issues */
+  transition: opacity 0.3s ease, filter 0.3s ease; /* Added for destroyed/routed */
 }
 .unit-card .card-body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   font-size: 0.95rem; /* Slightly larger base font for card body */
+  position: relative; /* Needed for shaken overlay */
 }
 .stat-icon {
   width: 1.1em;
@@ -354,4 +356,76 @@ body {
 .unit-activated .action-btn:disabled:not(.action-selected) {
   opacity: 0.5; /* Make disabled non-selected buttons more faded */
   cursor: not-allowed;
+}
+
+/* --- NEW: Status Styles --- */
+
+/* Style for Shaken Units */
+.unit-card.unit-shaken {
+  border-color: var(--bs-warning);
+  box-shadow: 0 0 8px rgba(var(--bs-warning-rgb), 0.5);
+}
+.unit-card.unit-shaken .card-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(var(--bs-warning-rgb), 0.1); /* Subtle overlay */
+  z-index: 1;
+  pointer-events: none;
+  border-radius: var(
+    --bs-card-inner-border-radius
+  ); /* Match card body radius */
+}
+.unit-card.unit-shaken .card-body > * {
+  position: relative; /* Ensure content is above overlay */
+  z-index: 2;
+}
+
+/* Style for Fatigued/Shaken Indicators */
+.status-indicators {
+  /* Container for status text */
+  min-height: 1.5em; /* Reserve space even if empty */
+}
+.status-indicators .fatigue-indicator,
+.status-indicators .shaken-indicator {
+  margin-right: 1em; /* Spacing between indicators */
+  display: inline-flex; /* Align icon and text */
+  align-items: center;
+  gap: 0.3em;
+}
+
+/* Styles for Destroyed/Routed card headers */
+.unit-card.unit-destroyed .card-header,
+.unit-card.unit-routed .card-header {
+  min-height: 80px; /* Ensure header has some height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* Needed for overlay */
+}
+.unit-card.unit-destroyed .unit-card-header-content,
+.unit-card.unit-routed .unit-card-header-content,
+.unit-card.unit-destroyed .header-button-group,
+.unit-card.unit-routed .header-button-group {
+  display: none; /* Hide original header content */
+}
+.status-overlay-text {
+  /* Style as needed, already positioned */
+  text-shadow: 1px 1px 2px black; /* Improve readability */
+  pointer-events: none; /* Don't block header bg */
+}
+
+/* Ensure recover button fits */
+.action-controls .recover-btn {
+  flex-grow: 1; /* Allow recover button to take space */
+}
+
+/* Manual Trigger Buttons Area */
+.manual-triggers {
+  /* Style the container for the manual buttons */
+  border-top: 1px dashed var(--bs-border-color-translucent);
+  padding-top: 0.5rem;
 }

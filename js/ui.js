@@ -6,6 +6,7 @@
 
 import { config, UI_ICONS, ACTION_BUTTON_CONFIG } from "./config.js"; // Configuration constants
 import { calculateMovement } from "./gameLogic.js"; // Import the new function
+import { getUnitStateValue, getCurrentArmyId, getUnitData } from "./state.js"; // Import state functions
 
 // --- Helper Functions ---
 
@@ -214,7 +215,7 @@ function _createEffectiveStatsHTML(baseUnit, hero) {
 
 /**
  * Creates the HTML string for the unit action controls.
- * Uses ACTION_BUTTON_CONFIG and UI_ICONS.
+ * Uses ACTION_BUTTON_CONFIG and UI_ICONS. Includes hidden Recover button.
  * @param {object} baseUnit - The processed base unit data.
  * @param {object | null} hero - The processed hero data if joined.
  * @returns {string} HTML string for the action controls.
@@ -248,6 +249,12 @@ function _createActionControlsHTML(baseUnit, hero) {
                         <span class="action-text">${text}</span>
                     </button>`;
   });
+
+  // Add the Recover button (initially hidden)
+  buttonsHTML += `<button type="button" class="btn btn-warning action-btn recover-btn" data-action="Recover" title="Recover from Shaken" style="display: none;">
+                      <i class="bi bi-bandaid"></i>
+                      <span class="action-text">Recover</span>
+                   </button>`;
 
   return `
         <div class="action-controls">
@@ -410,48 +417,90 @@ function updateTokenDisplay(unitId, currentTokens, casterLevel) {
 }
 
 /**
- * Updates the UI state of the action buttons on a unit card.
+ * Updates the UI state of the action buttons on a unit card. Handles Shaken state.
  * Uses ACTION_BUTTON_CONFIG to apply correct background/outline colors.
  * @param {string} unitId - The selectionId of the unit card to update.
  * @param {string | null} activeAction - The currently active action ('Hold', 'Advance', etc.), or null if deactivated.
+ * @param {boolean} [isShaken=false] - Whether the unit is currently Shaken.
  */
-function updateActionButtonsUI(unitId, activeAction) {
+function updateActionButtonsUI(unitId, activeAction, isShaken = false) {
   const cardElement = document.getElementById(`unit-card-${unitId}`);
   if (!cardElement) {
     // console.warn(`Card element not found for action button update: ${unitId}`);
     return;
   }
 
-  const actionButtons = cardElement.querySelectorAll(".action-btn");
+  const actionButtons = cardElement.querySelectorAll(
+    ".action-btn:not(.recover-btn)"
+  ); // Select non-recover buttons
+  const recoverButton = cardElement.querySelector(".recover-btn");
 
-  cardElement.classList.toggle("unit-activated", !!activeAction);
+  cardElement.classList.toggle("unit-activated", !!activeAction && !isShaken); // Only activated if not shaken
+  cardElement.classList.toggle("unit-shaken", isShaken); // Add/remove class for visual styling
 
-  actionButtons.forEach((button) => {
-    const buttonAction = button.dataset.action;
-    // Get color theme from ACTION_BUTTON_CONFIG
-    const colorTheme =
-      ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary"; // Use config, fallback
+  if (isShaken) {
+    // Shaken: Hide normal actions, show Recover
+    actionButtons.forEach((button) => {
+      button.style.display = "none"; // Hide normal actions
+      button.disabled = true;
+      // Reset any selection classes if needed
+      const buttonAction = button.dataset.action;
+      const colorTheme =
+        ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary";
+      button.classList.remove(
+        "action-selected",
+        `btn-${colorTheme}`,
+        `btn-outline-${colorTheme}`
+      );
+      button.classList.add(`btn-outline-${colorTheme}`); // Keep outline style for consistency if shown later
+    });
+    if (recoverButton) {
+      recoverButton.style.display = "inline-block"; // Show Recover button
+      recoverButton.disabled = false;
+      // Highlight recover if it's the 'active' action conceptually
+      recoverButton.classList.toggle(
+        "action-selected",
+        activeAction === "Recover"
+      );
+      recoverButton.classList.toggle("btn-warning", activeAction === "Recover");
+      recoverButton.classList.toggle(
+        "btn-outline-warning",
+        activeAction !== "Recover"
+      );
+    }
+  } else {
+    // Not Shaken: Show normal actions, hide Recover
+    actionButtons.forEach((button) => {
+      button.style.display = "inline-block"; // Show normal actions
+      const buttonAction = button.dataset.action;
+      const colorTheme =
+        ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary";
 
-    // Reset classes first
-    button.classList.remove(
-      "action-selected",
-      `btn-${colorTheme}`,
-      `btn-outline-${colorTheme}`
-    );
+      // Reset classes first
+      button.classList.remove(
+        "action-selected",
+        `btn-${colorTheme}`,
+        `btn-outline-${colorTheme}`
+      );
 
-    if (activeAction) {
-      if (buttonAction === activeAction) {
-        button.classList.add("action-selected", `btn-${colorTheme}`); // Solid background
-        button.disabled = false;
+      if (activeAction) {
+        if (buttonAction === activeAction) {
+          button.classList.add("action-selected", `btn-${colorTheme}`); // Solid background
+          button.disabled = false;
+        } else {
+          button.classList.add(`btn-outline-${colorTheme}`); // Outline background
+          button.disabled = true;
+        }
       } else {
         button.classList.add(`btn-outline-${colorTheme}`); // Outline background
-        button.disabled = true;
+        button.disabled = false;
       }
-    } else {
-      button.classList.add(`btn-outline-${colorTheme}`); // Outline background
-      button.disabled = false;
+    });
+    if (recoverButton) {
+      recoverButton.style.display = "none"; // Hide Recover button
+      recoverButton.disabled = true;
     }
-  });
+  }
 }
 
 /**
@@ -463,9 +512,112 @@ function resetAllActionButtonsUI() {
   allCards.forEach((card) => {
     const unitId = card.dataset.unitId;
     if (unitId) {
-      updateActionButtonsUI(unitId, null); // Call update with null action
+      // Fetch current shaken state to pass to update function
+      const isShaken = getUnitStateValue(
+        getCurrentArmyId(),
+        unitId,
+        "shaken",
+        false
+      );
+      updateActionButtonsUI(unitId, null, isShaken); // Call update with null action, respecting shaken status
     }
   });
+}
+
+/**
+ * Updates the visual indicator for Fatigue status.
+ * @param {string} cardUnitId - The selectionId of the unit card.
+ * @param {boolean} isFatigued - Whether the unit is fatigued.
+ */
+function updateFatiguedStatusUI(cardUnitId, isFatigued) {
+  const indicator = document.querySelector(
+    `.status-indicators[data-unit-id="${cardUnitId}"] .fatigue-indicator`
+  );
+  if (indicator) {
+    indicator.style.display = isFatigued ? "inline-flex" : "none"; // Use inline-flex for icon alignment
+  }
+}
+
+/**
+ * Updates the visual indicator for Shaken status and button states.
+ * @param {string} cardUnitId - The selectionId of the unit card.
+ * @param {boolean} isShaken - Whether the unit is shaken.
+ */
+function updateShakenStatusUI(cardUnitId, isShaken) {
+  const indicator = document.querySelector(
+    `.status-indicators[data-unit-id="${cardUnitId}"] .shaken-indicator`
+  );
+  if (indicator) {
+    indicator.style.display = isShaken ? "inline-flex" : "none"; // Use inline-flex for icon alignment
+  }
+  // Also update action buttons via the modified updateActionButtonsUI
+  const currentAction = getUnitStateValue(
+    getCurrentArmyId(),
+    cardUnitId,
+    "action",
+    null
+  ); // Need state access or pass it in
+  updateActionButtonsUI(cardUnitId, currentAction, isShaken);
+}
+
+/**
+ * Collapses the card to show only the header, indicating Destroyed status.
+ * @param {string} cardUnitId - The selectionId of the unit card.
+ */
+function collapseDestroyedCard(cardUnitId) {
+  const cardElement = document.getElementById(`unit-card-${cardUnitId}`);
+  if (!cardElement || cardElement.classList.contains("unit-destroyed")) return; // Prevent multiple calls
+
+  const cardBody = cardElement.querySelector(".card-body");
+  const cardHeader = cardElement.querySelector(".card-header");
+
+  if (cardBody) cardBody.style.display = "none"; // Hide body
+  if (cardHeader) {
+    cardHeader.classList.add("bg-danger", "text-white"); // Style header
+    // Add "DESTROYED" text if not already present
+    if (!cardHeader.querySelector(".status-overlay-text")) {
+      const overlay = document.createElement("div");
+      overlay.className =
+        "status-overlay-text position-absolute top-50 start-50 translate-middle fw-bold h3";
+      overlay.textContent = "DESTROYED";
+      overlay.style.zIndex = "3"; // Ensure text is on top
+      cardHeader.style.position = "relative"; // Needed for absolute positioning
+      cardHeader.appendChild(overlay);
+    }
+  }
+  cardElement.classList.add("unit-destroyed"); // Add class for general styling
+  cardElement.style.opacity = "0.5";
+  cardElement.style.pointerEvents = "none"; // Disable interactions
+}
+
+/**
+ * Collapses the card to show only the header, indicating Routed status.
+ * @param {string} cardUnitId - The selectionId of the unit card.
+ */
+function collapseRoutedCard(cardUnitId) {
+  const cardElement = document.getElementById(`unit-card-${cardUnitId}`);
+  if (!cardElement || cardElement.classList.contains("unit-routed")) return; // Prevent multiple calls
+
+  const cardBody = cardElement.querySelector(".card-body");
+  const cardHeader = cardElement.querySelector(".card-header");
+
+  if (cardBody) cardBody.style.display = "none"; // Hide body
+  if (cardHeader) {
+    cardHeader.classList.add("bg-secondary", "text-white"); // Style header differently?
+    // Add "ROUTED" text if not already present
+    if (!cardHeader.querySelector(".status-overlay-text")) {
+      const overlay = document.createElement("div");
+      overlay.className =
+        "status-overlay-text position-absolute top-50 start-50 translate-middle fw-bold h3";
+      overlay.textContent = "ROUTED";
+      overlay.style.zIndex = "3"; // Ensure text is on top
+      cardHeader.style.position = "relative"; // Needed for absolute positioning
+      cardHeader.appendChild(overlay);
+    }
+  }
+  cardElement.classList.add("unit-routed"); // Add class for general styling
+  cardElement.style.opacity = "0.4";
+  cardElement.style.pointerEvents = "none"; // Disable interactions
 }
 
 // --- Main Display Function ---
@@ -474,7 +626,7 @@ function resetAllActionButtonsUI() {
  * Displays the army units by creating and appending unit cards to the container.
  * @param {object} processedArmy - The structured army data object from processArmyData.
  * @param {HTMLElement} displayContainerRow - The HTML ROW element to inject the card columns into.
- * @param {object} initialComponentStates - The loaded component states { armyId: { unitId: { tokens: T, action: A } } }
+ * @param {object} initialComponentStates - The loaded component states { armyId: { unitId: { tokens: T, action: A, shaken: S, fatigued: F } } }
  */
 function displayArmyUnits(
   processedArmy,
@@ -494,7 +646,7 @@ function displayArmyUnits(
 
   // Clear previous content (like loading spinners or old cards)
   displayContainerRow.innerHTML = "";
-  const initialStatesToApply = []; // Store unitId and initialAction
+  const initialStatesToApply = []; // Store unitId, initialAction, isShaken, isFatigued
 
   processedArmy.units.forEach((currentUnit) => {
     // Skip rendering heroes that are joined to another unit (they are rendered as part of the base unit's card)
@@ -531,18 +683,47 @@ function displayArmyUnits(
     }
 
     // Get initial component states for this unit (using baseUnit.selectionId as the key)
-    const armyState = initialComponentStates[processedArmy.meta.id] || {};
-    const unitState = armyState[baseUnit.selectionId] || {};
-    const initialTokens = unitState.tokens ?? 0;
-    const initialAction = unitState.action ?? null; // Get initial action state
+    // Use getUnitStateValue for safer access with defaults
+    const armyId = processedArmy.meta.id;
+    const initialTokens = getUnitStateValue(
+      armyId,
+      actualCasterUnitId || baseUnit.selectionId,
+      "tokens",
+      0
+    );
+    const initialAction = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "action",
+      null
+    );
+    const initialShaken = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "shaken",
+      false
+    );
+    const initialFatigued = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "fatigued",
+      false
+    );
+    const initialStatus = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "status",
+      "active"
+    );
 
-    // Store initial action state to apply AFTER DOM insertion
-    if (initialAction) {
-      initialStatesToApply.push({
-        unitId: baseUnit.selectionId,
-        action: initialAction,
-      });
-    }
+    // Store initial states to apply AFTER DOM insertion
+    initialStatesToApply.push({
+      unitId: baseUnit.selectionId,
+      action: initialAction,
+      isShaken: initialShaken,
+      isFatigued: initialFatigued,
+      status: initialStatus,
+    });
 
     // --- Create Card Structure ---
     const colDiv = document.createElement("div");
@@ -554,13 +735,36 @@ function displayArmyUnits(
     cardDiv.dataset.unitId = baseUnit.selectionId; // Store base unit ID for event handling
     cardDiv.className =
       "card unit-card shadow-sm border-secondary-subtle flex-fill"; // flex-fill for equal height
-    // Initial activation class will be added later
+    // Initial activation/shaken class will be added later
 
     // --- Generate Card Content using Helpers ---
     const cardHeaderHTML = _createUnitCardHeaderHTML(baseUnit, hero);
     const effectiveStatsHTML = _createEffectiveStatsHTML(baseUnit, hero);
-    const actionControlsHTML = _createActionControlsHTML(baseUnit, hero); // Generate Action Buttons
+    const actionControlsHTML = _createActionControlsHTML(baseUnit, hero); // Includes hidden Recover button
     const modelsHTML = createModelsDisplay(baseUnit, hero); // Use existing function
+
+    // --- ADDED: Status Indicators and Manual Triggers ---
+    const statusIndicatorsHTML = `
+        <div class="status-indicators mt-2 small text-muted" data-unit-id="${
+          baseUnit.selectionId
+        }">
+            <span class="fatigue-indicator" style="display: ${
+              initialFatigued ? "inline-flex" : "none"
+            };"><i class="bi bi-clock-history"></i> Fatigued</span>
+            <span class="shaken-indicator" style="display: ${
+              initialShaken ? "inline-flex" : "none"
+            }; color: var(--bs-warning-text-emphasis); font-weight: bold;"><i class="bi bi-exclamation-triangle-fill"></i> SHAKEN</span>
+        </div>
+    `;
+
+    const manualTriggersHTML = `
+        <div class="manual-triggers mt-2 d-flex flex-wrap gap-1">
+            <button type="button" class="btn btn-sm btn-outline-warning defend-melee-btn" title="Report being attacked in melee and optionally strike back.">Defend Melee</button>
+            <button type="button" class="btn btn-sm btn-outline-danger resolve-melee-btn" title="Report the outcome of a melee combat this unit was involved in.">Resolve Melee</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary morale-wounds-btn" title="Manually trigger a morale check due to taking wounds.">Check Morale (Wounds)</button>
+        </div>
+    `;
+    // --- END ADDED ---
 
     // Build Card Body Content
     let cardBodyContentHTML = `<div class="details-section">`;
@@ -694,6 +898,8 @@ function displayArmyUnits(
     cardBody.innerHTML =
       effectiveStatsHTML +
       actionControlsHTML +
+      statusIndicatorsHTML + // Add indicator placeholder
+      manualTriggersHTML + // Add manual trigger buttons
       cardBodyContentHTML +
       modelsHTML;
 
@@ -706,12 +912,24 @@ function displayArmyUnits(
     displayContainerRow.appendChild(colDiv);
   }); // End forEach unit
 
-  // --- Apply Initial Action Button States AFTER DOM insertion ---
+  // --- Apply Initial States AFTER DOM insertion ---
   // Use requestAnimationFrame to ensure the DOM has updated
   requestAnimationFrame(() => {
-    initialStatesToApply.forEach(({ unitId, action }) => {
-      updateActionButtonsUI(unitId, action);
-    });
+    initialStatesToApply.forEach(
+      ({ unitId, action, isShaken, isFatigued, status }) => {
+        // Apply button states first
+        updateActionButtonsUI(unitId, action, isShaken);
+        // Apply status indicators
+        updateFatiguedStatusUI(unitId, isFatigued);
+        // updateShakenStatusUI is called within updateActionButtonsUI
+        // Apply collapsed state if needed
+        if (status === "destroyed") {
+          collapseDestroyedCard(unitId);
+        } else if (status === "routed") {
+          collapseRoutedCard(unitId);
+        }
+      }
+    );
   });
 } // End displayArmyUnits
 
@@ -723,4 +941,9 @@ export {
   createModelsDisplay,
   updateActionButtonsUI,
   resetAllActionButtonsUI,
+  // Added Exports
+  updateFatiguedStatusUI,
+  updateShakenStatusUI,
+  collapseDestroyedCard,
+  collapseRoutedCard,
 };
