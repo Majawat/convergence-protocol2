@@ -72,8 +72,6 @@ body {
   align-items: center;
 }
 .header-meta-info .info-separator {
-  /* margin-left: 0.5rem;
-  margin-right: 0.5rem; */
   display: none; /* Hide separators, use gap instead */
 }
 .header-meta-info .info-item {
@@ -190,7 +188,7 @@ body {
   pointer-events: none;
 }
 .wound-apply-btn i,
-.wound-reset-btn i,
+.unit-reset-btn i, /* Updated class */
 .token-add-btn i,
 .token-remove-btn i {
   pointer-events: none;
@@ -198,7 +196,7 @@ body {
 
 /* Sub-sections & Normal Details Container */
 .details-section {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem; /* Reduced margin */
 }
 .sub-section,
 .normal-unit-details {
@@ -288,7 +286,7 @@ body {
   padding: 0.1rem 0.3rem;
   font-size: 0.9em;
   line-height: 1;
-} /* Removed border: none; use outline */
+}
 .token-count-display {
   font-weight: bold;
   padding: 0 0.4rem;
@@ -317,48 +315,36 @@ body {
 
 /* --- Activation Styles --- */
 
-/* Action Controls Container */
 .action-controls {
-  margin-top: 0.5rem; /* Space below effective stats */
-  margin-bottom: 1rem; /* Space above details/models */
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem; /* Reduced margin */
 }
-
-/* Ensure button group takes full width */
 .action-controls .btn-group {
   width: 100%;
 }
-
-/* Individual Action Buttons */
 .action-controls .action-btn {
-  flex-grow: 1; /* Make buttons fill available space */
-  font-size: 0.85em; /* Slightly smaller text */
-  padding: 0.4rem 0.2rem; /* Adjust padding */
-  white-space: nowrap; /* Prevent text wrapping */
+  flex-grow: 1;
+  font-size: 0.85em;
+  padding: 0.4rem 0.2rem;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Selected Action Button Highlight */
 .action-btn.action-selected {
-  /* Uses btn-primary from ui.js, but we can add specifics */
   font-weight: bold;
-  box-shadow: inset 0 0 0 2px var(--bs-primary-border-subtle); /* Inner glow effect */
+  box-shadow: inset 0 0 0 2px var(--bs-primary-border-subtle);
 }
-
-/* Activated Unit Card Styling */
 .unit-card.unit-activated {
-  opacity: 0.85; /* Dim the card slightly */
-  border-color: var(--bs-primary); /* Highlight border */
-  box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.5); /* Subtle glow */
+  opacity: 0.85;
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.5);
 }
-
-/* Disabled buttons when activated */
 .unit-activated .action-btn:disabled:not(.action-selected) {
-  opacity: 0.5; /* Make disabled non-selected buttons more faded */
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* --- NEW: Status Styles --- */
+/* --- Status Styles --- */
 
 /* Style for Shaken Units */
 .unit-card.unit-shaken {
@@ -372,60 +358,85 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(var(--bs-warning-rgb), 0.1); /* Subtle overlay */
+  background-color: rgba(var(--bs-warning-rgb), 0.1);
   z-index: 1;
   pointer-events: none;
-  border-radius: var(
-    --bs-card-inner-border-radius
-  ); /* Match card body radius */
+  border-radius: var(--bs-card-inner-border-radius);
 }
 .unit-card.unit-shaken .card-body > * {
-  position: relative; /* Ensure content is above overlay */
+  position: relative;
   z-index: 2;
 }
 
-/* Style for Fatigued/Shaken Indicators */
-.status-indicators {
-  /* Container for status text */
-  min-height: 1.5em; /* Reserve space even if empty */
-}
-.status-indicators .fatigue-indicator,
-.status-indicators .shaken-indicator {
-  margin-right: 1em; /* Spacing between indicators */
-  display: inline-flex; /* Align icon and text */
+/* Style for Fatigued/Shaken Indicators in Header */
+.header-status-indicators {
+  display: inline-flex; /* Use flex for alignment */
   align-items: center;
-  gap: 0.3em;
+  gap: 0.4em; /* Space between icons */
+  vertical-align: middle; /* Align with title text */
+}
+
+.header-status-indicators .fatigue-indicator i,
+.header-status-indicators .shaken-indicator i {
+  vertical-align: -0.1em; /* Fine-tune icon alignment */
 }
 
 /* Styles for Destroyed/Routed card headers */
 .unit-card.unit-destroyed .card-header,
 .unit-card.unit-routed .card-header {
-  min-height: 80px; /* Ensure header has some height */
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative; /* Needed for overlay */
+  position: relative;
 }
 .unit-card.unit-destroyed .unit-card-header-content,
 .unit-card.unit-routed .unit-card-header-content,
 .unit-card.unit-destroyed .header-button-group,
 .unit-card.unit-routed .header-button-group {
-  display: none; /* Hide original header content */
+  display: none;
 }
 .status-overlay-text {
-  /* Style as needed, already positioned */
-  text-shadow: 1px 1px 2px black; /* Improve readability */
-  pointer-events: none; /* Don't block header bg */
+  text-shadow: 1px 1px 2px black;
+  pointer-events: none;
+}
+/* Specific styles for destroyed */
+.unit-card.unit-destroyed {
+  opacity: 0.5;
+  filter: grayscale(80%);
+  pointer-events: none;
+}
+/* Specific styles for routed (collapse body) */
+.unit-card.unit-routed .card-body {
+  display: none;
+}
+.unit-card.unit-routed {
+  opacity: 0.6; /* Slightly less faded than destroyed */
+  filter: grayscale(50%);
+}
+.unit-card.unit-routed .card-header {
+  /* Keep header visible but styled */
+  background-color: var(
+    --bs-secondary-bg
+  ); /* Example: Use secondary background */
+  color: var(--bs-secondary-color);
+}
+.unit-card.unit-routed .status-overlay-text {
+  color: var(--bs-light); /* Ensure text is visible on darker header */
 }
 
 /* Ensure recover button fits */
 .action-controls .recover-btn {
-  flex-grow: 1; /* Allow recover button to take space */
+  flex-grow: 1;
 }
 
 /* Manual Trigger Buttons Area */
 .manual-triggers {
-  /* Style the container for the manual buttons */
-  border-top: 1px dashed var(--bs-border-color-translucent);
-  padding-top: 0.5rem;
+  text-align: center; /* Center buttons */
+  margin-bottom: 0.5rem; /* Space below buttons */
+}
+.manual-triggers .btn {
+  /* Optional: Adjust button width if needed */
+  /* width: 48%; */ /* Example: make two buttons fit side-by-side */
+  /* max-width: 180px; */ /* Example: prevent buttons from getting too wide */
 }

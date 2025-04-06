@@ -1,7 +1,5 @@
 /**
  * @fileoverview Handles displaying army data and UI elements for interaction.
- * Refactored for clarity by breaking down card generation into smaller functions.
- * Added JSDoc comments and inline explanations.
  */
 
 import { config, UI_ICONS, ACTION_BUTTON_CONFIG } from "./config.js"; // Configuration constants
@@ -24,9 +22,6 @@ function _formatRule(rule, filterCaster) {
   // Filter out rules handled explicitly by UI elements
   if (rule.name === "Tough") return null;
   if (filterCaster && rule.name === "Caster") return null;
-
-  // Filter out movement rules handled by calculateMovement
-  // if (rule.name === "Fast" || rule.name === "Slow") return null;
 
   // Format with rating if present
   if (
@@ -141,7 +136,7 @@ function _createCasterControlsHTML(casterLevel, initialTokens) {
 }
 
 /**
- * Creates the HTML string for the unit card header.
+ * Creates the HTML string for the unit card header. Includes status indicator placeholders.
  * @param {object} baseUnit - The processed base unit data.
  * @param {object | null} hero - The processed hero data if joined.
  * @returns {string} HTML string for the card header.
@@ -159,7 +154,7 @@ function _createUnitCardHeaderHTML(baseUnit, hero) {
   const totalModels = baseUnit.size + (hero ? hero.size : 0);
   const totalPoints = baseUnit.cost + (hero ? hero.cost : 0);
 
-  // Meta info (Models, Points, XP, Base Size) - only show XP/Base for non-joined units for simplicity
+  // Meta info (Models, Points, XP, Base Size)
   let metaHtml = `<span class="info-item">${totalModels} Models</span><span class="info-separator">|</span><span class="info-item">${totalPoints} pts</span>`;
   if (!hero) {
     const unitBase = baseUnit.bases?.round || baseUnit.bases?.square;
@@ -171,18 +166,30 @@ function _createUnitCardHeaderHTML(baseUnit, hero) {
     } ${unitBase ? unitBase + "mm" : "N/A"}</span>`;
   }
 
+  // --- ADDED Status Indicator Placeholders ---
+  const statusIndicatorHTML = `
+        <span class="header-status-indicators ms-2 small" data-unit-id="${baseUnit.selectionId}">
+            <span class="fatigue-indicator text-warning" style="display: none;" title="Fatigued"><i class="bi bi-clock-history fs-6"></i></span>
+            <span class="shaken-indicator text-warning" style="display: none;" title="Shaken"><i class="bi bi-exclamation-triangle-fill fs-6"></i></span>
+        </span>
+    `;
+  // --- END ADDED ---
+
   return `
         <div class="card-header bg-body-tertiary">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-1">
                 <div class="unit-card-header-content">
-                    <h5 class="mb-0 card-title">${title}</h5>
+                    <h5 class="mb-0 card-title d-flex align-items-center">
+                        ${title}
+                        ${statusIndicatorHTML}
+                    </h5>
                     <small class="text-muted d-block">${subtitle}</small>
                     <div class="header-meta-info text-muted mt-1">${metaHtml}</div>
                 </div>
             </div>
             <div class="btn-group btn-group-sm header-button-group">
                 <button type="button" class="btn btn-outline-danger wound-apply-btn" title="Apply Wound (Auto-Target)">${UI_ICONS.woundApply}</button>
-                <button type="button" class="btn btn-outline-secondary wound-reset-btn" title="Reset Wounds">${UI_ICONS.woundReset}</button>
+                <button type="button" class="btn btn-outline-secondary unit-reset-btn" title="Reset Unit State (HP, Status, Action)">${UI_ICONS.woundReset}</button>
             </div>
         </div>
     `;
@@ -267,7 +274,6 @@ function _createActionControlsHTML(baseUnit, hero) {
 
 /**
  * Creates the HTML string for displaying individual models within a unit card.
- * Ensures model list structure matches the original request.
  * @param {object} unit - The processed unit data for the base unit.
  * @param {object | null} hero - The processed hero data if joined, otherwise null.
  * @returns {string} HTML string for the models section.
@@ -318,7 +324,7 @@ function createModelsDisplay(unit, hero = null) {
       modelBaseName = `Model ${modelCounter++}`; // Numbered regular model
     }
 
-    // Build model HTML - Structure kept identical to original request for consistency
+    // Build model HTML
     modelsHtml += `
             <div class="model-display clickable-model ${
               isRemoved ? "model-removed" : ""
@@ -347,8 +353,7 @@ function createModelsDisplay(unit, hero = null) {
 
 /**
  * Updates the visual representation of a single model's HP on its display element.
- * Ensures structure remains consistent.
- * @param {string} unitSelectionId - The selectionId of the unit card containing the model. (Used for potential context, though modelId should be unique).
+ * @param {string} unitSelectionId - The selectionId of the unit card containing the model.
  * @param {string} modelId - The unique ID of the model element (`data-model-id`).
  * @param {number} currentHp - The model's current HP.
  * @param {number} maxHp - The model's maximum HP.
@@ -418,7 +423,6 @@ function updateTokenDisplay(unitId, currentTokens, casterLevel) {
 
 /**
  * Updates the UI state of the action buttons on a unit card. Handles Shaken state.
- * Uses ACTION_BUTTON_CONFIG to apply correct background/outline colors.
  * @param {string} unitId - The selectionId of the unit card to update.
  * @param {string | null} activeAction - The currently active action ('Hold', 'Advance', etc.), or null if deactivated.
  * @param {boolean} [isShaken=false] - Whether the unit is currently Shaken.
@@ -426,7 +430,6 @@ function updateTokenDisplay(unitId, currentTokens, casterLevel) {
 function updateActionButtonsUI(unitId, activeAction, isShaken = false) {
   const cardElement = document.getElementById(`unit-card-${unitId}`);
   if (!cardElement) {
-    // console.warn(`Card element not found for action button update: ${unitId}`);
     return;
   }
 
@@ -511,7 +514,12 @@ function resetAllActionButtonsUI() {
   const allCards = document.querySelectorAll(".unit-card");
   allCards.forEach((card) => {
     const unitId = card.dataset.unitId;
-    if (unitId) {
+    if (
+      unitId &&
+      !card.classList.contains("unit-destroyed") &&
+      !card.classList.contains("unit-routed")
+    ) {
+      // Check if not destroyed/routed
       // Fetch current shaken state to pass to update function
       const isShaken = getUnitStateValue(
         getCurrentArmyId(),
@@ -525,30 +533,30 @@ function resetAllActionButtonsUI() {
 }
 
 /**
- * Updates the visual indicator for Fatigue status.
+ * Updates the visual indicator for Fatigue status in the header.
  * @param {string} cardUnitId - The selectionId of the unit card.
  * @param {boolean} isFatigued - Whether the unit is fatigued.
  */
 function updateFatiguedStatusUI(cardUnitId, isFatigued) {
   const indicator = document.querySelector(
-    `.status-indicators[data-unit-id="${cardUnitId}"] .fatigue-indicator`
+    `.header-status-indicators[data-unit-id="${cardUnitId}"] .fatigue-indicator`
   );
   if (indicator) {
-    indicator.style.display = isFatigued ? "inline-flex" : "none"; // Use inline-flex for icon alignment
+    indicator.style.display = isFatigued ? "inline" : "none"; // Use inline for header
   }
 }
 
 /**
- * Updates the visual indicator for Shaken status and button states.
+ * Updates the visual indicator for Shaken status in the header and button states.
  * @param {string} cardUnitId - The selectionId of the unit card.
  * @param {boolean} isShaken - Whether the unit is shaken.
  */
 function updateShakenStatusUI(cardUnitId, isShaken) {
   const indicator = document.querySelector(
-    `.status-indicators[data-unit-id="${cardUnitId}"] .shaken-indicator`
+    `.header-status-indicators[data-unit-id="${cardUnitId}"] .shaken-indicator`
   );
   if (indicator) {
-    indicator.style.display = isShaken ? "inline-flex" : "none"; // Use inline-flex for icon alignment
+    indicator.style.display = isShaken ? "inline" : "none"; // Use inline for header
   }
   // Also update action buttons via the modified updateActionButtonsUI
   const currentAction = getUnitStateValue(
@@ -587,6 +595,7 @@ function collapseDestroyedCard(cardUnitId) {
   }
   cardElement.classList.add("unit-destroyed"); // Add class for general styling
   cardElement.style.opacity = "0.5";
+  cardElement.style.filter = "grayscale(80%)"; // Add grayscale
   cardElement.style.pointerEvents = "none"; // Disable interactions
 }
 
@@ -617,7 +626,47 @@ function collapseRoutedCard(cardUnitId) {
   }
   cardElement.classList.add("unit-routed"); // Add class for general styling
   cardElement.style.opacity = "0.4";
+  cardElement.style.filter = "grayscale(100%)"; // Make more gray than destroyed
   cardElement.style.pointerEvents = "none"; // Disable interactions
+}
+
+/**
+ * Resets the card UI to its default state (e.g., after clicking Reset Unit).
+ * @param {string} cardUnitId - The selectionId of the unit card.
+ */
+function resetCardUI(cardUnitId) {
+  const cardElement = document.getElementById(`unit-card-${cardUnitId}`);
+  if (!cardElement) return;
+
+  const cardBody = cardElement.querySelector(".card-body");
+  const cardHeader = cardElement.querySelector(".card-header");
+  const overlayText = cardHeader?.querySelector(".status-overlay-text");
+
+  // Restore body visibility
+  if (cardBody) cardBody.style.display = "";
+
+  // Reset header style
+  if (cardHeader) {
+    cardHeader.classList.remove("bg-danger", "bg-secondary", "text-white");
+    if (overlayText) overlayText.remove(); // Remove status text
+  }
+
+  // Reset general card styles and classes
+  cardElement.classList.remove(
+    "unit-destroyed",
+    "unit-routed",
+    "unit-shaken",
+    "unit-activated"
+  );
+  cardElement.style.opacity = "";
+  cardElement.style.filter = "";
+  cardElement.style.pointerEvents = "";
+
+  // Reset status indicators
+  updateFatiguedStatusUI(cardUnitId, false);
+  updateShakenStatusUI(cardUnitId, false); // This also handles buttons via updateActionButtonsUI
+
+  // Reset models (handled by _handleResetUnitClick calling updateModelDisplay)
 }
 
 // --- Main Display Function ---
@@ -626,13 +675,8 @@ function collapseRoutedCard(cardUnitId) {
  * Displays the army units by creating and appending unit cards to the container.
  * @param {object} processedArmy - The structured army data object from processArmyData.
  * @param {HTMLElement} displayContainerRow - The HTML ROW element to inject the card columns into.
- * @param {object} initialComponentStates - The loaded component states { armyId: { unitId: { tokens: T, action: A, shaken: S, fatigued: F } } }
  */
-function displayArmyUnits(
-  processedArmy,
-  displayContainerRow,
-  initialComponentStates = {}
-) {
+function displayArmyUnits(processedArmy, displayContainerRow) {
   if (!displayContainerRow) {
     console.error("Display container row not provided for displayArmyUnits.");
     return;
@@ -644,20 +688,18 @@ function displayArmyUnits(
     return;
   }
 
-  // Clear previous content (like loading spinners or old cards)
+  // Clear previous content
   displayContainerRow.innerHTML = "";
-  const initialStatesToApply = []; // Store unitId, initialAction, isShaken, isFatigued
+  const initialStatesToApply = []; // Store initial states
 
   processedArmy.units.forEach((currentUnit) => {
-    // Skip rendering heroes that are joined to another unit (they are rendered as part of the base unit's card)
     if (
       currentUnit.isHero &&
       processedArmy.heroJoinTargets?.[currentUnit.selectionId]
     ) {
-      return;
+      return; // Skip joined heroes
     }
 
-    // Determine if a hero is joined TO this unit
     let hero = null;
     const joinedHeroId = Object.keys(processedArmy.heroJoinTargets || {}).find(
       (key) => processedArmy.heroJoinTargets[key] === currentUnit.selectionId
@@ -665,13 +707,11 @@ function displayArmyUnits(
     if (joinedHeroId && processedArmy.unitMap?.[joinedHeroId]) {
       hero = processedArmy.unitMap[joinedHeroId];
     }
-    const baseUnit = currentUnit; // The unit being iterated is always the base card unit
+    const baseUnit = currentUnit;
 
-    // Determine caster status and initial tokens for the card
     let casterLevel = 0;
     let unitIsCaster = false;
-    let actualCasterUnitId = null; // The selectionId of the unit that actually has the Caster rule
-
+    let actualCasterUnitId = null;
     if (hero?.casterLevel > 0) {
       casterLevel = hero.casterLevel;
       unitIsCaster = true;
@@ -682,8 +722,6 @@ function displayArmyUnits(
       actualCasterUnitId = baseUnit.selectionId;
     }
 
-    // Get initial component states for this unit (using baseUnit.selectionId as the key)
-    // Use getUnitStateValue for safer access with defaults
     const armyId = processedArmy.meta.id;
     const initialTokens = getUnitStateValue(
       armyId,
@@ -716,7 +754,6 @@ function displayArmyUnits(
       "active"
     );
 
-    // Store initial states to apply AFTER DOM insertion
     initialStatesToApply.push({
       unitId: baseUnit.selectionId,
       action: initialAction,
@@ -725,49 +762,34 @@ function displayArmyUnits(
       status: initialStatus,
     });
 
-    // --- Create Card Structure ---
     const colDiv = document.createElement("div");
-    colDiv.className = "col d-flex"; // Use d-flex on col for equal height cards
+    colDiv.className = "col d-flex";
 
     const cardDiv = document.createElement("div");
-    cardDiv.id = `unit-card-${baseUnit.selectionId}`; // ID based on the base unit
+    cardDiv.id = `unit-card-${baseUnit.selectionId}`;
     cardDiv.dataset.armyId = processedArmy.meta.id;
-    cardDiv.dataset.unitId = baseUnit.selectionId; // Store base unit ID for event handling
+    cardDiv.dataset.unitId = baseUnit.selectionId;
     cardDiv.className =
-      "card unit-card shadow-sm border-secondary-subtle flex-fill"; // flex-fill for equal height
-    // Initial activation/shaken class will be added later
+      "card unit-card shadow-sm border-secondary-subtle flex-fill";
 
-    // --- Generate Card Content using Helpers ---
-    const cardHeaderHTML = _createUnitCardHeaderHTML(baseUnit, hero);
+    const cardHeaderHTML = _createUnitCardHeaderHTML(baseUnit, hero); // Includes status icons now
     const effectiveStatsHTML = _createEffectiveStatsHTML(baseUnit, hero);
-    const actionControlsHTML = _createActionControlsHTML(baseUnit, hero); // Includes hidden Recover button
-    const modelsHTML = createModelsDisplay(baseUnit, hero); // Use existing function
+    const actionControlsHTML = _createActionControlsHTML(baseUnit, hero);
+    const modelsHTML = createModelsDisplay(baseUnit, hero);
 
-    // --- ADDED: Status Indicators and Manual Triggers ---
-    const statusIndicatorsHTML = `
-        <div class="status-indicators mt-2 small text-muted" data-unit-id="${
-          baseUnit.selectionId
-        }">
-            <span class="fatigue-indicator" style="display: ${
-              initialFatigued ? "inline-flex" : "none"
-            };"><i class="bi bi-clock-history"></i> Fatigued</span>
-            <span class="shaken-indicator" style="display: ${
-              initialShaken ? "inline-flex" : "none"
-            }; color: var(--bs-warning-text-emphasis); font-weight: bold;"><i class="bi bi-exclamation-triangle-fill"></i> SHAKEN</span>
-        </div>
-    `;
-
+    // --- Manual Triggers --- Moved below actions
     const manualTriggersHTML = `
-        <div class="manual-triggers mt-2 d-flex flex-wrap gap-1">
-            <button type="button" class="btn btn-sm btn-outline-warning defend-melee-btn" title="Report being attacked in melee and optionally strike back.">Defend Melee</button>
-            <button type="button" class="btn btn-sm btn-outline-danger resolve-melee-btn" title="Report the outcome of a melee combat this unit was involved in.">Resolve Melee</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary morale-wounds-btn" title="Manually trigger a morale check due to taking wounds.">Check Morale (Wounds)</button>
-        </div>
-    `;
-    // --- END ADDED ---
+            <div class="manual-triggers mt-2">
+                <button type="button" class="btn btn-sm btn-outline-danger resolve-melee-btn me-1" title="Report the outcome of a melee combat this unit was involved in.">Resolve Melee</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary morale-wounds-btn" title="Manually trigger a morale check due to taking wounds.">Check Morale (Wounds)</button>
+            </div>
+            <hr class="my-2">
+        `;
+    // --- END Manual Triggers ---
 
     // Build Card Body Content
     let cardBodyContentHTML = `<div class="details-section">`;
+    // ... (rest of the sub-section / normal-unit-details logic remains the same) ...
     if (hero) {
       // --- Joined Unit Display ---
       const heroBase = hero.bases?.round || hero.bases?.square;
@@ -782,46 +804,52 @@ function displayArmyUnits(
         .sort()
         .join(", ");
       cardBodyContentHTML += `
-                <div class="sub-section">
-                    <h6>${hero.customName || hero.originalName}</h6>
-                    <div class="sub-stats-row">
-                        <div class="stat-item">${UI_ICONS.quality} <span>${
+                     <div class="sub-section">
+                         <h6>${hero.customName || hero.originalName}</h6>
+                         <div class="sub-stats-row">
+                             <div class="stat-item">${UI_ICONS.quality} <span>${
         hero.quality
       }+</span></div>
-                        <div class="stat-item">${UI_ICONS.defense} <span>${
+                             <div class="stat-item">${UI_ICONS.defense} <span>${
         hero.defense
       }+</span></div>
-                        ${
-                          hero.rules.find((r) => r.name === "Tough")
-                            ? `<div class="stat-item">${UI_ICONS.tough} <span>${
-                                hero.rules.find((r) => r.name === "Tough")
-                                  ?.rating ?? "?"
-                              }</span></div>`
-                            : ""
-                        }
-                    </div>
-                    <div class="info-line small text-muted">
-                        <span class="info-item">${hero.cost} pts</span>
-                        <span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
-                          hero.xp || 0
-                        }</span></span>
-                        <span class="info-item base-info">${UI_ICONS.base} ${
-        heroBase ? heroBase + "mm" : "N/A"
-      }</span>
-                    </div>
-                    ${
-                      unitIsCaster && actualCasterUnitId === hero.selectionId
-                        ? _createCasterControlsHTML(casterLevel, initialTokens)
-                        : ""
-                    }
-                    <div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
-                      heroRules || "None"
-                    }</span></div>
-                    <div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
-                      hero.loadout,
-                      _formatRule
-                    )}</div>
-                </div>`;
+                             ${
+                               hero.rules.find((r) => r.name === "Tough")
+                                 ? `<div class="stat-item">${
+                                     UI_ICONS.tough
+                                   } <span>${
+                                     hero.rules.find((r) => r.name === "Tough")
+                                       ?.rating ?? "?"
+                                   }</span></div>`
+                                 : ""
+                             }
+                         </div>
+                         <div class="info-line small text-muted">
+                             <span class="info-item">${hero.cost} pts</span>
+                             <span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
+                               hero.xp || 0
+                             }</span></span>
+                             <span class="info-item base-info">${
+                               UI_ICONS.base
+                             } ${heroBase ? heroBase + "mm" : "N/A"}</span>
+                         </div>
+                         ${
+                           unitIsCaster &&
+                           actualCasterUnitId === hero.selectionId
+                             ? _createCasterControlsHTML(
+                                 casterLevel,
+                                 initialTokens
+                               )
+                             : ""
+                         }
+                         <div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
+                           heroRules || "None"
+                         }</span></div>
+                         <div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
+                           hero.loadout,
+                           _formatRule
+                         )}</div>
+                     </div>`;
 
       const unitBase = baseUnit.bases?.round || baseUnit.bases?.square;
       const unitRules = baseUnit.rules
@@ -830,43 +858,46 @@ function displayArmyUnits(
         .sort()
         .join(", ");
       cardBodyContentHTML += `
-                <div class="sub-section">
-                    <h6>${baseUnit.customName || baseUnit.originalName}</h6>
-                    <div class="sub-stats-row">
-                         <div class="stat-item">${UI_ICONS.quality} <span>${
-        baseUnit.quality
-      }+</span></div>
-                         <div class="stat-item">${UI_ICONS.defense} <span>${
-        baseUnit.defense
-      }+</span></div>
-                         ${
-                           baseUnit.rules.find((r) => r.name === "Tough")
-                             ? `<div class="stat-item">${
-                                 UI_ICONS.tough
-                               } <span>${
-                                 baseUnit.rules.find((r) => r.name === "Tough")
-                                   ?.rating ?? "?"
-                               }</span></div>`
-                             : ""
-                         }
-                    </div>
-                     <div class="info-line small text-muted">
-                        <span class="info-item">${baseUnit.cost} pts</span>
-                        <span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
-                          baseUnit.xp || 0
-                        }</span></span>
-                        <span class="info-item base-info">${UI_ICONS.base} ${
-        unitBase ? unitBase + "mm" : "N/A"
-      }</span>
-                    </div>
-                    <div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
-                      unitRules || "None"
-                    }</span></div>
-                    <div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
-                      baseUnit.loadout,
-                      _formatRule
-                    )}</div>
-                </div>`;
+                     <div class="sub-section">
+                         <h6>${
+                           baseUnit.customName || baseUnit.originalName
+                         }</h6>
+                         <div class="sub-stats-row">
+                              <div class="stat-item">${
+                                UI_ICONS.quality
+                              } <span>${baseUnit.quality}+</span></div>
+                              <div class="stat-item">${
+                                UI_ICONS.defense
+                              } <span>${baseUnit.defense}+</span></div>
+                              ${
+                                baseUnit.rules.find((r) => r.name === "Tough")
+                                  ? `<div class="stat-item">${
+                                      UI_ICONS.tough
+                                    } <span>${
+                                      baseUnit.rules.find(
+                                        (r) => r.name === "Tough"
+                                      )?.rating ?? "?"
+                                    }</span></div>`
+                                  : ""
+                              }
+                         </div>
+                          <div class="info-line small text-muted">
+                             <span class="info-item">${baseUnit.cost} pts</span>
+                             <span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
+                               baseUnit.xp || 0
+                             }</span></span>
+                             <span class="info-item base-info">${
+                               UI_ICONS.base
+                             } ${unitBase ? unitBase + "mm" : "N/A"}</span>
+                         </div>
+                         <div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
+                           unitRules || "None"
+                         }</span></div>
+                         <div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
+                           baseUnit.loadout,
+                           _formatRule
+                         )}</div>
+                     </div>`;
     } else {
       // --- Normal (Non-Joined) Unit Display ---
       const unitRules = baseUnit.rules
@@ -875,54 +906,49 @@ function displayArmyUnits(
         .sort()
         .join(", ");
       cardBodyContentHTML += `
-                <div class="normal-unit-details">
-                    ${
-                      unitIsCaster
-                        ? _createCasterControlsHTML(casterLevel, initialTokens)
-                        : ""
-                    }
-                    <div class="mb-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
-                      unitRules || "None"
-                    }</span></div>
-                    <div class="mb-0 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
-                      baseUnit.loadout,
-                      _formatRule
-                    )}</div>
-                </div>`;
+                     <div class="normal-unit-details">
+                         ${
+                           unitIsCaster
+                             ? _createCasterControlsHTML(
+                                 casterLevel,
+                                 initialTokens
+                               )
+                             : ""
+                         }
+                         <div class="mb-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
+                           unitRules || "None"
+                         }</span></div>
+                         <div class="mb-0 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
+                           baseUnit.loadout,
+                           _formatRule
+                         )}</div>
+                     </div>`;
     }
     cardBodyContentHTML += `</div>`; // Close details-section
 
-    // --- Assemble Card Body ---
     const cardBody = document.createElement("div");
     cardBody.className = "card-body";
     cardBody.innerHTML =
       effectiveStatsHTML +
       actionControlsHTML +
-      statusIndicatorsHTML + // Add indicator placeholder
-      manualTriggersHTML + // Add manual trigger buttons
+      manualTriggersHTML + // Add manual trigger buttons here
       cardBodyContentHTML +
       modelsHTML;
 
-    // --- Append Header and Body to Card ---
-    cardDiv.innerHTML = cardHeaderHTML; // Set header HTML
-    cardDiv.appendChild(cardBody); // Append body element
+    cardDiv.innerHTML = cardHeaderHTML;
+    cardDiv.appendChild(cardBody);
 
-    // --- Append Card Column to Row ---
     colDiv.appendChild(cardDiv);
     displayContainerRow.appendChild(colDiv);
   }); // End forEach unit
 
-  // --- Apply Initial States AFTER DOM insertion ---
-  // Use requestAnimationFrame to ensure the DOM has updated
+  // Apply Initial States AFTER DOM insertion
   requestAnimationFrame(() => {
     initialStatesToApply.forEach(
       ({ unitId, action, isShaken, isFatigued, status }) => {
-        // Apply button states first
         updateActionButtonsUI(unitId, action, isShaken);
-        // Apply status indicators
         updateFatiguedStatusUI(unitId, isFatigued);
-        // updateShakenStatusUI is called within updateActionButtonsUI
-        // Apply collapsed state if needed
+        // Shaken indicator updated by updateActionButtonsUI
         if (status === "destroyed") {
           collapseDestroyedCard(unitId);
         } else if (status === "routed") {
@@ -933,7 +959,6 @@ function displayArmyUnits(
   });
 } // End displayArmyUnits
 
-// Corrected Exports
 export {
   displayArmyUnits,
   updateModelDisplay,
@@ -941,9 +966,9 @@ export {
   createModelsDisplay,
   updateActionButtonsUI,
   resetAllActionButtonsUI,
-  // Added Exports
   updateFatiguedStatusUI,
   updateShakenStatusUI,
   collapseDestroyedCard,
   collapseRoutedCard,
+  resetCardUI,
 };
