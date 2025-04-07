@@ -382,10 +382,10 @@ body {
 
 /* Styles for Destroyed/Routed Units (Inactive) */
 .unit-card.unit-is-inactive {
-  opacity: 0.6;
-  filter: grayscale(75%);
+  opacity: 0.65; /* Make slightly less faded */
+  filter: grayscale(85%);
 }
-/* Disable interactions on the body content, but allow header interactions */
+/* Disable interactions on the body content */
 .unit-card.unit-is-inactive .card-body {
   pointer-events: none;
 }
@@ -393,48 +393,40 @@ body {
 .unit-card.unit-is-inactive .card-header .unit-reset-btn {
   pointer-events: auto !important;
   opacity: 1 !important; /* Make sure it's not faded */
+  cursor: pointer !important; /* Ensure cursor indicates clickable */
 }
-
-/* Specific header styles for destroyed/routed */
-.unit-card.unit-destroyed-style .card-header {
-  background-color: rgba(
-    var(--bs-danger-rgb),
-    0.5
-  ) !important; /* More subtle than solid bg */
-  color: var(--bs-danger-text-emphasis);
-}
-.unit-card.unit-routed-style .card-header {
-  background-color: rgba(var(--bs-secondary-rgb), 0.5) !important;
-  color: var(--bs-secondary-color);
+/* Ensure other header buttons remain disabled visually if needed */
+.unit-card.unit-is-inactive .card-header .wound-apply-btn {
+  pointer-events: none;
+  opacity: 0.65; /* Match card opacity */
 }
 
 /* Status Text Overlay */
 .status-text-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  /* Position it over the action/manual trigger area */
+  top: 40px; /* Adjust as needed based on effective stats height */
+  left: var(--bs-card-spacer-x);
+  right: var(--bs-card-spacer-x);
+  /* Height can be adjusted or let content define it */
+  padding: 1rem 0.5rem; /* Add some padding */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem; /* Make text large */
+  font-size: 1.75rem; /* Adjust size */
   font-weight: bold;
-  color: rgba(var(--bs-body-color-rgb), 0.6); /* Semi-transparent text */
+  color: rgba(var(--bs-body-color-rgb), 0.7); /* Slightly more opaque text */
   background-color: rgba(
     var(--bs-body-bg-rgb),
-    0.5
+    0.7
   ); /* Semi-transparent background */
   z-index: 5; /* Ensure it's above most body content */
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  border-radius: var(--bs-card-inner-border-radius); /* Match body radius */
+  border-radius: var(--bs-border-radius); /* Add rounded corners */
   text-transform: uppercase;
-  /* Hide the overlay by default, shown when class added */
-  /* display: none; */ /* Handled by adding/removing the element in JS */
+  text-align: center;
+  pointer-events: auto; /* Allow clicking through if needed, but likely not */
 }
-/* .unit-card.unit-is-inactive .status-text-overlay {
-    display: flex;
-} */
 
 /* Ensure recover button fits */
 .action-controls .recover-btn {
@@ -445,11 +437,6 @@ body {
 .manual-triggers {
   text-align: center; /* Center buttons */
   margin-bottom: 0.5rem; /* Space below buttons */
-}
-.manual-triggers .btn {
-  /* Optional: Adjust button width if needed */
-  /* width: 48%; */ /* Example: make two buttons fit side-by-side */
-  /* max-width: 180px; */ /* Example: prevent buttons from getting too wide */
 }
 
 /* Screen Diagnostics */

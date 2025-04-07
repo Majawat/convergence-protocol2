@@ -48,6 +48,7 @@ export const UI_ICONS = {
   viewSpells: `<i class="bi bi-book"></i>`,
   castSpell: `<i class="bi bi-magic"></i>`,
   selectItem: `<i class="bi bi-chevron-right"></i>`,
+  recover: `<i class="bi bi-bandaid"></i>`,
 };
 
 // Static configuration for Action Buttons

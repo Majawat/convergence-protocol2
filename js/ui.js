@@ -130,7 +130,7 @@ function _createActionControlsHTML(baseUnit, hero) {
     }
     buttonsHTML += `<button type="button" class="btn btn-outline-${config.colorTheme} action-btn" data-action="${actionName}" title="${actionName}">${icon}<span class="action-text">${text}</span></button>`;
   });
-  buttonsHTML += `<button type="button" class="btn btn-warning action-btn recover-btn" data-action="Recover" title="Recover from Shaken" style="display: none;"><i class="bi bi-bandaid"></i><span class="action-text">Recover</span></button>`;
+  buttonsHTML += `<button type="button" class="btn btn-warning action-btn recover-btn" data-action="Recover" title="Recover from Shaken" style="display: none;">${UI_ICONS.recover}<span class="action-text"> Recover</span></button>`;
   return `<div class="action-controls"><div class="btn-group w-100" role="group" aria-label="Unit Actions">${buttonsHTML}</div></div>`;
 }
 
@@ -294,7 +294,6 @@ function resetAllActionButtonsUI() {
   const allCards = document.querySelectorAll(".unit-card");
   allCards.forEach((card) => {
     const unitId = card.dataset.unitId;
-    // Only reset if not destroyed/routed
     if (unitId && !card.classList.contains("unit-is-inactive")) {
       const isShaken = getUnitStateValue(
         getCurrentArmyId(),
@@ -330,7 +329,7 @@ function updateShakenStatusUI(cardUnitId, isShaken) {
 
 /**
  * Adds the visual overlay and styling for a Destroyed/Routed unit.
- * Does NOT hide the body anymore.
+ * Moves the card to the end of the list.
  * @param {string} cardUnitId - The selectionId of the unit card.
  * @param {string} statusText - Either "DESTROYED" or "ROUTED".
  */
@@ -354,6 +353,15 @@ function setUnitInactiveUI(cardUnitId, statusText) {
     overlay.textContent = statusText;
     cardBody.appendChild(overlay); // Append to body
   }
+
+  // --- Move Card to End ---
+  const columnElement = cardElement.closest(".col"); // Get the parent column
+  const container = document.getElementById("army-units-container");
+  if (columnElement && container) {
+    console.log(`Moving inactive unit ${cardUnitId} to end.`);
+    container.appendChild(columnElement); // appendChild moves existing elements
+  }
+  // --- End Move Card ---
 }
 
 /** Wrapper for setting Destroyed UI */
@@ -388,6 +396,7 @@ function resetCardUI(cardUnitId) {
   updateShakenStatusUI(cardUnitId, false); // Also resets buttons
 
   // Note: HP reset is handled separately in _handleResetUnitClick
+  // Note: Card position is NOT reset here, requires manual re-sort or full redraw if needed.
 }
 
 // --- Main Display Function ---
@@ -598,6 +607,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         } else if (status === "routed") {
           setUnitInactiveUI(unitId, "ROUTED");
         }
+        // Note: Moving the card happens within setUnitInactiveUI now
       }
     );
   });
@@ -613,8 +623,8 @@ export {
   resetAllActionButtonsUI,
   updateFatiguedStatusUI,
   updateShakenStatusUI,
-  collapseDestroyedCard, // Keep export name, but function changed
-  collapseRoutedCard, // Keep export name, but function changed
+  collapseDestroyedCard, // Keep export name
+  collapseRoutedCard, // Keep export name
   resetCardUI,
-  setUnitInactiveUI, // Export new helper if needed elsewhere
+  setUnitInactiveUI, // Export new helper
 };
