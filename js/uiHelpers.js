@@ -5,16 +5,17 @@
 
 // Import constants if needed (e.g., from config)
 import { config, UI_ICONS } from "./config.js";
-// <-- ADDED Imports for Doctrine functions -->
+// Import state functions
 import {
   getCurrentArmyId,
   getDoctrinesData,
   getSelectedDoctrine,
-  setSelectedDoctrine, // Import the setter
+  setSelectedDoctrine,
+  getCommandPoints, // <-- ADDED: Need CP to disable buttons
 } from "./state.js";
 
 // Variable to store the element that triggered the modal
-let modalTriggerElement = null; // Renamed for clarity
+let modalTriggerElement = null;
 
 /**
  * Displays a list of armies from the campaign data for selection when no armyId is provided.
@@ -303,6 +304,109 @@ export function handleModalHidden() {
     });
   } else {
     modalTriggerElement = null; // Clear if no valid element
+  }
+}
+
+// --- ADDED: Function to display Stratagems ---
+/**
+ * Displays the Universal and selected Doctrine's stratagems in the modal.
+ * @param {string} armyId - The ID of the currently loaded army.
+ * @param {string | null} selectedDoctrineId - The ID of the doctrine selected by the user, or null.
+ */
+export function displayStratagems(armyId, selectedDoctrineId) {
+  const displayArea = document.getElementById("stratagemDisplayArea");
+  const doctrinesData = getDoctrinesData();
+  const currentPoints = getCommandPoints(armyId); // Get current CP
+
+  if (!displayArea || !doctrinesData || !doctrinesData.doctrines) {
+    console.error("Stratagem display area or doctrines data not found.");
+    if (displayArea)
+      displayArea.innerHTML =
+        '<p class="text-danger">Error loading stratagem data.</p>';
+    return;
+  }
+
+  displayArea.innerHTML = ""; // Clear previous content
+
+  const universalDoctrine = doctrinesData.doctrines.find(
+    (d) => d.id === "universal"
+  );
+  const selectedDoctrine = selectedDoctrineId
+    ? doctrinesData.doctrines.find((d) => d.id === selectedDoctrineId)
+    : null;
+
+  // Helper function to create HTML for a list of stratagems
+  const createStratagemListHTML = (doctrine, title) => {
+    if (!doctrine || !doctrine.stratagems || doctrine.stratagems.length === 0) {
+      return `<p class="text-muted small">No stratagems found for ${title}.</p>`;
+    }
+
+    let listHTML = `<h6 class="mt-3 mb-2">${title}</h6>`;
+    listHTML += '<ul class="list-group list-group-flush stratagem-list">'; // Added class
+
+    doctrine.stratagems.forEach((strat) => {
+      const cost = strat.cost || 0;
+      const canAfford = currentPoints >= cost;
+      const stratName = strat.name || "Unnamed Stratagem";
+      const stratDesc = strat.description || "No description available.";
+      // Use doctrine.id and strat.name as a unique identifier for data attribute
+      const stratDataId = `${doctrine.id}-${strat.name.replace(/\s+/g, "-")}`;
+
+      listHTML += `
+              <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap gap-2 px-0 py-2">
+                  <div class="me-auto">
+                      <strong class="stratagem-name">${stratName}</strong>
+                      <small class="stratagem-description d-block text-muted">${stratDesc}</small>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                      <span class="badge bg-warning text-dark rounded-pill stratagem-cost-badge" title="Command Point Cost">${cost} pt${
+        cost !== 1 ? "s" : ""
+      }</span>
+                      <button type="button"
+                              class="btn btn-sm btn-success activate-stratagem-btn"
+                              title="Activate ${stratName}"
+                              data-stratagem-id="${stratDataId}"
+                              data-stratagem-name="${encodeURIComponent(
+                                stratName
+                              )}"
+                              data-stratagem-cost="${cost}"
+                              data-army-id="${armyId || ""}"
+                              ${!canAfford ? "disabled" : ""}>
+                          Activate
+                      </button>
+                  </div>
+              </li>
+          `;
+    });
+
+    listHTML += "</ul>";
+    return listHTML;
+  };
+
+  // Display Universal Stratagems
+  if (universalDoctrine) {
+    displayArea.innerHTML += createStratagemListHTML(
+      universalDoctrine,
+      "Universal Stratagems"
+    );
+  } else {
+    displayArea.innerHTML +=
+      '<p class="text-warning">Universal stratagems not found.</p>';
+  }
+
+  // Display Selected Doctrine Stratagems
+  if (selectedDoctrine) {
+    displayArea.innerHTML += `<hr class="my-3">`; // Separator
+    displayArea.innerHTML += createStratagemListHTML(
+      selectedDoctrine,
+      `${selectedDoctrine.name} Stratagems`
+    );
+  } else if (selectedDoctrineId) {
+    displayArea.innerHTML += `<hr class="my-3">`;
+    displayArea.innerHTML += `<p class="text-warning">Selected doctrine '${selectedDoctrineId}' not found.</p>`;
+  } else {
+    displayArea.innerHTML += `<hr class="my-3">`;
+    displayArea.innerHTML += `<p class="text-muted">Select a doctrine from the dropdown above to see its specific stratagems.</p>`;
   }
 }
 

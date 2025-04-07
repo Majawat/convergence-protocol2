@@ -521,3 +521,37 @@ body {
 #modal-command-points-display .cp-icon-placeholder.text-secondary .bi {
   color: var(--bs-secondary); /* Color when points are zero */
 }
+
+/* --- ADDED: Stratagem Display Styles --- */
+#stratagemDisplayArea .stratagem-list .list-group-item {
+  border-left: 0;
+  border-right: 0;
+  border-top-width: 0; /* Remove top border */
+}
+#stratagemDisplayArea .stratagem-list .list-group-item:first-child {
+  border-top-width: 1px; /* Add border back to the first item */
+}
+
+#stratagemDisplayArea .stratagem-name {
+  font-size: 1.05em;
+}
+#stratagemDisplayArea .stratagem-description {
+  font-size: 0.9em;
+  white-space: normal; /* Allow wrapping */
+}
+#stratagemDisplayArea .stratagem-cost-badge {
+  font-size: 0.85em;
+  padding: 0.3em 0.5em;
+}
+#stratagemDisplayArea .activate-stratagem-btn {
+  font-size: 0.85em;
+  padding: 0.25rem 0.5rem;
+}
+/* Style for the modal CP icon placeholder */
+#modal-command-points-display .cp-icon-placeholder .bi {
+  color: var(--bs-warning); /* Default color */
+  transition: color 0.3s ease;
+}
+#modal-command-points-display .cp-icon-placeholder.text-secondary .bi {
+  color: var(--bs-secondary); /* Color when points are zero */
+}

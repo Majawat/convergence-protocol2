@@ -14,16 +14,16 @@ import {
   getCurrentArmyHeroTargets,
   getCurrentArmyId,
   getCurrentRound,
-  getCommandPoints, // <-- ADDED
-  getMaxCommandPoints, // <-- ADDED
-  getSelectedDoctrine, // <-- ADDED
-  getDoctrinesData, // <-- ADDED
+  getCommandPoints,
+  getMaxCommandPoints,
+  getSelectedDoctrine,
+  getDoctrinesData,
   // State Updaters
   updateModelStateValue,
   updateUnitStateValue,
   incrementCurrentRound,
-  setCommandPoints, // <-- ADDED
-  setSelectedDoctrine, // <-- ADDED
+  setCommandPoints,
+  setSelectedDoctrine,
 } from "./state.js";
 import { loadArmyState, saveArmyState } from "./storage.js";
 import { findTargetModelForWound, checkHalfStrength } from "./gameLogic.js";
@@ -44,6 +44,7 @@ import {
   updateRoundUI,
   updateCommandPointsDisplay,
   populateDoctrineSelector,
+  displayStratagems,
   handleModalHidden,
 } from "./uiHelpers.js";
 
@@ -847,11 +848,27 @@ function handleInteractionClick(event) {
   } else if (spellModal) {
     const castButton = event.target.closest(".cast-spell-btn");
     if (castButton) _handleCastSpellClick(castButton);
-  }
-  // <-- ADDED: Handle clicks within Stratagem Modal -->
-  else if (stratagemModal) {
-    // Add handlers for stratagem activation, manual CP adjust etc. later
-    console.log("Click inside Stratagem Modal");
+  } else if (stratagemModal) {
+    const activateButton = event.target.closest(".activate-stratagem-btn");
+    const removeCpButton = event.target.closest("#manual-cp-remove");
+    const addCpButton = event.target.closest("#manual-cp-add");
+
+    if (activateButton) {
+      // TODO: Implement _handleActivateStratagemClick
+      console.log(
+        "Activate Stratagem Clicked:",
+        activateButton.dataset.stratagemName
+      );
+      // _handleActivateStratagemClick(activateButton);
+    } else if (removeCpButton) {
+      // TODO: Implement _handleManualCpAdjustClick
+      console.log("Manual CP Remove Clicked");
+      // _handleManualCpAdjustClick(-1);
+    } else if (addCpButton) {
+      // TODO: Implement _handleManualCpAdjustClick
+      console.log("Manual CP Add Clicked");
+      // _handleManualCpAdjustClick(1);
+    }
   }
 }
 
@@ -888,7 +905,7 @@ export function setupEventListeners(armyId) {
     console.warn("Start Round button not found.");
   }
 
-  // --- ADDED: Stratagem Modal Listener ---
+  // --- Stratagem Modal Listener ---
   const stratagemModalElement = document.getElementById("stratagemModal");
   if (stratagemModalElement) {
     stratagemModalElement.addEventListener("show.bs.modal", (event) => {
@@ -906,8 +923,14 @@ export function setupEventListeners(armyId) {
         getCommandPoints(armyId),
         getMaxCommandPoints(armyId)
       );
-      // TODO: Display stratagems based on current selection
-      console.log("Stratagem modal opened, populating selector.");
+      // --- ADDED: Display stratagems on modal open ---
+      const currentDoctrine = getSelectedDoctrine(armyId);
+      displayStratagems(armyId, currentDoctrine);
+      console.log(
+        `Stratagem modal opened, populating selector and displaying stratagems for doctrine: ${
+          currentDoctrine || "None"
+        }.`
+      );
     });
     // Add listener to return focus when modal is hidden
     stratagemModalElement.removeEventListener(
@@ -927,17 +950,8 @@ export function setupEventListeners(armyId) {
         const selectedDoctrineId = event.target.value;
         setSelectedDoctrine(armyId, selectedDoctrineId || null); // Save selection (null if default selected)
         console.log(`Doctrine selected: ${selectedDoctrineId}`);
-        // TODO: Trigger display of stratagems for the selected doctrine
-        // displayStratagems(armyId, selectedDoctrineId); // Example function call
-        const displayArea = document.getElementById("stratagemDisplayArea");
-        if (displayArea) {
-          if (selectedDoctrineId) {
-            displayArea.innerHTML = `<p>Displaying Stratagems for: ${selectedDoctrineId} (Not implemented yet)</p>`;
-          } else {
-            displayArea.innerHTML =
-              '<p class="text-muted">Select a doctrine to view its Stratagems.</p>';
-          }
-        }
+        // --- ADDED: Trigger display of stratagems on change ---
+        displayStratagems(armyId, selectedDoctrineId || null);
       });
       console.log("Doctrine selector change listener attached.");
     } else {
@@ -946,7 +960,6 @@ export function setupEventListeners(armyId) {
   } else {
     console.warn("Stratagem modal element not found.");
   }
-  // --- END ADDED ---
 
   const initialRound = getCurrentRound();
   const roundDisplayElement = document.getElementById("round-display");
