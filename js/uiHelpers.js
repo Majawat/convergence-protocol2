@@ -8,7 +8,7 @@ import { config, UI_ICONS } from "./config.js";
 import { getCurrentArmyId } from "./state.js"; // Import needed to get armyId
 
 // Variable to store the element that triggered the spell modal
-// let spellModalTriggerElement = null; // Commented out for debugging
+let spellModalTriggerElement = null;
 
 /**
  * Displays a list of armies from the campaign data for selection when no armyId is provided.
@@ -193,11 +193,16 @@ export function populateAndShowSpellModal(
     return;
   }
 
-  // --- Focus Management Setup - Temporarily Commented Out ---
-  // modalElement.removeEventListener("show.bs.modal", handleSpellModalShow);
-  // modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden);
-  // modalElement.addEventListener("show.bs.modal", handleSpellModalShow, { once: true });
-  // modalElement.addEventListener("hidden.bs.modal", handleSpellModalHidden, { once: true });
+  // --- Focus Management Setup ---
+  // Store the element that triggered the modal
+  if (document.activeElement && document.activeElement !== document.body) {
+    spellModalTriggerElement = document.activeElement;
+  }
+  // Add listener to return focus when modal is hidden
+  modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden); // Remove previous listener if any
+  modalElement.addEventListener("hidden.bs.modal", handleSpellModalHidden, {
+    once: true,
+  });
   // --- End Focus Management ---
 
   const modalTitle = document.getElementById("viewSpellsModalLabel");
@@ -267,44 +272,36 @@ export function populateAndShowSpellModal(
       modalInstance.show();
     } catch (error) {
       console.error("Error showing spell modal:", error);
-      modalElement.removeEventListener("show.bs.modal", handleSpellModalShow); // Clean up listeners if show fails
       modalElement.removeEventListener(
         "hidden.bs.modal",
         handleSpellModalHidden
-      );
+      ); // Clean up listener if show fails
     }
   } else {
     console.warn("Bootstrap Modal component not found.");
-    modalElement.removeEventListener("show.bs.modal", handleSpellModalShow); // Clean up listeners if BS missing
-    modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden);
+    modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden); // Clean up listener if BS missing
   }
 }
 
 // --- Focus Management Functions ---
 
-function handleSpellModalShow(event) {
-  if (event.relatedTarget) {
-    spellModalTriggerElement = event.relatedTarget;
-  } else {
-    spellModalTriggerElement = document.activeElement;
-  }
-}
-
+/** Returns focus to the element that triggered the modal */
 function handleSpellModalHidden() {
   if (
     spellModalTriggerElement &&
     typeof spellModalTriggerElement.focus === "function"
   ) {
     requestAnimationFrame(() => {
+      // Use rAF for smoother focus transition
       try {
         spellModalTriggerElement.focus();
       } catch (e) {
         console.warn("Could not focus stored trigger element:", e);
       }
-      spellModalTriggerElement = null;
+      spellModalTriggerElement = null; // Clear stored element
     });
   } else {
-    spellModalTriggerElement = null;
+    spellModalTriggerElement = null; // Clear if no valid element
   }
 }
 
@@ -324,9 +321,18 @@ export function updateRoundUI(roundNumber) {
       // Check parentNode exists
       roundDisplayElement = document.createElement("h3"); // Use h3 as in user code
       roundDisplayElement.id = "round-display";
-      roundDisplayElement.className = "ms-3 align-middle"; // Use classes from user code
-      // Insert after H1 - ensure titleH1.nextSibling is correct reference point
-      titleH1.parentNode.insertBefore(roundDisplayElement, titleH1.nextSibling);
+      roundDisplayElement.className = "mb-0 order-1 order-md-0"; // Match classes from HTML
+      // Insert before the CP display (which is order-2)
+      const cpDisplay = document.getElementById("command-points-display");
+      if (cpDisplay) {
+        cpDisplay.parentNode.insertBefore(roundDisplayElement, cpDisplay);
+      } else {
+        // Fallback: insert after H1 if CP display isn't there yet
+        titleH1.parentNode.insertBefore(
+          roundDisplayElement,
+          titleH1.nextSibling
+        );
+      }
       console.log("Created #round-display element.");
     } else {
       console.error(
@@ -350,9 +356,75 @@ export function updateRoundUI(roundNumber) {
     } else {
       startRoundButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Start Game`;
     }
-    // Note: Enabling/disabling the button should be handled elsewhere
-    // based on game/loading state, not just the round number.
   } else {
     console.warn("Start/Next Round button not found for UI update.");
   }
+}
+
+// --- Function to update Command Points Display ---
+/**
+ * Updates the command points display elements (main header and modal header).
+ * @param {string} armyId - The ID of the current army.
+ * @param {number} currentPoints - The current command points.
+ * @param {number} maxPoints - The maximum command points for the army.
+ */
+export function updateCommandPointsDisplay(armyId, currentPoints, maxPoints) {
+  // Update main header display
+  const cpValueElement = document.getElementById("command-points-value");
+  const cpMaxElement = document.getElementById("command-points-max");
+  const cpIconPlaceholder = document.querySelector(
+    "#command-points-display .cp-icon-placeholder"
+  ); // Use placeholder class
+
+  if (cpValueElement) cpValueElement.textContent = currentPoints;
+  if (cpMaxElement) cpMaxElement.textContent = maxPoints;
+
+  // Update icon and color based on points
+  if (cpIconPlaceholder) {
+    // Set the icon HTML from config
+    cpIconPlaceholder.innerHTML =
+      UI_ICONS.commandPoints || '<i class="bi bi-question-circle"></i>'; // Fallback icon
+
+    // Add/remove class for color styling based on points
+    if (currentPoints <= 0) {
+      cpIconPlaceholder.classList.add("text-secondary");
+    } else {
+      cpIconPlaceholder.classList.remove("text-secondary");
+    }
+  }
+
+  // Update modal header display
+  const modalCpValueElement = document.getElementById(
+    "modal-command-points-value"
+  );
+  const modalCpMaxElement = document.getElementById("modal-command-points-max");
+  const modalCpIconPlaceholder = document.querySelector(
+    "#modal-command-points-display .cp-icon-placeholder"
+  ); // Use placeholder class
+
+  if (modalCpValueElement) modalCpValueElement.textContent = currentPoints;
+  if (modalCpMaxElement) modalCpMaxElement.textContent = maxPoints;
+
+  if (modalCpIconPlaceholder) {
+    // Set the icon HTML from config
+    modalCpIconPlaceholder.innerHTML =
+      UI_ICONS.commandPoints || '<i class="bi bi-question-circle"></i>'; // Fallback icon
+
+    // Add/remove class for color styling based on points
+    if (currentPoints <= 0) {
+      modalCpIconPlaceholder.classList.add("text-secondary");
+    } else {
+      modalCpIconPlaceholder.classList.remove("text-secondary");
+    }
+  }
+
+  // Enable Stratagems button if army is loaded
+  const stratButton = document.getElementById("stratagems-button");
+  if (stratButton) stratButton.disabled = false;
+
+  // Enable/disable manual adjust buttons based on current points
+  const removeCpButton = document.getElementById("manual-cp-remove");
+  const addCpButton = document.getElementById("manual-cp-add");
+  if (removeCpButton) removeCpButton.disabled = currentPoints <= 0;
+  if (addCpButton) addCpButton.disabled = currentPoints >= maxPoints;
 }

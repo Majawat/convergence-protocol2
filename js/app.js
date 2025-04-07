@@ -13,6 +13,7 @@ import {
   setCampaignData,
   setArmyBooksData,
   setCommonRulesData,
+  setDoctrinesData, // <-- ADDED
   setLoadedArmyData, // This now initializes/updates points & base structure in storage
   // State Getters
   getCampaignData,
@@ -26,6 +27,9 @@ import {
   getUnitData,
   getJoinedHeroData,
   getCurrentArmyId,
+  // <-- ADDED CP Getters -->
+  getCommandPoints,
+  getMaxCommandPoints,
   // State Updaters (Generic updaters handle load/save implicitly)
   updateUnitStateValue,
   updateModelStateValue,
@@ -36,6 +40,8 @@ import {
   displayArmySelection,
   populateArmyInfoModal,
   updateRoundUI,
+  // <-- ADDED CP UI Helper -->
+  updateCommandPointsDisplay,
 } from "./uiHelpers.js";
 import { setupEventListeners } from "./eventHandlers.js";
 import { findTargetModelForWound } from "./gameLogic.js";
@@ -101,15 +107,23 @@ function _initializeArmyStateFromStorage(armyId, processedArmy) {
   let armyState = loadArmyState(armyId); // Load this specific army's state
   let stateChanged = false;
 
+  // Calculate initial/max CP based on processed data
+  const initialCommandPoints =
+    Math.floor(processedArmy.meta.listPoints / 1000) *
+    config.COMMAND_POINTS_PER_1000;
+
   // If no state exists, create a default structure (setLoadedArmyData already did basic init)
   if (!armyState) {
     armyState = {
       listPoints: processedArmy.meta.listPoints || 0,
       units: {},
+      commandPoints: initialCommandPoints, // <-- Initialize CP
+      selectedDoctrine: null, // <-- Initialize Doctrine
+      maxCommandPoints: initialCommandPoints, // <-- Initialize Max CP
     };
     stateChanged = true;
     console.log(
-      `No existing state found for ${armyId}, creating default structure.`
+      `No existing state found for ${armyId}, creating default structure with ${initialCommandPoints} CP.`
     );
   } else {
     // Ensure units object exists if it was missing in old data
@@ -117,10 +131,31 @@ function _initializeArmyStateFromStorage(armyId, processedArmy) {
       armyState.units = {};
       stateChanged = true;
     }
-    // Ensure listPoints matches processed data (might have changed if list was updated)
+    // Ensure listPoints matches processed data
     if (armyState.listPoints !== processedArmy.meta.listPoints) {
       armyState.listPoints = processedArmy.meta.listPoints || 0;
       stateChanged = true;
+    }
+    // <-- Ensure CP/Doctrine fields exist and initialize max CP -->
+    if (armyState.commandPoints === undefined) {
+      armyState.commandPoints = initialCommandPoints;
+      stateChanged = true;
+    }
+    if (armyState.selectedDoctrine === undefined) {
+      armyState.selectedDoctrine = null;
+      stateChanged = true;
+    }
+    // Initialize or update maxCommandPoints based on current list points
+    if (armyState.maxCommandPoints !== initialCommandPoints) {
+      armyState.maxCommandPoints = initialCommandPoints;
+      // Optionally clamp current CP if max decreased (unlikely for fixed generation)
+      if (armyState.commandPoints > armyState.maxCommandPoints) {
+        armyState.commandPoints = armyState.maxCommandPoints;
+      }
+      stateChanged = true;
+      console.log(
+        `Updated maxCommandPoints for ${armyId} to ${initialCommandPoints}.`
+      );
     }
   }
 
@@ -202,25 +237,7 @@ function _initializeArmyStateFromStorage(armyId, processedArmy) {
         model.currentHp = unitStateModels[modelId].currentHp;
       }
     });
-    // --- Optional: Clean up models in state that are no longer in processed data ---
-    // (Could be useful if units change significantly, but adds complexity)
-    // Object.keys(unitStateModels).forEach(storedModelId => {
-    //    if (!unit.models.some(procModel => procModel.modelId === storedModelId)) {
-    //        delete unitStateModels[storedModelId];
-    //        stateChanged = true;
-    //        console.log(`Removed stale model ${storedModelId} from unit ${unitId} state.`);
-    //    }
-    // });
   });
-
-  // --- Optional: Clean up units in state that are no longer in processed data ---
-  // Object.keys(armyState.units).forEach(storedUnitId => {
-  //     if (!processedArmy.units.some(procUnit => procUnit.selectionId === storedUnitId)) {
-  //         delete armyState.units[storedUnitId];
-  //         stateChanged = true;
-  //         console.log(`Removed stale unit ${storedUnitId} from army ${armyId} state.`);
-  //     }
-  // });
 
   // Save the state back to storage only if something was actually initialized or changed
   if (stateChanged) {
@@ -283,10 +300,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   titleH1.textContent = `Loading ${armyInfo.armyName}...`;
 
   try {
-    // Step 4: Load Static Game Data (Books/Rules)
+    // Step 4: Load Static Game Data (Books/Rules/Doctrines) // <-- UPDATED
     const gameData = await loadGameData(getCampaignData());
     setArmyBooksData(gameData.armyBooks);
     setCommonRulesData(gameData.commonRules);
+    setDoctrinesData(gameData.doctrines); // <-- ADDED
 
     // Step 5: Fetch and Process Army List
     mainListContainer.innerHTML = ""; // Clear spinner
@@ -300,10 +318,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
     // Store processed data in memory AND initialize/update base state in localStorage
+    // This now also calculates and stores initial/max CP
     setLoadedArmyData(armyIdToLoad, processedArmy);
 
     // Step 6: Initialize Full State & Update UI
     // Load full state from storage, initialize missing parts, apply HP to models in memory
+    // This now also ensures CP/Doctrine fields exist in loaded state
     _initializeArmyStateFromStorage(armyIdToLoad, processedArmy);
 
     // Update page elements
@@ -312,9 +332,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     populateArmyInfoModal(armyInfo);
 
     // Display units, passing the component state *for this specific army*
-    // Need a way to get component state easily - let's assume getUnitStateValue can be used or adapt ui.js
-    // For simplicity, ui.js might need refactoring to use getUnitStateValue for tokens etc.
-    // Or, we reconstruct the old componentState object format just for display:
     const currentArmyState = loadArmyState(armyIdToLoad) || { units: {} };
     const displayComponentState = {};
     Object.entries(currentArmyState.units).forEach(([unitId, unitState]) => {
@@ -335,9 +352,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Step 7: Setup Event Listeners
     setupEventListeners(armyIdToLoad);
 
-    // Inside DOMContentLoaded in app.js, after getting currentRound
+    // Update Round UI
     updateRoundUI(getCurrentRound());
-    // Handle enabling the button separately, e.g., after army processing is fully done
+    // <-- ADDED: Update Command Points UI -->
+    updateCommandPointsDisplay(
+      armyIdToLoad,
+      getCommandPoints(armyIdToLoad),
+      getMaxCommandPoints(armyIdToLoad)
+    );
+
+    // Handle enabling the button separately
     const startRoundButton = document.getElementById("start-round-button");
     startRoundButton.disabled = false;
 

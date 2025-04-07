@@ -7,12 +7,13 @@ import {
   loadGameState,
   saveGameState,
 } from "./storage.js";
-import { config } from "./config.js"; // Import config for defaults like MAX_SPELL_TOKENS
+import { config } from "./config.js"; // Import config for defaults
 
 // --- Global Non-Persistent State ---
 let campaignData = null;
 let armyBooksData = {}; // { factionId: data } - Still global cache
 let commonRulesData = {}; // { gameSystemId: data } - Still global cache
+let doctrinesData = null; // <-- ADDED: To store loaded doctrines.json
 let loadedArmiesData = {}; // { armyId: processedArmy } - Stores the *processed* data for the currently loaded army
 
 // --- Global Persistent State (Managed via storage functions) ---
@@ -28,6 +29,10 @@ export function getArmyBooksData() {
 }
 export function getCommonRulesData() {
   return commonRulesData; // Assumes loadGameData populates this correctly
+}
+// <-- ADDED: Getter for Doctrines data -->
+export function getDoctrinesData() {
+  return doctrinesData;
 }
 
 /** Gets the processed data object for the currently loaded army */
@@ -53,11 +58,32 @@ export function getCurrentArmyId() {
  */
 function getArmyState(armyId) {
   if (!armyId) armyId = getCurrentArmyId();
-  if (!armyId) return { listPoints: 0, units: {} }; // Return default if no ID
+  if (!armyId)
+    return {
+      listPoints: 0,
+      units: {},
+      commandPoints: 0,
+      selectedDoctrine: null,
+      maxCommandPoints: 0,
+    }; // <-- ADDED CP/Doctrine defaults
 
   const state = loadArmyState(armyId);
   // Return loaded state or a default structure if null/undefined
-  return state || { listPoints: 0, units: {} };
+  // <-- UPDATED Default Structure -->
+  const defaultState = {
+    listPoints: 0,
+    units: {},
+    commandPoints: 0,
+    selectedDoctrine: null,
+    maxCommandPoints: 0, // Maximum CP for manual adjustments
+  };
+  // Ensure loaded state has the new fields, providing defaults if missing
+  if (state) {
+    if (state.commandPoints === undefined) state.commandPoints = 0;
+    if (state.selectedDoctrine === undefined) state.selectedDoctrine = null;
+    if (state.maxCommandPoints === undefined) state.maxCommandPoints = 0;
+  }
+  return state || defaultState;
 }
 
 /**
@@ -75,7 +101,7 @@ function getUnitState(armyId, unitId) {
       status: "active", // Keep existing status
       shaken: false,
       fatigued: false,
-      attackedInMeleeThisRound: false, // <-- Added default
+      attackedInMeleeThisRound: false,
       action: null,
       limitedWeaponUsed: false,
       tokens: 0,
@@ -97,8 +123,7 @@ function getModelState(armyId, unitId, modelId) {
   // Return existing model state or a default structure
   return (
     unitState.models?.[modelId] || {
-      currentHp: 1, // Default to 1 HP if not found? Or look up maxHP? Needs thought.
-      // Let's assume initialization handles setting correct HP. Default needed if accessed before init.
+      currentHp: 1,
       name: null,
     }
   );
@@ -127,6 +152,31 @@ export function getModelStateValue(armyId, unitId, modelId, key, defaultValue) {
   if (!armyId || !unitId || !modelId || !key) return defaultValue;
   const modelState = getModelState(armyId, unitId, modelId); // getModelState provides default
   return modelState.hasOwnProperty(key) ? modelState[key] : defaultValue;
+}
+
+// <-- ADDED: Getters for Command Points and Doctrine -->
+/** Gets the current command points for the specified army. */
+export function getCommandPoints(armyId) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId) return 0;
+  const state = getArmyState(armyId);
+  return state.commandPoints;
+}
+
+/** Gets the maximum command points for the specified army (for manual adjustments). */
+export function getMaxCommandPoints(armyId) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId) return 0;
+  const state = getArmyState(armyId);
+  return state.maxCommandPoints;
+}
+
+/** Gets the selected doctrine ID for the specified army. */
+export function getSelectedDoctrine(armyId) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId) return null;
+  const state = getArmyState(armyId);
+  return state.selectedDoctrine;
 }
 
 // --- Global Game State Getters/Setters ---
@@ -166,6 +216,10 @@ export function setArmyBooksData(data) {
 export function setCommonRulesData(data) {
   commonRulesData = data || {};
 }
+// <-- ADDED: Setter for Doctrines data -->
+export function setDoctrinesData(data) {
+  doctrinesData = data;
+}
 
 /** Stores the processed army data in memory and initializes/updates its state in localStorage */
 export function setLoadedArmyData(armyId, processedData) {
@@ -173,25 +227,44 @@ export function setLoadedArmyData(armyId, processedData) {
   if (armyId && processedData) {
     loadedArmiesData[armyId] = processedData;
 
-    // Initialize state in localStorage if it doesn't exist, or just update points
+    // Initialize state in localStorage if it doesn't exist, or just update points/CP
     let currentState = loadArmyState(armyId); // Load existing state if present
+
+    // <-- UPDATED: Calculate initial CP -->
+    const initialCommandPoints =
+      Math.floor(processedData.meta.listPoints / 1000) *
+      config.COMMAND_POINTS_PER_1000;
+
+    // <-- UPDATED Default State -->
     const defaultState = {
-      // Define default structure
       listPoints: processedData.meta.listPoints || 0,
       units: {},
+      commandPoints: initialCommandPoints,
+      selectedDoctrine: null, // Doctrine selection happens later
+      maxCommandPoints: initialCommandPoints, // Store the initial max
     };
 
     if (!currentState) {
       currentState = defaultState;
-      console.log(`Initializing new state for army ${armyId} in localStorage.`);
+      console.log(
+        `Initializing new state for army ${armyId} in localStorage with ${initialCommandPoints} CP.`
+      );
     } else {
-      // Ensure listPoints is updated, keep existing units structure
+      // Ensure listPoints is updated
       currentState.listPoints =
         processedData.meta.listPoints || currentState.listPoints || 0;
-      // Ensure units object exists if it was missing in old data
+      // Ensure units object exists
       if (!currentState.units) currentState.units = {};
+      // Ensure CP fields exist and initialize maxCommandPoints if missing
+      if (currentState.commandPoints === undefined)
+        currentState.commandPoints = initialCommandPoints;
+      if (currentState.selectedDoctrine === undefined)
+        currentState.selectedDoctrine = null;
+      if (currentState.maxCommandPoints === undefined)
+        currentState.maxCommandPoints = initialCommandPoints; // Initialize max CP if loading old state
+
       console.log(
-        `Loaded existing state for army ${armyId}, updated list points.`
+        `Loaded existing state for army ${armyId}, updated list points. Current CP: ${currentState.commandPoints}, Max CP: ${currentState.maxCommandPoints}.`
       );
     }
     saveArmyState(armyId, currentState); // Save the initial/updated basic state
@@ -222,7 +295,7 @@ export function updateUnitStateValue(armyId, unitId, key, value) {
       status: "active",
       shaken: false,
       fatigued: false,
-      attackedInMeleeThisRound: false, // <-- Added default
+      attackedInMeleeThisRound: false,
       action: null,
       limitedWeaponUsed: false,
       tokens: 0,
@@ -258,7 +331,7 @@ export function updateModelStateValue(armyId, unitId, modelId, key, value) {
       status: "active",
       shaken: false,
       fatigued: false,
-      attackedInMeleeThisRound: false, // <-- Added default
+      attackedInMeleeThisRound: false,
       action: null,
       limitedWeaponUsed: false,
       tokens: 0,
@@ -300,6 +373,51 @@ export function updateArmyListPoints(armyId, points) {
   currentState.listPoints = points;
   saveArmyState(armyId, currentState);
   // console.log(`Updated list points for army ${armyId} to ${points}.`);
+}
+
+// <-- ADDED: Functions to update Command Points and Doctrine -->
+/**
+ * Sets the command points for the specified army and saves the state.
+ * Clamps the value between 0 and maxCommandPoints.
+ * @param {string} armyId - The ID of the army.
+ * @param {number} points - The new command point value.
+ */
+export function setCommandPoints(armyId, points) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId || typeof points !== "number") return;
+
+  const currentState = getArmyState(armyId);
+  const maxPoints = currentState.maxCommandPoints || 0; // Use stored max
+  // Clamp points between 0 and max
+  const clampedPoints = Math.max(0, Math.min(points, maxPoints));
+
+  if (currentState.commandPoints !== clampedPoints) {
+    currentState.commandPoints = clampedPoints;
+    saveArmyState(armyId, currentState);
+    console.log(`Set command points for army ${armyId} to ${clampedPoints}.`);
+  }
+}
+
+/**
+ * Sets the selected doctrine ID for the specified army and saves the state.
+ * @param {string} armyId - The ID of the army.
+ * @param {string | null} doctrineId - The ID of the selected doctrine (e.g., 'shock', 'defensive') or null.
+ */
+export function setSelectedDoctrine(armyId, doctrineId) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId) return;
+  // Basic validation: check if it's a string or null
+  if (typeof doctrineId !== "string" && doctrineId !== null) {
+    console.error("Invalid doctrineId provided:", doctrineId);
+    return;
+  }
+
+  const currentState = getArmyState(armyId);
+  if (currentState.selectedDoctrine !== doctrineId) {
+    currentState.selectedDoctrine = doctrineId;
+    saveArmyState(armyId, currentState);
+    console.log(`Set selected doctrine for army ${armyId} to ${doctrineId}.`);
+  }
 }
 
 // --- Utility Getters using Current Army Context ---

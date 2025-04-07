@@ -15,14 +15,13 @@
     <script type="module" src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
     <style>
-      /* Original styles for Army Info Image */
+      /* Original styles ... */
       #armyInfoImage {
         max-height: 300px;
         object-fit: cover;
         width: 100%;
         background-color: var(--bs-secondary-bg);
       }
-      /* Original styles for spell list items */
       #spellListContainer .list-group-item {
         background-color: var(--bs-body-bg);
       }
@@ -42,19 +41,55 @@
         cursor: help;
         margin-left: 0.5rem;
       }
-
-      /* Style for screen diagnostics */
       #screenDiagnostics {
         font-size: 0.75rem;
         color: var(--bs-secondary-color);
-        display: flex; /* Use flexbox */
-        justify-content: center; /* Center items */
-        gap: 1rem; /* Space between items */
-        flex-wrap: wrap; /* Allow wrapping on small screens */
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
       }
-      /* Ensure toasts stack correctly */
       .toast-container {
-        z-index: 1100; /* Ensure toasts appear above modals if necessary */
+        z-index: 1100;
+      }
+
+      /* Styles for Command Points */
+      #command-points-display {
+        font-size: 1.1rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3em;
+        padding: 0.2em 0.5em;
+        border-radius: var(--bs-border-radius);
+        background-color: var(--bs-tertiary-bg);
+        border: 1px solid var(--bs-border-color);
+      }
+      /* Removed specific icon selector here, color handled in JS */
+      #command-points-value {
+        font-weight: bold;
+      }
+      /* Style for the icon placeholder */
+      .cp-icon-placeholder .bi {
+        color: var(--bs-warning); /* Default color */
+        transition: color 0.3s ease; /* Smooth color transition */
+      }
+      .cp-icon-placeholder.text-secondary .bi {
+        color: var(--bs-secondary); /* Color when points are zero */
+      }
+
+      /* Styles for Stratagem Modal */
+      #modal-cp-adjust-group .btn {
+        padding: 0.1rem 0.4rem;
+        line-height: 1;
+      }
+      /* Style for the modal icon placeholder */
+      #modal-command-points-display .cp-icon-placeholder .bi {
+        color: var(--bs-warning); /* Default color */
+        transition: color 0.3s ease;
+      }
+      #modal-command-points-display .cp-icon-placeholder.text-secondary .bi {
+        color: var(--bs-secondary); /* Color when points are zero */
       }
     </style>
   </head>
@@ -130,27 +165,53 @@
     </nav>
 
     <main class="container mt-4">
-      <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
-        <h1 id="army-title-h1" class="flex-grow-1 mb-0">Loading Army...</h1>
-        <div class="d-flex gap-2">
-          <button
-            id="army-info-button"
-            type="button"
-            class="btn btn-sm btn-outline-info"
-            data-bs-toggle="modal"
-            data-bs-target="#armyInfoModal"
-            disabled
-          >
-            <i class="bi bi-info-circle"></i> Army Info
-          </button>
-          <button
-            id="start-round-button"
-            type="button"
-            class="btn btn-sm btn-success"
-            disabled
-          >
-            <i class="bi bi-arrow-repeat"></i> Loading
-          </button>
+      <div
+        class="d-flex align-items-center justify-content-between gap-3 mb-2 flex-wrap"
+      >
+        <h1 id="army-title-h1" class="flex-grow-1 mb-0 me-3">
+          Loading Army...
+        </h1>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <h3 id="round-display" class="mb-0 order-1 order-md-0"></h3>
+
+          <div id="command-points-display" class="mb-0 order-2 order-md-1">
+            <span class="cp-icon-placeholder"></span> <span>Points: </span>
+            <span id="command-points-value">--</span>
+            <span> / </span>
+            <span id="command-points-max">--</span>
+          </div>
+
+          <div class="d-flex gap-2 order-0 order-md-2">
+            <button
+              id="army-info-button"
+              type="button"
+              class="btn btn-sm btn-outline-info"
+              data-bs-toggle="modal"
+              data-bs-target="#armyInfoModal"
+              disabled
+            >
+              <i class="bi bi-info-circle"></i> Info
+            </button>
+            <button
+              id="stratagems-button"
+              type="button"
+              class="btn btn-sm btn-outline-warning"
+              data-bs-toggle="modal"
+              data-bs-target="#stratagemModal"
+              disabled
+            >
+              <i class="bi bi-journal-bookmark-fill"></i> Stratagems
+            </button>
+            <button
+              id="start-round-button"
+              type="button"
+              class="btn btn-sm btn-success"
+              disabled
+            >
+              <i class="bi bi-arrow-repeat"></i> Loading
+            </button>
+          </div>
         </div>
       </div>
       <hr class="mt-2 mb-4" />
@@ -257,6 +318,93 @@
               id="spellListContainer"
               class="list-group list-group-flush"
             ></ul>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="stratagemModal"
+      tabindex="-1"
+      aria-labelledby="stratagemModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="stratagemModalLabel">
+              Doctrines & Stratagems
+            </h5>
+            <div class="ms-auto d-flex align-items-center gap-2">
+              <div
+                id="modal-cp-adjust-group"
+                class="btn-group btn-group-sm me-2"
+                role="group"
+                aria-label="Manual CP Adjust"
+              >
+                <button
+                  type="button"
+                  id="manual-cp-remove"
+                  class="btn btn-outline-secondary"
+                  title="Decrease Command Points"
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  id="manual-cp-add"
+                  class="btn btn-outline-secondary"
+                  title="Increase Command Points"
+                >
+                  +
+                </button>
+              </div>
+              <div
+                id="modal-command-points-display"
+                class="fw-bold fs-5 d-flex align-items-center gap-1"
+              >
+                <span class="cp-icon-placeholder"></span> <span>Points: </span>
+                <span id="modal-command-points-value">--</span>
+                <span> / </span>
+                <span id="modal-command-points-max">--</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-close btn-close-white ms-2"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="doctrineSelector" class="form-label"
+                >Selected Doctrine:</label
+              >
+              <select
+                class="form-select"
+                id="doctrineSelector"
+                aria-label="Select Doctrine"
+              >
+                <option selected value="">-- Select Doctrine --</option>
+              </select>
+            </div>
+            <hr />
+            <div id="stratagemDisplayArea">
+              <p class="text-muted">
+                Select a doctrine to view its Stratagems.
+              </p>
+            </div>
           </div>
           <div class="modal-footer">
             <button
