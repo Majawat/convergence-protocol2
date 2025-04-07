@@ -854,21 +854,95 @@ function handleInteractionClick(event) {
     const addCpButton = event.target.closest("#manual-cp-add");
 
     if (activateButton) {
-      // TODO: Implement _handleActivateStratagemClick
       console.log(
         "Activate Stratagem Clicked:",
         activateButton.dataset.stratagemName
       );
-      // _handleActivateStratagemClick(activateButton);
+      _handleActivateStratagemClick(activateButton);
     } else if (removeCpButton) {
-      // TODO: Implement _handleManualCpAdjustClick
       console.log("Manual CP Remove Clicked");
-      // _handleManualCpAdjustClick(-1);
+      _handleManualCpAdjustClick(-1);
     } else if (addCpButton) {
-      // TODO: Implement _handleManualCpAdjustClick
       console.log("Manual CP Add Clicked");
-      // _handleManualCpAdjustClick(1);
+      _handleManualCpAdjustClick(1);
     }
+  }
+}
+
+/**
+ * Handles clicks on the manual Command Point adjustment buttons (+/-).
+ * @param {number} adjustment - The amount to adjust by (+1 or -1).
+ * @private
+ */
+function _handleManualCpAdjustClick(adjustment) {
+  const armyId = getCurrentArmyId();
+  if (!armyId) return;
+
+  const currentPoints = getCommandPoints(armyId);
+  const maxPoints = getMaxCommandPoints(armyId); // Needed for update display
+  const newPoints = currentPoints + adjustment;
+
+  // setCommandPoints handles clamping between 0 and maxPoints
+  setCommandPoints(armyId, newPoints);
+
+  // Update the UI display (both header and modal)
+  const updatedPoints = getCommandPoints(armyId); // Get the clamped value
+  updateCommandPointsDisplay(armyId, updatedPoints, maxPoints);
+
+  // Re-display stratagems to update button states
+  const selectedDoctrine = getSelectedDoctrine(armyId);
+  displayStratagems(armyId, selectedDoctrine);
+
+  console.log(`Manual CP adjustment: ${adjustment}. New CP: ${updatedPoints}`);
+}
+
+/**
+ * Handles clicks on the "Activate" button for a stratagem.
+ * @param {HTMLElement} buttonElement - The clicked button element.
+ * @private
+ */
+function _handleActivateStratagemClick(buttonElement) {
+  const armyId = buttonElement.dataset.armyId;
+  const stratName = decodeURIComponent(buttonElement.dataset.stratagemName);
+  const stratCost = parseInt(buttonElement.dataset.stratagemCost, 10);
+  // const stratId = buttonElement.dataset.stratagemId; // Available if needed later
+
+  if (!armyId || isNaN(stratCost) || !stratName) {
+    console.error(
+      "Activate button missing required data:",
+      buttonElement.dataset
+    );
+    showToast("Error activating stratagem: Missing data.", "Error");
+    return;
+  }
+
+  const currentPoints = getCommandPoints(armyId);
+  const maxPoints = getMaxCommandPoints(armyId); // For display update
+
+  if (currentPoints >= stratCost) {
+    const newPoints = currentPoints - stratCost;
+    setCommandPoints(armyId, newPoints); // Update state
+
+    // Update UI displays
+    updateCommandPointsDisplay(armyId, newPoints, maxPoints);
+
+    // Re-render stratagems to update button states
+    const selectedDoctrine = getSelectedDoctrine(armyId);
+    displayStratagems(armyId, selectedDoctrine);
+
+    // Notify user
+    showToast(`Stratagem Activated: ${stratName}`, "Stratagem Used");
+    console.log(
+      `Activated Stratagem: ${stratName} for ${stratCost} CP. New CP: ${newPoints}`
+    );
+
+    // Reminder: The app does NOT execute the stratagem's effect.
+    // The player needs to apply the effect based on the toast/rules.
+  } else {
+    showToast(
+      `Insufficient Command Points to activate ${stratName} (Cost: ${stratCost}, Have: ${currentPoints}).`,
+      "Activation Failed"
+    );
   }
 }
 
