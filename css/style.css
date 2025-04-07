@@ -18,7 +18,7 @@ body {
   display: flex;
   flex-direction: column;
   font-size: 0.95rem; /* Slightly larger base font for card body */
-  position: relative; /* Needed for shaken overlay */
+  position: relative; /* Needed for overlays */
 }
 .stat-icon {
   width: 1.1em;
@@ -380,56 +380,61 @@ body {
   vertical-align: -0.1em; /* Fine-tune icon alignment */
 }
 
-/* Styles for Destroyed/Routed card headers */
-.unit-card.unit-destroyed .card-header,
-.unit-card.unit-routed .card-header {
-  min-height: 80px;
+/* Styles for Destroyed/Routed Units (Inactive) */
+.unit-card.unit-is-inactive {
+  opacity: 0.6;
+  filter: grayscale(75%);
+}
+/* Disable interactions on the body content, but allow header interactions */
+.unit-card.unit-is-inactive .card-body {
+  pointer-events: none;
+}
+/* Explicitly re-enable pointer events for the reset button in the header */
+.unit-card.unit-is-inactive .card-header .unit-reset-btn {
+  pointer-events: auto !important;
+  opacity: 1 !important; /* Make sure it's not faded */
+}
+
+/* Specific header styles for destroyed/routed */
+.unit-card.unit-destroyed-style .card-header {
+  background-color: rgba(
+    var(--bs-danger-rgb),
+    0.5
+  ) !important; /* More subtle than solid bg */
+  color: var(--bs-danger-text-emphasis);
+}
+.unit-card.unit-routed-style .card-header {
+  background-color: rgba(var(--bs-secondary-rgb), 0.5) !important;
+  color: var(--bs-secondary-color);
+}
+
+/* Status Text Overlay */
+.status-text-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  font-size: 2rem; /* Make text large */
+  font-weight: bold;
+  color: rgba(var(--bs-body-color-rgb), 0.6); /* Semi-transparent text */
+  background-color: rgba(
+    var(--bs-body-bg-rgb),
+    0.5
+  ); /* Semi-transparent background */
+  z-index: 5; /* Ensure it's above most body content */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  border-radius: var(--bs-card-inner-border-radius); /* Match body radius */
+  text-transform: uppercase;
+  /* Hide the overlay by default, shown when class added */
+  /* display: none; */ /* Handled by adding/removing the element in JS */
 }
-
-.unit-card.unit-destroyed .unit-card-header-content,
-.unit-card.unit-routed .unit-card-header-content,
-.unit-card.unit-destroyed .header-button-group,
-.unit-card.unit-routed .header-button-group {
-}
-
-.status-overlay-text {
-  text-shadow: 1px 1px 2px black;
-  pointer-events: none;
-}
-/* Specific styles for destroyed */
-.unit-card.unit-routed .card-body,
-.unit-card.unit-destroyed .card-body {
-}
-.unit-card.unit-routed,
-.unit-card.unit-destroyed {
-  opacity: 0.5;
-  filter: grayscale(80%);
-  pointer-events: none;
-}
-
-.unit-card.unit-routed .card-header {
-  /* Keep header visible but styled */
-  background-color: var(
-    --bs-secondary-bg
-  ); /* Example: Use secondary background */
-  color: var(--bs-secondary-color);
-}
-.unit-card.unit-routed .status-overlay-text {
-  color: var(--bs-light); /* Ensure text is visible on darker header */
-  background-color: var(--bs-dark);
-  padding: 1.5rem;
-  border-radius: var(--bs-border-radius-lg);
-  text-align: center;
-  position: absolute;
-  width: 100%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-10%, -50%);
-}
+/* .unit-card.unit-is-inactive .status-text-overlay {
+    display: flex;
+} */
 
 /* Ensure recover button fits */
 .action-controls .recover-btn {
@@ -440,6 +445,11 @@ body {
 .manual-triggers {
   text-align: center; /* Center buttons */
   margin-bottom: 0.5rem; /* Space below buttons */
+}
+.manual-triggers .btn {
+  /* Optional: Adjust button width if needed */
+  /* width: 48%; */ /* Example: make two buttons fit side-by-side */
+  /* max-width: 180px; */ /* Example: prevent buttons from getting too wide */
 }
 
 /* Screen Diagnostics */
