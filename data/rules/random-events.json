@@ -1,0 +1,220 @@
+{
+  "events": [
+    {
+      "id": "11",
+      "title": "P.O.W",
+      "description": "A unit was captured by a local militia and is now being held as prisoners of war.",
+      "effect": "Select one random unit, and remove it from play. At the end of the mission it may be bought back for D3 * 50pts or else it's disbanded."
+    },
+    {
+      "id": "12",
+      "title": "Bring me their Heads",
+      "description": "A local warlord wants one of the armies dead, and is willing to pay for it.",
+      "effect": "Select one random army. Enemy armies get 25pts at the end of the mission for every unit from it that they destroyed."
+    },
+    {
+      "id": "13",
+      "title": "Fragile Guns",
+      "description": "After walking through a psychic field some weapons suddenly start breaking.",
+      "effect": "Select D3 random units, which can't use one random ranged weapon or upgrade until the end of the mission."
+    },
+    {
+      "id": "14",
+      "title": "Monstrous Spawn",
+      "description": "A unit accidentally walks into a beast's nest and is brutally mauled.",
+      "effect": "Select one random unit, which takes D3+3 automatic hits with AP(1)."
+    },
+    {
+      "id": "15",
+      "title": "Low Supplies",
+      "description": "The army's supply routes have been cut, leaving some units without ammo.",
+      "effect": "Select D3 random units, which can't shoot until the end of the mission."
+    },
+    {
+      "id": "16",
+      "title": "Combat Fatigued",
+      "description": "One of the armies has been fighting for too long and has become exhausted.",
+      "effect": "All units from one random army get -1 to morale until the end of the game."
+    },
+    {
+      "id": "21",
+      "title": "Carnivorous Fauna",
+      "description": "The local terrain is infested with vicious creatures, always ready to attack.",
+      "effect": "Until the end of the mission whenever a unit enters terrain roll a D6, on a 1 it takes a dangerous terrain test."
+    },
+    {
+      "id": "22",
+      "title": "Toxic Fumes",
+      "description": "Strange fumes start building in the area, choking anyone caught in them.",
+      "effect": "Select one random table quarter. All of the units within that table quarter take D3+4 automatic hits."
+    },
+    {
+      "id": "23",
+      "title": "Rigged to Blow",
+      "description": "Sometimes you might just walk into a ridiculous amount of explosives...",
+      "effect": "Select one random player, who may note down one piece of terrain in secret. The first unit to enter that terrain takes D3+3 automatic hits with AP(2)."
+    },
+    {
+      "id": "24",
+      "title": "Earthquake",
+      "description": "A sudden earthquake makes everything crumble, burying units in the rubble.",
+      "effect": "All units within terrain must take a dangerous terrain test."
+    },
+    {
+      "id": "25",
+      "title": "Dark Clouds",
+      "description": "Psychic clouds cover the area, reducing visibility to a minimum.",
+      "effect": "Select one random table quarter. All of the units within that table quarter get -6\" range when shooting."
+    },
+    {
+      "id": "26",
+      "title": "Finish Them!",
+      "description": "The armies are eager to finish the fight at all cost, even if it means killing the enemy with their bare hands.",
+      "effect": "All units get +1 attack in melee and earn +D3 XP when destroying enemies in melee until the end of the round."
+    },
+    {
+      "id": "31",
+      "title": "Psychic Anomaly",
+      "description": "A psychic anomaly has formed, casting electric bolts at anyone nearby.",
+      "effect": "Place an anomaly marker in the center of one random table quarter. All units that move within 3\" of it take D3+3 hits."
+    },
+    {
+      "id": "32",
+      "title": "The Walking Dead",
+      "description": "The battlefield is covered in corpses ready to rise again from the grave.",
+      "effect": "Place a unit of D6+4 Zombies (Qua 5+, Def 5+, Claws (A3), Slow) in the center of one random table quarter. At the end of each round the zombies must charge or rush the nearest unit."
+    },
+    {
+      "id": "33",
+      "title": "Crazed Sniper",
+      "description": "A local farmer is sick of the fighting and has taken justice in his own hands.",
+      "effect": "Place a sniper on the highest piece of terrain with most line of sight on the table. Select one random unit, and at the end of each round if it is in line of sight of the sniper it takes D3 hits."
+    },
+    {
+      "id": "34",
+      "title": "Old Friend",
+      "description": "Out of pure chance an army runs into an old friend that is ready to lend a hand.",
+      "effect": "Place a Mercenary (Qua 3+, Def 3+, Carbine (18\", A3)) as part of a random unit and that player may control it until the end of the mission."
+    },
+    {
+      "id": "35",
+      "title": "Escort Mission",
+      "description": "A unit was hired by a local warlord to take them through enemy lines.",
+      "effect": "Select one random unit. If it manages to exit the table through an opponent's deployment zone it gets D3 * 25pts."
+    },
+    {
+      "id": "36",
+      "title": "Enemy Intel",
+      "description": "A data core filled with enemy intel has been found, which could change the tide of this conflict.",
+      "effect": "Place an intel marker at the center of a random table quarter. Units can pick it up by moving into contact with it, and they drop it if they are destroyed or shaken. If a unit with it manages to exit the table through an opponent's table edge its army gets 1 VP."
+    },
+    {
+      "id": "41",
+      "title": "Surprise Attack",
+      "description": "A local militia has ambushed one of the units, trying to steal its gear.",
+      "effect": "Select one random unit that is inside a piece of terrain. That unit is shaken."
+    },
+    {
+      "id": "42",
+      "title": "Grave Miscalculation",
+      "description": "A stray shot accidentally hits a cache of ammo, causing a massive explosion.",
+      "effect": "The first time during this round when a unit rolls a 1 to hit for shooting it takes D3+3 automatic hits with AP(2)."
+    },
+    {
+      "id": "43",
+      "title": "Berserker",
+      "description": "One of the warriors is enraged and cuts the enemy's heads off clean.",
+      "effect": "The first time during this round when a unit rolls a 6 to hit in melee the target takes D3 automatic wounds."
+    },
+    {
+      "id": "44",
+      "title": "No Mercy",
+      "description": "Some warriors are ready to cut down their foes even when they surrender.",
+      "effect": "The first time during this round when a unit destroys an enemy unit that was shaken it receives +1 XP."
+    },
+    {
+      "id": "45",
+      "title": "Weak Spot",
+      "description": "If you hit your enemy where it hurts most you can kill even mighty giants with the smallest projectile.",
+      "effect": "The first time during this round when a unit with tough rolls a 1 to block from shooting or melee it takes +D3 wounds."
+    },
+    {
+      "id": "46",
+      "title": "Countdown",
+      "description": "High command has promised a large bonus if the battle can be ended quickly.",
+      "effect": "If an army manages to win the mission by the end of the round it gets a bonus of 5 XP, which must be split as evenly as possible amongst units."
+    },
+    {
+      "id": "51",
+      "title": "Hearts & Minds",
+      "description": "The locals are friendly to our cause, and are ready to take in our wounded.",
+      "effect": "Select one random army which may pay 50pts to re-roll results of 1 once per unit when checking for casualties."
+    },
+    {
+      "id": "52",
+      "title": "Moral Victory",
+      "description": "An enemy unit has managed to inflict enough casualties to become a priority target for everyone in the army.",
+      "effect": "Select one random player, who may note down one enemy unit in secret. If that unit is destroyed then all units in the army get +1 XP."
+    },
+    {
+      "id": "53",
+      "title": "Flash Grenades",
+      "description": "Nothing confuses the enemy more than a blinding light followed by a punch.",
+      "effect": "Select one random army. Enemy units get -1 in melee when attacking units from the selected army until the end of the round."
+    },
+    {
+      "id": "54",
+      "title": "Suppressing Fire",
+      "description": "Continuous fire is bound to take out even the most resilient of enemies.",
+      "effect": "Select one random unit, which doubles its shooting attacks during this round."
+    },
+    {
+      "id": "55",
+      "title": "War Shout",
+      "description": "In desperate times a shout of war can bring warriors back in fighting spirit.",
+      "effect": "Select one random unit that is shaken, which immediately stops being shaken."
+    },
+    {
+      "id": "56",
+      "title": "Covered in Blood",
+      "description": "A unit is covered in blood from all the fighting, terrifying all enemies around.",
+      "effect": "Select one random unit. Enemy units within 6\" of it get -1 to morale until the end of the mission."
+    },
+    {
+      "id": "61",
+      "title": "Ancient Relic",
+      "description": "In the midst of fighting a unit found an ancient relic, which provides the unit with unprecedented wisdom.",
+      "effect": "Select one random unit, which immediately gets D3 * 1 XP."
+    },
+    {
+      "id": "62",
+      "title": "Abandoned Outpost",
+      "description": "Intel from our scouts has revealed an abandoned outpost filled with gear, and one of the units decided to inspect it.",
+      "effect": "Select one random army, which may remove one unit that is not shaken from play and get D3 * 50pts."
+    },
+    {
+      "id": "63",
+      "title": "Alien Cannon",
+      "description": "A unit dug up a mysterious crate whilst setting up defensive positions, revealing a very powerful weapon.",
+      "effect": "Select one random unit, which gets the Alien Cannon (24\", A3, AP(D3))."
+    },
+    {
+      "id": "64",
+      "title": "Extortion",
+      "description": "One of the armies has been getting a lot of gifts from the \"happy\" locals...",
+      "effect": "Select one random army, which immediately gets D3 * 25pts."
+    },
+    {
+      "id": "65",
+      "title": "Critical Transmission",
+      "description": "A unit randomly caught enemy radio chatter that revealed mission critical information on enemy positions.",
+      "effect": "Select one random army, which immediately gets 1 VP."
+    },
+    {
+      "id": "66",
+      "title": "Time Warp",
+      "description": "A unit that was fleeing the battlefield ran into a psychic anomaly and warped to a different time and dimension.",
+      "effect": "Select one random unit that was destroyed and place it in a warp zone. The warp zone should have an area of 2'x2' and 3-5 pieces of terrain, and the unit must be placed within 3\" of one of the zone's edges. Then place a Time Beast (Qua 3+, Def 3+, Claws (A6, AP(2)), Tough(6)) within 3\" of the opposing edge of the warp zone, which is controlled by an opponent. Roll to see who goes first and then play out the fight like a regular battle, until one of the two has been destroyed. If the Time Beast wins then the unit is dead and removed from the army sheet. If the unit wins then it gets +3 XP and scavenges 150pts. The unit may then join its army again at the end of the mission."
+    }
+  ]
+}

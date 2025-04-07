@@ -1,0 +1,217 @@
+{
+  "doctrines": [
+    {
+      "id": "universal",
+      "name": "Universal Doctrine",
+      "icon": "bi-infinity",
+      "type": "universal",
+      "color": "secondary",
+      "stratagems": [
+        {
+          "name": "High Command",
+          "cost": 1,
+          "description": "Add +1 to the result of any single die."
+        },
+        {
+          "name": "Supreme Command",
+          "cost": 2,
+          "description": "Add +1 to the result of all dice in a single roll."
+        },
+        {
+          "name": "Seize Initiative",
+          "cost": 2,
+          "description": "When it's the enemy turn to activate a unit, you may activate one of your units instead. The opposing player may spend 2 CP in order to stop this ability from having any effect."
+        },
+        {
+          "name": "Waive Initiative",
+          "cost": 2,
+          "description": "When it's your turn to activate a unit, you force the opponent to activate one of their units instead. The opposing player may spend 2 CP in order to stop this ability from having any effect."
+        },
+        {
+          "name": "Delayed Deployment",
+          "cost": 2,
+          "description": "During the deployment phase, when it's your turn to place a unit, you may pass the turn to your opponent. The opposing player may spend 2 CP in order to stop this ability from having any effect."
+        },
+        {
+          "name": "Hidden Deployment",
+          "cost": 3,
+          "description": "After all units have deployed, you may remove up to 3 friendly units and place them again in any order. The opposing player may spend 3 CP to do the same, in which case players alternate in placing those units again."
+        }
+      ]
+    },
+    {
+      "id": "strategic",
+      "name": "Strategic Doctrine",
+      "icon": "bi-geo-alt-fill",
+      "type": "tactical",
+      "color": "primary",
+      "stratagems": [
+        {
+          "name": "Push Forward",
+          "cost": 1,
+          "description": "Pick one friendly unit that is using an Advance or Rush action, and it may add +2\" to its movement."
+        },
+        {
+          "name": "Hindered Advance",
+          "cost": 1,
+          "description": "Pick one enemy unit that is moving through terrain, which counts as Dangerous terrain for that movement."
+        },
+        {
+          "name": "Coordinated Move",
+          "cost": 2,
+          "description": "Pick two friendly units that are within 12\" of each other, which may each move by up to 3\" in any direction."
+        },
+        {
+          "name": "Strategic Relocation",
+          "cost": 3,
+          "description": "Pick one friendly unit that has just been activated, but that hasn't done anything yet, which may be placed anywhere within 6\" of its position."
+        }
+      ]
+    },
+    {
+      "id": "defensive",
+      "name": "Defensive Doctrine",
+      "icon": "bi-shield-fill",
+      "type": "defensive",
+      "color": "success",
+      "stratagems": [
+        {
+          "name": "Eternal Vigilance",
+          "cost": 1,
+          "description": "Pick one friendly model that just suffered a wound which would kill it and roll D6, on a 4+ that wound is ignored."
+        },
+        {
+          "name": "Lightning Reflexes",
+          "cost": 1,
+          "description": "Pick one friendly unit that is being shot at, which counts as being in Cover terrain for that shooting."
+        },
+        {
+          "name": "Armour Breaker",
+          "cost": 2,
+          "description": "Pick one enemy unit that has just taken hits, which gets -1 to its Defense rolls against those hits."
+        },
+        {
+          "name": "Tactical Retreat",
+          "cost": 3,
+          "description": "Pick one friendly unit that is within 12\" of an enemy, and it may move up to D6+2 inches directly away from the closest enemy."
+        }
+      ]
+    },
+    {
+      "id": "shock",
+      "name": "Shock Doctrine",
+      "icon": "bi-lightning-fill",
+      "type": "offensive",
+      "color": "danger",
+      "stratagems": [
+        {
+          "name": "Sweeping Move",
+          "cost": 1,
+          "description": "Pick one friendly unit that is using a Charge action, and it may add +4\" to its movement."
+        },
+        {
+          "name": "Hit & Run",
+          "cost": 1,
+          "description": "Pick one friendly unit that has just finished fighting in melee, which may move by up to 3\" in any direction."
+        },
+        {
+          "name": "Combat Fatigue",
+          "cost": 2,
+          "description": "Pick one enemy unit that is about to strike in melee and roll one D6, on a 4+ that unit counts as fatigued for that melee, but doesn't get fatigued from that melee."
+        },
+        {
+          "name": "Killing Blow",
+          "cost": 3,
+          "description": "Pick one friendly unit that is fighting in melee. Any friendly model that is killed during this melee may strike one more time with all of its weapons before it is removed."
+        }
+      ]
+    },
+    {
+      "id": "hunting",
+      "name": "Hunting Doctrine",
+      "icon": "bi-crosshair",
+      "type": "offensive",
+      "color": "danger",
+      "stratagems": [
+        {
+          "name": "Heightened Senses",
+          "cost": 1,
+          "description": "Pick one friendly unit that is shooting at an enemy in Cover terrain, which may ignore Cover for that shooting."
+        },
+        {
+          "name": "Disrupted Sight",
+          "cost": 1,
+          "description": "Pick one enemy unit that is shooting, which gets -3\" range for that shooting."
+        },
+        {
+          "name": "Frenzied Attack",
+          "cost": 2,
+          "description": "Pick one friendly unit that shot at an enemy unit, which may shoot at another enemy unit within 12\" of it, but only hits on unmodified rolls of 6."
+        },
+        {
+          "name": "Closing Fire",
+          "cost": 3,
+          "description": "Pick one friendly unit that is being charged by an enemy unit, which may shoot at the charging unit at any point during its movement, but gets -1 to hit rolls."
+        }
+      ]
+    },
+    {
+      "id": "valorous",
+      "name": "Valorous Doctrine",
+      "icon": "bi-flag-fill",
+      "type": "defensive",
+      "color": "success",
+      "stratagems": [
+        {
+          "name": "Minimize Losses",
+          "cost": 1,
+          "description": "Pick one friendly unit that just became Shaken, which may move up to 2D6+4 inches directly away from the closest enemy."
+        },
+        {
+          "name": "Stand Strong",
+          "cost": 1,
+          "description": "Pick one friendly unit that just failed a morale test, which may re-roll that morale test roll."
+        },
+        {
+          "name": "Terrorize",
+          "cost": 2,
+          "description": "Pick one enemy unit that just passed a morale test, which must re-roll that morale test roll."
+        },
+        {
+          "name": "Code of Honor",
+          "cost": 3,
+          "description": "Pick one friendly unit that would be Shaken or Routed. If it would be Shaken, it is not. If it would be Routed, then it is Shaken instead."
+        }
+      ]
+    },
+    {
+      "id": "tactical",
+      "name": "Tactical Doctrine",
+      "icon": "bi-briefcase-fill",
+      "type": "tactical",
+      "color": "primary",
+      "stratagems": [
+        {
+          "name": "Rush Objective",
+          "cost": 1,
+          "description": "Pick one friendly unit that is using a Rush action, and it may add +4\" to its movement if it ends up within 3\" of an objective."
+        },
+        {
+          "name": "Supreme Caster",
+          "cost": 1,
+          "description": "One friendly Caster gets 1 spell token, which may not be spent to give casters +1/-1 to their casting rolls."
+        },
+        {
+          "name": "Vanish",
+          "cost": 2,
+          "description": "At the end of the round, pick one friendly unit with Ambush and remove it from play (dropping any objectives), and which may be deployed again starting from the next round."
+        },
+        {
+          "name": "Total Shutdown",
+          "cost": 3,
+          "description": "At the end of the round, pick one objective marker under your control that is about to be seized by your opponent, which becomes neutral instead."
+        }
+      ]
+    }
+  ]
+}

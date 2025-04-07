@@ -1,0 +1,9 @@
+{
+  "rules": [
+    {
+      "id": "dangerous-terrain",
+      "name": "Dangerous Terrain",
+      "description": "Models moving across dangerous terrain, or that activate in it, must roll one die (or as many as their tough value), and for each roll of 1 the unit takes a wound."
+    }
+  ]
+}
