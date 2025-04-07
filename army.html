@@ -15,13 +15,14 @@
     <script type="module" src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
     <style>
+      /* Original styles for Army Info Image */
       #armyInfoImage {
         max-height: 300px;
         object-fit: cover;
         width: 100%;
         background-color: var(--bs-secondary-bg);
       }
-      /* Style for spell list items */
+      /* Original styles for spell list items */
       #spellListContainer .list-group-item {
         background-color: var(--bs-body-bg);
       }
@@ -40,7 +41,21 @@
       #spellListContainer .spell-info-icon {
         cursor: help;
         margin-left: 0.5rem;
-      } /* If using tooltips later */
+      }
+
+      /* Style for screen diagnostics */
+      #screenDiagnostics {
+        font-size: 0.75rem;
+        color: var(--bs-secondary-color);
+        display: flex; /* Use flexbox */
+        justify-content: center; /* Center items */
+        gap: 1rem; /* Space between items */
+        flex-wrap: wrap; /* Allow wrapping on small screens */
+      }
+      /* Ensure toasts stack correctly */
+      .toast-container {
+        z-index: 1100; /* Ensure toasts appear above modals if necessary */
+      }
     </style>
   </head>
   <body class="bg-body text-body">
@@ -156,10 +171,21 @@
     </main>
 
     <footer class="container mt-5 py-3 border-top">
-      <p class="text-center text-muted">&copy; 2025 OPR Army Tracker</p>
+      <p class="text-center text-muted mb-1">&copy; 2025 OPR Army Tracker</p>
+      <div id="screenDiagnostics" class="text-center">
+        <span id="screenWidthDisplay">Width: ...</span>
+        <span id="screenHeightDisplay">Height: ...</span>
+        <span id="screenThemeDisplay">Theme: ...</span>
+      </div>
     </footer>
 
-    <div class="modal fade" id="armyInfoModal" tabindex="-1">
+    <div
+      class="modal fade"
+      id="armyInfoModal"
+      tabindex="-1"
+      aria-labelledby="armyInfoModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
@@ -180,6 +206,7 @@
               class="img-fluid rounded mb-3"
               alt="Army Image"
               onerror="this.style.display='none'"
+              style="display: none"
             />
             <h6 id="armyInfoTagline" class="text-muted fst-italic mb-3"></h6>
             <p id="armyInfoSummary" class="lead"></p>
@@ -243,21 +270,32 @@
       </div>
     </div>
 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <template id="toastTemplate">
+        <div
+          class="toast"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <div class="toast-header">
+            <strong class="me-auto toast-title">Notification</strong>
+            <small class="text-muted toast-timestamp">Just now</small>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="toast-body" style="white-space: pre-wrap">
+            Toast message goes here.
+          </div>
+        </div>
+      </template>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="js/app.js"></script>
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div id="themeToast" class="toast">
-        <div class="toast-header">
-          <strong class="me-auto">Theme Change</strong> <small>Just now</small>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="toast-body"></div>
-      </div>
-    </div>
   </body>
 </html>
