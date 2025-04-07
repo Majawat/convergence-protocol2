@@ -5,10 +5,16 @@
 
 // Import constants if needed (e.g., from config)
 import { config, UI_ICONS } from "./config.js";
-import { getCurrentArmyId } from "./state.js"; // Import needed to get armyId
+// <-- ADDED Imports for Doctrine functions -->
+import {
+  getCurrentArmyId,
+  getDoctrinesData,
+  getSelectedDoctrine,
+  setSelectedDoctrine, // Import the setter
+} from "./state.js";
 
-// Variable to store the element that triggered the spell modal
-let spellModalTriggerElement = null;
+// Variable to store the element that triggered the modal
+let modalTriggerElement = null; // Renamed for clarity
 
 /**
  * Displays a list of armies from the campaign data for selection when no armyId is provided.
@@ -196,11 +202,11 @@ export function populateAndShowSpellModal(
   // --- Focus Management Setup ---
   // Store the element that triggered the modal
   if (document.activeElement && document.activeElement !== document.body) {
-    spellModalTriggerElement = document.activeElement;
+    modalTriggerElement = document.activeElement;
   }
   // Add listener to return focus when modal is hidden
-  modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden); // Remove previous listener if any
-  modalElement.addEventListener("hidden.bs.modal", handleSpellModalHidden, {
+  modalElement.removeEventListener("hidden.bs.modal", handleModalHidden); // Use generic handler
+  modalElement.addEventListener("hidden.bs.modal", handleModalHidden, {
     once: true,
   });
   // --- End Focus Management ---
@@ -272,36 +278,31 @@ export function populateAndShowSpellModal(
       modalInstance.show();
     } catch (error) {
       console.error("Error showing spell modal:", error);
-      modalElement.removeEventListener(
-        "hidden.bs.modal",
-        handleSpellModalHidden
-      ); // Clean up listener if show fails
+      modalElement.removeEventListener("hidden.bs.modal", handleModalHidden); // Clean up listener if show fails
     }
   } else {
     console.warn("Bootstrap Modal component not found.");
-    modalElement.removeEventListener("hidden.bs.modal", handleSpellModalHidden); // Clean up listener if BS missing
+    modalElement.removeEventListener("hidden.bs.modal", handleModalHidden); // Clean up listener if BS missing
   }
 }
 
 // --- Focus Management Functions ---
 
 /** Returns focus to the element that triggered the modal */
-function handleSpellModalHidden() {
-  if (
-    spellModalTriggerElement &&
-    typeof spellModalTriggerElement.focus === "function"
-  ) {
+export function handleModalHidden() {
+  // Made generic
+  if (modalTriggerElement && typeof modalTriggerElement.focus === "function") {
     requestAnimationFrame(() => {
       // Use rAF for smoother focus transition
       try {
-        spellModalTriggerElement.focus();
+        modalTriggerElement.focus();
       } catch (e) {
         console.warn("Could not focus stored trigger element:", e);
       }
-      spellModalTriggerElement = null; // Clear stored element
+      modalTriggerElement = null; // Clear stored element
     });
   } else {
-    spellModalTriggerElement = null; // Clear if no valid element
+    modalTriggerElement = null; // Clear if no valid element
   }
 }
 
@@ -427,4 +428,45 @@ export function updateCommandPointsDisplay(armyId, currentPoints, maxPoints) {
   const addCpButton = document.getElementById("manual-cp-add");
   if (removeCpButton) removeCpButton.disabled = currentPoints <= 0;
   if (addCpButton) addCpButton.disabled = currentPoints >= maxPoints;
+}
+
+// <-- ADDED: Function to populate the Doctrine Selector -->
+/**
+ * Populates the doctrine selector dropdown in the Stratagem modal.
+ * @param {string} armyId - The ID of the currently loaded army.
+ */
+export function populateDoctrineSelector(armyId) {
+  const selector = document.getElementById("doctrineSelector");
+  const doctrines = getDoctrinesData()?.doctrines; // Use state getter
+  const currentlySelected = getSelectedDoctrine(armyId); // Use state getter
+
+  if (!selector || !doctrines) {
+    console.error("Doctrine selector or doctrines data not found.");
+    if (selector)
+      selector.innerHTML = '<option value="">Error loading doctrines</option>';
+    return;
+  }
+
+  // Clear existing options (except the default placeholder)
+  selector.innerHTML =
+    '<option selected value="">-- Select Doctrine --</option>';
+
+  // Add options for each doctrine (excluding 'universal')
+  doctrines.forEach((doctrine) => {
+    if (doctrine.id !== "universal") {
+      // Skip universal doctrine
+      const option = document.createElement("option");
+      option.value = doctrine.id;
+      option.textContent = doctrine.name || doctrine.id; // Use name, fallback to id
+      // Pre-select the option if it matches the stored state
+      if (doctrine.id === currentlySelected) {
+        option.selected = true;
+      }
+      selector.appendChild(option);
+    }
+  });
+
+  console.log(
+    `Doctrine selector populated. Current selection: ${currentlySelected}`
+  );
 }

@@ -448,3 +448,76 @@ body {
   gap: 1rem; /* Space between items */
   flex-wrap: wrap; /* Allow wrapping on small screens */
 }
+
+/* Army Info Modal Image */
+#armyInfoImage {
+  max-height: 300px;
+  object-fit: cover;
+  width: 100%;
+  background-color: var(--bs-secondary-bg);
+}
+
+/* Spell List Modal */
+#spellListContainer .list-group-item {
+  background-color: var(--bs-body-bg);
+}
+#spellListContainer .spell-cost {
+  font-weight: bold;
+  color: var(--bs-info);
+  margin-left: 0.5rem;
+  font-size: 0.9em;
+}
+#spellListContainer .spell-effect {
+  font-size: 0.9em;
+  color: var(--bs-secondary-color);
+  display: block;
+  margin-top: 0.25rem;
+}
+#spellListContainer .spell-info-icon {
+  cursor: help;
+  margin-left: 0.5rem;
+}
+
+/* Toast Container */
+.toast-container {
+  z-index: 1100; /* Ensure toasts appear above modals if necessary */
+}
+
+/* Command Points Display */
+#command-points-display {
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.2em 0.5em;
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+}
+#command-points-value {
+  font-weight: bold;
+}
+/* Style for the CP icon placeholder */
+.cp-icon-placeholder .bi {
+  color: var(--bs-warning); /* Default color */
+  transition: color 0.3s ease; /* Smooth color transition */
+}
+.cp-icon-placeholder.text-secondary .bi {
+  color: var(--bs-secondary); /* Color when points are zero */
+}
+
+/* Stratagem Modal Specifics */
+#modal-cp-adjust-group .btn {
+  /* Style the manual adjust buttons */
+  padding: 0.1rem 0.4rem;
+  line-height: 1;
+}
+/* Style for the modal CP icon placeholder */
+#modal-command-points-display .cp-icon-placeholder .bi {
+  color: var(--bs-warning); /* Default color */
+  transition: color 0.3s ease;
+}
+#modal-command-points-display .cp-icon-placeholder.text-secondary .bi {
+  color: var(--bs-secondary); /* Color when points are zero */
+}

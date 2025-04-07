@@ -14,10 +14,16 @@ import {
   getCurrentArmyHeroTargets,
   getCurrentArmyId,
   getCurrentRound,
+  getCommandPoints, // <-- ADDED
+  getMaxCommandPoints, // <-- ADDED
+  getSelectedDoctrine, // <-- ADDED
+  getDoctrinesData, // <-- ADDED
   // State Updaters
   updateModelStateValue,
   updateUnitStateValue,
   incrementCurrentRound,
+  setCommandPoints, // <-- ADDED
+  setSelectedDoctrine, // <-- ADDED
 } from "./state.js";
 import { loadArmyState, saveArmyState } from "./storage.js";
 import { findTargetModelForWound, checkHalfStrength } from "./gameLogic.js";
@@ -36,7 +42,13 @@ import {
   showToast,
   populateAndShowSpellModal,
   updateRoundUI,
+  updateCommandPointsDisplay,
+  populateDoctrineSelector,
+  handleModalHidden,
 } from "./uiHelpers.js";
+
+// Variable to store the element that triggered the modal
+let modalTriggerElement = null;
 
 // --- Placeholder for a more robust interactive toast/modal system ---
 /**
@@ -528,14 +540,6 @@ function _handleCastSpellClick(buttonElement) {
   }
 }
 
-/**
- * Handles clicks on the action buttons ("Hold", "Advance", etc.) and "Recover".
- * Charge action applies fatigue and triggers melee resolution prompts for the charger.
- * @param {HTMLElement} targetElement - The clicked button element.
- * @param {string} armyId - The current army ID.
- * @param {string} cardUnitId - The selectionId of the card.
- * @private
- */
 async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
   const actionType = targetElement.dataset.action;
   if (!actionType) return;
@@ -666,14 +670,6 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
   }
 }
 
-/**
- * Handles clicks on the "Resolve Melee Outcome" button (for the unit involved, likely defender).
- * Prompts user if THIS unit struck back (for fatigue), then win/loss/tie, then morale result if lost. Applies Shaken/Routed.
- * @param {HTMLElement} targetElement - The clicked button element.
- * @param {string} armyId - The current army ID.
- * @param {string} cardUnitId - The selectionId of the card (this is the unit involved in the melee).
- * @private
- */
 async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   console.log(`Resolving melee outcome for ${cardUnitId}`);
   const unitData = getUnitData(cardUnitId);
@@ -809,6 +805,7 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
 function handleInteractionClick(event) {
   const unitCard = event.target.closest(".unit-card");
   const spellModal = event.target.closest("#viewSpellsModal");
+  const stratagemModal = event.target.closest("#stratagemModal"); // <-- ADDED
 
   if (unitCard) {
     const cardUnitId = unitCard.dataset.unitId;
@@ -851,6 +848,11 @@ function handleInteractionClick(event) {
     const castButton = event.target.closest(".cast-spell-btn");
     if (castButton) _handleCastSpellClick(castButton);
   }
+  // <-- ADDED: Handle clicks within Stratagem Modal -->
+  else if (stratagemModal) {
+    // Add handlers for stratagem activation, manual CP adjust etc. later
+    console.log("Click inside Stratagem Modal");
+  }
 }
 
 /**
@@ -886,22 +888,75 @@ export function setupEventListeners(armyId) {
     console.warn("Start Round button not found.");
   }
 
+  // --- ADDED: Stratagem Modal Listener ---
+  const stratagemModalElement = document.getElementById("stratagemModal");
+  if (stratagemModalElement) {
+    stratagemModalElement.addEventListener("show.bs.modal", (event) => {
+      // Store the trigger element for focus return
+      if (event.relatedTarget) {
+        modalTriggerElement = event.relatedTarget;
+      } else {
+        modalTriggerElement = document.activeElement;
+      }
+      // Populate selector when modal opens
+      populateDoctrineSelector(armyId);
+      // Update CP display in modal header
+      updateCommandPointsDisplay(
+        armyId,
+        getCommandPoints(armyId),
+        getMaxCommandPoints(armyId)
+      );
+      // TODO: Display stratagems based on current selection
+      console.log("Stratagem modal opened, populating selector.");
+    });
+    // Add listener to return focus when modal is hidden
+    stratagemModalElement.removeEventListener(
+      "hidden.bs.modal",
+      handleModalHidden
+    ); // Use generic handler
+    stratagemModalElement.addEventListener(
+      "hidden.bs.modal",
+      handleModalHidden,
+      { once: true }
+    );
+
+    // Add listener for doctrine selection change
+    const doctrineSelector = document.getElementById("doctrineSelector");
+    if (doctrineSelector) {
+      doctrineSelector.addEventListener("change", (event) => {
+        const selectedDoctrineId = event.target.value;
+        setSelectedDoctrine(armyId, selectedDoctrineId || null); // Save selection (null if default selected)
+        console.log(`Doctrine selected: ${selectedDoctrineId}`);
+        // TODO: Trigger display of stratagems for the selected doctrine
+        // displayStratagems(armyId, selectedDoctrineId); // Example function call
+        const displayArea = document.getElementById("stratagemDisplayArea");
+        if (displayArea) {
+          if (selectedDoctrineId) {
+            displayArea.innerHTML = `<p>Displaying Stratagems for: ${selectedDoctrineId} (Not implemented yet)</p>`;
+          } else {
+            displayArea.innerHTML =
+              '<p class="text-muted">Select a doctrine to view its Stratagems.</p>';
+          }
+        }
+      });
+      console.log("Doctrine selector change listener attached.");
+    } else {
+      console.warn("Doctrine selector element not found.");
+    }
+  } else {
+    console.warn("Stratagem modal element not found.");
+  }
+  // --- END ADDED ---
+
   const initialRound = getCurrentRound();
   const roundDisplayElement = document.getElementById("round-display");
-  if (roundDisplayElement)
-    roundDisplayElement.textContent = `Round ${initialRound}`;
-  else {
-    const titleH1 = document.getElementById("army-title-h1");
-    if (titleH1) {
-      let displaySpan = document.getElementById("round-display");
-      if (!displaySpan) {
-        displaySpan = document.createElement("h3");
-        displaySpan.id = "round-display";
-        displaySpan.className = "ms-3 align-middle";
-        titleH1.parentNode.insertBefore(displaySpan, titleH1.nextSibling);
-      }
-      displaySpan.textContent = ``;
-    }
+  // Ensure round display element exists before setting text content
+  if (roundDisplayElement) {
+    roundDisplayElement.textContent =
+      initialRound >= 1 ? `Round ${initialRound}` : "";
+  } else {
+    // Attempt to create it if missing (logic moved to updateRoundUI)
+    updateRoundUI(initialRound);
   }
 
   // --- Screen Diagnostics ---
