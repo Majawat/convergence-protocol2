@@ -131,10 +131,16 @@ export function showToast(message, title = "Update", delay = 5000) {
   const toastTitleElement = newToastElement.querySelector(".toast-title");
   const toastBodyElement = newToastElement.querySelector(".toast-body");
   // Optional: Update timestamp if needed, otherwise 'Just now' is fine
-  // const toastTimestampElement = newToastElement.querySelector('.toast-timestamp');
+  const toastTimestampElement =
+    newToastElement.querySelector(".toast-timestamp");
 
   if (toastTitleElement) toastTitleElement.textContent = title;
   if (toastBodyElement) toastBodyElement.textContent = message;
+
+  if (toastTimestampElement) {
+    const now = new Date();
+    toastTimestampElement.textContent = now.toLocaleTimeString();
+  }
 
   // Append to container
   toastContainer.appendChild(newToastElement);
@@ -299,5 +305,54 @@ function handleSpellModalHidden() {
     });
   } else {
     spellModalTriggerElement = null;
+  }
+}
+
+/**
+ * Updates the round display and start/next round button text.
+ * Creates the round display element if it doesn't exist.
+ * @param {number} roundNumber - The current round number (0 for pre-game).
+ */
+export function updateRoundUI(roundNumber) {
+  const startRoundButton = document.getElementById("start-round-button");
+  let roundDisplayElement = document.getElementById("round-display"); // Try to find existing
+
+  // Create round display element if it doesn't exist
+  if (!roundDisplayElement) {
+    const titleH1 = document.getElementById("army-title-h1");
+    if (titleH1 && titleH1.parentNode) {
+      // Check parentNode exists
+      roundDisplayElement = document.createElement("h3"); // Use h3 as in user code
+      roundDisplayElement.id = "round-display";
+      roundDisplayElement.className = "ms-3 align-middle"; // Use classes from user code
+      // Insert after H1 - ensure titleH1.nextSibling is correct reference point
+      titleH1.parentNode.insertBefore(roundDisplayElement, titleH1.nextSibling);
+      console.log("Created #round-display element.");
+    } else {
+      console.error(
+        "Cannot create round display: #army-title-h1 or its parent not found."
+      );
+      return; // Exit if we can't create it
+    }
+  }
+
+  // Update Round Display Text
+  if (roundNumber >= 1) {
+    roundDisplayElement.textContent = `Round ${roundNumber}`;
+  } else {
+    roundDisplayElement.textContent = ""; // Clear display for round 0 or pre-game
+  }
+
+  // Update Start/Next Button Text/HTML
+  if (startRoundButton) {
+    if (roundNumber >= 1) {
+      startRoundButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Next Round`;
+    } else {
+      startRoundButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Start Game`;
+    }
+    // Note: Enabling/disabling the button should be handled elsewhere
+    // based on game/loading state, not just the round number.
+  } else {
+    console.warn("Start/Next Round button not found for UI update.");
   }
 }

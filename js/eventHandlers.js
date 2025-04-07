@@ -32,7 +32,11 @@ import {
   collapseRoutedCard,
   resetCardUI,
 } from "./ui.js";
-import { showToast, populateAndShowSpellModal } from "./uiHelpers.js";
+import {
+  showToast,
+  populateAndShowSpellModal,
+  updateRoundUI,
+} from "./uiHelpers.js";
 
 // --- Placeholder for a more robust interactive toast/modal system ---
 /**
@@ -231,26 +235,18 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
   }
 }
 
+/**
+ * Handles the 'Start New Round' button click.
+ * Increments round, updates UI, resets statuses, generates tokens.
+ * @param {string} armyId - The ID of the current army.
+ */
 function handleStartRoundClick(armyId) {
   console.log(`--- Starting New Round for Army ${armyId} ---`);
   const newRound = incrementCurrentRound();
   console.log(`Round incremented to ${newRound}`);
-  const roundDisplayElement = document.getElementById("round-display");
-  if (roundDisplayElement)
-    roundDisplayElement.textContent = `Round ${newRound}`;
-  else {
-    const titleH1 = document.getElementById("army-title-h1");
-    if (titleH1) {
-      let displaySpan = document.getElementById("round-display");
-      if (!displaySpan) {
-        displaySpan = document.createElement("h3");
-        displaySpan.id = "round-display";
-        displaySpan.className = "ms-3 align-middle";
-        titleH1.parentNode.insertBefore(displaySpan, titleH1.nextSibling);
-      }
-      displaySpan.textContent = `Round ${newRound}`;
-    }
-  }
+
+  // Update Round Display and Button using the helper function
+  updateRoundUI(newRound);
 
   const currentArmyProcessedData = getLoadedArmyData();
   if (!currentArmyProcessedData || !currentArmyProcessedData.units) {
@@ -904,7 +900,7 @@ export function setupEventListeners(armyId) {
         displaySpan.className = "ms-3 align-middle";
         titleH1.parentNode.insertBefore(displaySpan, titleH1.nextSibling);
       }
-      displaySpan.textContent = `Round ${initialRound}`;
+      displaySpan.textContent = ``;
     }
   }
 

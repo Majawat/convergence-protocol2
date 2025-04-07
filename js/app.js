@@ -17,6 +17,7 @@ import {
   // State Getters
   getCampaignData,
   getCommonRulesData,
+  getCurrentRound,
   getUnitStateValue, // Use new specific getters
   getModelStateValue, // Use new specific getters
   getLoadedArmyData,
@@ -31,7 +32,11 @@ import {
 } from "./state.js";
 import { loadArmyState, saveArmyState } from "./storage.js"; // Use new storage functions
 import { displayArmyUnits } from "./ui.js";
-import { displayArmySelection, populateArmyInfoModal } from "./uiHelpers.js";
+import {
+  displayArmySelection,
+  populateArmyInfoModal,
+  updateRoundUI,
+} from "./uiHelpers.js";
 import { setupEventListeners } from "./eventHandlers.js";
 import { findTargetModelForWound } from "./gameLogic.js";
 
@@ -329,6 +334,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Step 7: Setup Event Listeners
     setupEventListeners(armyIdToLoad);
+
+    // Inside DOMContentLoaded in app.js, after getting currentRound
+    updateRoundUI(getCurrentRound());
+    // Handle enabling the button separately, e.g., after army processing is fully done
+    const startRoundButton = document.getElementById("start-round-button");
+    startRoundButton.disabled = false;
 
     console.log("Application initialization complete.");
   } catch (error) {
