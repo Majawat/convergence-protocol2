@@ -243,9 +243,9 @@ function handleStartRoundClick(armyId) {
     if (titleH1) {
       let displaySpan = document.getElementById("round-display");
       if (!displaySpan) {
-        displaySpan = document.createElement("span");
+        displaySpan = document.createElement("h3");
         displaySpan.id = "round-display";
-        displaySpan.className = "ms-3 badge bg-info align-middle";
+        displaySpan.className = "ms-3 align-middle";
         titleH1.parentNode.insertBefore(displaySpan, titleH1.nextSibling);
       }
       displaySpan.textContent = `Round ${newRound}`;
@@ -899,9 +899,9 @@ export function setupEventListeners(armyId) {
     if (titleH1) {
       let displaySpan = document.getElementById("round-display");
       if (!displaySpan) {
-        displaySpan = document.createElement("span");
+        displaySpan = document.createElement("h3");
         displaySpan.id = "round-display";
-        displaySpan.className = "ms-3 badge bg-info align-middle";
+        displaySpan.className = "ms-3 align-middle";
         titleH1.parentNode.insertBefore(displaySpan, titleH1.nextSibling);
       }
       displaySpan.textContent = `Round ${initialRound}`;
