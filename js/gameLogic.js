@@ -73,7 +73,7 @@ export function calculateMovement(unitData, actionType) {
 
   if (baseMovement === 0) return 0; // No modifiers for Hold
 
-  // Check for Fast/Slow rules [cite: 224, 253]
+  // Check for Fast/Slow rules
   const hasFast = unitData.rules?.some((rule) => rule.name === "Fast");
   const hasSlow = unitData.rules?.some((rule) => rule.name === "Slow");
 
@@ -86,4 +86,23 @@ export function calculateMovement(unitData, actionType) {
   }
 }
 
-// Add other game logic functions here later (e.g., morale checks)
+// NOTE: performMoraleCheck function is removed as the logic is now handled
+// by player prompts within the event handlers (_handleResolveMeleeClick, _handleMoraleWoundsClick).
+// You could keep a function here just to calculate if a unit is <= half strength
+// if that logic becomes complex (e.g., handling Tough values for single models).
+
+/**
+ * Checks if a unit is at half strength or less based on current HP.
+ * NOTE: This needs access to the unit's STARTING size/toughness for accuracy.
+ * Currently uses processed data size, which might be inaccurate if size changes mid-game.
+ * @param {object} unitData - Processed unit data.
+ * @returns {boolean} True if at half strength or less.
+ */
+export function checkHalfStrength(unitData) {
+  if (!unitData) return false;
+  // TODO: Get starting size/toughness reliably (e.g., from initial load or state)
+  const startingSize = unitData.size; // Placeholder - needs actual starting size
+  const currentModels = unitData.models.filter((m) => m.currentHp > 0).length;
+  // TODO: Handle Tough(X) models correctly if needed for single-model units
+  return currentModels * 2 <= startingSize;
+}

@@ -40,3 +40,4 @@ This list tracks the features and improvements planned for the OPR Army Tracker.
 - [ ] **Joined Hero Distinction:** Improve visual clarity on cards showing joined units (clearly separating hero/base unit stats and models).
 - [ ] **Spell Modal Polish:** Ensure all "Cast" buttons update their enabled/disabled state correctly after a spell is cast.
 - [ ] **General UI/UX:** Refine layout, add tooltips, improve feedback messages.
+# OPR Army Tracker

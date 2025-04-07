@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Convergence Protocol - Quick Reference</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-size: 18px;
+        overflow: hidden;
+        height: 100vh;
+        background-color: #212529;
+        color: #f8f9fa;
+      }
+      .main-container {
+        height: 100vh;
+        max-height: 100vh;
+      }
+      .rule-section {
+        font-size: 0.9rem;
+        border-left: 3px solid #0d6efd;
+        padding-left: 10px;
+        margin-bottom: 4px;
+      }
+      h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+        color: #0dcaf0;
+      }
+      .reference-container {
+        height: calc(100vh - 60px);
+      }
+      .card {
+        background-color: rgba(33, 37, 41, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .table {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+      }
+      .table th,
+      .table td {
+        padding: 0.25rem 0.4rem;
+        vertical-align: middle;
+      }
+      .doctrine-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.25rem 0;
+        font-size: 0.85rem;
+      }
+      .doctrine-item:last-child {
+        border-bottom: none;
+      }
+      .doctrine-cost {
+        font-weight: bold;
+        color: #0dcaf0;
+      }
+      .navbar {
+        padding: 0.25rem 1rem;
+      }
+      .navbar-brand {
+        font-size: 1.5rem;
+      }
+      .card-header {
+        background-color: rgba(13, 110, 253, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 0.75rem;
+      }
+      .card-body {
+        padding: 0.5rem;
+      }
+      .special-rules {
+        font-size: 0.8rem;
+        columns: 2;
+        column-gap: 12px;
+      }
+      .special-rule {
+        break-inside: avoid;
+        margin-bottom: 6px;
+      }
+      .rule-name {
+        font-weight: bold;
+        color: #0dcaf0;
+      }
+      .mission-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      .current-mission {
+        background-color: rgba(40, 167, 69, 0.1);
+        border-left: 4px solid #28a745;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+      }
+      /* High contrast for TV viewing */
+      strong,
+      th {
+        color: #fff;
+      }
+      p {
+        margin-bottom: 0.3rem;
+      }
+      .special-objective {
+        break-inside: avoid;
+        margin-bottom: 4px;
+      }
+      .campaign-rules {
+        font-size: 0.85rem;
+        columns: 2;
+        column-gap: 12px;
+      }
+      .campaign-rule {
+        break-inside: avoid;
+        margin-bottom: 6px;
+      }
+      .table-responsive {
+        overflow-x: hidden;
+      }
+      .objectives-table td,
+      .objectives-table th {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="assets/img/logo.webp" height="40" alt="Logo" class="me-2" />
+          The Convergence Protocol - Quick Reference
+        </a>
+      </div>
+    </nav>
+
+    <div class="container-fluid main-container">
+      <div class="row reference-container">
+        <!-- RULES COLUMN -->
+        <div class="col-4 p-2 overflow-hidden">
+          <div class="card h-100">
+            <div class="card-header">
+              <h4 class="mb-0">Core Rules v3.4.1</h4>
+            </div>
+            <div class="card-body p-2 overflow-hidden">
+              <div class="row g-1">
+                <!-- Activation -->
+                <div class="col-12 rule-section">
+                  <h5>Activation</h5>
+                  <table class="table table-sm table-dark">
+                    <thead>
+                      <tr>
+                        <th>Action</th>
+                        <th>Move</th>
+                        <th>Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Hold</td>
+                        <td>0"</td>
+                        <td>Can shoot</td>
+                      </tr>
+                      <tr>
+                        <td>Advance</td>
+                        <td>6"</td>
+                        <td>Can shoot after move</td>
+                      </tr>
+                      <tr>
+                        <td>Rush</td>
+                        <td>12"</td>
+                        <td>Can't shoot</td>
+                      </tr>
+                      <tr>
+                        <td>Charge</td>
+                        <td>12"</td>
+                        <td>Moves into melee</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Melee -->
+                <div class="col-12 rule-section">
+                  <h5>Melee</h5>
+                  <p>
+                    Charging models move into base contact or as close as
+                    possible. Defenders move up to 3" to do the same. Models
+                    within 2" horizontally and 4" vertically must strike with
+                    all melee weapons. Defenders may strike back.
+                  </p>
+                  <p>
+                    <strong>Fatigue:</strong> After charging or striking back,
+                    units only hit on unmodified rolls of 6 in melee until the
+                    end of the round.
+                  </p>
+                </div>
+
+                <!-- Morale -->
+                <div class="col-12 rule-section">
+                  <h5>Morale</h5>
+                  <p>
+                    At the end of an activation where wounds leave a unit with
+                    half or less of its total size/tough value, or it loses a
+                    melee, take a quality test. If failed, the unit is Shaken.
+                  </p>
+                  <p>
+                    <strong>Shaken:</strong> Must stay idle, counts as fatigued,
+                    always fails morale tests, can't contest objectives. Must
+                    spend one full activation idle to recover.
+                  </p>
+                  <p>
+                    <strong>Melee Results:</strong> Compare wounds caused. The
+                    losing unit takes a morale test. If failed while at half
+                    strength or less, it routs (removed from play), otherwise
+                    Shaken.
+                  </p>
+                </div>
+
+                <!-- Terrain -->
+                <div class="col-12 rule-section">
+                  <h5>Terrain</h5>
+                  <p>
+                    <strong>Cover:</strong> Units mostly inside/behind cover get
+                    +1 to Defense when blocking hits from shooting.
+                  </p>
+                  <p>
+                    <strong>Difficult:</strong> Units moving through difficult
+                    terrain can't move more than 6" at a time.
+                  </p>
+                  <p>
+                    <strong>Dangerous:</strong> Models moving across or
+                    activating in dangerous terrain roll one die (or their tough
+                    value). For each roll of 1, the unit takes a wound.
+                  </p>
+                </div>
+
+                <!-- Universal Doctrine -->
+                <div class="col-12 mb-2">
+                  <h5>Universal Doctrine</h5>
+                  <div class="row g-0 rule-section">
+                    <div class="col-6 p-1">
+                      <span class="doctrine-cost">1 CP</span>
+                      <strong>High Command:</strong> +1 to any single die
+                    </div>
+                    <div class="col-6 p-1">
+                      <span class="doctrine-cost">2 CP</span>
+                      <strong>Supreme Command:</strong> +1 to all dice in roll
+                    </div>
+                    <div class="col-6 p-1">
+                      <span class="doctrine-cost">2 CP</span>
+                      <strong>Seize Initiative:</strong> Activate instead of
+                      enemy
+                    </div>
+                    <div class="col-6 p-1">
+                      <span class="doctrine-cost">2 CP</span>
+                      <strong>Waive Initiative:</strong> Force opponent to
+                      activate
+                    </div>
+                    <div class="col-6 p-1">
+                      <span class="doctrine-cost">2 CP</span>
+                      <strong>Delayed Deployment:</strong> Pass deployment turn
+                    </div>
+                    <div class="col-6 p-1">
+                      <span class="doctrine-cost">3 CP</span>
+                      <strong>Hidden Deployment:</strong> Redeploy up to 3 units
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SPECIAL RULES COLUMN -->
+        <div class="col-4 p-2 overflow-hidden">
+          <div class="card h-100">
+            <div class="card-header">
+              <h4 class="mb-0">Special Rules Reference</h4>
+            </div>
+            <div class="card-body p-2">
+              <div class="special-rules">
+                <div class="special-rule">
+                  <span class="rule-name">AP(X):</span> Targets get -X to
+                  Defense rolls when blocking hits. Makes armor less effective.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Ambush:</span> May be set aside before
+                  deployment. Deploy anywhere over 9" from enemies after round
+                  1. Cannot seize/contest objectives on deployment round.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Blast(X):</span> Ignores cover. Each
+                  hit multiplied by X (max = models in target unit). Devastating
+                  against large units.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Caster(X):</span> Gets X spell tokens
+                  each round (max 6). Spend tokens equal to spell value to cast.
+                  Roll 4+ to succeed. Nearby units can spend tokens for +1/-1 to
+                  rolls.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Counter:</span> Strikes first when
+                  charged. Charging unit gets -1 Impact roll per Counter model.
+                  Good defensive weapon.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Deadly(X):</span> Multiply wound by X.
+                  Resolved first; wounds don't carry over. Effective against
+                  tough models.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Entrenched:</span> -2 to be hit when
+                  shot at from >9" if hasn't moved since last activation.
+                  Rewards defensive positioning.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Fast:</span> +2" on Advance, +4" on
+                  Rush/Charge. Significantly boosts mobility.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Fear(X):</span> Counts as dealing +X
+                  wounds when determining melee winner. Makes enemies more
+                  likely to fail morale.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Fearless:</span> On failed morale
+                  test, roll one die. On 4+ it counts as passed instead. Greatly
+                  improves reliability.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Flying:</span> Move through units and
+                  terrain, ignoring terrain effects while moving. Exceptional
+                  tactical mobility.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Furious:</span> When charging, 6s to
+                  hit in melee deal one extra hit. Increases damage on charges.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Hero:</span> May join one multi-model
+                  unit (without another Hero). Can take morale tests for unit.
+                  Uses unit's Defense until others are killed.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Immobile:</span> May only use Hold
+                  actions, cannot move under any circumstances.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Impact(X):</span> Roll X dice when
+                  charging (not if fatigued). Each 2+ = one hit. Adds
+                  significant charge damage.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Indirect:</span> -1 to hit when
+                  shooting after moving. Can target without line of sight.
+                  Ignores cover from obstructions. Good for artillery.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Lance:</span> When charging, +1 to hit
+                  and AP(+1) in melee. Makes charges deadlier.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Lock-On:</span> Ignores cover and all
+                  negative modifiers to hit and range. Perfect against hidden
+                  enemies.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Limited:</span> Only usable once per
+                  game. Typically for powerful weapons/abilities.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Poison:</span> Ignores Regeneration.
+                  Target must re-roll Defense rolls of 6. Counters regenerating
+                  foes.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Regeneration:</span> When taking a
+                  wound, roll a die. On 5+ it's ignored. Provides significant
+                  durability.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Relentless:</span> When using Hold and
+                  shooting, 6s to hit deal one extra hit. Rewards stationary
+                  firing.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Reliable:</span> Attacks at Quality
+                  2+, regardless of normal Quality. Greatly increases hit
+                  chance.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Rending:</span> Ignores Regeneration.
+                  Unmodified 6s to hit get AP(4). Occasional high-penetration
+                  hits.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Scout:</span> After all deployment,
+                  place anywhere within 12" of position. Great for early
+                  positioning.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Slow:</span> -2" on Advance, -4" on
+                  Rush/Charge. Significant mobility penalty.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Sniper:</span> Shoots at Quality 2+.
+                  Each model can target any model in the unit. Resolved before
+                  other weapons.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Stealth:</span> Enemies get -1 to hit
+                  when shooting from >9" away. Better survival at range.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Strider:</span> Ignores difficult
+                  terrain effects when moving. Maintains mobility everywhere.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Tough(X):</span> Takes X wounds to
+                  kill. Continue putting wounds on tough model with most wounds
+                  until killed.
+                </div>
+                <div class="special-rule">
+                  <span class="rule-name">Transport(X):</span> Carries up to X
+                  models. Heroes with Tough(6) count as 1, non-heroes with
+                  Tough(3) count as 3 each.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MISSION & CAMPAIGN COLUMN -->
+        <div class="col-4 p-2 overflow-hidden">
+          <div class="card h-100">
+            <div class="card-header">
+              <h4 class="mb-0">Mission & Campaign</h4>
+            </div>
+            <div class="card-body p-1">
+              <div class="current-mission mb-2">
+                <h5>Mission 2: Signal in the Storm</h5>
+                <p>
+                  <strong>Overview:</strong> Forces must navigate electrical
+                  storms that disable technology while racing to extract a
+                  component from a deteriorating facility.
+                </p>
+
+                <p>
+                  <strong>Primary Objective:</strong> Component Extraction -
+                  Gather access codes from at least two security terminals
+                  before entering the chamber, then extract the component.
+                </p>
+
+                <h6 class="mb-1">Special Rules:</h6>
+                <ul class="mb-1 ps-3">
+                  <li>
+                    <strong>Terminals (9 markers):</strong> Roll D3 when
+                    reached:
+                    <ul class="ps-3 mb-0">
+                      <li>
+                        <strong>1:</strong> Storm Control - Shield terrain,
+                        grant cover.
+                      </li>
+                      <li><strong>2:</strong> Data Terminal - Gain 1 XP.</li>
+                      <li>
+                        <strong>3:</strong> Security Terminal - Get coded data.
+                        Two pieces unlock chamber.
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>Electrical Storm:</strong> Roll D6 each round. On
+                    4+, storm active:
+                    <ul class="ps-3 mb-0">
+                      <li>Mechanical/Robot units: -1 to hit</li>
+                      <li>Energy weapons: range halved</li>
+                      <li>Sheltered units ignore penalty</li>
+                      <li>Jump/Flyer/Fast units: dangerous terrain tests</li>
+                    </ul>
+                  </li>
+                </ul>
+
+                <p>
+                  <strong>Victory:</strong> Secure component and extract it off
+                  the board.
+                </p>
+              </div>
+
+              <div class="row mb-2">
+                <div class="col-6">
+                  <h5>Special Objectives (75pts bonus)</h5>
+                  <table
+                    class="table table-sm table-dark table-striped table-hover mb-0 objectives-table"
+                  >
+                    <thead>
+                      <tr>
+                        <th>D6</th>
+                        <th>Objective</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td>
+                        <td><strong>Mastery</strong></td>
+                        <td>Unit in each table quarter at end</td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td><strong>Honor</strong></td>
+                        <td>No enemies in own deployment zone</td>
+                      </tr>
+                      <tr>
+                        <td>3</td>
+                        <td><strong>Casting</strong></td>
+                        <td>Cast spell attempt each round</td>
+                      </tr>
+                      <tr>
+                        <td>4</td>
+                        <td><strong>Recovery</strong></td>
+                        <td>First to unstop a shaken unit</td>
+                      </tr>
+                      <tr>
+                        <td>5</td>
+                        <td><strong>Rage</strong></td>
+                        <td>First to destroy an enemy unit</td>
+                      </tr>
+                      <tr>
+                        <td>6</td>
+                        <td><strong>Destruction</strong></td>
+                        <td>Kill most expensive enemy unit</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col-6">
+                  <h5>Leaderboard</h5>
+                  <div class="table-responsive">
+                    <table
+                      class="table table-sm table-dark table-striped table-hover mb-0"
+                    >
+                      <thead>
+                        <tr>
+                          <th>Player</th>
+                          <th>W-L</th>
+                          <th>VP</th>
+                          <th>UP</th>
+                          <th>CP</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Alex</td>
+                          <td>1-0</td>
+                          <td>2</td>
+                          <td>3</td>
+                          <td>4</td>
+                        </tr>
+                        <tr>
+                          <td>Cody</td>
+                          <td>0-1</td>
+                          <td>0</td>
+                          <td>0</td>
+                          <td>4</td>
+                        </tr>
+                        <tr>
+                          <td>Claire</td>
+                          <td>0-1</td>
+                          <td>0</td>
+                          <td>0</td>
+                          <td>4</td>
+                        </tr>
+                        <tr>
+                          <td>Victoria</td>
+                          <td>0-0</td>
+                          <td>0</td>
+                          <td>6</td>
+                          <td>4</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <h5 class="mt-1">Campaign Rules</h5>
+              <div class="row g-1">
+                <div class="col-6 rule-section">
+                  <div class="campaign-rule">
+                    <strong>Random Events:</strong> Roll D6 at start of each
+                    round, on 5+ a random event occurs.
+                  </div>
+                  <div class="campaign-rule">
+                    <strong>Mission Length:</strong> If no winner after round 4,
+                    play continues until there is a winner.
+                  </div>
+                  <div class="campaign-rule">
+                    <strong>Mission Goals:</strong> Winner gets 2 VP and 150pts.
+                    Losers get 300pts.
+                  </div>
+                </div>
+                <div class="col-6 rule-section">
+                  <div class="campaign-rule">
+                    <strong>Casualties:</strong> Units fully destroyed/routed
+                    are casualties. Roll D6 for each:
+                    <ul class="ps-3 mb-0 small">
+                      <li><strong>1:</strong> Dead - Remove from army</li>
+                      <li><strong>2-5:</strong> Recovered - No penalties</li>
+                      <li><strong>6:</strong> Natural Talent - +1 XP</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-1">
+                <div class="col-6">
+                  <div class="rule-section campaign-rule">
+                    <strong>XP Earned:</strong>
+                    <ul class="ps-3 mb-0 small">
+                      <li>+1 XP: Not a casualty</li>
+                      <li>+1 XP: Killed a unit</li>
+                      <li>+2 XP: Killed a hero unit</li>
+                      <li>+3 XP: Killed a hero and its unit</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="rule-section campaign-rule">
+                    <strong>Unit Leveling:</strong> At 5 XP, unit costs +25pts
+                    and gains a trait (roll D6).
+                  </div>
+                  <div class="rule-section campaign-rule">
+                    <strong>Hero Leveling:</strong> At 5 XP, hero costs +55pts
+                    and gains a skill set, then roll for trait.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -72,9 +72,10 @@ function getUnitState(armyId, unitId) {
   // Return existing unit state or a default structure
   return (
     armyState.units?.[unitId] || {
-      status: "active",
+      status: "active", // Keep existing status
       shaken: false,
       fatigued: false,
+      attackedInMeleeThisRound: false, // <-- Added default
       action: null,
       limitedWeaponUsed: false,
       tokens: 0,
@@ -221,6 +222,7 @@ export function updateUnitStateValue(armyId, unitId, key, value) {
       status: "active",
       shaken: false,
       fatigued: false,
+      attackedInMeleeThisRound: false, // <-- Added default
       action: null,
       limitedWeaponUsed: false,
       tokens: 0,
@@ -256,6 +258,7 @@ export function updateModelStateValue(armyId, unitId, modelId, key, value) {
       status: "active",
       shaken: false,
       fatigued: false,
+      attackedInMeleeThisRound: false, // <-- Added default
       action: null,
       limitedWeaponUsed: false,
       tokens: 0,
