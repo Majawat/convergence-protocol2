@@ -2,15 +2,6 @@
 
 This list tracks the features and improvements planned for the OPR Army Tracker.
 
-### I. Core Gameplay Loop & Activation
-
-- [ ] **Unit Activation Selection:** Implement UI/logic for the current player to select an available unit to activate.
-- [ ] **Action Selection:** Implement UI/logic for the player to choose an action for the activated unit (Hold, Advance, Rush, Charge).
-- [ ] **Update `action` State:** When a unit takes an action, update its `action` field in the stored state (e.g., set `action: 'Advance'`).
-- [ ] **Visual Activation Indicator:** Update the UI (unit cards) to clearly show which units have already activated this round (i.e., their `action` state is not `null`).
-- [ ] **Turn Progression:** Implement logic to switch turns between players after an activation.
-- [ ] **Round Progression:** Verify/ensure the "Start Round" button logic correctly resets `action` to `null` and `fatigued` to `false` for all units in the current army's state.
-
 ### II. Combat & Rules Implementation
 
 - [ ] **Target Selection:** Implement UI for selecting targets for Shooting and Charge actions.
