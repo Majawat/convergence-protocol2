@@ -507,6 +507,38 @@ body {
   color: var(--bs-secondary); /* Color when points are zero */
 }
 
+/* Underdog Points Display */
+#underdog-points-display {
+  font-size: 1rem; /* Slightly smaller than CP */
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.2em 0.5em;
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+}
+#underdog-points-value {
+  font-weight: bold;
+  min-width: 5ch; /* Give space for "Calculating..." */
+  text-align: center;
+}
+/* Style for the UP icon placeholder */
+.up-icon-placeholder .bi {
+  color: var(--bs-info); /* Default color (e.g., blue) */
+  transition: color 0.3s ease;
+}
+.up-icon-placeholder.text-secondary .bi {
+  color: var(--bs-secondary); /* Color when points are zero */
+}
+/* Style for UP +/- buttons */
+#underdog-points-display .btn-group .btn {
+  padding: 0.1rem 0.4rem;
+  line-height: 1;
+  font-size: 0.9em;
+}
+
 /* Stratagem Modal Specifics */
 #modal-cp-adjust-group .btn {
   /* Style the manual adjust buttons */

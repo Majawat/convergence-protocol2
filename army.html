@@ -97,14 +97,49 @@
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <h3 id="round-display" class="mb-0 order-1 order-md-0"></h3>
 
-          <div id="command-points-display" class="mb-0 order-2 order-md-1">
+          <div
+            id="command-points-display"
+            class="point-display mb-0 order-2 order-md-1"
+          >
             <span class="cp-icon-placeholder"></span> <span>Points: </span>
             <span id="command-points-value">--</span>
             <span> / </span>
             <span id="command-points-max">--</span>
           </div>
 
-          <div class="d-flex gap-2 order-0 order-md-2">
+          <div
+            id="underdog-points-display"
+            class="point-display mb-0 order-3 order-md-2"
+          >
+            <span class="up-icon-placeholder"></span> <span>Underdog: </span>
+            <span id="underdog-points-value">--</span>
+            <div
+              class="btn-group btn-group-sm ms-2"
+              role="group"
+              aria-label="Manual Underdog Point Adjust"
+            >
+              <button
+                type="button"
+                id="manual-up-remove"
+                class="btn btn-outline-secondary btn-sm"
+                title="Decrease Underdog Points"
+                disabled
+              >
+                -
+              </button>
+              <button
+                type="button"
+                id="manual-up-add"
+                class="btn btn-outline-secondary btn-sm"
+                title="Increase Underdog Points"
+                disabled
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 order-0 order-md-3">
             <button
               id="army-info-button"
               type="button"
@@ -139,7 +174,7 @@
       <hr class="mt-2 mb-4" />
       <div
         id="army-units-container"
-        class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-4"
+        class="row row-cols-1 row-cols-xl-2 row-cols-xxl-3 g-4"
       >
         <div class="col-12">
           <div

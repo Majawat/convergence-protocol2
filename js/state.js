@@ -11,13 +11,10 @@ import { config } from "./config.js"; // Import config for defaults
 
 // --- Global Non-Persistent State ---
 let campaignData = null;
-let armyBooksData = {}; // { factionId: data } - Still global cache
-let commonRulesData = {}; // { gameSystemId: data } - Still global cache
-let doctrinesData = null; // <-- ADDED: To store loaded doctrines.json
-let loadedArmiesData = {}; // { armyId: processedArmy } - Stores the *processed* data for the currently loaded army
-
-// --- Global Persistent State (Managed via storage functions) ---
-// Game state like currentRound is loaded/saved directly when needed
+let armyBooksData = {};
+let commonRulesData = {};
+let doctrinesData = null;
+let loadedArmiesData = {};
 
 // --- Getters ---
 
@@ -65,25 +62,46 @@ function getArmyState(armyId) {
       commandPoints: 0,
       selectedDoctrine: null,
       maxCommandPoints: 0,
-    }; // <-- ADDED CP/Doctrine defaults
+      underdogPoints: 0,
+      maxUnderdogPoints: 0,
+    };
 
   const state = loadArmyState(armyId);
   // Return loaded state or a default structure if null/undefined
-  // <-- UPDATED Default Structure -->
   const defaultState = {
     listPoints: 0,
     units: {},
     commandPoints: 0,
     selectedDoctrine: null,
-    maxCommandPoints: 0, // Maximum CP for manual adjustments
+    maxCommandPoints: 0,
+    underdogPoints: 0,
+    maxUnderdogPoints: 0,
   };
   // Ensure loaded state has the new fields, providing defaults if missing
   if (state) {
     if (state.commandPoints === undefined) state.commandPoints = 0;
     if (state.selectedDoctrine === undefined) state.selectedDoctrine = null;
     if (state.maxCommandPoints === undefined) state.maxCommandPoints = 0;
+    if (state.underdogPoints === undefined) state.underdogPoints = 0;
+    if (state.maxUnderdogPoints === undefined) state.maxUnderdogPoints = 0;
   }
   return state || defaultState;
+}
+
+/** Gets the current underdog points for the specified army. */
+export function getUnderdogPoints(armyId) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId) return 0;
+  const state = getArmyState(armyId);
+  return state.underdogPoints;
+}
+
+/** Gets the maximum underdog points for the specified army. */
+export function getMaxUnderdogPoints(armyId) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId) return 0;
+  const state = getArmyState(armyId);
+  return state.maxUnderdogPoints;
 }
 
 /**
@@ -216,56 +234,57 @@ export function setArmyBooksData(data) {
 export function setCommonRulesData(data) {
   commonRulesData = data || {};
 }
-// <-- ADDED: Setter for Doctrines data -->
 export function setDoctrinesData(data) {
   doctrinesData = data;
 }
 
-/** Stores the processed army data in memory and initializes/updates its state in localStorage */
+/** Stores the processed army data and initializes/updates basic state */
 export function setLoadedArmyData(armyId, processedData) {
   loadedArmiesData = {}; // Clear previous armies
   if (armyId && processedData) {
     loadedArmiesData[armyId] = processedData;
 
-    // Initialize state in localStorage if it doesn't exist, or just update points/CP
-    let currentState = loadArmyState(armyId); // Load existing state if present
-
-    // <-- UPDATED: Calculate initial CP -->
+    let currentState = loadArmyState(armyId);
     const initialCommandPoints =
       Math.floor(processedData.meta.listPoints / 1000) *
       config.COMMAND_POINTS_PER_1000;
 
-    // <-- UPDATED Default State -->
+    // Default state structure including UP (initialized to 0 for now)
     const defaultState = {
       listPoints: processedData.meta.listPoints || 0,
       units: {},
       commandPoints: initialCommandPoints,
-      selectedDoctrine: null, // Doctrine selection happens later
-      maxCommandPoints: initialCommandPoints, // Store the initial max
+      selectedDoctrine: null,
+      maxCommandPoints: initialCommandPoints,
+      underdogPoints: 0, // UP calculation happens later
+      maxUnderdogPoints: 0, // UP calculation happens later
     };
 
     if (!currentState) {
       currentState = defaultState;
-      console.log(
-        `Initializing new state for army ${armyId} in localStorage with ${initialCommandPoints} CP.`
-      );
+      console.log(`Initializing new state for army ${armyId} in localStorage.`);
     } else {
-      // Ensure listPoints is updated
+      // Ensure fields exist and update points/max CP
       currentState.listPoints =
         processedData.meta.listPoints || currentState.listPoints || 0;
-      // Ensure units object exists
       if (!currentState.units) currentState.units = {};
-      // Ensure CP fields exist and initialize maxCommandPoints if missing
       if (currentState.commandPoints === undefined)
         currentState.commandPoints = initialCommandPoints;
       if (currentState.selectedDoctrine === undefined)
         currentState.selectedDoctrine = null;
-      if (currentState.maxCommandPoints === undefined)
-        currentState.maxCommandPoints = initialCommandPoints; // Initialize max CP if loading old state
+      if (currentState.maxCommandPoints !== initialCommandPoints) {
+        currentState.maxCommandPoints = initialCommandPoints;
+        if (currentState.commandPoints > currentState.maxCommandPoints) {
+          currentState.commandPoints = currentState.maxCommandPoints;
+        }
+      }
+      // Initialize UP fields if loading old state, but don't overwrite with 0 if they exist
+      if (currentState.underdogPoints === undefined)
+        currentState.underdogPoints = 0;
+      if (currentState.maxUnderdogPoints === undefined)
+        currentState.maxUnderdogPoints = 0;
 
-      console.log(
-        `Loaded existing state for army ${armyId}, updated list points. Current CP: ${currentState.commandPoints}, Max CP: ${currentState.maxCommandPoints}.`
-      );
+      console.log(`Loaded existing state for army ${armyId}.`);
     }
     saveArmyState(armyId, currentState); // Save the initial/updated basic state
   } else {
@@ -375,7 +394,6 @@ export function updateArmyListPoints(armyId, points) {
   // console.log(`Updated list points for army ${armyId} to ${points}.`);
 }
 
-// <-- ADDED: Functions to update Command Points and Doctrine -->
 /**
  * Sets the command points for the specified army and saves the state.
  * Clamps the value between 0 and maxCommandPoints.
@@ -417,6 +435,50 @@ export function setSelectedDoctrine(armyId, doctrineId) {
     currentState.selectedDoctrine = doctrineId;
     saveArmyState(armyId, currentState);
     console.log(`Set selected doctrine for army ${armyId} to ${doctrineId}.`);
+  }
+}
+
+/**
+ * Sets the underdog points for the specified army and saves the state.
+ * Clamps the value between 0 and maxUnderdogPoints.
+ * @param {string} armyId - The ID of the army.
+ * @param {number} points - The new underdog point value.
+ */
+export function setUnderdogPoints(armyId, points) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId || typeof points !== "number") return;
+
+  const currentState = getArmyState(armyId);
+  const maxPoints = currentState.maxUnderdogPoints || 0; // Use stored max
+  // Clamp points between 0 and max
+  const clampedPoints = Math.max(0, Math.min(points, maxPoints));
+
+  if (currentState.underdogPoints !== clampedPoints) {
+    currentState.underdogPoints = clampedPoints;
+    saveArmyState(armyId, currentState);
+    console.log(`Set underdog points for army ${armyId} to ${clampedPoints}.`);
+  }
+}
+
+/**
+ * Sets the maximum underdog points for the specified army and saves the state.
+ * Typically set once after calculation at the start of a game.
+ * @param {string} armyId - The ID of the army.
+ * @param {number} points - The maximum underdog point value.
+ */
+export function setMaxUnderdogPoints(armyId, points) {
+  if (!armyId) armyId = getCurrentArmyId();
+  if (!armyId || typeof points !== "number" || points < 0) return;
+
+  const currentState = getArmyState(armyId);
+  if (currentState.maxUnderdogPoints !== points) {
+    currentState.maxUnderdogPoints = points;
+    // Optionally clamp current UP if max decreased (e.g., recalculation)
+    if (currentState.underdogPoints > currentState.maxUnderdogPoints) {
+      currentState.underdogPoints = currentState.maxUnderdogPoints;
+    }
+    saveArmyState(armyId, currentState);
+    console.log(`Set max underdog points for army ${armyId} to ${points}.`);
   }
 }
 

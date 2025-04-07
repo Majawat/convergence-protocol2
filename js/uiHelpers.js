@@ -11,7 +11,10 @@ import {
   getDoctrinesData,
   getSelectedDoctrine,
   setSelectedDoctrine,
-  getCommandPoints, // <-- ADDED: Need CP to disable buttons
+  getCommandPoints,
+  getMaxCommandPoints,
+  getUnderdogPoints,
+  getMaxUnderdogPoints,
 } from "./state.js";
 
 // Variable to store the element that triggered the modal
@@ -534,7 +537,49 @@ export function updateCommandPointsDisplay(armyId, currentPoints, maxPoints) {
   if (addCpButton) addCpButton.disabled = currentPoints >= maxPoints;
 }
 
-// <-- ADDED: Function to populate the Doctrine Selector -->
+/**
+ * Updates the underdog points display element and its +/- buttons.
+ * @param {string} armyId - The ID of the current army.
+ * @param {number | string} currentPoints - The current underdog points, or a string like "Calculating...".
+ * @param {number} maxPoints - The maximum underdog points for the army.
+ */
+export function updateUnderdogPointsDisplay(armyId, currentPoints, maxPoints) {
+  const upValueElement = document.getElementById("underdog-points-value");
+  const upIconPlaceholder = document.querySelector(
+    "#underdog-points-display .up-icon-placeholder"
+  );
+  const removeUpButton = document.getElementById("manual-up-remove");
+  const addUpButton = document.getElementById("manual-up-add");
+
+  const isCalculating = typeof currentPoints === "string";
+
+  if (upValueElement) {
+    upValueElement.textContent = isCalculating
+      ? currentPoints
+      : `${currentPoints} / ${maxPoints}`;
+  }
+
+  if (upIconPlaceholder) {
+    upIconPlaceholder.innerHTML =
+      UI_ICONS.underdogPoints || '<i class="bi bi-question-circle"></i>'; // Fallback icon
+    // Optionally change icon color based on points/state
+    upIconPlaceholder.classList.toggle(
+      "text-secondary",
+      !isCalculating && currentPoints <= 0
+    );
+    upIconPlaceholder.classList.toggle(
+      "text-info",
+      !isCalculating && currentPoints > 0
+    ); // Use info color for UP
+  }
+
+  // Enable/disable manual adjust buttons
+  if (removeUpButton)
+    removeUpButton.disabled = isCalculating || currentPoints <= 0;
+  if (addUpButton)
+    addUpButton.disabled = isCalculating || currentPoints >= maxPoints;
+}
+
 /**
  * Populates the doctrine selector dropdown in the Stratagem modal.
  * @param {string} armyId - The ID of the currently loaded army.

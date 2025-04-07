@@ -18,12 +18,15 @@ import {
   getMaxCommandPoints,
   getSelectedDoctrine,
   getDoctrinesData,
+  getUnderdogPoints,
+  getMaxUnderdogPoints,
   // State Updaters
   updateModelStateValue,
   updateUnitStateValue,
   incrementCurrentRound,
   setCommandPoints,
   setSelectedDoctrine,
+  setUnderdogPoints,
 } from "./state.js";
 import { loadArmyState, saveArmyState } from "./storage.js";
 import { findTargetModelForWound, checkHalfStrength } from "./gameLogic.js";
@@ -46,6 +49,7 @@ import {
   populateDoctrineSelector,
   displayStratagems,
   handleModalHidden,
+  updateUnderdogPointsDisplay,
 } from "./uiHelpers.js";
 
 // Variable to store the element that triggered the modal
@@ -806,7 +810,8 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
 function handleInteractionClick(event) {
   const unitCard = event.target.closest(".unit-card");
   const spellModal = event.target.closest("#viewSpellsModal");
-  const stratagemModal = event.target.closest("#stratagemModal"); // <-- ADDED
+  const stratagemModal = event.target.closest("#stratagemModal");
+  const upDisplay = event.target.closest("#underdog-points-display");
 
   if (unitCard) {
     const cardUnitId = unitCard.dataset.unitId;
@@ -865,6 +870,15 @@ function handleInteractionClick(event) {
     } else if (addCpButton) {
       console.log("Manual CP Add Clicked");
       _handleManualCpAdjustClick(1);
+    }
+  } else if (upDisplay) {
+    const removeUpButton = event.target.closest("#manual-up-remove");
+    const addUpButton = event.target.closest("#manual-up-add");
+
+    if (removeUpButton) {
+      _handleUnderdogPointAdjustClick(-1); // Call handler with -1
+    } else if (addUpButton) {
+      _handleUnderdogPointAdjustClick(1); // Call handler with +1
     }
   }
 }
@@ -944,6 +958,37 @@ function _handleActivateStratagemClick(buttonElement) {
       "Activation Failed"
     );
   }
+}
+
+/**
+ * Handles clicks on the manual Underdog Point adjustment buttons (+/-).
+ * @param {number} adjustment - The amount to adjust by (+1 or -1).
+ * @private
+ */
+function _handleUnderdogPointAdjustClick(adjustment) {
+  const armyId = getCurrentArmyId();
+  if (!armyId) return;
+
+  const currentPoints = getUnderdogPoints(armyId);
+  const maxPoints = getMaxUnderdogPoints(armyId); // Needed for clamping and display
+  const newPoints = currentPoints + adjustment;
+
+  // setUnderdogPoints handles clamping between 0 and maxPoints
+  setUnderdogPoints(armyId, newPoints);
+
+  // Update the UI display
+  const updatedPoints = getUnderdogPoints(armyId); // Get the clamped value
+  updateUnderdogPointsDisplay(armyId, updatedPoints, maxPoints);
+
+  // Show toast for spending (decrementing)
+  if (adjustment === -1 && currentPoints > 0) {
+    showToast(
+      `Underdog Point Spent!\nApply +/- 1 to the entire roll.`,
+      "Underdog Point"
+    );
+  }
+
+  console.log(`Manual UP adjustment: ${adjustment}. New UP: ${updatedPoints}`);
 }
 
 /**

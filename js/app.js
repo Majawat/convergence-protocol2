@@ -2,7 +2,6 @@
  * @fileoverview Main application entry point and orchestration.
  * Loads data, initializes state, sets up UI, and attaches event listeners.
  */
-
 // Core Imports
 import { config } from "./config.js";
 import { loadCampaignData, loadGameData } from "./dataLoader.js";
@@ -13,35 +12,39 @@ import {
   setCampaignData,
   setArmyBooksData,
   setCommonRulesData,
-  setDoctrinesData, // <-- ADDED
-  setLoadedArmyData, // This now initializes/updates points & base structure in storage
+  setDoctrinesData,
+  setLoadedArmyData,
+  setUnderdogPoints,
+  setMaxUnderdogPoints,
   // State Getters
   getCampaignData,
   getCommonRulesData,
+  getDoctrinesData,
   getCurrentRound,
-  getUnitStateValue, // Use new specific getters
-  getModelStateValue, // Use new specific getters
+  getUnitStateValue,
+  getModelStateValue,
   getLoadedArmyData,
   getCurrentArmyHeroTargets,
   getCurrentArmyUnitMap,
   getUnitData,
   getJoinedHeroData,
   getCurrentArmyId,
-  // <-- ADDED CP Getters -->
   getCommandPoints,
   getMaxCommandPoints,
-  // State Updaters (Generic updaters handle load/save implicitly)
+  getUnderdogPoints,
+  getMaxUnderdogPoints,
+  // State Updaters
   updateUnitStateValue,
   updateModelStateValue,
 } from "./state.js";
-import { loadArmyState, saveArmyState } from "./storage.js"; // Use new storage functions
+import { loadArmyState, saveArmyState } from "./storage.js";
 import { displayArmyUnits } from "./ui.js";
 import {
   displayArmySelection,
   populateArmyInfoModal,
   updateRoundUI,
-  // <-- ADDED CP UI Helper -->
   updateCommandPointsDisplay,
+  updateUnderdogPointsDisplay,
 } from "./uiHelpers.js";
 import { setupEventListeners } from "./eventHandlers.js";
 import { findTargetModelForWound } from "./gameLogic.js";
@@ -250,14 +253,89 @@ function _initializeArmyStateFromStorage(armyId, processedArmy) {
   }
 }
 
+/**
+ * Fetches and processes all campaign armies to calculate and cache their points.
+ * @param {Array} campaignArmies - Array of army info from campaign data.
+ */
+async function calculateAndCacheAllArmyPoints(campaignArmies) {
+  console.log("DEBUG: Starting background calculation of all army points..."); // Log start
+  const allArmyIds = campaignArmies.map((a) => a.armyForgeID).filter(Boolean);
+  if (allArmyIds.length === 0) {
+    console.log(
+      "DEBUG: No valid army IDs found in campaign data for pre-calculation."
+    );
+    return null; // Return null or empty object on failure
+  }
+
+  let pointsCache = {}; // Initialize cache object
+  try {
+    console.log(
+      `DEBUG: Fetching data for ${allArmyIds.length} armies for cache...`
+    );
+    const armyDataPromises = allArmyIds.map((id) => fetchArmyData(id));
+    const allRawData = await Promise.allSettled(armyDataPromises); // Use allSettled
+
+    let fetchErrors = 0;
+
+    for (let i = 0; i < allRawData.length; i++) {
+      const result = allRawData[i];
+      const armyId = allArmyIds[i];
+
+      if (result.status === "fulfilled" && result.value) {
+        const raw = result.value;
+        console.log(`DEBUG: Processing army ${armyId} for cache...`);
+        const processed = processArmyData(raw); // Process to get points
+        if (processed) {
+          pointsCache[armyId] = processed.meta.listPoints || 0;
+          console.log(
+            `DEBUG: Processed ${armyId}, Points: ${pointsCache[armyId]}`
+          );
+        } else {
+          console.warn(
+            `DEBUG: Failed to process data for army ID: ${armyId} during pre-calculation.`
+          );
+          fetchErrors++;
+        }
+      } else {
+        console.warn(
+          `DEBUG: Failed to fetch data for army ID: ${armyId} during pre-calculation. Reason:`,
+          result.reason
+        );
+        fetchErrors++;
+      }
+    }
+
+    // Save the calculated points to sessionStorage
+    sessionStorage.setItem(
+      config.CAMPAIGN_POINTS_CACHE_KEY,
+      JSON.stringify(pointsCache)
+    );
+    console.log(
+      "DEBUG: Finished background point calculation. Cached points:",
+      pointsCache
+    );
+    if (fetchErrors > 0) {
+      console.warn(
+        `DEBUG: ${fetchErrors} errors occurred during point pre-calculation.`
+      );
+    }
+    return pointsCache; // Return the calculated cache
+  } catch (error) {
+    console.error("DEBUG: Error during background point calculation:", error);
+    // Clear potentially incomplete cache on error
+    sessionStorage.removeItem(config.CAMPAIGN_POINTS_CACHE_KEY);
+    return null; // Return null on error
+  }
+}
+
 // --- Main Application Logic ---
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("DOM fully loaded and parsed");
+  console.log("DEBUG: DOM fully loaded and parsed"); // Changed log prefix
 
   const mainListContainer = document.getElementById("army-units-container");
   const titleH1 = document.getElementById("army-title-h1");
   if (!mainListContainer || !titleH1) {
-    console.error("Essential HTML elements not found!");
+    console.error("DEBUG: Essential HTML elements not found!");
     document.body.innerHTML =
       '<div class="alert alert-danger m-5">Critical Error: Page structure missing.</div>';
     return;
@@ -275,100 +353,237 @@ document.addEventListener("DOMContentLoaded", async () => {
       '<div class="col-12"><div class="alert alert-danger m-4">Failed to load campaign data.</div></div>';
     return;
   }
+  const campaignArmies = getCampaignData()?.armies || [];
+  console.log("DEBUG: Campaign data loaded.");
 
   // Step 2: Determine Army to Load
   const urlParams = new URLSearchParams(window.location.search);
   const armyIdToLoad = urlParams.get("armyId");
-  const campaignArmies = getCampaignData()?.armies || [];
   const armyInfo = armyIdToLoad
     ? campaignArmies.find((a) => a.armyForgeID === armyIdToLoad)
     : null;
+  console.log(`DEBUG: Army ID to load: ${armyIdToLoad}`);
 
   // Step 3: Display Selection or Proceed
   if (!armyIdToLoad || !armyInfo) {
+    console.log("DEBUG: No valid army ID provided, displaying selection.");
+    // Display the selection list
     displayArmySelection(campaignArmies, mainListContainer);
     document.title = "Select Army - OPR Army Tracker";
     titleH1.textContent = "Select Army";
+    // Disable buttons on selection screen
     const infoButton = document.getElementById("army-info-button");
     if (infoButton) infoButton.disabled = true;
-    return;
+    const stratButton = document.getElementById("stratagems-button");
+    if (stratButton) stratButton.disabled = true;
+    const startRoundButton = document.getElementById("start-round-button");
+    if (startRoundButton) startRoundButton.disabled = true;
+
+    // Trigger background pre-calculation
+    console.log("DEBUG: Triggering background point pre-calculation.");
+    setTimeout(() => calculateAndCacheAllArmyPoints(campaignArmies), 100);
+
+    return; // Stop execution
   }
 
-  // Valid armyId found
+  // --- Code below only runs if a valid armyId IS found ---
+  console.log(
+    `DEBUG: Proceeding to load army: ${armyInfo.armyName} (${armyIdToLoad})`
+  );
   mainListContainer.innerHTML =
     '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading Game Data...</span></div></div></div>';
   titleH1.textContent = `Loading ${armyInfo.armyName}...`;
 
   try {
-    // Step 4: Load Static Game Data (Books/Rules/Doctrines) // <-- UPDATED
+    // Step 4: Load Static Game Data
+    console.log("DEBUG: Loading game data (books, rules, doctrines)...");
     const gameData = await loadGameData(getCampaignData());
     setArmyBooksData(gameData.armyBooks);
     setCommonRulesData(gameData.commonRules);
-    setDoctrinesData(gameData.doctrines); // <-- ADDED
+    setDoctrinesData(gameData.doctrines);
+    console.log("DEBUG: Game data loaded.");
 
-    // Step 5: Fetch and Process Army List
+    // Step 5: Fetch and Process Army List (Current one)
+    console.log(`DEBUG: Fetching army data for ${armyIdToLoad}...`);
     mainListContainer.innerHTML = ""; // Clear spinner
     const rawData = await fetchArmyData(armyIdToLoad);
     if (!rawData)
       throw new Error(`Could not fetch army list data for ID: ${armyIdToLoad}`);
+    console.log(`DEBUG: Processing army data for ${armyIdToLoad}...`);
     const processedArmy = processArmyData(rawData);
     if (!processedArmy)
       throw new Error(
         `Failed to process army list data for ${armyInfo.armyName}.`
       );
-
-    // Store processed data in memory AND initialize/update base state in localStorage
-    // This now also calculates and stores initial/max CP
-    setLoadedArmyData(armyIdToLoad, processedArmy);
-
-    // Step 6: Initialize Full State & Update UI
-    // Load full state from storage, initialize missing parts, apply HP to models in memory
-    // This now also ensures CP/Doctrine fields exist in loaded state
-    _initializeArmyStateFromStorage(armyIdToLoad, processedArmy);
-
-    // Update page elements
-    document.title = `${armyInfo.armyName} - OPR Army Tracker`;
-    titleH1.textContent = armyInfo.armyName;
-    populateArmyInfoModal(armyInfo);
-
-    // Display units, passing the component state *for this specific army*
-    const currentArmyState = loadArmyState(armyIdToLoad) || { units: {} };
-    const displayComponentState = {};
-    Object.entries(currentArmyState.units).forEach(([unitId, unitState]) => {
-      displayComponentState[unitId] = {
-        tokens: unitState.tokens, // Add other components if needed
-      };
-    });
-
-    displayArmyUnits(
-      processedArmy, // Contains models with updated currentHp
-      mainListContainer,
-      displayComponentState // Pass reconstructed component state for display
+    console.log(
+      `DEBUG: Army processed. Points: ${processedArmy.meta.listPoints}`
     );
 
-    // Set initial wound target highlights
-    _initializeWoundHighlights(armyIdToLoad); // Pass armyId
+    setLoadedArmyData(armyIdToLoad, processedArmy); // Initializes state with points/CP
+
+    // Step 6: Initialize Full State & Update UI (excluding UP initially)
+    _initializeArmyStateFromStorage(armyIdToLoad, processedArmy); // Ensures all state fields exist
+    document.title = `${armyInfo.armyName} - OPR Army Tracker`;
+    titleH1.textContent = armyInfo.armyName;
+    populateArmyInfoModal(armyInfo); // Enables info button
+    console.log("DEBUG: Displaying army units...");
+    displayArmyUnits(processedArmy, mainListContainer, {});
+    _initializeWoundHighlights(armyIdToLoad);
+    console.log("DEBUG: Units displayed.");
 
     // Step 7: Setup Event Listeners
-    setupEventListeners(armyIdToLoad);
+    console.log("DEBUG: Setting up event listeners...");
+    setupEventListeners(armyIdToLoad); // Attaches listeners, including start round
+    console.log("DEBUG: Event listeners set up.");
 
-    // Update Round UI
+    // Update Round, CP UI
+    console.log("DEBUG: Updating Round and CP display...");
     updateRoundUI(getCurrentRound());
-    // <-- ADDED: Update Command Points UI -->
     updateCommandPointsDisplay(
       armyIdToLoad,
       getCommandPoints(armyIdToLoad),
       getMaxCommandPoints(armyIdToLoad)
+    ); // Enables strat button
+    // Initialize UP Display to "Calculating..."
+    console.log("DEBUG: Initializing UP display to 'Calculating...'");
+    updateUnderdogPointsDisplay(armyIdToLoad, "Calculating...", 0);
+
+    // Enable Start Round button
+    const startRoundButton = document.getElementById("start-round-button");
+    if (startRoundButton) {
+      startRoundButton.disabled = false;
+      console.log("DEBUG: Start Round button enabled.");
+    } else {
+      console.warn("DEBUG: Start Round button not found after main load!");
+    }
+
+    console.log(
+      "DEBUG: Main army display complete. Starting background UP calculation..."
     );
 
-    // Handle enabling the button separately
-    const startRoundButton = document.getElementById("start-round-button");
-    startRoundButton.disabled = false;
+    // --- Background Calculation for Underdog Points ---
+    setTimeout(async () => {
+      console.log("DEBUG: Background UP calculation task started.");
+      try {
+        const allArmyIds = campaignArmies
+          .map((a) => a.armyForgeID)
+          .filter(Boolean);
+        let pointsCache = null;
+        let cachedPointsValid = false;
+        let armyPointsData = []; // Will store { armyId, points }
 
-    console.log("Application initialization complete.");
+        // Try to load from cache first
+        const cachedData = sessionStorage.getItem(
+          config.CAMPAIGN_POINTS_CACHE_KEY
+        );
+        if (cachedData) {
+          try {
+            pointsCache = JSON.parse(cachedData);
+            if (
+              allArmyIds.every(
+                (id) => pointsCache && typeof pointsCache[id] === "number"
+              )
+            ) {
+              cachedPointsValid = true;
+              console.log("DEBUG: Using cached points for UP calculation.");
+              allArmyIds.forEach((id) => {
+                armyPointsData.push({ armyId: id, points: pointsCache[id] });
+              });
+            } else {
+              console.log(
+                "DEBUG: Points cache is incomplete or invalid. Re-fetching."
+              );
+              pointsCache = null; // Invalidate cache
+            }
+          } catch (e) {
+            console.warn(
+              "DEBUG: Could not parse points cache. Re-fetching.",
+              e
+            );
+            sessionStorage.removeItem(config.CAMPAIGN_POINTS_CACHE_KEY);
+            pointsCache = null;
+          }
+        }
+
+        if (!cachedPointsValid) {
+          // Fetch and process if cache not valid
+          console.log(
+            "DEBUG: Fetching/processing all armies for UP calculation (cache invalid/missing)..."
+          );
+          // Use the pre-calculation function
+          pointsCache = await calculateAndCacheAllArmyPoints(campaignArmies);
+          if (pointsCache) {
+            allArmyIds.forEach((id) => {
+              // Only add if successfully calculated
+              if (typeof pointsCache[id] === "number") {
+                armyPointsData.push({ armyId: id, points: pointsCache[id] });
+              }
+            });
+          } else {
+            // Handle error from calculateAndCacheAllArmyPoints
+            throw new Error("Failed to calculate and cache points.");
+          }
+        }
+
+        // Proceed with UP calculation using armyPointsData
+        if (armyPointsData.length <= 1) {
+          console.log(
+            "DEBUG: Not enough armies loaded/processed to calculate Underdog Points."
+          );
+          setUnderdogPoints(armyIdToLoad, 0);
+          setMaxUnderdogPoints(armyIdToLoad, 0);
+          updateUnderdogPointsDisplay(armyIdToLoad, 0, 0);
+          return;
+        }
+
+        const maxPoints = Math.max(...armyPointsData.map((a) => a.points));
+        const currentArmyPointsData = armyPointsData.find(
+          (a) => a.armyId === armyIdToLoad
+        );
+        // Use the already processed points for the current army
+        const currentArmyPoints = processedArmy.meta.listPoints || 0; // Fallback just in case
+
+        let calculatedUP = 0;
+        if (currentArmyPoints < maxPoints) {
+          const difference = maxPoints - currentArmyPoints;
+          calculatedUP = Math.floor(
+            difference / config.UNDERDOG_POINTS_PER_DELTA
+          );
+        }
+
+        console.log(
+          `DEBUG: UP Calculation: Max Points = ${maxPoints}, Current Army Points = ${currentArmyPoints}, Calculated UP = ${calculatedUP}`
+        );
+
+        // Save calculated UP to state
+        setMaxUnderdogPoints(armyIdToLoad, calculatedUP);
+        setUnderdogPoints(armyIdToLoad, calculatedUP);
+
+        // Update the UI display
+        console.log("DEBUG: Updating UP display with calculated value.");
+        updateUnderdogPointsDisplay(armyIdToLoad, calculatedUP, calculatedUP);
+        console.log("DEBUG: Background UP calculation finished successfully.");
+      } catch (error) {
+        console.error(
+          "DEBUG: Error during background Underdog Points calculation:",
+          error
+        );
+        showToast(
+          "Error calculating Underdog Points. Please track manually.",
+          "Error"
+        );
+        updateUnderdogPointsDisplay(armyIdToLoad, 0, 0); // Show 0/0 on error
+        setMaxUnderdogPoints(armyIdToLoad, 0);
+        setUnderdogPoints(armyIdToLoad, 0);
+        console.log("DEBUG: Background UP calculation finished with error.");
+      }
+    }, 100); // Small delay
+    // --- END Background Calculation ---
+
+    console.log("DEBUG: Application initialization promise resolved.");
   } catch (error) {
     console.error(
-      `An error occurred during initialization for army ${armyIdToLoad}:`,
+      `DEBUG: An error occurred during initialization for army ${armyIdToLoad}:`,
       error
     );
     mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">An error occurred while loading the army (${
