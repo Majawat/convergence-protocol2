@@ -96,7 +96,7 @@ function displayMissionSnapshot(missionsData) {
 }
 
 /**
- * Renders a snapshot of the top players on the leaderboard.
+ * Renders a snapshot of the leaderboard as a table.
  * @param {object | null} campaignData - The loaded campaign data.
  */
 function displayLeaderboardSnapshot(campaignData) {
@@ -107,31 +107,28 @@ function displayLeaderboardSnapshot(campaignData) {
     !campaignData.armies ||
     campaignData.armies.length === 0
   ) {
-    leaderboardSnapshotElement.innerHTML = `<p class="text-muted">No campaign data available for leaderboard.</p>`;
+    leaderboardSnapshotElement.innerHTML = `<p class="text-muted p-3">No campaign data available for leaderboard.</p>`; // Added padding
     return;
   }
 
   const basePoints = campaignData.basePoints || 0;
   const armies = campaignData.armies;
 
-  // Calculate leaderboard data (same logic as campaign.js)
+  // Calculate leaderboard data
   const leaderboardData = armies.map((army) => {
     const wins = army.wins || 0;
     const losses = army.losses || 0;
     const earnedVP = army.earnedVP || 0;
-    const objectives = army.objectives || 0;
-    const earnedPts = army.earnedPts || 0;
+    const objectives = army.objectives || 0; // Not displayed in snapshot, but needed for sorting potentially
     const totalVP = wins * 2 + earnedVP;
     const totalGames = wins + losses;
     const positionScore = totalGames > 0 ? totalVP / totalGames : 0;
-    // Note: maxArmyPoints calculation is not needed for snapshot display, only for sorting logic used previously
-    // const maxArmyPoints = basePoints + (150 * wins) + (300 * losses) + earnedPts + (75 * objectives);
 
     return {
       player: army.player || "N/A",
       armyName: army.armyName || "Unnamed Army",
       vp: totalVP,
-      wins: wins, // Needed for sorting tie-breaker
+      wins: wins,
       positionScore: positionScore,
     };
   });
@@ -144,36 +141,48 @@ function displayLeaderboardSnapshot(campaignData) {
     return b.wins - a.wins;
   });
 
-  // Display top 3 (or fewer if less than 3 players)
-  const topPlayers = leaderboardData.slice(0, 3);
+  // --- UPDATED: Display ALL players in a table ---
+  // const topPlayers = leaderboardData.slice(0, 3); // REMOVED slice
 
-  if (topPlayers.length === 0) {
-    leaderboardSnapshotElement.innerHTML = `<p class="text-muted">No players on leaderboard yet.</p>`;
+  if (leaderboardData.length === 0) {
+    // Check leaderboardData instead of topPlayers
+    leaderboardSnapshotElement.innerHTML = `<p class="text-muted p-3">No players on leaderboard yet.</p>`; // Added padding
     return;
   }
 
-  let listHTML = '<ul class="list-group list-group-flush">';
-  topPlayers.forEach((player, index) => {
-    // Now calls the globally accessible renderHTML helper
-    listHTML += `
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>
-                    <span class="badge bg-secondary rounded-pill me-2">${
-                      index + 1
-                    }</span>
-                    <strong>${renderHTML(player.player)}</strong> (${renderHTML(
-      player.armyName
-    )})
-                </span>
-                <span class="badge bg-primary rounded-pill">${
+  // Use table instead of list group
+  let tableHTML = `
+        <table class="table table-sm table-hover leaderboard-snapshot-table mb-0">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Player</th>
+                    <th>Army</th>
+                    <th>VP</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+  leaderboardData.forEach((player, index) => {
+    // Iterate over leaderboardData
+    tableHTML += `
+            <tr>
+                <td><span class="badge bg-secondary rounded-pill">${
+                  index + 1
+                }</span></td>
+                <td>${renderHTML(player.player)}</td>
+                <td>${renderHTML(player.armyName)}</td>
+                <td><span class="badge bg-primary rounded-pill">${
                   player.vp
-                } VP</span>
-            </li>
+                }</span></td>
+            </tr>
         `;
   });
-  listHTML += "</ul>";
+  tableHTML += `
+            </tbody>
+        </table>`;
 
-  leaderboardSnapshotElement.innerHTML = listHTML;
+  leaderboardSnapshotElement.innerHTML = tableHTML;
 }
 
 // --- Initialization ---
@@ -187,10 +196,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     displayMissionSnapshot(dashboardData.missionsData);
     displayLeaderboardSnapshot(dashboardData.campaignData);
   } else {
-    // Handle cases where data loading failed (error shown in loadDashboardData)
+    // Handle cases where data loading failed
     if (missionSnapshotElement)
-      missionSnapshotElement.innerHTML = `<p class="text-danger">Could not load mission data.</p>`;
+      missionSnapshotElement.innerHTML = `<p class="text-danger p-3">Could not load mission data.</p>`; // Added padding
     if (leaderboardSnapshotElement)
-      leaderboardSnapshotElement.innerHTML = `<p class="text-danger">Could not load leaderboard data.</p>`;
+      leaderboardSnapshotElement.innerHTML = `<p class="text-danger p-3">Could not load leaderboard data.</p>`; // Added padding
   }
 });

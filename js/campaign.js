@@ -1,7 +1,7 @@
 /**
  * @fileoverview Logic for the Campaign Status page.
  * Fetches campaign data, mission data, battle reports, calculates leaderboard,
- * and updates the UI.
+ * and updates the UI. Includes logic to handle anchor links after dynamic load.
  */
 
 // Import necessary functions from other modules
@@ -22,7 +22,7 @@ let campaignTitleElement;
 let currentMissionDisplayElement;
 let leaderboardDisplayElement;
 let pastMissionsDisplayElement;
-let upcomingMissionsDisplayElement; // <-- New Reference
+let upcomingMissionsDisplayElement;
 let battleReportModalBodyElement;
 let battleReportModalLabelElement;
 let battleReportModal; // Bootstrap Modal instance
@@ -39,7 +39,7 @@ function initializeUIReferences() {
   pastMissionsDisplayElement = document.getElementById("past-missions-display");
   upcomingMissionsDisplayElement = document.getElementById(
     "upcoming-missions-display"
-  ); // <-- Get New Element
+  );
   battleReportModalBodyElement = document.getElementById(
     "battleReportModalBody"
   );
@@ -108,7 +108,11 @@ async function loadAllCampaignPageData() {
     return { campaignData, missionsData, battleReportsData };
   } catch (error) {
     console.error("Error loading campaign page data:", error);
-    showToast(`Error loading campaign page: ${error.message}`, "Error");
+    // Use showToast if available
+    if (typeof showToast === "function") {
+      showToast(`Error loading campaign page: ${error.message}`, "Error");
+    }
+    // Display error state in UI elements
     if (campaignTitleElement)
       campaignTitleElement.textContent = "Error Loading Campaign";
     if (currentMissionDisplayElement)
@@ -118,7 +122,7 @@ async function loadAllCampaignPageData() {
     if (pastMissionsDisplayElement)
       pastMissionsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Could not load battle reports.</div>`;
     if (upcomingMissionsDisplayElement)
-      upcomingMissionsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Could not load upcoming missions.</div>`; // <-- Error handling for new section
+      upcomingMissionsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Could not load upcoming missions.</div>`;
     return null;
   }
 }
@@ -143,11 +147,10 @@ function renderHTML(content) {
  */
 function displayCurrentMission(missionsData) {
   if (!currentMissionDisplayElement) return;
-
   const currentMission = missionsData?.missions?.find(
     (m) => m.status === "current"
   );
-
+  // ... (rest of function remains the same as previous version) ...
   if (currentMission) {
     let missionHTML = `
             <div class="card shadow-sm">
@@ -242,11 +245,11 @@ function displayCurrentMission(missionsData) {
                      }
                 </div>
                 <div class="card-footer text-muted">
-                    ${
-                      currentMission.points
-                        ? `Base Points: ${currentMission.points}`
-                        : ""
-                    } ${
+                   Status: ${currentMission.status} ${
+      currentMission.points
+        ? ` | Recommended Points: ${currentMission.points}`
+        : ""
+    } ${
       currentMission.datetime
         ? `| Scheduled: ${new Date(currentMission.datetime).toLocaleString()}`
         : ""
@@ -270,24 +273,20 @@ function displayLeaderboard(campaignData) {
       leaderboardDisplayElement.innerHTML = `<div class="alert alert-warning" role="alert">Could not display leaderboard.</div>`;
     return;
   }
-
+  // ... (rest of function remains the same as previous version) ...
   const basePoints = campaignData.basePoints || 0;
   const armies = campaignData.armies;
-
   const leaderboardData = armies.map((army) => {
     const wins = army.wins || 0;
     const losses = army.losses || 0;
     const earnedVP = army.earnedVP || 0;
     const objectives = army.objectives || 0;
     const earnedPts = army.earnedPts || 0;
-
     const totalVP = wins * 2 + earnedVP;
     const totalGames = wins + losses;
     const positionScore = totalGames > 0 ? totalVP / totalGames : 0;
-
     const maxArmyPoints =
       basePoints + 150 * wins + 300 * losses + earnedPts + 75 * objectives;
-
     return {
       player: army.player || "N/A",
       armyName: army.armyName || "Unnamed Army",
@@ -299,17 +298,12 @@ function displayLeaderboard(campaignData) {
       positionScore: positionScore,
     };
   });
-
   leaderboardData.sort((a, b) => {
-    if (b.positionScore !== a.positionScore) {
+    if (b.positionScore !== a.positionScore)
       return b.positionScore - a.positionScore;
-    }
-    if (b.vp !== a.vp) {
-      return b.vp - a.vp;
-    }
+    if (b.vp !== a.vp) return b.vp - a.vp;
     return b.wins - a.wins;
   });
-
   let tableHTML = `
         <table class="table table-striped table-hover table-sm leaderboard-table">
             <thead class="table-dark">
@@ -325,13 +319,12 @@ function displayLeaderboard(campaignData) {
             </thead>
             <tbody>
     `;
-
   leaderboardData.forEach((army, index) => {
     tableHTML += `
             <tr>
                 <td>${index + 1}</td>
-                <td>${army.player}</td>
-                <td>${army.armyName}</td>
+                <td>${renderHTML(army.player)}</td>
+                <td>${renderHTML(army.armyName)}</td>
                 <td>${army.vp}</td>
                 <td>${army.wins}-${army.losses}</td>
                 <td>${army.objectives}</td>
@@ -339,12 +332,10 @@ function displayLeaderboard(campaignData) {
             </tr>
         `;
   });
-
   tableHTML += `
             </tbody>
         </table>
     `;
-
   leaderboardDisplayElement.innerHTML = tableHTML;
 }
 
@@ -354,21 +345,17 @@ function displayLeaderboard(campaignData) {
  */
 function displayPastMissions(missionsData) {
   if (!pastMissionsDisplayElement) return;
-
+  // ... (rest of function remains the same as previous version) ...
   const completedMissions =
     missionsData?.missions?.filter(
       (m) => m.status === "completed" && m.battleReportFile
     ) || [];
-
   if (completedMissions.length === 0) {
     pastMissionsDisplayElement.innerHTML = `<p class="text-muted">No completed missions with battle reports found.</p>`;
     return;
   }
-
   completedMissions.sort((a, b) => (b.number || 0) - (a.number || 0));
-
   let reportsHTML = '<div class="list-group">';
-
   completedMissions.forEach((mission) => {
     reportsHTML += `
             <button type="button" class="list-group-item list-group-item-action view-report-btn"
@@ -391,10 +378,8 @@ function displayPastMissions(missionsData) {
             </button>
         `;
   });
-
   reportsHTML += "</div>";
   pastMissionsDisplayElement.innerHTML = reportsHTML;
-
   document.querySelectorAll(".view-report-btn").forEach((button) => {
     button.addEventListener("click", handleViewReportClick);
   });
@@ -406,20 +391,15 @@ function displayPastMissions(missionsData) {
  */
 function displayUpcomingMissions(missionsData) {
   if (!upcomingMissionsDisplayElement) return;
-
+  // ... (rest of function remains the same as previous version) ...
   const upcomingMissions =
     missionsData?.missions?.filter((m) => m.status === "upcoming") || [];
-
   if (upcomingMissions.length === 0) {
     upcomingMissionsDisplayElement.innerHTML = `<p class="text-muted">No upcoming missions scheduled.</p>`;
     return;
   }
-
-  // Sort upcoming missions by number ascending
   upcomingMissions.sort((a, b) => (a.number || 0) - (b.number || 0));
-
   let upcomingHTML = '<div class="list-group">';
-
   upcomingMissions.forEach((mission) => {
     upcomingHTML += `
             <div class="list-group-item upcoming-mission-item">
@@ -427,9 +407,9 @@ function displayUpcomingMissions(missionsData) {
                     <h6 class="mb-1">Mission ${mission.number}: ${
       renderHTML(mission.title) || "Upcoming Mission"
     }</h6>
-                    <small class="text-muted">${mission.month || ""}${
-      mission.points ? ` | ${mission.points}pts` : ""
-    }</small>
+                    <small class="text-muted">${
+                      renderHTML(mission.month) || ""
+                    }${mission.points ? ` | ${mission.points}pts` : ""}</small>
                 </div>
                 ${
                   mission.overview
@@ -441,7 +421,6 @@ function displayUpcomingMissions(missionsData) {
             </div>
         `;
   });
-
   upcomingHTML += "</div>";
   upcomingMissionsDisplayElement.innerHTML = upcomingHTML;
 }
@@ -471,24 +450,29 @@ function formatTextToParagraphs(text = "") {
  */
 function showBattleReportModal(missionId) {
   const reportData = battleReportsCache[missionId];
-
+  // ... (rest of function remains the same as previous version) ...
   if (
     !battleReportModal ||
     !battleReportModalBodyElement ||
     !battleReportModalLabelElement ||
     !reportData
   ) {
-    showToast(
-      `Could not display details for Mission ${missionId}. Report data missing.`,
-      "Error"
-    );
+    // Use showToast if available
+    if (typeof showToast === "function") {
+      showToast(
+        `Could not display details for Mission ${missionId}. Report data missing.`,
+        "Error"
+      );
+    } else {
+      console.error(
+        `Could not display details for Mission ${missionId}. Report data missing.`
+      );
+    }
     if (battleReportModal) battleReportModal.hide();
     return;
   }
-
   battleReportModalLabelElement.textContent =
     renderHTML(reportData.title) || `Mission ${reportData.missionId} Report`;
-
   let bodyHTML = `<p><strong>Participants:</strong> ${
     reportData.participants
       ?.map(
@@ -501,7 +485,6 @@ function showBattleReportModal(missionId) {
       )
       .join(", ") || "N/A"
   }</p><hr>`;
-
   if (reportData.rounds && reportData.rounds.length > 0) {
     bodyHTML += "<h4>Round Summaries</h4>";
     reportData.rounds.forEach((round) => {
@@ -514,28 +497,25 @@ function showBattleReportModal(missionId) {
                     ${formattedDescription}
                     ${
                       round.image
-                        ? `<figure class="figure text-center mt-2">
-                             <img src="${round.image}" alt="Round ${
+                        ? `<figure class="figure text-center mt-2"> <img src="${
+                            round.image
+                          }" alt="Round ${
                             round.number
                           } image" class="img-fluid battle-report-img figure-img" onerror="this.style.display='none'; this.parentElement.style.display='none'; console.warn('Failed to load report image: ${
                             round.image
-                          }')">
-                             ${
-                               round.image_caption
-                                 ? `<figcaption class="figure-caption">${renderHTML(
-                                     round.image_caption
-                                   )}</figcaption>`
-                                 : ""
-                             }
-                           </figure>`
+                          }')"> ${
+                            round.image_caption
+                              ? `<figcaption class="figure-caption">${renderHTML(
+                                  round.image_caption
+                                )}</figcaption>`
+                              : ""
+                          } </figure>`
                         : ""
                     }
-                </div>
-            `;
+                </div> `;
     });
     bodyHTML += "<hr>";
   }
-
   if (reportData.keyMoments && reportData.keyMoments.length > 0) {
     bodyHTML += "<h4>Key Moments</h4><ul class='list-unstyled'>";
     reportData.keyMoments.forEach((moment) => {
@@ -545,11 +525,9 @@ function showBattleReportModal(missionId) {
     });
     bodyHTML += "</ul><hr>";
   }
-
   bodyHTML += `<h5>Conclusion</h5>${formatTextToParagraphs(
     reportData.conclusion
   )}`;
-
   battleReportModalBodyElement.innerHTML = bodyHTML;
   if (battleReportModal) battleReportModal.show();
 }
@@ -564,28 +542,32 @@ async function handleViewReportClick(event) {
   const button = event.currentTarget;
   const missionId = button.dataset.missionId;
   const reportPath = button.dataset.reportPath;
-
+  // ... (rest of function remains the same as previous version) ...
   if (!missionId || !reportPath) {
-    showToast(
-      "Could not determine which report to view (missing ID or path).",
-      "Error"
-    );
+    // Use showToast if available
+    if (typeof showToast === "function") {
+      showToast(
+        "Could not determine which report to view (missing ID or path).",
+        "Error"
+      );
+    } else {
+      console.error(
+        "Could not determine which report to view (missing ID or path)."
+      );
+    }
     return;
   }
-
   if (battleReportsCache[missionId]) {
     console.log(`Showing cached report for Mission ${missionId}`);
     showBattleReportModal(missionId);
     return;
   }
-
   console.log(`Fetching report for Mission ${missionId} from ${reportPath}`);
   if (battleReportModalBodyElement)
     battleReportModalBodyElement.innerHTML = `<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading report...</p></div>`;
   if (battleReportModalLabelElement)
     battleReportModalLabelElement.textContent = "Loading...";
   if (battleReportModal) battleReportModal.show();
-
   try {
     const reportData = await loadBattleReport(reportPath);
     if (reportData) {
@@ -594,20 +576,57 @@ async function handleViewReportClick(event) {
       showBattleReportModal(reportData.missionId);
     } else {
       if (battleReportModal) battleReportModal.hide();
-      showToast(
-        `Could not load details for Mission ${missionId}. File not found or invalid.`,
-        "Error"
-      );
+      if (typeof showToast === "function") {
+        showToast(
+          `Could not load details for Mission ${missionId}. File not found or invalid.`,
+          "Error"
+        );
+      } else {
+        console.error(
+          `Could not load details for Mission ${missionId}. File not found or invalid.`
+        );
+      }
     }
   } catch (error) {
     if (battleReportModal) battleReportModal.hide();
     console.error(`Error loading battle report ${reportPath}:`, error);
-    showToast(`Error loading report: ${error.message}`, "Error");
+    if (typeof showToast === "function") {
+      showToast(`Error loading report: ${error.message}`, "Error");
+    }
+  }
+}
+
+/**
+ * Checks the URL hash and scrolls to the corresponding element if found.
+ * Should be called after dynamic content is loaded.
+ */
+function handleFragmentIdentifierScroll() {
+  const hash = window.location.hash;
+  if (hash) {
+    // Use requestAnimationFrame to ensure scrolling happens after paint
+    requestAnimationFrame(() => {
+      try {
+        // Remove the '#' character
+        const elementId = hash.substring(1);
+        const targetElement = document.getElementById(elementId);
+
+        if (targetElement) {
+          console.log(`Scrolling to element: #${elementId}`);
+          targetElement.scrollIntoView({
+            behavior: "smooth", // Use smooth scrolling
+            block: "start", // Align top of element with top of viewport
+          });
+        } else {
+          console.warn(`Element with ID ${elementId} not found for scrolling.`);
+        }
+      } catch (e) {
+        console.error("Error scrolling to fragment:", e);
+      }
+    });
   }
 }
 
 // --- Initialization ---
-
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("Campaign JS loaded.");
   initializeUIReferences();
@@ -628,5 +647,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     displayLeaderboard(campaignData);
     displayPastMissions(missionsData);
     displayUpcomingMissions(missionsData);
+
+    // --- Call the scroll handler AFTER rendering ---
+    handleFragmentIdentifierScroll();
   }
+  // Error handling for data loading is done within loadAllCampaignPageData
 });
