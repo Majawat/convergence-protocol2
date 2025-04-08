@@ -28,7 +28,7 @@ import {
   setSelectedDoctrine,
   setUnderdogPoints,
 } from "./state.js";
-import { loadArmyState, saveArmyState } from "./storage.js";
+import { loadArmyState, saveArmyState, resetArmyState } from "./storage.js";
 import { findTargetModelForWound, checkHalfStrength } from "./gameLogic.js";
 import {
   updateModelDisplay,
@@ -812,8 +812,11 @@ function handleInteractionClick(event) {
   const spellModal = event.target.closest("#viewSpellsModal");
   const stratagemModal = event.target.closest("#stratagemModal");
   const upDisplay = event.target.closest("#underdog-points-display");
+  const resetButton = event.target.closest("#reset-army-data-button");
 
-  if (unitCard) {
+  if (resetButton) {
+    _handleResetArmyDataClick();
+  } else if (unitCard) {
     const cardUnitId = unitCard.dataset.unitId;
     const armyId = unitCard.dataset.armyId;
     if (!cardUnitId || !armyId) return;
@@ -989,6 +992,56 @@ function _handleUnderdogPointAdjustClick(adjustment) {
   }
 
   console.log(`Manual UP adjustment: ${adjustment}. New UP: ${updatedPoints}`);
+}
+
+/**
+ * Handles click on the "Reset Army Data" button.
+ * Confirms with the user, clears storage, and reloads the page.
+ * @private
+ */
+async function _handleResetArmyDataClick() {
+  const armyId = getCurrentArmyId();
+  if (!armyId) {
+    showToast("Cannot reset: No army is currently loaded.", "Error");
+    return;
+  }
+  const armyData = getLoadedArmyData(); // Get data for the name
+  const armyName = armyData?.meta?.name || `Army (${armyId})`;
+
+  // Confirmation Dialog
+  const confirmed = confirm(
+    `WARNING!\n\nThis will permanently delete all saved progress (HP, status, CP, UP, doctrine selection) for "${armyName}" and reload its data from scratch.\n\nAre you absolutely sure you want to proceed?`
+  );
+
+  if (confirmed) {
+    console.log(`Resetting data for army ${armyId}...`);
+
+    // 1. Clear Persistent State for this army
+    resetArmyState(armyId); // Clears localStorage item
+
+    // 2. Clear Session Caches (Optional but recommended)
+    // Clear points cache to force recalculation if user navigates back/forth
+    sessionStorage.removeItem(config.CAMPAIGN_POINTS_CACHE_KEY);
+    // Could also clear book/rules/doctrine caches if needed, but points is most relevant here
+    // sessionStorage.removeItem(config.ARMY_BOOKS_CACHE_KEY);
+    // sessionStorage.removeItem(config.DOCTRINES_CACHE_KEY);
+    // const rulesCacheKey = config.COMMON_RULES_CACHE_KEY_PREFIX + config.GAME_SYSTEM_ID;
+    // sessionStorage.removeItem(rulesCacheKey);
+    console.log("Cleared relevant session storage caches.");
+
+    // 3. Show feedback and reload
+    showToast(
+      `Resetting data for ${armyName}... Page will reload.`,
+      "Resetting",
+      3000
+    );
+    // Use setTimeout to allow toast to show before reload potentially interrupts it
+    setTimeout(() => {
+      window.location.reload();
+    }, 500); // Short delay
+  } else {
+    console.log("Army data reset cancelled by user.");
+  }
 }
 
 /**
