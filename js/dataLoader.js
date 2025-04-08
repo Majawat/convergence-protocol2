@@ -24,6 +24,37 @@ export async function loadCampaignData() {
 }
 
 /**
+ * Fetches the random events data file (e.g., data/rules/random-events.json).
+ * Assumes a structure like { "events": [...] }
+ * @returns {Promise<object|null>} The parsed random events data or null on error.
+ */
+export async function loadRandomEventsData() {
+  const eventsUrl = "./data/rules/random-events.json"; // Adjust path as needed
+  try {
+    console.log(`Fetching random events data from: ${eventsUrl}`);
+    const response = await fetch(eventsUrl);
+    if (!response.ok) {
+      throw new Error(
+        `HTTP error loading random events! status: ${response.status}`
+      );
+    }
+    const data = await response.json();
+    // Basic validation
+    if (data && Array.isArray(data.events)) {
+      console.log("Random events data loaded successfully.");
+      return data;
+    } else {
+      console.warn("Invalid or empty random events data structure found.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error loading random events data:", error);
+    // Re-throw error to be caught by the caller (e.g., in rules.js)
+    throw error;
+  }
+}
+
+/**
  * Fetches the missions data file (e.g., data/missions.json).
  * Assumes a structure like { "missions": [...] }
  * @returns {Promise<object|null>} The parsed missions data or null on error.
@@ -37,19 +68,25 @@ export async function loadMissionsData() {
     if (!response.ok) {
       // It's okay if missions.json doesn't exist, return null gracefully
       if (response.status === 404) {
-        console.warn("missions.json not found. Proceeding without mission details.");
+        console.warn(
+          "missions.json not found. Proceeding without mission details."
+        );
         return null;
       }
-      throw new Error(`HTTP error loading missions! status: ${response.status}`);
+      throw new Error(
+        `HTTP error loading missions! status: ${response.status}`
+      );
     }
     const data = await response.json();
     // Basic validation
     if (data && Array.isArray(data.missions)) {
-        console.log("Missions data loaded successfully.");
-        return data;
+      console.log("Missions data loaded successfully.");
+      return data;
     } else {
-        console.warn("Invalid or empty missions data structure found in missions.json.");
-        return null;
+      console.warn(
+        "Invalid or empty missions data structure found in missions.json."
+      );
+      return null;
     }
   } catch (error) {
     console.error("Error loading missions data:", error);
@@ -66,51 +103,55 @@ export async function loadMissionsData() {
  */
 export async function loadBattleReport(missionIdOrPath) {
   if (missionIdOrPath === undefined || missionIdOrPath === null) {
-      console.error("Invalid missionId or path provided for loadBattleReport");
-      return null;
+    console.error("Invalid missionId or path provided for loadBattleReport");
+    return null;
   }
 
   let reportUrl;
   let missionId;
 
   // Check if it's a path or just an ID
-  if (typeof missionIdOrPath === 'string' && missionIdOrPath.includes('/')) {
-      reportUrl = missionIdOrPath;
-      // Attempt to extract mission ID from path if needed, otherwise set to null
-      const match = missionIdOrPath.match(/mission(\d+)\.json$/);
-      missionId = match ? parseInt(match[1], 10) : null;
-      console.log(`Fetching battle report from path: ${reportUrl}`);
+  if (typeof missionIdOrPath === "string" && missionIdOrPath.includes("/")) {
+    reportUrl = missionIdOrPath;
+    // Attempt to extract mission ID from path if needed, otherwise set to null
+    const match = missionIdOrPath.match(/mission(\d+)\.json$/);
+    missionId = match ? parseInt(match[1], 10) : null;
+    console.log(`Fetching battle report from path: ${reportUrl}`);
   } else {
-      // Assume it's an ID and construct the path
-      missionId = parseInt(missionIdOrPath, 10);
-      if (isNaN(missionId)) {
-           console.error("Invalid missionId provided:", missionIdOrPath);
-           return null;
-      }
-      reportUrl = `./data/battle-reports/mission${missionId}.json`; // Path convention
-      console.log(`Fetching battle report for mission ${missionId} from: ${reportUrl}`);
+    // Assume it's an ID and construct the path
+    missionId = parseInt(missionIdOrPath, 10);
+    if (isNaN(missionId)) {
+      console.error("Invalid missionId provided:", missionIdOrPath);
+      return null;
+    }
+    reportUrl = `./data/battle-reports/mission${missionId}.json`; // Path convention
+    console.log(
+      `Fetching battle report for mission ${missionId} from: ${reportUrl}`
+    );
   }
 
   try {
-      const response = await fetch(reportUrl);
-      if (!response.ok) {
-          // Handle 404 gracefully - the report might just not exist yet
-          if (response.status === 404) {
-              console.warn(`Battle report not found at: ${reportUrl}`);
-              return null;
-          }
-          throw new Error(`HTTP error loading battle report ${reportUrl}! status: ${response.status}`);
+    const response = await fetch(reportUrl);
+    if (!response.ok) {
+      // Handle 404 gracefully - the report might just not exist yet
+      if (response.status === 404) {
+        console.warn(`Battle report not found at: ${reportUrl}`);
+        return null;
       }
-      const data = await response.json();
-      console.log(`Battle report loaded successfully from ${reportUrl}.`);
-      // Add missionId to the data object if it wasn't inferred from path or is missing
-      if (missionId !== null && !data.missionId) {
-          data.missionId = missionId;
-      }
-      return data;
+      throw new Error(
+        `HTTP error loading battle report ${reportUrl}! status: ${response.status}`
+      );
+    }
+    const data = await response.json();
+    console.log(`Battle report loaded successfully from ${reportUrl}.`);
+    // Add missionId to the data object if it wasn't inferred from path or is missing
+    if (missionId !== null && !data.missionId) {
+      data.missionId = missionId;
+    }
+    return data;
   } catch (error) {
-      console.error(`Error loading battle report from ${reportUrl}:`, error);
-      return null; // Allow Promise.allSettled or individual catches to handle it
+    console.error(`Error loading battle report from ${reportUrl}:`, error);
+    return null; // Allow Promise.allSettled or individual catches to handle it
   }
 }
 

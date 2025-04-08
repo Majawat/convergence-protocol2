@@ -214,7 +214,7 @@
       "id": "66",
       "title": "Time Warp",
       "description": "A unit that was fleeing the battlefield ran into a psychic anomaly and warped to a different time and dimension.",
-      "effect": "Select one random unit that was destroyed and place it in a warp zone. The warp zone should have an area of 2'x2' and 3-5 pieces of terrain, and the unit must be placed within 3\" of one of the zone's edges. Then place a Time Beast (Qua 3+, Def 3+, Claws (A6, AP(2)), Tough(6)) within 3\" of the opposing edge of the warp zone, which is controlled by an opponent. Roll to see who goes first and then play out the fight like a regular battle, until one of the two has been destroyed. If the Time Beast wins then the unit is dead and removed from the army sheet. If the unit wins then it gets +3 XP and scavenges 150pts. The unit may then join its army again at the end of the mission."
+      "effect": "Select one random unit that was destroyed and place it in a warp zone. The warp zone should have an area of 2'x2' and 3-5 pieces of terrain, and the unit must be placed within 3\" of one of the zone's edges. Then place a Time Beast (Qua 3+, Def 3+, Claws (A6, AP(2)), Tough(6)) within 3\" of the opposing edge of the warp zone, which is controlled by an opponent. \n\nRoll to see who goes first and then play out the fight like a regular battle, until one of the two has been destroyed. If the Time Beast wins then the unit is dead and removed from the army sheet. If the unit wins then it gets +3 XP and scavenges 150pts. The unit may then join its army again at the end of the mission."
     }
   ]
 }

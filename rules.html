@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rules Reference - OPR Tracker</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <script type="module" src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* Custom styles for rules page */
+      .accordion-button:not(.collapsed) {
+        color: var(--bs-primary-text-emphasis);
+        background-color: var(--bs-primary-bg-subtle);
+      }
+      /* --- REMOVED .rules-table styles --- */
+
+      .rule-name {
+        /* Now used in cards */
+        font-weight: bold;
+        color: var(--bs-info); /* Or another highlight color */
+        display: block; /* Ensure name is on its own line */
+        margin-bottom: 0.25rem;
+      }
+      /* Ensure list styling inside descriptions is visible */
+      .accordion-body ul,
+      .accordion-body ol {
+        padding-left: 1.5rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .accordion-body li {
+        margin-bottom: 0.25rem;
+      }
+
+      /* --- ADDED Card Styles --- */
+      .event-card {
+        height: 100%; /* Make cards in a row equal height */
+      }
+      .event-card .card-header {
+        font-weight: bold;
+      }
+      .event-card .card-body {
+        font-size: 0.9rem; /* Slightly smaller text in cards */
+      }
+      .event-card .effect-section {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--bs-border-color-translucent);
+      }
+      /* Specific formatting for Time Warp stats */
+      .time-warp-stats ul {
+        list-style: none;
+        padding-left: 0;
+      }
+      .time-warp-stats li {
+        margin-bottom: 0.1rem;
+      }
+    </style>
+  </head>
+  <body class="bg-body text-body">
+    <nav
+      class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm"
+    >
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">OPR Tracker</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="army.html">View Armies</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="campaign.html">Campaign Status</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="rules.html"
+                >Rules Reference</a
+              >
+            </li>
+          </ul>
+          <div class="dropdown">
+            <button
+              class="btn btn-sm btn-secondary dropdown-toggle"
+              type="button"
+              id="themeDropdown"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="bi bi-circle-half theme-icon-active"></i> Theme
+            </button>
+            <ul
+              class="dropdown-menu dropdown-menu-end"
+              aria-labelledby="themeDropdown"
+            >
+              <li>
+                <button
+                  class="dropdown-item d-flex align-items-center"
+                  type="button"
+                  data-bs-theme-value="light"
+                >
+                  <i class="bi bi-sun-fill me-2"></i> Light
+                </button>
+              </li>
+              <li>
+                <button
+                  class="dropdown-item d-flex align-items-center"
+                  type="button"
+                  data-bs-theme-value="dark"
+                >
+                  <i class="bi bi-moon-stars-fill me-2"></i> Dark
+                </button>
+              </li>
+              <li>
+                <button
+                  class="dropdown-item d-flex align-items-center"
+                  type="button"
+                  data-bs-theme-value="auto"
+                >
+                  <i class="bi bi-circle-half me-2"></i> Auto
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container mt-4">
+      <h1 class="mb-4">Rules Reference</h1>
+
+      <div class="accordion" id="rulesAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingCoreRules">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseCoreRules"
+              aria-expanded="false"
+              aria-controls="collapseCoreRules"
+            >
+              <i class="bi bi-book-half me-2"></i> Core Rules (GF v3.4.1)
+            </button>
+          </h2>
+          <div
+            id="collapseCoreRules"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingCoreRules"
+            data-bs-parent="#rulesAccordion"
+          >
+            <div class="accordion-body">
+              <p class="text-muted">
+                Core rules content to be added here by transcribing from the
+                Beginner's Guide PDF.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingCampaignRules">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseCampaignRules"
+              aria-expanded="false"
+              aria-controls="collapseCampaignRules"
+            >
+              <i class="bi bi-map-fill me-2"></i> Campaign Rules (v3.4.0)
+            </button>
+          </h2>
+          <div
+            id="collapseCampaignRules"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingCampaignRules"
+            data-bs-parent="#rulesAccordion"
+          >
+            <div class="accordion-body">
+              <p class="text-muted">
+                Campaign rules content to be added here by transcribing from the
+                Campaign Rules PDF.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingRandomEvents">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseRandomEvents"
+              aria-expanded="false"
+              aria-controls="collapseRandomEvents"
+            >
+              <i class="bi bi-dice-3-fill me-2"></i> Random Events
+            </button>
+          </h2>
+          <div
+            id="collapseRandomEvents"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingRandomEvents"
+            data-bs-parent="#rulesAccordion"
+          >
+            <div class="accordion-body">
+              <p class="text-muted small">
+                At the start of each round, roll D6. On a 5+, roll 2D6 (reading
+                them like D66, e.g., a 2 and a 5 is 25) and consult the events
+                below.
+              </p>
+              <div id="random-events-display">
+                <div class="text-center p-3">
+                  <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="ms-2">Loading Random Events...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingGlossary">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseGlossary"
+              aria-expanded="false"
+              aria-controls="collapseGlossary"
+            >
+              <i class="bi bi-journal-text me-2"></i> Glossary (Future)
+            </button>
+          </h2>
+          <div
+            id="collapseGlossary"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingGlossary"
+            data-bs-parent="#rulesAccordion"
+          >
+            <div class="accordion-body">
+              <p class="text-muted">
+                A glossary of special rules and terms will be added here later.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="container mt-5 py-3 border-top">
+      <p class="text-center text-muted">&copy; 2025 OPR Army Tracker</p>
+    </footer>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <template id="toastTemplate">
+        <div
+          class="toast"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <div class="toast-header">
+            <strong class="me-auto toast-title">Notification</strong>
+            <small class="text-muted toast-timestamp">Just now</small>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="toast-body" style="white-space: pre-wrap">
+            Toast message goes here.
+          </div>
+        </div>
+      </template>
+      <div
+        id="themeToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <strong class="me-auto">Theme Change</strong>
+          <small>Just now</small>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="toast-body"></div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module" src="js/rules.js"></script>
+  </body>
+</html>
