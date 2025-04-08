@@ -23,7 +23,88 @@ export async function loadCampaignData() {
   }
 }
 
-// <-- ADDED: Function to load doctrines -->
+/**
+ * Fetches the missions data file (e.g., missions.json).
+ * Assumes a structure like { "missions": [...] }
+ * @returns {Promise<object|null>} The parsed missions data or null on error.
+ */
+export async function loadMissionsData() {
+  // Define the path to your missions file in config.js or directly here
+  const missionsUrl = "./data/missions.json"; // Adjust path as needed
+  try {
+    console.log(`Fetching missions data from: ${missionsUrl}`);
+    const response = await fetch(missionsUrl);
+    if (!response.ok) {
+      // It's okay if missions.json doesn't exist, return null gracefully
+      if (response.status === 404) {
+        console.warn(
+          "missions.json not found. Proceeding without mission details."
+        );
+        return null;
+      }
+      throw new Error(
+        `HTTP error loading missions! status: ${response.status}`
+      );
+    }
+    const data = await response.json();
+    // Basic validation
+    if (data && Array.isArray(data.missions)) {
+      console.log("Missions data loaded successfully.");
+      return data;
+    } else {
+      console.warn("Invalid or empty missions data structure found.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error loading missions data:", error);
+    // Don't throw, allow the app to continue without mission data
+    return null;
+  }
+}
+
+/**
+ * Fetches a specific battle report JSON file based on mission ID.
+ * @param {number|string} missionId - The ID of the mission report to fetch.
+ * @returns {Promise<object|null>} The parsed battle report data or null on error.
+ */
+export async function loadBattleReport(missionId) {
+  if (missionId === undefined || missionId === null) {
+    console.error("Invalid missionId provided for loadBattleReport");
+    return null;
+  }
+  // Construct the path assuming a convention like 'missionX.json'
+  const reportUrl = `./data/battle-reports/mission${missionId}.json`;
+  try {
+    console.log(`Fetching battle report from: ${reportUrl}`);
+    const response = await fetch(reportUrl);
+    if (!response.ok) {
+      // Handle 404 gracefully - the report might just not exist yet
+      if (response.status === 404) {
+        console.warn(`Battle report for mission ${missionId} not found.`);
+        return null;
+      }
+      throw new Error(
+        `HTTP error loading battle report ${missionId}! status: ${response.status}`
+      );
+    }
+    const data = await response.json();
+    console.log(`Battle report for mission ${missionId} loaded successfully.`);
+    // Add missionId to the data object if it's not already there (useful for processing)
+    if (!data.missionId) {
+      data.missionId = parseInt(missionId, 10); // Ensure it's a number
+    }
+    return data;
+  } catch (error) {
+    console.error(
+      `Error loading battle report for mission ${missionId}:`,
+      error
+    );
+    // Re-throw or return null depending on how you want to handle errors upstream
+    // Returning null allows Promise.allSettled or individual catches to handle it
+    return null;
+  }
+}
+
 /**
  * Fetches the doctrines data file, utilizing sessionStorage.
  * @returns {Promise<object|null>} The parsed doctrines data or null on error.
