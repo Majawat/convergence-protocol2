@@ -18,42 +18,38 @@ export async function loadCampaignData() {
     return data;
   } catch (error) {
     console.error("Error loading campaign data:", error);
-    // Error display should be handled by the caller (app.js)
+    // Error display should be handled by the caller
     return null;
   }
 }
 
 /**
- * Fetches the missions data file (e.g., missions.json).
+ * Fetches the missions data file (e.g., data/missions.json).
  * Assumes a structure like { "missions": [...] }
  * @returns {Promise<object|null>} The parsed missions data or null on error.
  */
 export async function loadMissionsData() {
-  // Define the path to your missions file in config.js or directly here
-  const missionsUrl = "./data/missions.json"; // Adjust path as needed
+  // Define the path to your missions file
+  const missionsUrl = "./data/missions.json"; // Adjusted path based on project structure
   try {
     console.log(`Fetching missions data from: ${missionsUrl}`);
     const response = await fetch(missionsUrl);
     if (!response.ok) {
       // It's okay if missions.json doesn't exist, return null gracefully
       if (response.status === 404) {
-        console.warn(
-          "missions.json not found. Proceeding without mission details."
-        );
+        console.warn("missions.json not found. Proceeding without mission details.");
         return null;
       }
-      throw new Error(
-        `HTTP error loading missions! status: ${response.status}`
-      );
+      throw new Error(`HTTP error loading missions! status: ${response.status}`);
     }
     const data = await response.json();
     // Basic validation
     if (data && Array.isArray(data.missions)) {
-      console.log("Missions data loaded successfully.");
-      return data;
+        console.log("Missions data loaded successfully.");
+        return data;
     } else {
-      console.warn("Invalid or empty missions data structure found.");
-      return null;
+        console.warn("Invalid or empty missions data structure found in missions.json.");
+        return null;
     }
   } catch (error) {
     console.error("Error loading missions data:", error);
@@ -62,46 +58,59 @@ export async function loadMissionsData() {
   }
 }
 
+// --- UPDATED: Function to load a specific battle report ---
 /**
- * Fetches a specific battle report JSON file based on mission ID.
- * @param {number|string} missionId - The ID of the mission report to fetch.
+ * Fetches a specific battle report JSON file based on mission ID or file path.
+ * @param {number|string} missionIdOrPath - The ID of the mission report or the direct path to the JSON file.
  * @returns {Promise<object|null>} The parsed battle report data or null on error.
  */
-export async function loadBattleReport(missionId) {
-  if (missionId === undefined || missionId === null) {
-    console.error("Invalid missionId provided for loadBattleReport");
-    return null;
+export async function loadBattleReport(missionIdOrPath) {
+  if (missionIdOrPath === undefined || missionIdOrPath === null) {
+      console.error("Invalid missionId or path provided for loadBattleReport");
+      return null;
   }
-  // Construct the path assuming a convention like 'missionX.json'
-  const reportUrl = `./data/battle-reports/mission${missionId}.json`;
-  try {
-    console.log(`Fetching battle report from: ${reportUrl}`);
-    const response = await fetch(reportUrl);
-    if (!response.ok) {
-      // Handle 404 gracefully - the report might just not exist yet
-      if (response.status === 404) {
-        console.warn(`Battle report for mission ${missionId} not found.`);
-        return null;
+
+  let reportUrl;
+  let missionId;
+
+  // Check if it's a path or just an ID
+  if (typeof missionIdOrPath === 'string' && missionIdOrPath.includes('/')) {
+      reportUrl = missionIdOrPath;
+      // Attempt to extract mission ID from path if needed, otherwise set to null
+      const match = missionIdOrPath.match(/mission(\d+)\.json$/);
+      missionId = match ? parseInt(match[1], 10) : null;
+      console.log(`Fetching battle report from path: ${reportUrl}`);
+  } else {
+      // Assume it's an ID and construct the path
+      missionId = parseInt(missionIdOrPath, 10);
+      if (isNaN(missionId)) {
+           console.error("Invalid missionId provided:", missionIdOrPath);
+           return null;
       }
-      throw new Error(
-        `HTTP error loading battle report ${missionId}! status: ${response.status}`
-      );
-    }
-    const data = await response.json();
-    console.log(`Battle report for mission ${missionId} loaded successfully.`);
-    // Add missionId to the data object if it's not already there (useful for processing)
-    if (!data.missionId) {
-      data.missionId = parseInt(missionId, 10); // Ensure it's a number
-    }
-    return data;
+      reportUrl = `./data/battle-reports/mission${missionId}.json`; // Path convention
+      console.log(`Fetching battle report for mission ${missionId} from: ${reportUrl}`);
+  }
+
+  try {
+      const response = await fetch(reportUrl);
+      if (!response.ok) {
+          // Handle 404 gracefully - the report might just not exist yet
+          if (response.status === 404) {
+              console.warn(`Battle report not found at: ${reportUrl}`);
+              return null;
+          }
+          throw new Error(`HTTP error loading battle report ${reportUrl}! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(`Battle report loaded successfully from ${reportUrl}.`);
+      // Add missionId to the data object if it wasn't inferred from path or is missing
+      if (missionId !== null && !data.missionId) {
+          data.missionId = missionId;
+      }
+      return data;
   } catch (error) {
-    console.error(
-      `Error loading battle report for mission ${missionId}:`,
-      error
-    );
-    // Re-throw or return null depending on how you want to handle errors upstream
-    // Returning null allows Promise.allSettled or individual catches to handle it
-    return null;
+      console.error(`Error loading battle report from ${reportUrl}:`, error);
+      return null; // Allow Promise.allSettled or individual catches to handle it
   }
 }
 

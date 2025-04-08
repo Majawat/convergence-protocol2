@@ -54,7 +54,7 @@
           }
         ]
       },
-      "battleReportFile": "assets/json/battle-reports/mission1.json",
+      "battleReportFile": "data/battle-reports/mission1.json",
       "winner": "Alex",
       "winningArmy": "van Louen's Roughnecks"
     },
@@ -98,7 +98,7 @@
           }
         ]
       },
-      "battleReportFile": "assets/json/battle-reports/mission2.json",
+      "battleReportFile": "data/battle-reports/mission2.json",
       "winner": "Victoria",
       "winningArmy": "Galdoo'o naahlk wildigitkw"
     },
