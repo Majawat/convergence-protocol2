@@ -37,6 +37,16 @@
         margin-bottom: 0.5rem;
         border-radius: var(--bs-border-radius);
       }
+      /* Style for upcoming mission list items */
+      .upcoming-mission-item {
+        background-color: var(--bs-secondary-bg);
+      }
+      .upcoming-mission-item h6 {
+        margin-bottom: 0.1rem;
+      }
+      .upcoming-mission-item .text-muted {
+        font-size: 0.9em;
+      }
     </style>
   </head>
   <body class="bg-body text-body">
@@ -164,6 +174,17 @@
         </div>
       </section>
 
+      <section id="upcoming-missions-section" class="mb-4">
+        <h2>Upcoming Missions</h2>
+        <div id="upcoming-missions-display">
+          <div class="text-center">
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Loading Upcoming Missions...</span>
+          </div>
+        </div>
+      </section>
       <div
         class="modal fade"
         id="battleReportModal"

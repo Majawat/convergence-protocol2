@@ -8,8 +8,8 @@
 import { config } from "./config.js"; // Configuration constants
 import {
   loadCampaignData,
-  loadMissionsData, // Now implemented in dataLoader.js
-  loadBattleReport, // Now implemented in dataLoader.js
+  loadMissionsData,
+  loadBattleReport,
 } from "./dataLoader.js";
 import { showToast } from "./uiHelpers.js"; // For notifications
 
@@ -22,6 +22,7 @@ let campaignTitleElement;
 let currentMissionDisplayElement;
 let leaderboardDisplayElement;
 let pastMissionsDisplayElement;
+let upcomingMissionsDisplayElement; // <-- New Reference
 let battleReportModalBodyElement;
 let battleReportModalLabelElement;
 let battleReportModal; // Bootstrap Modal instance
@@ -36,6 +37,9 @@ function initializeUIReferences() {
   );
   leaderboardDisplayElement = document.getElementById("leaderboard-display");
   pastMissionsDisplayElement = document.getElementById("past-missions-display");
+  upcomingMissionsDisplayElement = document.getElementById(
+    "upcoming-missions-display"
+  ); // <-- Get New Element
   battleReportModalBodyElement = document.getElementById(
     "battleReportModalBody"
   );
@@ -59,48 +63,42 @@ function initializeUIReferences() {
  */
 async function loadAllCampaignPageData() {
   try {
-    // Fetch campaign data (essential)
     const campaignData = await loadCampaignData();
     if (!campaignData) {
       throw new Error("Failed to load essential campaign data.");
     }
 
-    // Fetch missions data (use cache if available)
     if (!missionsDataCache) {
       missionsDataCache = await loadMissionsData();
     }
-    const missionsData = missionsDataCache; // Use cached or freshly fetched data
+    const missionsData = missionsDataCache;
 
-    // Identify completed missions with battle report files from missionsData
     const completedMissions =
       missionsData?.missions?.filter(
         (m) => m.status === "completed" && m.battleReportFile
       ) || [];
 
-    // Fetch available battle reports based on completed missions list
     const battleReportPromises = completedMissions.map((mission) =>
-      loadBattleReport(mission.battleReportFile) // Load using the file path
+      loadBattleReport(mission.battleReportFile)
         .then((report) => {
           if (report && !report.missionId) {
-            // Add mission number if missing in the report itself
             report.missionId = mission.number;
           }
-          return report; // Return the loaded report (or null if load failed)
+          return report;
         })
         .catch((err) => {
           console.warn(
             `Failed to load battle report ${mission.battleReportFile}:`,
             err
           );
-          return null; // Return null for failed reports
+          return null;
         })
     );
 
     const battleReportsData = (await Promise.all(battleReportPromises)).filter(
       (report) => report !== null
-    ); // Filter out nulls from failed loads
+    );
 
-    // Store fetched reports in cache
     battleReportsData.forEach((report) => {
       if (report.missionId) {
         battleReportsCache[report.missionId] = report;
@@ -111,7 +109,6 @@ async function loadAllCampaignPageData() {
   } catch (error) {
     console.error("Error loading campaign page data:", error);
     showToast(`Error loading campaign page: ${error.message}`, "Error");
-    // Display error state in UI elements
     if (campaignTitleElement)
       campaignTitleElement.textContent = "Error Loading Campaign";
     if (currentMissionDisplayElement)
@@ -120,11 +117,25 @@ async function loadAllCampaignPageData() {
       leaderboardDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Could not load leaderboard data.</div>`;
     if (pastMissionsDisplayElement)
       pastMissionsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Could not load battle reports.</div>`;
+    if (upcomingMissionsDisplayElement)
+      upcomingMissionsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Could not load upcoming missions.</div>`; // <-- Error handling for new section
     return null;
   }
 }
 
 // --- UI Rendering Functions ---
+
+/**
+ * Helper to safely render potentially HTML content within text.
+ * @param {string} content - Text content, potentially containing HTML.
+ * @returns {string} Sanitized or original HTML string.
+ */
+function renderHTML(content) {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = content || "";
+  tempDiv.querySelectorAll("script").forEach((script) => script.remove());
+  return tempDiv.innerHTML;
+}
 
 /**
  * Renders the current mission details based on the 'status' field in missions.json.
@@ -138,21 +149,11 @@ function displayCurrentMission(missionsData) {
   );
 
   if (currentMission) {
-    // Use Bootstrap card for display
-    // Helper to safely render HTML content (like lists in descriptions)
-    const renderHTML = (content) => {
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = content || ""; // Use innerHTML to parse potential tags
-      // Basic sanitization (remove script tags) - consider a more robust library if needed
-      tempDiv.querySelectorAll("script").forEach((script) => script.remove());
-      return tempDiv.innerHTML;
-    };
-
     let missionHTML = `
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Mission ${currentMission.number}: ${
-      currentMission.title || "Upcoming Mission"
+      renderHTML(currentMission.title) || "Upcoming Mission"
     }</h5>
                 </div>
                 <div class="card-body">
@@ -163,7 +164,6 @@ function displayCurrentMission(missionsData) {
                           )}</p><hr>`
                         : ""
                     }
-
                     ${
                       currentMission.objective?.primary
                         ? `<h6>Primary Objective:</h6><p>${renderHTML(
@@ -171,7 +171,6 @@ function displayCurrentMission(missionsData) {
                           )}</p>`
                         : ""
                     }
-
                     ${
                       currentMission.objective?.secondary &&
                       currentMission.objective.secondary.length > 0
@@ -186,7 +185,6 @@ function displayCurrentMission(missionsData) {
                            .join("")}</ul>`
                         : ""
                     }
-
                     ${
                       currentMission.specialRules &&
                       currentMission.specialRules.length > 0
@@ -203,7 +201,6 @@ function displayCurrentMission(missionsData) {
                            .join("")}</ul>`
                         : ""
                     }
-
                      ${
                        currentMission.deployment
                          ? `<h6 class="mt-3">Deployment:</h6><p>${renderHTML(
@@ -211,7 +208,6 @@ function displayCurrentMission(missionsData) {
                            )}</p>`
                          : ""
                      }
-
                      ${
                        currentMission.victoryConditions?.primary
                          ? `<h6 class="mt-3">Victory Conditions:</h6><p>${renderHTML(
@@ -219,7 +215,6 @@ function displayCurrentMission(missionsData) {
                            )}</p>`
                          : ""
                      }
-
                      ${
                        currentMission.scoringSystem?.points &&
                        currentMission.scoringSystem.points.length > 0
@@ -229,7 +224,6 @@ function displayCurrentMission(missionsData) {
                            .join("")}</ul>`
                          : ""
                      }
-
                      ${
                        currentMission.terrainSuggestions &&
                        currentMission.terrainSuggestions.length > 0
@@ -248,11 +242,11 @@ function displayCurrentMission(missionsData) {
                      }
                 </div>
                 <div class="card-footer text-muted">
-                   Status: ${currentMission.status} ${
-      currentMission.points
-        ? ` | Recommended Points: ${currentMission.points}`
-        : ""
-    } ${
+                    ${
+                      currentMission.points
+                        ? `Base Points: ${currentMission.points}`
+                        : ""
+                    } ${
       currentMission.datetime
         ? `| Scheduled: ${new Date(currentMission.datetime).toLocaleString()}`
         : ""
@@ -280,20 +274,17 @@ function displayLeaderboard(campaignData) {
   const basePoints = campaignData.basePoints || 0;
   const armies = campaignData.armies;
 
-  // 1. Calculate stats for each army
   const leaderboardData = armies.map((army) => {
     const wins = army.wins || 0;
     const losses = army.losses || 0;
-    const earnedVP = army.earnedVP || 0; // VP from special events/rules
-    const objectives = army.objectives || 0; // Special objectives completed count
-    const earnedPts = army.earnedPts || 0; // Bonus points earned (e.g., from special objectives)
+    const earnedVP = army.earnedVP || 0;
+    const objectives = army.objectives || 0;
+    const earnedPts = army.earnedPts || 0;
 
     const totalVP = wins * 2 + earnedVP;
     const totalGames = wins + losses;
-    const positionScore = totalGames > 0 ? totalVP / totalGames : 0; // VP per game played
+    const positionScore = totalGames > 0 ? totalVP / totalGames : 0;
 
-    // Calculate Max Army Points based on user's formula
-    // Max points = Base Points + (150 * wins) + (300 * losses) + earnedPts + (75 * objectives)
     const maxArmyPoints =
       basePoints + 150 * wins + 300 * losses + earnedPts + 75 * objectives;
 
@@ -304,12 +295,11 @@ function displayLeaderboard(campaignData) {
       wins: wins,
       losses: losses,
       objectives: objectives,
-      maxPoints: maxArmyPoints, // Use the calculated max points
-      positionScore: positionScore, // For sorting
+      maxPoints: maxArmyPoints,
+      positionScore: positionScore,
     };
   });
 
-  // 2. Sort the leaderboard (by positionScore desc, then VP desc, then Wins desc)
   leaderboardData.sort((a, b) => {
     if (b.positionScore !== a.positionScore) {
       return b.positionScore - a.positionScore;
@@ -317,10 +307,9 @@ function displayLeaderboard(campaignData) {
     if (b.vp !== a.vp) {
       return b.vp - a.vp;
     }
-    return b.wins - a.wins; // Tie-breaker
+    return b.wins - a.wins;
   });
 
-  // 3. Generate HTML Table
   let tableHTML = `
         <table class="table table-striped table-hover table-sm leaderboard-table">
             <thead class="table-dark">
@@ -376,7 +365,6 @@ function displayPastMissions(missionsData) {
     return;
   }
 
-  // Sort completed missions by number descending (most recent first)
   completedMissions.sort((a, b) => (b.number || 0) - (a.number || 0));
 
   let reportsHTML = '<div class="list-group">';
@@ -388,12 +376,16 @@ function displayPastMissions(missionsData) {
                     data-report-path="${mission.battleReportFile}">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">Mission ${mission.number}: ${
-      mission.title || "Completed Mission"
+      renderHTML(mission.title) || "Completed Mission"
     }</h5>
-                    <small>Winner: ${mission.winner || "N/A"}</small>
+                    <small>Winner: ${
+                      renderHTML(mission.winner) || "N/A"
+                    }</small>
                 </div>
                 <p class="mb-1 text-muted small">${
-                  mission.winningArmy ? `(${mission.winningArmy})` : ""
+                  mission.winningArmy
+                    ? `(${renderHTML(mission.winningArmy)})`
+                    : ""
                 }</p>
                 <small class="text-muted">Click to view details</small>
             </button>
@@ -403,28 +395,73 @@ function displayPastMissions(missionsData) {
   reportsHTML += "</div>";
   pastMissionsDisplayElement.innerHTML = reportsHTML;
 
-  // Add event listeners to the newly created buttons
   document.querySelectorAll(".view-report-btn").forEach((button) => {
     button.addEventListener("click", handleViewReportClick);
   });
 }
 
 /**
- * Formats a string with newlines into multiple HTML paragraphs.
- * Basic sanitization to prevent script injection.
+ * Renders the list of upcoming missions based on missions.json.
+ * @param {object | null} missionsData - The loaded missions data.
+ */
+function displayUpcomingMissions(missionsData) {
+  if (!upcomingMissionsDisplayElement) return;
+
+  const upcomingMissions =
+    missionsData?.missions?.filter((m) => m.status === "upcoming") || [];
+
+  if (upcomingMissions.length === 0) {
+    upcomingMissionsDisplayElement.innerHTML = `<p class="text-muted">No upcoming missions scheduled.</p>`;
+    return;
+  }
+
+  // Sort upcoming missions by number ascending
+  upcomingMissions.sort((a, b) => (a.number || 0) - (b.number || 0));
+
+  let upcomingHTML = '<div class="list-group">';
+
+  upcomingMissions.forEach((mission) => {
+    upcomingHTML += `
+            <div class="list-group-item upcoming-mission-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">Mission ${mission.number}: ${
+      renderHTML(mission.title) || "Upcoming Mission"
+    }</h6>
+                    <small class="text-muted">${mission.month || ""}${
+      mission.points ? ` | ${mission.points}pts` : ""
+    }</small>
+                </div>
+                ${
+                  mission.overview
+                    ? `<p class="mb-1 small">${renderHTML(
+                        mission.overview
+                      )}</p>`
+                    : ""
+                }
+            </div>
+        `;
+  });
+
+  upcomingHTML += "</div>";
+  upcomingMissionsDisplayElement.innerHTML = upcomingHTML;
+}
+
+/**
+ * Formats a block of text into HTML paragraphs based on newline characters.
  * @param {string} text - The text to format.
  * @returns {string} HTML string with paragraphs.
  */
 function formatTextToParagraphs(text = "") {
   if (!text) return "<p>No description.</p>";
-  // Basic sanitization: remove script tags
   const sanitizedText = text.replace(/<script.*?>.*?<\/script>/gi, "");
-  // Split by newline, filter empty lines, wrap in <p>
-  return sanitizedText
-    .split("\n")
+  let paragraphs = sanitizedText.split("\n\n");
+  if (paragraphs.length <= 1) {
+    paragraphs = sanitizedText.split("\n");
+  }
+  return paragraphs
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph.length > 0)
-    .map((paragraph) => `<p>${paragraph}</p>`) // Keep existing HTML if any, wrap plain text
+    .map((paragraph) => `<p>${renderHTML(paragraph)}</p>`)
     .join("");
 }
 
@@ -445,19 +482,18 @@ function showBattleReportModal(missionId) {
       `Could not display details for Mission ${missionId}. Report data missing.`,
       "Error"
     );
-    if (battleReportModal) battleReportModal.hide(); // Hide if shown with loading text
+    if (battleReportModal) battleReportModal.hide();
     return;
   }
 
   battleReportModalLabelElement.textContent =
-    reportData.title || `Mission ${reportData.missionId} Report`;
+    renderHTML(reportData.title) || `Mission ${reportData.missionId} Report`;
 
-  // Build modal body HTML
   let bodyHTML = `<p><strong>Participants:</strong> ${
     reportData.participants
       ?.map(
         (p) =>
-          `${p.player} (${p.army})${
+          `${renderHTML(p.player)} (${renderHTML(p.army)})${
             p.result === "winner"
               ? " - Winner <i class='bi bi-trophy-fill text-warning'></i>"
               : ""
@@ -469,12 +505,12 @@ function showBattleReportModal(missionId) {
   if (reportData.rounds && reportData.rounds.length > 0) {
     bodyHTML += "<h4>Round Summaries</h4>";
     reportData.rounds.forEach((round) => {
-      // --- UPDATED: Use formatTextToParagraphs ---
       const formattedDescription = formatTextToParagraphs(round.description);
-
       bodyHTML += `
                 <div class="mb-3 p-3 border rounded bg-body-tertiary shadow-sm">
-                    <h6>Round ${round.number}: ${round.title || ""}</h6>
+                    <h6>Round ${round.number}: ${
+        renderHTML(round.title) || ""
+      }</h6>
                     ${formattedDescription}
                     ${
                       round.image
@@ -486,7 +522,9 @@ function showBattleReportModal(missionId) {
                           }')">
                              ${
                                round.image_caption
-                                 ? `<figcaption class="figure-caption">${round.image_caption}</figcaption>`
+                                 ? `<figcaption class="figure-caption">${renderHTML(
+                                     round.image_caption
+                                   )}</figcaption>`
                                  : ""
                              }
                            </figure>`
@@ -499,22 +537,20 @@ function showBattleReportModal(missionId) {
   }
 
   if (reportData.keyMoments && reportData.keyMoments.length > 0) {
-    bodyHTML += "<h4>Key Moments</h4><ul class='list-unstyled'>"; // Use list-unstyled for cleaner look
+    bodyHTML += "<h4>Key Moments</h4><ul class='list-unstyled'>";
     reportData.keyMoments.forEach((moment) => {
       bodyHTML += `<li class="mb-2 p-2 border-start border-3 border-info"><strong>${
-        moment.title || "Moment"
-      }:</strong> ${moment.description || ""}</li>`;
-      // TODO: Add image support for key moments if desired (similar to rounds)
+        renderHTML(moment.title) || "Moment"
+      }:</strong> ${renderHTML(moment.description) || ""}</li>`;
     });
     bodyHTML += "</ul><hr>";
   }
 
   bodyHTML += `<h5>Conclusion</h5>${formatTextToParagraphs(
     reportData.conclusion
-  )}`; // Format conclusion too
+  )}`;
 
   battleReportModalBodyElement.innerHTML = bodyHTML;
-  // Ensure modal is shown (it might have been shown with loading text)
   if (battleReportModal) battleReportModal.show();
 }
 
@@ -527,7 +563,7 @@ function showBattleReportModal(missionId) {
 async function handleViewReportClick(event) {
   const button = event.currentTarget;
   const missionId = button.dataset.missionId;
-  const reportPath = button.dataset.reportPath; // Get the path
+  const reportPath = button.dataset.reportPath;
 
   if (!missionId || !reportPath) {
     showToast(
@@ -537,39 +573,34 @@ async function handleViewReportClick(event) {
     return;
   }
 
-  // Check cache first
   if (battleReportsCache[missionId]) {
     console.log(`Showing cached report for Mission ${missionId}`);
     showBattleReportModal(missionId);
     return;
   }
 
-  // If not cached, fetch it
   console.log(`Fetching report for Mission ${missionId} from ${reportPath}`);
-  // Show loading state in modal temporarily
   if (battleReportModalBodyElement)
     battleReportModalBodyElement.innerHTML = `<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading report...</p></div>`;
   if (battleReportModalLabelElement)
     battleReportModalLabelElement.textContent = "Loading...";
-  if (battleReportModal) battleReportModal.show(); // Show modal while loading
+  if (battleReportModal) battleReportModal.show();
 
   try {
-    const reportData = await loadBattleReport(reportPath); // Fetch using the path
+    const reportData = await loadBattleReport(reportPath);
     if (reportData) {
-      // Add missionId if it wasn't inferred correctly or missing
       if (!reportData.missionId) reportData.missionId = parseInt(missionId, 10);
-      // Cache the fetched report
       battleReportsCache[reportData.missionId] = reportData;
-      showBattleReportModal(reportData.missionId); // Populate and ensure modal is shown
+      showBattleReportModal(reportData.missionId);
     } else {
-      if (battleReportModal) battleReportModal.hide(); // Hide modal if report fails
+      if (battleReportModal) battleReportModal.hide();
       showToast(
         `Could not load details for Mission ${missionId}. File not found or invalid.`,
         "Error"
       );
     }
   } catch (error) {
-    if (battleReportModal) battleReportModal.hide(); // Hide modal on error
+    if (battleReportModal) battleReportModal.hide();
     console.error(`Error loading battle report ${reportPath}:`, error);
     showToast(`Error loading report: ${error.message}`, "Error");
   }
@@ -586,17 +617,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (pageData) {
     const { campaignData, missionsData, battleReportsData } = pageData;
 
-    // Set campaign title
     if (campaignTitleElement && campaignData.campaignName) {
       campaignTitleElement.textContent = campaignData.campaignName;
     } else if (campaignTitleElement) {
-      campaignTitleElement.textContent = "Campaign Status"; // Default title
+      campaignTitleElement.textContent = "Campaign Status";
     }
 
     // Render UI sections
-    displayCurrentMission(missionsData); // Pass only missionsData
+    displayCurrentMission(missionsData);
     displayLeaderboard(campaignData);
-    displayPastMissions(missionsData); // Pass missionsData to find completed reports
+    displayPastMissions(missionsData);
+    displayUpcomingMissions(missionsData);
   }
-  // Error handling is done within loadAllCampaignPageData
 });
