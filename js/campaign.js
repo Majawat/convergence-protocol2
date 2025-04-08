@@ -139,6 +139,15 @@ function displayCurrentMission(missionsData) {
 
   if (currentMission) {
     // Use Bootstrap card for display
+    // Helper to safely render HTML content (like lists in descriptions)
+    const renderHTML = (content) => {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = content || ""; // Use innerHTML to parse potential tags
+      // Basic sanitization (remove script tags) - consider a more robust library if needed
+      tempDiv.querySelectorAll("script").forEach((script) => script.remove());
+      return tempDiv.innerHTML;
+    };
+
     let missionHTML = `
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
@@ -149,13 +158,17 @@ function displayCurrentMission(missionsData) {
                 <div class="card-body">
                     ${
                       currentMission.overview
-                        ? `<p class="card-text lead">${currentMission.overview}</p><hr>`
+                        ? `<p class="card-text lead">${renderHTML(
+                            currentMission.overview
+                          )}</p><hr>`
                         : ""
                     }
 
                     ${
                       currentMission.objective?.primary
-                        ? `<h6>Primary Objective:</h6><p>${currentMission.objective.primary}</p>`
+                        ? `<h6>Primary Objective:</h6><p>${renderHTML(
+                            currentMission.objective.primary
+                          )}</p>`
                         : ""
                     }
 
@@ -166,7 +179,9 @@ function displayCurrentMission(missionsData) {
                          <ul>${currentMission.objective.secondary
                            .map(
                              (obj) =>
-                               `<li><strong>${obj.name}:</strong> ${obj.description}</li>`
+                               `<li><strong>${renderHTML(
+                                 obj.name
+                               )}:</strong> ${renderHTML(obj.description)}</li>`
                            )
                            .join("")}</ul>`
                         : ""
@@ -179,21 +194,29 @@ function displayCurrentMission(missionsData) {
                          <ul>${currentMission.specialRules
                            .map(
                              (rule) =>
-                               `<li><strong>${rule.name}:</strong> ${rule.description}</li>`
+                               `<li><strong>${renderHTML(
+                                 rule.name
+                               )}:</strong> ${renderHTML(
+                                 rule.description
+                               )}</li>`
                            )
-                           .join("")}</ul>` // Note: This renders HTML within description
+                           .join("")}</ul>`
                         : ""
                     }
 
                      ${
                        currentMission.deployment
-                         ? `<h6 class="mt-3">Deployment:</h6><p>${currentMission.deployment}</p>`
+                         ? `<h6 class="mt-3">Deployment:</h6><p>${renderHTML(
+                             currentMission.deployment
+                           )}</p>`
                          : ""
                      }
 
                      ${
                        currentMission.victoryConditions?.primary
-                         ? `<h6 class="mt-3">Victory Conditions:</h6><p>${currentMission.victoryConditions.primary}</p>`
+                         ? `<h6 class="mt-3">Victory Conditions:</h6><p>${renderHTML(
+                             currentMission.victoryConditions.primary
+                           )}</p>`
                          : ""
                      }
 
@@ -202,7 +225,7 @@ function displayCurrentMission(missionsData) {
                        currentMission.scoringSystem.points.length > 0
                          ? `<h6 class="mt-3">Scoring:</h6>
                          <ul>${currentMission.scoringSystem.points
-                           .map((pt) => `<li>${pt}</li>`)
+                           .map((pt) => `<li>${renderHTML(pt)}</li>`)
                            .join("")}</ul>`
                          : ""
                      }
@@ -214,7 +237,11 @@ function displayCurrentMission(missionsData) {
                          <ul>${currentMission.terrainSuggestions
                            .map(
                              (terrain) =>
-                               `<li><strong>${terrain.name}:</strong> ${terrain.description}</li>`
+                               `<li><strong>${renderHTML(
+                                 terrain.name
+                               )}:</strong> ${renderHTML(
+                                 terrain.description
+                               )}</li>`
                            )
                            .join("")}</ul>`
                          : ""
@@ -383,6 +410,25 @@ function displayPastMissions(missionsData) {
 }
 
 /**
+ * Formats a string with newlines into multiple HTML paragraphs.
+ * Basic sanitization to prevent script injection.
+ * @param {string} text - The text to format.
+ * @returns {string} HTML string with paragraphs.
+ */
+function formatTextToParagraphs(text = "") {
+  if (!text) return "<p>No description.</p>";
+  // Basic sanitization: remove script tags
+  const sanitizedText = text.replace(/<script.*?>.*?<\/script>/gi, "");
+  // Split by newline, filter empty lines, wrap in <p>
+  return sanitizedText
+    .split("\n")
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph.length > 0)
+    .map((paragraph) => `<p>${paragraph}</p>`) // Keep existing HTML if any, wrap plain text
+    .join("");
+}
+
+/**
  * Populates and shows the battle report modal using cached data.
  * @param {number|string} missionId - The ID of the mission report to show.
  */
@@ -423,16 +469,13 @@ function showBattleReportModal(missionId) {
   if (reportData.rounds && reportData.rounds.length > 0) {
     bodyHTML += "<h4>Round Summaries</h4>";
     reportData.rounds.forEach((round) => {
-      // Basic check for HTML tags in description - use textContent if none found
-      const descriptionHTML =
-        round.description?.includes("<") && round.description?.includes(">")
-          ? round.description
-          : `<p>${round.description || "No summary."}</p>`; // Wrap in <p> if plain text
+      // --- UPDATED: Use formatTextToParagraphs ---
+      const formattedDescription = formatTextToParagraphs(round.description);
 
       bodyHTML += `
-                <div class="mb-3 p-2 border rounded bg-body-tertiary">
+                <div class="mb-3 p-3 border rounded bg-body-tertiary shadow-sm">
                     <h6>Round ${round.number}: ${round.title || ""}</h6>
-                    ${descriptionHTML}
+                    ${formattedDescription}
                     ${
                       round.image
                         ? `<figure class="figure text-center mt-2">
@@ -456,19 +499,19 @@ function showBattleReportModal(missionId) {
   }
 
   if (reportData.keyMoments && reportData.keyMoments.length > 0) {
-    bodyHTML += "<h4>Key Moments</h4><ul>";
+    bodyHTML += "<h4>Key Moments</h4><ul class='list-unstyled'>"; // Use list-unstyled for cleaner look
     reportData.keyMoments.forEach((moment) => {
-      bodyHTML += `<li><strong>${moment.title || "Moment"}:</strong> ${
-        moment.description || ""
-      }</li>`;
+      bodyHTML += `<li class="mb-2 p-2 border-start border-3 border-info"><strong>${
+        moment.title || "Moment"
+      }:</strong> ${moment.description || ""}</li>`;
       // TODO: Add image support for key moments if desired (similar to rounds)
     });
     bodyHTML += "</ul><hr>";
   }
 
-  bodyHTML += `<h5>Conclusion</h5><p>${
-    reportData.conclusion || "No conclusion provided."
-  }</p>`;
+  bodyHTML += `<h5>Conclusion</h5>${formatTextToParagraphs(
+    reportData.conclusion
+  )}`; // Format conclusion too
 
   battleReportModalBodyElement.innerHTML = bodyHTML;
   // Ensure modal is shown (it might have been shown with loading text)
