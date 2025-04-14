@@ -61,11 +61,10 @@
         padding-bottom: 0.25rem;
         color: var(--bs-body-color);
       }
-      /* *** NEW: Table Column Styling *** */
       .d6-roll-column {
         text-align: center !important;
         white-space: nowrap;
-        width: 1%; /* Minimize width for nowrap */
+        width: 1%;
       }
 
       /* Card Styles for Doctrines and Events */
@@ -115,7 +114,7 @@
       }
       /* Universal Doctrine Background Fix */
       .rule-subsection .list-group-item {
-        background-color: var(--bs-card-bg); /* Match card background */
+        background-color: var(--bs-card-bg);
       }
       .event-card .effect-section {
         margin-top: 0.75rem;
@@ -168,7 +167,21 @@
 
       /* Scroll Margin for Fixed Navbar */
       section[id] {
-        scroll-margin-top: 70px; /* Adjust value based on your navbar height */
+        scroll-margin-top: 70px;
+      }
+
+      .definition {
+        border-bottom: 1px dotted var(--bs-primary); /* Indicate interactivity */
+        cursor: help; /* Change cursor on hover */
+        /* color: var(--bs-link-color); Optional: make it look like a link */
+      }
+      /* Ensure popovers inherit theme */
+      .popover {
+        --bs-popover-bg: var(--bs-body-bg);
+        --bs-popover-border-color: var(--bs-border-color-translucent);
+        --bs-popover-header-bg: var(--bs-secondary-bg);
+        --bs-popover-header-color: var(--bs-body-color);
+        --bs-popover-body-color: var(--bs-body-color);
       }
     </style>
   </head>
@@ -262,12 +275,12 @@
         </h2>
         <div class="rule-subsection">
           <h5>Game Structure</h5>
-          <p>
+          <p class="allow-definitions">
             Games consist of <strong>Rounds</strong> (usually 4). Each round
             consists of alternating player <strong>Turns</strong>. Each turn
             consists of one unit <strong>Activation</strong>.
           </p>
-          <ul>
+          <ul class="allow-definitions">
             <li>
               Player who finished activating first last round goes first in the
               next round.
@@ -279,6 +292,9 @@
         </div>
         <div class="rule-subsection">
           <h5>Activation Actions</h5>
+          <p class="allow-definitions">
+            Activate one unit per turn. Choose one action:
+          </p>
           <div class="table-responsive">
             <table class="table table-sm table-striped table-bordered">
               <thead class="table-dark">
@@ -288,21 +304,21 @@
                   <th>Notes</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="allow-definitions">
                 <tr>
                   <td><strong>Hold</strong></td>
                   <td>0"</td>
-                  <td>Can shoot.</td>
+                  <td>Can shoot</td>
                 </tr>
                 <tr>
                   <td><strong>Advance</strong></td>
                   <td>Up to 6"</td>
-                  <td>Can shoot after moving.</td>
+                  <td>Can shoot after moving</td>
                 </tr>
                 <tr>
                   <td><strong>Rush</strong></td>
                   <td>Up to 12"</td>
-                  <td>Cannot shoot.</td>
+                  <td>Cannot shoot</td>
                 </tr>
                 <tr>
                   <td><strong>Charge</strong></td>
@@ -315,7 +331,7 @@
         </div>
         <div class="rule-subsection">
           <h5>Shooting Sequence</h5>
-          <ol>
+          <ol class="allow-definitions">
             <li>
               <strong>Determine Attacks:</strong> Sum Attack values of shooting
               models in range & LoS.
@@ -336,7 +352,7 @@
         </div>
         <div class="rule-subsection">
           <h5>Melee Sequence</h5>
-          <ul>
+          <ul class="allow-definitions">
             <li>
               <strong>Charge Moves:</strong> Move up to 12" to base contact (or
               as close as possible). Target models move up to 3" into base
@@ -373,7 +389,7 @@
         </div>
         <div class="rule-subsection">
           <h5>Melee Resolution</h5>
-          <ul>
+          <ul class="allow-definitions">
             <li>
               <strong>Determine Winner:</strong> Compare total wounds caused by
               each unit. Unit that caused more wounds wins. Tie if wounds are
@@ -399,7 +415,7 @@
         </div>
         <div class="rule-subsection">
           <h5>Morale</h5>
-          <ul>
+          <ul class="allow-definitions">
             <li>
               <strong>When to Test:</strong>
               <ul>
@@ -442,17 +458,17 @@
         </div>
         <div class="rule-subsection">
           <h5>Basic Terrain Effects</h5>
-          <ul>
+          <ul class="allow-definitions">
             <li>
-              <strong>Cover Terrain:</strong> +1 Defense vs Shooting if majority of unit
+              <strong>Cover:</strong> +1 Defense vs Shooting if majority of unit
               models are inside/behind.
             </li>
             <li>
-              <strong>Difficult Terrain:</strong> Max 6" move if any model moves through
+              <strong>Difficult:</strong> Max 6" move if any model moves through
               it.
             </li>
             <li>
-              <strong>Dangerous Terrain:</strong> Roll 1 die per model (or Tough value)
+              <strong>Dangerous:</strong> Roll 1 die per model (or Tough value)
               moving through/activating in it. On a 1, unit takes 1 wound.
             </li>
           </ul>
@@ -476,19 +492,21 @@
         </div>
         <div class="rule-subsection">
           <h5>Pre-Mission Setup</h5>
-          <h6>Army Size Limit</h6>
-          <p>
-            No army may have > 250pts more than the lowest point value army in
-            the match.
-          </p>
-          <h6>Underdog Bonus</h6>
-          <p>
-            Get 1 Underdog Point (UP) for every 50pts difference below the
-            highest point value army. Spend 1 UP to modify any single roll
-            (friendly or enemy) by +/- 1.
-          </p>
-          <h6>Special Objectives</h6>
-          <p>Roll D6 for a bonus objective (worth 75pts if completed):</p>
+          <div class="allow-definitions">
+            <h6>Army Size Limit</h6>
+            <p>
+              No army may have > 250pts more than the lowest point value army in
+              the match.
+            </p>
+            <h6>Underdog Bonus</h6>
+            <p>
+              Get 1 Underdog Point (UP) for every 50pts difference below the
+              highest point value army. Spend 1 UP to modify any single roll
+              (friendly or enemy) by +/- 1.
+            </p>
+            <h6>Special Objectives</h6>
+            <p>Roll D6 for a bonus objective (worth 75pts if completed):</p>
+          </div>
           <div class="table-responsive mt-2">
             <table class="table table-sm table-bordered table-striped">
               <thead class="table-dark">
@@ -498,7 +516,7 @@
                   <th>Condition</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="allow-definitions">
                 <tr>
                   <td class="d6-roll-column">1</td>
                   <td>Mastery</td>
@@ -535,11 +553,11 @@
         </div>
         <div class="rule-subsection">
           <h5>Post-Mission Steps</h5>
-
-          <h6>Mission Rewards</h6>
-          <p>Winner gets 2 VP + 150pts. Loser(s) get 300pts.</p>
-
-          <h6>Casualties (Destroyed/Routed Units)</h6>
+          <div class="allow-definitions">
+            <h6>Mission Rewards</h6>
+            <p>Winner gets 2 VP + 150pts. Loser(s) get 300pts.</p>
+            <h6>Casualties (Destroyed/Routed Units)</h6>
+          </div>
           <div class="table-responsive mt-2 mb-2">
             <table class="table table-sm table-bordered table-striped">
               <caption>
@@ -552,7 +570,7 @@
                   <th>Effect</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="allow-definitions">
                 <tr>
                   <td class="d6-roll-column">1</td>
                   <td>Dead</td>
@@ -583,7 +601,7 @@
                   <th>Effect</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="allow-definitions">
                 <tr>
                   <td class="d6-roll-column">1</td>
                   <td>Dead</td>
@@ -629,7 +647,7 @@
                   <th>Effect</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="allow-definitions">
                 <tr>
                   <td class="d6-roll-column">1</td>
                   <td>Natural Talent</td>
@@ -662,22 +680,24 @@
                 </tr>
               </tbody>
             </table>
-            <p class="small text-muted">Re-roll if trait already gained.</p>
+            <p class="small text-muted allow-definitions">
+              Re-roll if trait already gained.
+            </p>
           </div>
-
-          <h6>XP Earning</h6>
-          <ul>
-            <li>+1 XP: Unit was not a casualty.</li>
-            <li>+1 XP: Unit killed an enemy unit.</li>
-            <li>+2 XP: Unit killed an enemy HERO unit.</li>
-            <li>+3 XP: Unit killed an enemy HERO and its joined unit.</li>
-          </ul>
-
-          <h6>Leveling Up (at 5 XP)</h6>
-          <p>
-            Unit becomes more expensive and gains a Trait (Regular Unit) or
-            Skill Set/Trait (Hero Unit).
-          </p>
+          <div class="allow-definitions">
+            <h6>XP Earning</h6>
+            <ul>
+              <li>+1 XP: Unit was not a casualty.</li>
+              <li>+1 XP: Unit killed an enemy unit.</li>
+              <li>+2 XP: Unit killed an enemy HERO unit.</li>
+              <li>+3 XP: Unit killed an enemy HERO and its joined unit.</li>
+            </ul>
+            <h6>Leveling Up (at 5 XP)</h6>
+            <p>
+              Unit becomes more expensive and gains a Trait (Regular Unit) or
+              Skill Set/Trait (Hero Unit).
+            </p>
+          </div>
           <div class="table-responsive mt-2 mb-2">
             <table class="table table-sm table-bordered table-striped">
               <caption>
@@ -690,7 +710,7 @@
                   <th>Effect (+25pts Cost)</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="allow-definitions">
                 <tr>
                   <td class="d6-roll-column">1</td>
                   <td>Agile</td>
@@ -723,7 +743,7 @@
                 </tr>
               </tbody>
             </table>
-            <p class="small text-muted">
+            <p class="small text-muted allow-definitions">
               Re-roll if trait already gained (except Specialist).
             </p>
           </div>
@@ -754,7 +774,7 @@
               </tbody>
             </table>
           </div>
-          <p>
+          <p class="allow-definitions">
             Each time the Hero levels up (including the first), roll D6 for a
             Skill Trait from their chosen set(s). Re-roll if trait already
             gained. If all 3 traits from the first set are gained, roll for a
@@ -772,7 +792,7 @@
                     <th>Trait</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
                     <td>Leader: Friendly units within 6" get +1 to morale.</td>
@@ -805,7 +825,7 @@
                     <th>Trait</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
                     <td>
@@ -838,7 +858,7 @@
                     <th>Trait</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
                     <td>
@@ -870,7 +890,7 @@
                     <th>Trait</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
                     <td>Hunter: Hero may shoot even after Rush actions.</td>
@@ -900,7 +920,7 @@
                     <th>Trait</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
                     <td>Runner: Hero always moves +2" (even in terrain).</td>
@@ -929,7 +949,7 @@
                     <th>Trait</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
                     <td>
@@ -953,9 +973,8 @@
               </table>
             </div>
           </div>
-
-          <h6>Upgrading & Recruiting</h6>
-          <p>
+          <h6 class="allow-definitions">Upgrading & Recruiting</h6>
+          <p class="allow-definitions">
             Spend earned points on unit upgrades or new units. Upgrades can be
             sold for half price (round down to nearest 5). Recruit up to 1 new
             Hero per mission (max 3 total). Recruit regular units freely (one
@@ -970,19 +989,19 @@
         </h2>
         <div class="rule-subsection mb-3">
           <h5>Command Point Generation (Fixed)</h5>
-          <p>
+          <p class="allow-definitions">
             Players get <strong>4 Command Points (CP)</strong> per 1000pts in
             their army list at the start of the game.
           </p>
         </div>
         <div class="rule-subsection mb-3">
           <h5>Using Stratagems</h5>
-          <p>
+          <p class="allow-definitions">
             At any point during the game (friendly or enemy activation), players
             may spend CP to activate Stratagems. Each specific Stratagem can
             only be used once per unit activation.
           </p>
-          <p>
+          <p class="allow-definitions">
             Players always have access to the
             <strong>Universal Doctrine</strong> Stratagems below, plus the
             Stratagems from <strong>one</strong> other Doctrine chosen before
@@ -1014,11 +1033,14 @@
           <i class="bi bi-journal-text me-2"></i> Glossary
         </h2>
         <div class="collapse show" id="collapseGlossary">
-          <p class="text-muted p-3 border rounded bg-body-tertiary">
+          <p
+            class="text-muted p-3 border rounded bg-body-tertiary allow-definitions"
+          >
             A glossary of special rules and terms will be added here later.
             Tooltips will also be added throughout the rules for quick
             definitions.
           </p>
+          <div id="glossary-content-display"></div>
         </div>
       </section>
 
@@ -1034,7 +1056,7 @@
           <i class="bi bi-dice-3-fill me-2"></i> Random Events
         </h2>
         <div class="collapse show" id="collapseRandomEvents">
-          <p class="text-muted small mb-3">
+          <p class="text-muted small mb-3 allow-definitions">
             At the start of each round, roll D6. On a 5+, roll 2D6 (reading them
             like D66, e.g., a 2 and a 5 is 25) and consult the events below.
           </p>
@@ -1167,6 +1189,7 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <script type="module" src="js/definitions.js"></script>
     <script type="module" src="js/rules.js"></script>
   </body>
 </html>

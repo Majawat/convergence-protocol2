@@ -25,16 +25,41 @@ export function getArmyBooksData() {
   return armyBooksData;
 }
 export function getCommonRulesData() {
-  return commonRulesData; // Assumes loadGameData populates this correctly
+  return commonRulesData;
 }
-// <-- ADDED: Getter for Doctrines data -->
 export function getDoctrinesData() {
   return doctrinesData;
 }
 
+/**
+ * Retrieves the consolidated definitions object from sessionStorage.
+ * @returns {object} The definitions object, or an empty object if not found/invalid.
+ */
+export function getDefinitions() {
+  try {
+    const cachedDefs = sessionStorage.getItem(config.DEFINITIONS_CACHE_KEY);
+    if (cachedDefs) {
+      const parsed = JSON.parse(cachedDefs);
+      // Basic validation
+      if (parsed && typeof parsed === "object") {
+        return parsed;
+      } else {
+        console.warn(
+          "Invalid definitions data found in sessionStorage. Returning empty."
+        );
+        sessionStorage.removeItem(config.DEFINITIONS_CACHE_KEY); // Clear invalid data
+        return {};
+      }
+    }
+  } catch (e) {
+    console.error("Error reading definitions from sessionStorage:", e);
+    sessionStorage.removeItem(config.DEFINITIONS_CACHE_KEY); // Clear potentially corrupt data
+  }
+  return {}; // Return empty object if not found or error
+}
+
 /** Gets the processed data object for the currently loaded army */
 export function getLoadedArmyData() {
-  // Removed armyId param - only one army loaded
   const currentId = getCurrentArmyId();
   return currentId ? loadedArmiesData[currentId] : null;
 }
@@ -67,7 +92,6 @@ function getArmyState(armyId) {
     };
 
   const state = loadArmyState(armyId);
-  // Return loaded state or a default structure if null/undefined
   const defaultState = {
     listPoints: 0,
     units: {},
@@ -77,7 +101,6 @@ function getArmyState(armyId) {
     underdogPoints: 0,
     maxUnderdogPoints: 0,
   };
-  // Ensure loaded state has the new fields, providing defaults if missing
   if (state) {
     if (state.commandPoints === undefined) state.commandPoints = 0;
     if (state.selectedDoctrine === undefined) state.selectedDoctrine = null;
@@ -113,10 +136,9 @@ export function getMaxUnderdogPoints(armyId) {
  */
 function getUnitState(armyId, unitId) {
   const armyState = getArmyState(armyId);
-  // Return existing unit state or a default structure
   return (
     armyState.units?.[unitId] || {
-      status: "active", // Keep existing status
+      status: "active",
       shaken: false,
       fatigued: false,
       attackedInMeleeThisRound: false,
@@ -138,21 +160,14 @@ function getUnitState(armyId, unitId) {
  */
 function getModelState(armyId, unitId, modelId) {
   const unitState = getUnitState(armyId, unitId);
-  // Return existing model state or a default structure
-  return (
-    unitState.models?.[modelId] || {
-      currentHp: 1,
-      name: null,
-    }
-  );
+  return unitState.models?.[modelId] || { currentHp: 1, name: null };
 }
 
 /** Gets the list points for a specific army from its saved state. */
 export function getArmyListPoints(armyId) {
-  // Keep armyId param for potential external use
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId) return 0;
-  const state = getArmyState(armyId); // getArmyState provides default
+  const state = getArmyState(armyId);
   return state.listPoints;
 }
 
@@ -160,7 +175,7 @@ export function getArmyListPoints(armyId) {
 export function getUnitStateValue(armyId, unitId, key, defaultValue) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId || !unitId || !key) return defaultValue;
-  const unitState = getUnitState(armyId, unitId); // getUnitState provides default
+  const unitState = getUnitState(armyId, unitId);
   return unitState.hasOwnProperty(key) ? unitState[key] : defaultValue;
 }
 
@@ -168,11 +183,10 @@ export function getUnitStateValue(armyId, unitId, key, defaultValue) {
 export function getModelStateValue(armyId, unitId, modelId, key, defaultValue) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId || !unitId || !modelId || !key) return defaultValue;
-  const modelState = getModelState(armyId, unitId, modelId); // getModelState provides default
+  const modelState = getModelState(armyId, unitId, modelId);
   return modelState.hasOwnProperty(key) ? modelState[key] : defaultValue;
 }
 
-// <-- ADDED: Getters for Command Points and Doctrine -->
 /** Gets the current command points for the specified army. */
 export function getCommandPoints(armyId) {
   if (!armyId) armyId = getCurrentArmyId();
@@ -181,7 +195,7 @@ export function getCommandPoints(armyId) {
   return state.commandPoints;
 }
 
-/** Gets the maximum command points for the specified army (for manual adjustments). */
+/** Gets the maximum command points for the specified army. */
 export function getMaxCommandPoints(armyId) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId) return 0;
@@ -211,16 +225,16 @@ export function setCurrentRound(roundNumber) {
     console.error("Invalid round number provided to setCurrentRound.");
     return;
   }
-  const gameState = loadGameState(); // Load current state
+  const gameState = loadGameState();
   gameState.currentRound = roundNumber;
-  saveGameState(gameState); // Save updated state
+  saveGameState(gameState);
 }
 
 /** Increments the current round number and saves it. */
 export function incrementCurrentRound() {
   const currentRound = getCurrentRound();
   setCurrentRound(currentRound + 1);
-  return currentRound + 1; // Return the new round number
+  return currentRound + 1;
 }
 
 // --- Setters ---
@@ -238,6 +252,31 @@ export function setDoctrinesData(data) {
   doctrinesData = data;
 }
 
+/**
+ * Stores the consolidated definitions object in sessionStorage.
+ * @param {object} data - The consolidated definitions object.
+ */
+export function setDefinitions(data) {
+  if (!data || typeof data !== "object") {
+    console.error("Attempted to set invalid definitions data.");
+    return;
+  }
+  try {
+    sessionStorage.setItem(config.DEFINITIONS_CACHE_KEY, JSON.stringify(data));
+    console.log(
+      `Definitions state updated in sessionStorage (${
+        Object.keys(data).length
+      } terms).`
+    );
+  } catch (e) {
+    console.error("Error saving definitions to sessionStorage:", e);
+    if (e.name === "QuotaExceededError") {
+      console.error("SessionStorage quota exceeded. Definitions not saved.");
+      // Optionally show a user-facing error toast here
+    }
+  }
+}
+
 /** Stores the processed army data and initializes/updates basic state */
 export function setLoadedArmyData(armyId, processedData) {
   loadedArmiesData = {}; // Clear previous armies
@@ -249,22 +288,20 @@ export function setLoadedArmyData(armyId, processedData) {
       Math.floor(processedData.meta.listPoints / 1000) *
       config.COMMAND_POINTS_PER_1000;
 
-    // Default state structure including UP (initialized to 0 for now)
     const defaultState = {
       listPoints: processedData.meta.listPoints || 0,
       units: {},
       commandPoints: initialCommandPoints,
       selectedDoctrine: null,
       maxCommandPoints: initialCommandPoints,
-      underdogPoints: 0, // UP calculation happens later
-      maxUnderdogPoints: 0, // UP calculation happens later
+      underdogPoints: 0,
+      maxUnderdogPoints: 0,
     };
 
     if (!currentState) {
       currentState = defaultState;
       console.log(`Initializing new state for army ${armyId} in localStorage.`);
     } else {
-      // Ensure fields exist and update points/max CP
       currentState.listPoints =
         processedData.meta.listPoints || currentState.listPoints || 0;
       if (!currentState.units) currentState.units = {};
@@ -278,7 +315,6 @@ export function setLoadedArmyData(armyId, processedData) {
           currentState.commandPoints = currentState.maxCommandPoints;
         }
       }
-      // Initialize UP fields if loading old state, but don't overwrite with 0 if they exist
       if (currentState.underdogPoints === undefined)
         currentState.underdogPoints = 0;
       if (currentState.maxUnderdogPoints === undefined)
@@ -286,7 +322,7 @@ export function setLoadedArmyData(armyId, processedData) {
 
       console.log(`Loaded existing state for army ${armyId}.`);
     }
-    saveArmyState(armyId, currentState); // Save the initial/updated basic state
+    saveArmyState(armyId, currentState);
   } else {
     console.warn("Attempted to set loaded army data with invalid ID or data.");
   }
@@ -295,21 +331,19 @@ export function setLoadedArmyData(armyId, processedData) {
 // --- Per-Army State Updaters (Load, Modify, Save) ---
 
 /**
- * Updates a specific unit state value (e.g., shaken, fatigued, action, tokens, status) and saves.
+ * Updates a specific unit state value and saves.
  * @param {string} armyId - The ID of the army.
  * @param {string} unitId - The ID of the unit.
- * @param {string} key - The state key to update (e.g., 'shaken', 'tokens', 'action').
+ * @param {string} key - The state key to update.
  * @param {*} value - The new value for the key.
  */
 export function updateUnitStateValue(armyId, unitId, key, value) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId || !unitId || !key) return;
 
-  const currentState = getArmyState(armyId); // getArmyState loads or provides default
+  const currentState = getArmyState(armyId);
 
-  // Ensure unit exists in state
   if (!currentState.units[unitId]) {
-    // Initialize unit state if it doesn't exist
     currentState.units[unitId] = {
       status: "active",
       shaken: false,
@@ -323,28 +357,24 @@ export function updateUnitStateValue(armyId, unitId, key, value) {
     console.warn(`Initialized missing unit state for ${unitId} during update.`);
   }
 
-  // Update the specific value
   currentState.units[unitId][key] = value;
-
-  // Save the entire updated state object
   saveArmyState(armyId, currentState);
 }
 
 /**
- * Updates a specific model state value (e.g., currentHp, name) and saves.
+ * Updates a specific model state value and saves.
  * @param {string} armyId - The ID of the army.
  * @param {string} unitId - The ID of the unit.
  * @param {string} modelId - The ID of the model.
- * @param {string} key - The state key to update (e.g., 'currentHp', 'name').
+ * @param {string} key - The state key to update.
  * @param {*} value - The new value for the key.
  */
 export function updateModelStateValue(armyId, unitId, modelId, key, value) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId || !unitId || !modelId || !key) return;
 
-  const currentState = getArmyState(armyId); // getArmyState loads or provides default
+  const currentState = getArmyState(armyId);
 
-  // Ensure unit exists
   if (!currentState.units[unitId]) {
     currentState.units[unitId] = {
       status: "active",
@@ -357,17 +387,14 @@ export function updateModelStateValue(armyId, unitId, modelId, key, value) {
       models: {},
     };
   }
-  // Ensure models object exists
   if (!currentState.units[unitId].models) {
     currentState.units[unitId].models = {};
   }
-  // Ensure model exists
   if (!currentState.units[unitId].models[modelId]) {
-    currentState.units[unitId].models[modelId] = { currentHp: 1, name: null }; // Provide default if missing
+    currentState.units[unitId].models[modelId] = { currentHp: 1, name: null };
     console.warn(
       `Initialized missing model state for ${modelId} in unit ${unitId} during update.`
     );
-    // Try to get maxHp if possible to set a better default currentHp
     const modelData = getLoadedArmyData()?.unitMap?.[unitId]?.models?.find(
       (m) => m.modelId === modelId
     );
@@ -376,10 +403,7 @@ export function updateModelStateValue(armyId, unitId, modelId, key, value) {
     }
   }
 
-  // Update the specific value
   currentState.units[unitId].models[modelId][key] = value;
-
-  // Save the entire updated state object
   saveArmyState(armyId, currentState);
 }
 
@@ -388,10 +412,9 @@ export function updateArmyListPoints(armyId, points) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId || typeof points !== "number") return;
 
-  const currentState = getArmyState(armyId); // getArmyState loads or provides default
+  const currentState = getArmyState(armyId);
   currentState.listPoints = points;
   saveArmyState(armyId, currentState);
-  // console.log(`Updated list points for army ${armyId} to ${points}.`);
 }
 
 /**
@@ -405,8 +428,7 @@ export function setCommandPoints(armyId, points) {
   if (!armyId || typeof points !== "number") return;
 
   const currentState = getArmyState(armyId);
-  const maxPoints = currentState.maxCommandPoints || 0; // Use stored max
-  // Clamp points between 0 and max
+  const maxPoints = currentState.maxCommandPoints || 0;
   const clampedPoints = Math.max(0, Math.min(points, maxPoints));
 
   if (currentState.commandPoints !== clampedPoints) {
@@ -419,12 +441,11 @@ export function setCommandPoints(armyId, points) {
 /**
  * Sets the selected doctrine ID for the specified army and saves the state.
  * @param {string} armyId - The ID of the army.
- * @param {string | null} doctrineId - The ID of the selected doctrine (e.g., 'shock', 'defensive') or null.
+ * @param {string | null} doctrineId - The ID of the selected doctrine or null.
  */
 export function setSelectedDoctrine(armyId, doctrineId) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId) return;
-  // Basic validation: check if it's a string or null
   if (typeof doctrineId !== "string" && doctrineId !== null) {
     console.error("Invalid doctrineId provided:", doctrineId);
     return;
@@ -449,8 +470,7 @@ export function setUnderdogPoints(armyId, points) {
   if (!armyId || typeof points !== "number") return;
 
   const currentState = getArmyState(armyId);
-  const maxPoints = currentState.maxUnderdogPoints || 0; // Use stored max
-  // Clamp points between 0 and max
+  const maxPoints = currentState.maxUnderdogPoints || 0;
   const clampedPoints = Math.max(0, Math.min(points, maxPoints));
 
   if (currentState.underdogPoints !== clampedPoints) {
@@ -462,7 +482,6 @@ export function setUnderdogPoints(armyId, points) {
 
 /**
  * Sets the maximum underdog points for the specified army and saves the state.
- * Typically set once after calculation at the start of a game.
  * @param {string} armyId - The ID of the army.
  * @param {number} points - The maximum underdog point value.
  */
@@ -473,7 +492,6 @@ export function setMaxUnderdogPoints(armyId, points) {
   const currentState = getArmyState(armyId);
   if (currentState.maxUnderdogPoints !== points) {
     currentState.maxUnderdogPoints = points;
-    // Optionally clamp current UP if max decreased (e.g., recalculation)
     if (currentState.underdogPoints > currentState.maxUnderdogPoints) {
       currentState.underdogPoints = currentState.maxUnderdogPoints;
     }
@@ -504,14 +522,12 @@ export function getCurrentArmyUnits() {
 
 /** Gets a specific unit's processed data from the currently loaded army */
 export function getUnitData(unitId) {
-  // Removed armyId param, assumes current army
   const currentId = getCurrentArmyId();
   return currentId ? loadedArmiesData[currentId]?.unitMap?.[unitId] : null;
 }
 
 /** Gets a specific hero unit's processed data if joined to the given base unit in the currently loaded army */
 export function getJoinedHeroData(baseUnitId) {
-  // Removed armyId param
   const currentId = getCurrentArmyId();
   const armyData = currentId ? loadedArmiesData[currentId] : null;
 
