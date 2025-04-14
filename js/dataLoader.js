@@ -159,7 +159,7 @@ export async function loadBattleReport(missionIdOrPath) {
  * Fetches the doctrines data file, utilizing sessionStorage.
  * @returns {Promise<object|null>} The parsed doctrines data or null on error.
  */
-async function loadDoctrinesData() {
+export async function loadDoctrinesData() {
   const cacheKey = config.DOCTRINES_CACHE_KEY;
   try {
     // Try loading from cache first

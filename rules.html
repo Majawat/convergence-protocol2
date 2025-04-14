@@ -18,40 +18,81 @@
     <link rel="stylesheet" href="css/style.css" />
     <style>
       /* Custom styles for rules page */
-      .accordion-button:not(.collapsed) {
-        color: var(--bs-primary-text-emphasis);
-        background-color: var(--bs-primary-bg-subtle);
+      .rule-subsection {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: var(--bs-tertiary-bg);
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: var(--bs-border-radius);
       }
-      /* --- REMOVED .rules-table styles --- */
-
-      .rule-name {
-        /* Now used in cards */
-        font-weight: bold;
-        color: var(--bs-info); /* Or another highlight color */
-        display: block; /* Ensure name is on its own line */
+      .rule-subsection h5 {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--bs-border-color-translucent);
+      }
+      .rule-subsection ul,
+      .rule-subsection ol {
+        padding-left: 1.5rem; /* Indent lists */
+        margin-bottom: 0; /* Remove default bottom margin */
+      }
+      .rule-subsection li {
         margin-bottom: 0.25rem;
       }
-      /* Ensure list styling inside descriptions is visible */
-      .accordion-body ul,
-      .accordion-body ol {
-        padding-left: 1.5rem;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-      }
-      .accordion-body li {
-        margin-bottom: 0.25rem;
+      .rule-subsection p:last-child {
+        margin-bottom: 0;
       }
 
-      /* --- ADDED Card Styles --- */
+      /* Card Styles for Doctrines and Events */
+      .doctrine-card,
       .event-card {
         height: 100%; /* Make cards in a row equal height */
       }
+      .doctrine-card .card-header,
       .event-card .card-header {
         font-weight: bold;
       }
+      .doctrine-card .card-body,
       .event-card .card-body {
         font-size: 0.9rem; /* Slightly smaller text in cards */
       }
+      .doctrine-card .list-group-item,
+      .event-card .list-group-item {
+        font-size: 0.85rem;
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+        background-color: transparent; /* Ensure card background shows */
+        border: none; /* Remove default borders */
+        border-bottom: 1px solid var(--bs-border-color-translucent); /* Add subtle separator */
+      }
+      .doctrine-card .list-group-item:last-child,
+      .event-card .list-group-item:last-child {
+        border-bottom: none; /* Remove border from last item */
+      }
+      .doctrine-card .badge,
+      .event-card .badge {
+        flex-shrink: 0; /* Prevent badge shrinking */
+      }
+
+      /* Prevent parent list item from wrapping its main content and actions */
+      .doctrine-card .list-group-item,
+      .rule-subsection .list-group-item {
+        flex-wrap: nowrap !important; /* Force description and actions onto one line */
+      }
+
+      /* Handle potential overflow in the description div when wrapping is prevented */
+      .doctrine-card .list-group-item .me-auto,
+      .rule-subsection .list-group-item .me-auto {
+        overflow: hidden; /* Hide overflow */
+        text-overflow: ellipsis; /* Add ellipsis (...) */
+      }
+
+      /* Keep the original fix for the badge container itself */
+      .doctrine-card .list-group-item .stratagem-actions,
+      .rule-subsection .list-group-item .stratagem-actions {
+        flex-shrink: 0; /* Prevent this container from shrinking */
+        white-space: nowrap; /* Prevent content inside (like badge text) from wrapping */
+      }
+
       .event-card .effect-section {
         margin-top: 0.75rem;
         padding-top: 0.75rem;
@@ -151,127 +192,334 @@
     <main class="container mt-4">
       <h1 class="mb-4">Rules Reference</h1>
 
-      <div class="accordion" id="rulesAccordion">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingCoreRules">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseCoreRules"
-              aria-expanded="false"
-              aria-controls="collapseCoreRules"
-            >
-              <i class="bi bi-book-half me-2"></i> Core Rules (GF v3.4.1)
-            </button>
-          </h2>
-          <div
-            id="collapseCoreRules"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingCoreRules"
-            data-bs-parent="#rulesAccordion"
-          >
-            <div class="accordion-body">
-              <p class="text-muted">
-                Core rules content to be added here by transcribing from the
-                Beginner's Guide PDF.
-              </p>
-            </div>
-          </div>
+      <section id="core-rules" class="mb-4">
+        <h2>
+          <i class="bi bi-book-half me-2"></i>Core Rules Summary (GF v3.4.1)
+        </h2>
+        <div class="rule-subsection">
+          <h5>Game Structure</h5>
+          <p>
+            Games consist of <strong>Rounds</strong> (usually 4). Each round
+            consists of alternating player <strong>Turns</strong>. Each turn
+            consists of one unit <strong>Activation</strong>.
+          </p>
+          <ul>
+            <li>
+              Player who finished activating first last round goes first in the
+              next round.
+            </li>
+            <li>
+              After 4 rounds, check mission objectives to determine the winner.
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Activation Actions</h5>
+          <p>Activate one unit per turn. Choose one action:</p>
+          <ul>
+            <li><strong>Hold:</strong> No move. Can Shoot.</li>
+            <li>
+              <strong>Advance:</strong> Move up to 6". Can Shoot after moving.
+            </li>
+            <li><strong>Rush:</strong> Move up to 12". Cannot Shoot.</li>
+            <li>
+              <strong>Charge:</strong> Move up to 12" into base contact with
+              target enemy unit. Cannot Shoot.
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Shooting Sequence</h5>
+          <ol>
+            <li>
+              <strong>Determine Attacks:</strong> Sum Attack values of shooting
+              models in range & LoS.
+            </li>
+            <li>
+              <strong>Roll to Hit:</strong> Roll Quality tests for each attack.
+              Success = Hit.
+            </li>
+            <li>
+              <strong>Roll to Block:</strong> Target rolls Defense tests for
+              each hit. Success = Block. Fail = Wound.
+            </li>
+            <li>
+              <strong>Remove Casualties:</strong> Remove one model per Wound
+              taken.
+            </li>
+          </ol>
+        </div>
+        <div class="rule-subsection">
+          <h5>Melee Sequence</h5>
+          <ul>
+            <li>
+              <strong>Charge Moves:</strong> Move up to 12" to base contact (or
+              as close as possible). Target models move up to 3" into base
+              contact.
+            </li>
+            <li>
+              <strong>Who Can Strike:</strong> Models within 2" horizontally AND
+              4" vertically of an enemy model.
+            </li>
+            <li>
+              <strong>Melee Sequence (Attacker & Defender):</strong>
+              <ol>
+                <li>
+                  Determine Attacks: Sum Attack values of striking models.
+                </li>
+                <li>Roll to Hit: Roll Quality tests. Success = Hit.</li>
+                <li>
+                  Roll to Block: Target rolls Defense tests. Success = Block.
+                  Fail = Wound.
+                </li>
+                <li>Remove Casualties: Remove one model per Wound taken.</li>
+              </ol>
+            </li>
+            <li>
+              <strong>Return Strikes:</strong> Defender may choose to strike
+              back after the attacker finishes.
+            </li>
+            <li>
+              <strong>Fatigue:</strong> After attacking in melee (charging or
+              striking back) for the *first time* in a round, the unit only hits
+              on unmodified 6s in melee for the rest of that round.
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Melee Resolution</h5>
+          <ul>
+            <li>
+              <strong>Determine Winner:</strong> Compare total wounds caused by
+              each unit. Unit that caused more wounds wins. Tie if wounds are
+              equal or zero.
+            </li>
+            <li>
+              <strong>Morale Test:</strong> Only the LOSER of the melee takes a
+              morale test.
+            </li>
+            <li>
+              <strong>Consolidation Moves:</strong>
+              <ul>
+                <li>
+                  If one unit was destroyed/routed: Winner moves up to 3".
+                </li>
+                <li>
+                  If neither unit destroyed/routed: Charger moves back 1" (if
+                  possible).
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Morale</h5>
+          <ul>
+            <li>
+              <strong>When to Test:</strong>
+              <ul>
+                <li>
+                  End of activation if unit took wounds AND is now at half
+                  starting size/toughness or less.
+                </li>
+                <li>After losing a melee.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Test:</strong> Roll one die, succeed on unit's Quality
+              value or higher.
+            </li>
+            <li>
+              <strong>Outcomes (General/Wounds):</strong> Pass = OK. Fail =
+              **Shaken**.
+            </li>
+            <li>
+              <strong>Outcomes (Melee Loss):</strong> Pass = OK. Fail =
+              **Shaken**. Fail while at <= half strength = **Routed**.
+            </li>
+            <li>
+              <strong>Shaken Effects:</strong> Must Hold action to recover.
+              Counts as Fatigued. Auto-fails morale tests. Cannot contest/seize
+              objectives.
+            </li>
+            <li>
+              <strong>Routed Effects:</strong> Unit is removed from play as
+              casualty.
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Basic Terrain Effects</h5>
+          <ul>
+            <li>
+              <strong>Cover:</strong> +1 Defense vs Shooting if majority of unit
+              models are inside/behind.
+            </li>
+            <li>
+              <strong>Difficult:</strong> Max 6" move if any model moves through
+              it.
+            </li>
+            <li>
+              <strong>Dangerous:</strong> Roll 1 die per model (or Tough value)
+              moving through/activating in it. On a 1, unit takes 1 wound.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="campaign-rules" class="mb-4">
+        <h2>
+          <i class="bi bi-map-fill me-2"></i>Campaign Rules Summary (v3.4.0)
+        </h2>
+        <div class="rule-subsection">
+          <h5>Campaign Flow (Checklist)</h5>
+          <ol>
+            <li>Mission Setup (Points, Underdog, Objectives)</li>
+            <li>Play Mission (4+ rounds)</li>
+            <li>Check for Casualties</li>
+            <li>Earn Experience (XP)</li>
+            <li>Upgrade Armies</li>
+            <li>Recruit Units</li>
+          </ol>
+        </div>
+        <div class="rule-subsection">
+          <h5>Pre-Mission Setup</h5>
+          <ul>
+            <li>
+              <strong>Army Size Limit:</strong> No army may have > 250pts more
+              than the lowest point value army in the match.
+            </li>
+            <li>
+              <strong>Underdog Bonus:</strong> Get 1 Underdog Point (UP) for
+              every 50pts difference below the highest point value army. Spend 1
+              UP to modify any single roll (friendly or enemy) by +/- 1.
+            </li>
+            <li>
+              <strong>Special Objectives:</strong> Roll D6 for a bonus objective
+              (worth 75pts if completed):
+              <ul>
+                <li>1: Mastery (Unit in each quarter)</li>
+                <li>2: Honor (No enemies in own deployment zone)</li>
+                <li>3: Casting (Attempt spell each round)</li>
+                <li>4: Recovery (First to un-shake unit)</li>
+                <li>5: Rage (First to destroy enemy unit)</li>
+                <li>6: Destruction (Kill most expensive enemy unit)</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Post-Mission Steps</h5>
+          <ul>
+            <li>
+              <strong>Mission Rewards:</strong> Winner gets 2 VP + 150pts.
+              Loser(s) get 300pts.
+            </li>
+            <li>
+              <strong>Casualties (Destroyed/Routed Units):</strong>
+              <ul>
+                <li>
+                  Roll D6 for each Regular Unit: 1=Dead (remove), 2-5=Recovered,
+                  6=Talent (+1 XP).
+                </li>
+                <li>
+                  Roll D6 for each Hero Unit: 1=Dead, 2-5=Injury Trait (-5pts),
+                  6=Talent Trait (+5pts).
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>XP Earning:</strong>
+              <ul>
+                <li>+1 XP: Unit was not a casualty.</li>
+                <li>+1 XP: Unit killed an enemy unit.</li>
+                <li>+2 XP: Unit killed an enemy HERO unit.</li>
+                <li>+3 XP: Unit killed an enemy HERO and its joined unit.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Leveling Up (at 5 XP):</strong>
+              <ul>
+                <li>Regular Unit: +25pts, gain random Trait.</li>
+                <li>
+                  Hero Unit: +55pts, gain random Skill Set (first time), then
+                  gain random Skill Trait from set.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Upgrading/Recruiting:</strong> Spend earned points on
+              upgrades or new units. Can sell upgrades (half price). Can recruit
+              1 Hero (max 3 total). Can recruit regular units (one can start
+              with 5XP for +50pts). Can disband units/army.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="command-points-section" class="mb-4">
+        <h2>
+          <i class="bi bi-binoculars-fill me-2"></i>Command Points & Stratagems
+        </h2>
+
+        <div class="rule-subsection mb-3">
+          <h5>Command Point Generation (Fixed)</h5>
+          <p>
+            Players get <strong>4 Command Points (CP)</strong> per 1000pts in
+            their army list at the start of the game.
+          </p>
         </div>
 
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingCampaignRules">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseCampaignRules"
-              aria-expanded="false"
-              aria-controls="collapseCampaignRules"
-            >
-              <i class="bi bi-map-fill me-2"></i> Campaign Rules (v3.4.0)
-            </button>
-          </h2>
-          <div
-            id="collapseCampaignRules"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingCampaignRules"
-            data-bs-parent="#rulesAccordion"
-          >
-            <div class="accordion-body">
-              <p class="text-muted">
-                Campaign rules content to be added here by transcribing from the
-                Campaign Rules PDF.
-              </p>
-            </div>
-          </div>
+        <div class="rule-subsection mb-3">
+          <h5>Using Stratagems</h5>
+          <p>
+            At any point during the game (friendly or enemy activation), players
+            may spend CP to activate Stratagems. Each specific Stratagem can
+            only be used once per unit activation.
+          </p>
+          <p>
+            Players always have access to the
+            <strong>Universal Doctrine</strong> Stratagems below, plus the
+            Stratagems from <strong>one</strong> other Doctrine chosen before
+            the game begins (see options below).
+          </p>
         </div>
 
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingRandomEvents">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseRandomEvents"
-              aria-expanded="false"
-              aria-controls="collapseRandomEvents"
+        <div id="doctrines-display">
+          <div class="text-center p-3">
+            <div
+              class="spinner-border spinner-border-sm text-warning"
+              role="status"
             >
-              <i class="bi bi-dice-3-fill me-2"></i> Random Events
-            </button>
-          </h2>
-          <div
-            id="collapseRandomEvents"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingRandomEvents"
-            data-bs-parent="#rulesAccordion"
-          >
-            <div class="accordion-body">
-              <p class="text-muted small">
-                At the start of each round, roll D6. On a 5+, roll 2D6 (reading
-                them like D66, e.g., a 2 and a 5 is 25) and consult the events
-                below.
-              </p>
-              <div id="random-events-display">
-                <div class="text-center p-3">
-                  <div class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <span class="ms-2">Loading Random Events...</span>
-                </div>
-              </div>
+              <span class="visually-hidden">Loading...</span>
             </div>
+            <span class="ms-2">Loading Doctrines & Stratagems...</span>
           </div>
         </div>
+      </section>
 
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingGlossary">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseGlossary"
-              aria-expanded="false"
-              aria-controls="collapseGlossary"
-            >
-              <i class="bi bi-journal-text me-2"></i> Glossary (Future)
-            </button>
-          </h2>
-          <div
-            id="collapseGlossary"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingGlossary"
-            data-bs-parent="#rulesAccordion"
-          >
-            <div class="accordion-body">
-              <p class="text-muted">
-                A glossary of special rules and terms will be added here later.
-              </p>
+      <section id="random-events" class="mb-4">
+        <h2><i class="bi bi-dice-3-fill me-2"></i> Random Events</h2>
+        <p class="text-muted small">
+          At the start of each round, roll D6. On a 5+, roll 2D6 (reading them
+          like D66, e.g., a 2 and a 5 is 25) and consult the events below.
+        </p>
+        <div id="random-events-display">
+          <div class="text-center p-3">
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
+            <span class="ms-2">Loading Random Events...</span>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section id="glossary" class="mb-4">
+        <h2><i class="bi bi-journal-text me-2"></i> Glossary (Future)</h2>
+        <p class="text-muted">
+          A glossary of special rules and terms will be added here later.
+        </p>
+      </section>
     </main>
 
     <footer class="container mt-5 py-3 border-top">
@@ -299,6 +547,31 @@
           <div class="toast-body" style="white-space: pre-wrap">
             Toast message goes here.
           </div>
+        </div>
+      </template>
+      <template id="interactiveToastTemplate">
+        <div
+          class="toast"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          data-bs-autohide="false"
+        >
+          <div class="toast-header">
+            <strong class="me-auto toast-title">Confirmation</strong>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="toast-body" style="white-space: pre-wrap">
+            Interactive message goes here.
+          </div>
+          <div
+            class="mt-2 pt-2 border-top toast-buttons-container p-2 text-end"
+          ></div>
         </div>
       </template>
       <div
