@@ -42,14 +42,14 @@ import {
   resetCardUI,
 } from "./ui.js";
 import {
-  showToast, // Keep for simple notifications
-  showInteractiveToast, // Use the interactive toast function
+  showToast,
+  showInteractiveToast, 
   populateAndShowSpellModal,
   updateRoundUI,
   updateCommandPointsDisplay,
   populateDoctrineSelector,
   displayStratagems,
-  handleFocusReturn, // Use generic focus handler
+  handleFocusReturn,
   updateUnderdogPointsDisplay,
 } from "./uiHelpers.js";
 
@@ -823,7 +823,6 @@ async function _handleResetArmyDataClick() {
 }
 
 /**
- * *** NEW ***
  * Handles click on the "Reset ALL Data" button.
  * Confirms with the user, clears ALL localStorage and sessionStorage, and reloads the page.
  * @private
@@ -887,10 +886,8 @@ function handleInteractionClick(event) {
   const stratagemModal = event.target.closest("#stratagemModal");
   const upDisplay = event.target.closest("#underdog-points-display");
   const resetArmyButton = event.target.closest("#reset-army-data-button");
-  // *** NEW: Get reference to the new button ***
   const resetAllButton = event.target.closest("#reset-all-data-button");
 
-  // *** UPDATED: Check for the new button first ***
   if (resetAllButton) {
     _handleResetAllDataClick();
   } else if (resetArmyButton) {
