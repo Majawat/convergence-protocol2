@@ -6,16 +6,11 @@ import { config } from "./config.js";
 
 // --- Public Fetch Functions ---
 
-/**
- * Fetches the main campaign data file.
- * @returns {Promise<object|null>} The parsed campaign data or null on error.
- */
-export async function loadCampaignData() {
+/** Fetches campaign data. */
+async function loadCampaignData() {
   try {
     const response = await fetch(config.CAMPAIGN_DATA_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     console.log("Campaign data loaded successfully.");
     return data;
@@ -25,20 +20,13 @@ export async function loadCampaignData() {
   }
 }
 
-/**
- * Fetches the random events data file.
- * @returns {Promise<object|null>} The parsed random events data or null on error.
- */
-export async function loadRandomEventsData() {
+/** Fetches random events data. */
+async function loadRandomEventsData() {
   const eventsUrl = "./data/rules/random-events.json";
   try {
     console.log(`Fetching random events data from: ${eventsUrl}`);
     const response = await fetch(eventsUrl);
-    if (!response.ok) {
-      throw new Error(
-        `HTTP error loading random events! status: ${response.status}`
-      );
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     if (data && Array.isArray(data.events)) {
       console.log("Random events data loaded successfully.");
@@ -53,34 +41,25 @@ export async function loadRandomEventsData() {
   }
 }
 
-/**
- * Fetches the missions data file.
- * @returns {Promise<object|null>} The parsed missions data or null on error.
- */
-export async function loadMissionsData() {
+/** Fetches missions data. */
+async function loadMissionsData() {
   const missionsUrl = "./data/missions.json";
   try {
     console.log(`Fetching missions data from: ${missionsUrl}`);
     const response = await fetch(missionsUrl);
     if (!response.ok) {
       if (response.status === 404) {
-        console.warn(
-          "missions.json not found. Proceeding without mission details."
-        );
+        console.warn("missions.json not found.");
         return null;
       }
-      throw new Error(
-        `HTTP error loading missions! status: ${response.status}`
-      );
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     if (data && Array.isArray(data.missions)) {
       console.log("Missions data loaded successfully.");
       return data;
     } else {
-      console.warn(
-        "Invalid or empty missions data structure found in missions.json."
-      );
+      console.warn("Invalid missions data structure found.");
       return null;
     }
   } catch (error) {
@@ -89,12 +68,8 @@ export async function loadMissionsData() {
   }
 }
 
-/**
- * Fetches a specific battle report JSON file.
- * @param {string} reportPath - The direct path to the JSON file.
- * @returns {Promise<object|null>} The parsed battle report data or null on error.
- */
-export async function loadBattleReport(reportPath) {
+/** Fetches a specific battle report. */
+async function loadBattleReport(reportPath) {
   if (!reportPath) {
     console.error("Invalid path provided for loadBattleReport");
     return null;
@@ -115,9 +90,7 @@ export async function loadBattleReport(reportPath) {
     console.log(`Battle report loaded successfully from ${reportPath}.`);
     if (!data.missionId) {
       const match = reportPath.match(/mission(\d+)\.json$/);
-      if (match) {
-        data.missionId = parseInt(match[1], 10);
-      }
+      if (match) data.missionId = parseInt(match[1], 10);
     }
     return data;
   } catch (error) {
@@ -130,6 +103,7 @@ export async function loadBattleReport(reportPath) {
 
 /** Fetches doctrines, using cache. */
 async function _loadDoctrinesDataInternal() {
+  // Renamed slightly for clarity
   const cacheKey = config.DOCTRINES_CACHE_KEY;
   try {
     const cachedData = sessionStorage.getItem(cacheKey);
@@ -160,7 +134,7 @@ async function _loadDoctrinesDataInternal() {
     }
   } catch (error) {
     console.error("Error loading doctrines data:", error);
-    return null;
+    return null; // Return null on error
   }
 }
 
@@ -200,7 +174,6 @@ async function _loadCommonDataInternal(gameSystemId) {
     const response = await fetch(commonRulesUrl);
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const data = await response.json();
-    // Basic validation
     if (data && (Array.isArray(data.rules) || Array.isArray(data.traits))) {
       console.log("Common rules/traits data fetched successfully.");
       return data;
@@ -218,23 +191,20 @@ async function _loadCommonDataInternal(gameSystemId) {
 async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
   const url = `${config.ARMYFORGE_BOOK_API_URL_BASE}${factionId}?gameSystem=${gameSystem}`;
   try {
-    // console.log(`Fetching army book: ${factionName} (${factionId})`); // Reduce console noise
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const bookData = await response.json();
-    // console.log(`Successfully fetched army book: ${factionName}`); // Reduce console noise
     return { factionId, bookData, factionName };
   } catch (error) {
     console.error(
       `Failed to fetch army book ${factionName} (${factionId}):`,
       error
     );
-    return null; // Return null for failed fetches
+    return null;
   }
 }
 
 /**
- * *** UPDATED ***
  * Fetches Army Book data, Common Rules/Traits, Custom Definitions, AND Doctrines data.
  * Consolidates all rule/term definitions into a single object, using sessionStorage for caching definitions.
  * @param {object} campaignData - The loaded campaign data.
@@ -245,7 +215,7 @@ async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
  * definitions: object
  * }>} Object containing the loaded data and the consolidated definitions.
  */
-export async function loadGameData(campaignData) {
+async function loadGameData(campaignData) {
   const requiredGsId = config.GAME_SYSTEM_ID;
   const definitionsCacheKey = config.DEFINITIONS_CACHE_KEY;
   let definitions = {};
@@ -258,7 +228,6 @@ export async function loadGameData(campaignData) {
     const cachedDefinitions = sessionStorage.getItem(definitionsCacheKey);
     if (cachedDefinitions) {
       const parsedDefs = JSON.parse(cachedDefinitions);
-      // Basic validation: check if it's a non-empty object
       if (
         parsedDefs &&
         typeof parsedDefs === "object" &&
@@ -270,29 +239,26 @@ export async function loadGameData(campaignData) {
           } terms).`
         );
         definitions = parsedDefs;
-        // If definitions are cached, we still need to load army books and doctrines (which might also be cached)
-        // We can skip loading common rules/traits and custom defs as they are part of the definitions cache
+        // Still need to load army books and doctrines (which might also be cached)
         const doctrinesPromise = _loadDoctrinesDataInternal();
-        // Load only army books
         const factionPromises = [];
         if (campaignData && campaignData.armies) {
           const uniqueFactions = new Map();
           campaignData.armies.forEach((army) => {
             (army.faction || []).forEach((fac) => {
-              if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id)) {
+              if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id))
                 uniqueFactions.set(fac.id, fac);
-              }
             });
           });
-          uniqueFactions.forEach((faction) => {
+          uniqueFactions.forEach((faction) =>
             factionPromises.push(
               _loadArmyBookDataInternal(
                 faction.id,
                 faction.gameSystem,
                 faction.name || faction.id
               )
-            );
-          });
+            )
+          );
         }
         const [doctrinesResult, ...bookResults] = await Promise.all([
           doctrinesPromise,
@@ -300,17 +266,14 @@ export async function loadGameData(campaignData) {
         ]);
         doctrinesDataResult = doctrinesResult;
         bookResults.forEach((result) => {
-          if (result && result.bookData) {
+          if (result && result.bookData)
             armyBooks[result.factionId] = result.bookData;
-          }
         });
-
-        // Return cached definitions and freshly loaded (or cached) books/doctrines
         return {
-          armyBooks: armyBooks,
-          commonRules: {}, // Indicate common rules were not fetched this time
+          armyBooks,
+          commonRules: {},
           doctrines: doctrinesDataResult,
-          definitions: definitions,
+          definitions,
         };
       } else {
         console.warn(
@@ -321,7 +284,7 @@ export async function loadGameData(campaignData) {
     }
   } catch (e) {
     console.error("Error reading definitions cache:", e);
-    sessionStorage.removeItem(definitionsCacheKey); // Clear potentially corrupt cache
+    sessionStorage.removeItem(definitionsCacheKey);
   }
 
   // --- Step 2: Fetch Base Data (If Definitions Not Cached) ---
@@ -335,50 +298,44 @@ export async function loadGameData(campaignData) {
     customDefsPromise,
     doctrinesPromise,
   ]);
-  doctrinesDataResult = doctrinesResult; // Store loaded/cached doctrines
+  doctrinesDataResult = doctrinesResult;
 
   // --- Step 3: Process Base Definitions (Custom > Common) ---
-  // Process Custom Definitions first
   if (customDefsData) {
     (customDefsData.rules || []).forEach((rule) => {
-      if (rule.name && rule.description) {
+      if (rule.name && rule.description)
         definitions[rule.name] = {
           description: rule.description,
           type: "rules",
           source: "Custom",
         };
-      }
     });
     (customDefsData.traits || []).forEach((trait) => {
-      if (trait.name && trait.description) {
+      if (trait.name && trait.description)
         definitions[trait.name] = {
           description: trait.description,
           type: "traits",
           source: "Custom",
         };
-      }
     });
   }
-  // Process Common Rules & Traits (only add if not already defined by custom)
   if (commonData) {
-    commonRulesResult = { [requiredGsId]: commonData }; // Store raw data
+    commonRulesResult = { [requiredGsId]: commonData };
     (commonData.rules || []).forEach((rule) => {
-      if (rule.name && rule.description && !definitions[rule.name]) {
+      if (rule.name && rule.description && !definitions[rule.name])
         definitions[rule.name] = {
           description: rule.description,
           type: "rules",
           source: "Common",
         };
-      }
     });
     (commonData.traits || []).forEach((trait) => {
-      if (trait.name && trait.description && !definitions[trait.name]) {
+      if (trait.name && trait.description && !definitions[trait.name])
         definitions[trait.name] = {
           description: trait.description,
           type: "traits",
           source: "Common",
         };
-      }
     });
   }
 
@@ -388,20 +345,19 @@ export async function loadGameData(campaignData) {
     const uniqueFactions = new Map();
     campaignData.armies.forEach((army) => {
       (army.faction || []).forEach((fac) => {
-        if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id)) {
+        if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id))
           uniqueFactions.set(fac.id, fac);
-        }
       });
     });
-    uniqueFactions.forEach((faction) => {
+    uniqueFactions.forEach((faction) =>
       factionPromises.push(
         _loadArmyBookDataInternal(
           faction.id,
           faction.gameSystem,
           faction.name || faction.id
         )
-      );
-    });
+      )
+    );
   }
   const bookResults = await Promise.all(factionPromises);
 
@@ -409,28 +365,25 @@ export async function loadGameData(campaignData) {
   bookResults.forEach((result) => {
     if (result && result.bookData) {
       const { factionId, bookData, factionName } = result;
-      armyBooks[factionId] = bookData; // Store raw book data
-
+      armyBooks[factionId] = bookData;
       (bookData.specialRules || []).forEach((rule) => {
-        if (rule.name && rule.description && !definitions[rule.name]) {
+        if (rule.name && rule.description && !definitions[rule.name])
           definitions[rule.name] = {
             description: rule.description,
             type: "special-rules",
             source: factionName,
           };
-        }
       });
       (bookData.spells || []).forEach((spell) => {
         if (spell.name && spell.effect) {
           const spellKey = `${spell.name} (${factionName})`;
-          if (!definitions[spellKey]) {
+          if (!definitions[spellKey])
             definitions[spellKey] = {
               description: spell.effect,
               type: "spells",
               source: factionName,
               threshold: spell.threshold || 0,
             };
-          }
         }
       });
     }
@@ -448,11 +401,8 @@ export async function loadGameData(campaignData) {
     }
   } catch (e) {
     console.error("Error saving definitions to sessionStorage cache:", e);
-    // Potentially show a warning to the user if storage is full
-    if (e.name === "QuotaExceededError") {
-      // Consider using showToast here if available/imported
+    if (e.name === "QuotaExceededError")
       console.error("SessionStorage quota exceeded. Definitions not cached.");
-    }
   }
 
   console.log(
@@ -467,3 +417,13 @@ export async function loadGameData(campaignData) {
     definitions: definitions,
   };
 }
+
+// *** ADDED Export for the internal doctrine loader ***
+export {
+  loadCampaignData,
+  loadRandomEventsData,
+  loadMissionsData,
+  loadBattleReport,
+  loadGameData,
+  _loadDoctrinesDataInternal as loadDoctrinesData, // Export the internal function
+};

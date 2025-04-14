@@ -4,11 +4,13 @@
  * Initializes definition popovers.
  */
 
-// *** UPDATED: Removed loadDoctrinesData import ***
-import { loadRandomEventsData } from "./dataLoader.js";
+// *** UPDATED: Import loadDoctrinesData correctly ***
+import { loadRandomEventsData, loadDoctrinesData } from "./dataLoader.js";
 import { showToast } from "./uiHelpers.js";
+import { UI_ICONS } from "./config.js";
 import { initializeDefinitionsSystem } from "./definitions.js";
-import { getDoctrinesData } from "./state.js";
+// *** REMOVED: No longer need getDoctrinesData from state here ***
+// import { getDefinitions } from "./state.js"; // Keep getDefinitions if initializeDefinitionsSystem uses it internally
 
 // --- UI Element References ---
 let randomEventsDisplayElement;
@@ -104,12 +106,13 @@ function displayDoctrines(doctrinesData) {
     console.error("Doctrines display element not found.");
     return;
   }
-  // Use the passed-in data (which comes from getDoctrinesData in the state)
+  // Use the passed-in data
   if (
     !doctrinesData ||
     !Array.isArray(doctrinesData.doctrines) ||
     doctrinesData.doctrines.length === 0
   ) {
+    // Display error if data is invalid/null after loading attempt
     doctrinesDisplayElement.innerHTML = `<div class="alert alert-warning" role="alert">Could not load or find doctrines data.</div>`;
     return;
   }
@@ -200,33 +203,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeUIReferences();
 
   try {
-    // Load data first
-    // Definitions are assumed to be loaded into state by app.js calling loadGameData
+    // *** UPDATED: Fetch events and doctrines explicitly ***
     const eventsDataPromise = loadRandomEventsData();
-    const doctrinesData = getDoctrinesData(); // Get doctrines from state
+    const doctrinesDataPromise = loadDoctrinesData(); // Uses cache if available
 
-    // Display static/state-dependent content immediately
-    displayDoctrines(doctrinesData);
+    // Wait for both fetches to complete
+    const [eventsData, doctrinesData] = await Promise.all([
+      eventsDataPromise,
+      doctrinesDataPromise,
+    ]);
 
-    // Wait for events data and display it
-    const eventsData = await eventsDataPromise;
+    // Display dynamic sections using the fetched/cached data
     displayRandomEvents(eventsData);
+    displayDoctrines(doctrinesData); // Pass the loaded data
 
-    // Initialize popovers AFTER all dynamic content is rendered
+    // Initialize popovers AFTER dynamic content is rendered
+    // Ensure definitions cache has been populated by app.js or another initializer first
     setTimeout(() => {
       initializeDefinitionsSystem();
     }, 100);
   } catch (error) {
     console.error("Error loading rules page data:", error);
     showToast("Failed to load some rules data.", "Error");
-    if (randomEventsDisplayElement) {
+    // Update specific display areas if possible
+    if (
+      randomEventsDisplayElement &&
+      !randomEventsDisplayElement.innerHTML.includes("card")
+    ) {
+      // Check if not already populated
       randomEventsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Error loading random events. Check console.</div>`;
     }
-    if (doctrinesDisplayElement) {
-      // Check if doctrines failed specifically during state retrieval (though unlikely now)
-      if (!getDoctrinesData()) {
-        doctrinesDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Error loading doctrines. Check console.</div>`;
-      }
+    if (
+      doctrinesDisplayElement &&
+      !doctrinesDisplayElement.innerHTML.includes("card")
+    ) {
+      // Check if not already populated
+      doctrinesDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Error loading doctrines. Check console.</div>`;
     }
   }
 });
