@@ -42,77 +42,16 @@ import {
   resetCardUI,
 } from "./ui.js";
 import {
-  showToast,
+  showToast, // Keep for simple notifications
+  showInteractiveToast, // *** NEW: Import the interactive toast function ***
   populateAndShowSpellModal,
   updateRoundUI,
   updateCommandPointsDisplay,
   populateDoctrineSelector,
   displayStratagems,
-  handleModalHidden,
+  handleFocusReturn, // *** RENAMED: Use generic focus handler ***
   updateUnderdogPointsDisplay,
 } from "./uiHelpers.js";
-
-// Variable to store the element that triggered the modal
-let modalTriggerElement = null;
-
-// --- Placeholder for a more robust interactive toast/modal system ---
-/**
- * Shows a message with interactive buttons and returns a Promise resolving with the clicked button's value.
- * Replace this with your actual modal/toast implementation.
- * @param {string} message - The message to display.
- * @param {string[]} buttons - An array of button labels (e.g., ["Yes", "No"], ["Pass", "Fail"], ["Win", "Lose", "Tie"]).
- * @param {string} [title='Input Needed'] - Optional title.
- * @returns {Promise<string|null>} A promise resolving with the text of the clicked button, or null if cancelled.
- */
-async function showInteractivePrompt(
-  message,
-  buttons = ["OK"],
-  title = "Input Needed"
-) {
-  console.warn(
-    "Using placeholder showInteractivePrompt. Implement a real modal/toast system."
-  );
-  // Simple prompt for now, replace with UI
-  let choice = null;
-  if (buttons.length === 2 && buttons[0] === "Yes" && buttons[1] === "No") {
-    choice = confirm(`${title}\n\n${message}`) ? "Yes" : "No";
-  } else if (
-    buttons.length === 2 &&
-    buttons[0] === "Pass" &&
-    buttons[1] === "Fail"
-  ) {
-    choice = confirm(`${title}\n\n${message}\n\nOK for Pass, Cancel for Fail`)
-      ? "Pass"
-      : "Fail";
-  } else if (
-    buttons.length === 3 &&
-    buttons[0] === "Win" &&
-    buttons[1] === "Lose" &&
-    buttons[2] === "Tie"
-  ) {
-    let validInput = false;
-    while (!validInput) {
-      const input = prompt(`${title}\n\n${message}\n\nEnter W, L, or T:`);
-      if (input === null) {
-        choice = null;
-        validInput = true;
-      } else {
-        const upperInput = input.toUpperCase();
-        if (["W", "L", "T"].includes(upperInput)) {
-          choice =
-            upperInput === "W" ? "Win" : upperInput === "L" ? "Lose" : "Tie";
-          validInput = true;
-        } else {
-          alert("Invalid input. Please enter W, L, or T.");
-        }
-      }
-    }
-  } else {
-    alert(`${title}\n\n${message}`);
-    choice = buttons[0] || null;
-  }
-  return Promise.resolve(choice);
-}
 
 // --- Internal Helper Functions ---
 
@@ -376,14 +315,23 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
   const heroData = getJoinedHeroData(cardUnitId);
   const heroId = heroData ? heroData.selectionId : null;
 
-  const confirmReset = await showInteractivePrompt(
-    `Fully reset ${
+  // *** CHANGE: Use interactive toast ***
+  const confirmReset = await showInteractiveToast(
+    `Reset ${
       baseUnitData.customName || baseUnitData.originalName
     } (HP, Status, Action)?`,
-    ["Reset", "Cancel"],
-    "Confirm Reset"
+    "Confirm Reset",
+    [
+      { text: "Reset", value: "reset", style: "danger" },
+      { text: "Cancel", value: "cancel", style: "secondary" },
+    ]
   );
-  if (confirmReset !== "Reset") return;
+  // *** END CHANGE ***
+
+  if (confirmReset !== "reset") {
+    console.log("Unit reset cancelled.");
+    return;
+  }
 
   console.log(
     `Resetting unit state for card unit ${cardUnitId}` +
@@ -610,25 +558,36 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
       console.log(`Resolving melee outcome for charger ${cardUnitId}`);
 
       // 1. Ask for Melee Outcome (for the CHARGING unit)
-      const outcome = await showInteractivePrompt(
+      // *** CHANGE: Use interactive toast ***
+      const outcome = await showInteractiveToast(
         `Did ${
           unitData.customName || cardUnitId
         } (the Charger) WIN, LOSE, or TIE the melee?`,
-        ["Win", "Lose", "Tie"],
-        "Melee: Charger Outcome?"
+        "Melee: Charger Outcome?",
+        [
+          { text: "Win", value: "Win", style: "success" },
+          { text: "Lose", value: "Lose", style: "danger" },
+          { text: "Tie", value: "Tie", style: "warning" },
+        ]
       );
+      // *** END CHANGE ***
 
       if (outcome === "Lose") {
         console.log(`Charging unit ${cardUnitId} lost melee. Checking morale.`);
         const quality = unitData.quality;
         // 2. Ask for Morale Result
-        const moraleResult = await showInteractivePrompt(
+        // *** CHANGE: Use interactive toast ***
+        const moraleResult = await showInteractiveToast(
           `MELEE MORALE TEST (Quality ${quality}+): Did ${
             unitData.customName || cardUnitId
           } PASS or FAIL?`,
-          ["Pass", "Fail"],
-          "Melee: Charger Morale"
+          "Melee: Charger Morale",
+          [
+            { text: "Pass", value: "Pass", style: "success" },
+            { text: "Fail", value: "Fail", style: "danger" },
+          ]
         );
+        // *** END CHANGE ***
 
         if (moraleResult === "Fail") {
           // 3. Check half strength for Routing
@@ -681,11 +640,16 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   if (!unitData) return;
 
   // 1. Ask if THIS unit Struck Back (for fatigue)
-  const didStrikeBack = await showInteractivePrompt(
+  // *** CHANGE: Use interactive toast ***
+  const didStrikeBack = await showInteractiveToast(
     `Did ${unitData.customName || cardUnitId} Strike Back in this melee?`,
-    ["Yes", "No"],
-    "Melee: Strike Back?"
+    "Melee: Strike Back?",
+    [
+      { text: "Yes", value: "Yes", style: "primary" },
+      { text: "No", value: "No", style: "secondary" },
+    ]
   );
+  // *** END CHANGE ***
 
   if (didStrikeBack === "Yes") {
     const isFirstMelee = !getUnitStateValue(
@@ -711,23 +675,34 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   }
 
   // 2. Ask for Melee Outcome for THIS unit
-  const outcome = await showInteractivePrompt(
+  // *** CHANGE: Use interactive toast ***
+  const outcome = await showInteractiveToast(
     `Did ${
       unitData.customName || unitData.originalName
     } WIN, LOSE, or TIE the melee?`,
-    ["Win", "Lose", "Tie"],
-    "Melee: Outcome?"
+    "Melee: Outcome?",
+    [
+      { text: "Win", value: "Win", style: "success" },
+      { text: "Lose", value: "Lose", style: "danger" },
+      { text: "Tie", value: "Tie", style: "warning" },
+    ]
   );
+  // *** END CHANGE ***
 
   if (outcome === "Lose") {
     console.log(`Unit ${cardUnitId} lost melee. Checking morale.`);
     const quality = unitData.quality;
     // 3. Ask for Morale Result
-    const moraleResult = await showInteractivePrompt(
+    // *** CHANGE: Use interactive toast ***
+    const moraleResult = await showInteractiveToast(
       `MELEE MORALE TEST (Quality ${quality}+): Did the unit PASS or FAIL?`,
-      ["Pass", "Fail"],
-      "Melee: Morale Test"
+      "Melee: Morale Test",
+      [
+        { text: "Pass", value: "Pass", style: "success" },
+        { text: "Fail", value: "Fail", style: "danger" },
+      ]
     );
+    // *** END CHANGE ***
 
     if (moraleResult === "Fail") {
       // 4. Check half strength for Routing
@@ -784,11 +759,17 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
     return;
   }
 
-  const moraleResult = await showInteractivePrompt(
+  // *** CHANGE: Use interactive toast ***
+  const moraleResult = await showInteractiveToast(
     `WOUNDS MORALE TEST (Quality ${quality}+): Did the unit PASS or FAIL?`,
-    ["Pass", "Fail"],
-    "Wounds: Morale Test"
+    "Wounds: Morale Test",
+    [
+      { text: "Pass", value: "Pass", style: "success" },
+      { text: "Fail", value: "Fail", style: "danger" },
+    ]
   );
+  // *** END CHANGE ***
+
   if (moraleResult === "Fail") {
     console.log(`Unit ${cardUnitId} fails morale from wounds -> SHAKEN!`);
     updateUnitStateValue(armyId, cardUnitId, "shaken", true);
@@ -1008,12 +989,18 @@ async function _handleResetArmyDataClick() {
   const armyData = getLoadedArmyData(); // Get data for the name
   const armyName = armyData?.meta?.name || `Army (${armyId})`;
 
-  // Confirmation Dialog
-  const confirmed = confirm(
-    `WARNING!\n\nThis will permanently delete all saved progress (HP, status, CP, UP, doctrine selection) for "${armyName}" and reload its data from scratch.\n\nAre you absolutely sure you want to proceed?`
+  // *** CHANGE: Use interactive toast for confirmation ***
+  const confirmed = await showInteractiveToast(
+    `WARNING!\n\nThis will permanently delete all saved progress (HP, status, CP, UP, doctrine selection) for "${armyName}" and reload its data from scratch.\n\nAre you absolutely sure you want to proceed?`,
+    "Confirm Full Army Reset",
+    [
+      { text: "Reset Army Data", value: "reset", style: "danger" },
+      { text: "Cancel", value: "cancel", style: "secondary" },
+    ]
   );
+  // *** END CHANGE ***
 
-  if (confirmed) {
+  if (confirmed === "reset") {
     console.log(`Resetting data for army ${armyId}...`);
 
     // 1. Clear Persistent State for this army
@@ -1083,9 +1070,10 @@ export function setupEventListeners(armyId) {
     stratagemModalElement.addEventListener("show.bs.modal", (event) => {
       // Store the trigger element for focus return
       if (event.relatedTarget) {
-        modalTriggerElement = event.relatedTarget;
+        // *** CHANGE: Use generic focus variable ***
+        elementToFocusAfterClose = event.relatedTarget;
       } else {
-        modalTriggerElement = document.activeElement;
+        elementToFocusAfterClose = document.activeElement;
       }
       // Populate selector when modal opens
       populateDoctrineSelector(armyId);
@@ -1107,11 +1095,11 @@ export function setupEventListeners(armyId) {
     // Add listener to return focus when modal is hidden
     stratagemModalElement.removeEventListener(
       "hidden.bs.modal",
-      handleModalHidden
-    ); // Use generic handler
+      handleFocusReturn // *** CHANGE: Use generic handler ***
+    );
     stratagemModalElement.addEventListener(
       "hidden.bs.modal",
-      handleModalHidden,
+      handleFocusReturn, // *** CHANGE: Use generic handler ***
       { once: true }
     );
 
