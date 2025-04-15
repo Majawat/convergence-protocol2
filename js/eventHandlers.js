@@ -1,7 +1,5 @@
 /**
  * @fileoverview Handles user interactions and events for the OPR Army Tracker.
- * UPDATED: Added _handleUnderdogPointAdjustClick function definition.
- * UPDATED: Modified modal 'show' listener to use setElementToFocusAfterClose from uiHelpers.
  */
 
 // Imports from other modules
@@ -53,7 +51,7 @@ import {
   displayStratagems,
   handleFocusReturn, // Keep importing this
   updateUnderdogPointsDisplay,
-  setElementToFocusAfterClose, // *** ADDED: Import the new setter ***
+  setElementToFocusAfterClose, // Import the setter
 } from "./uiHelpers.js";
 
 // --- Internal Helper Functions ---
@@ -1168,6 +1166,32 @@ export function setupEventListeners(armyId) {
   } else {
     console.warn("Stratagem modal element not found.");
   }
+
+  // --- *** ADDED: Army Info Modal Listeners *** ---
+  const armyInfoModalElement = document.getElementById("armyInfoModal");
+  if (armyInfoModalElement) {
+    armyInfoModalElement.addEventListener("show.bs.modal", (event) => {
+      // Store the trigger element for focus return
+      setElementToFocusAfterClose(
+        event.relatedTarget || document.activeElement
+      );
+      console.log("Army Info modal opened.");
+    });
+    // Add listener to return focus when modal is hidden
+    armyInfoModalElement.removeEventListener(
+      "hidden.bs.modal",
+      handleFocusReturn // Use the imported handler
+    );
+    armyInfoModalElement.addEventListener(
+      "hidden.bs.modal",
+      handleFocusReturn, // Use the imported handler
+      { once: true }
+    );
+    console.log("Army Info modal listeners attached.");
+  } else {
+    console.warn("Army Info modal element not found.");
+  }
+  // --- *** END ADDED *** ---
 
   const initialRound = getCurrentRound();
   const roundDisplayElement = document.getElementById("round-display");
