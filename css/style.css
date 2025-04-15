@@ -587,3 +587,78 @@ body {
 #modal-command-points-display .cp-icon-placeholder.text-secondary .bi {
   color: var(--bs-secondary); /* Color when points are zero */
 }
+
+/* --- 404 Page Specific Styles --- */
+
+/* 404/40K Glitch Effect */
+@keyframes textFlicker {
+  0%,
+  100% {
+    content: "404";
+    opacity: 1;
+  }
+  45% {
+    content: "404";
+    opacity: 1;
+  }
+  46% {
+    content: "40K";
+    opacity: 0.8;
+  } /* Start of glitch */
+  47% {
+    content: "404";
+    opacity: 0.9;
+  }
+  48% {
+    content: "40K";
+    opacity: 1;
+  }
+  50% {
+    content: "404";
+    opacity: 0.8;
+  }
+  52% {
+    content: "40K";
+    opacity: 1;
+  }
+  54% {
+    content: "404";
+    opacity: 0.9;
+  }
+  56% {
+    content: "40K";
+    opacity: 1;
+  }
+  85% {
+    content: "404";
+    opacity: 1;
+  } /* End of glitch */
+}
+
+.error-text::before {
+  content: "404"; /* Initial content */
+  animation: textFlicker 4s infinite; /* Apply the animation */
+}
+
+/* 404 Icon Float Effect */
+#404-icon {
+  animation: float 6s ease-in-out infinite;
+  fill: var(--bs-body-color); /* Ensure icon color matches theme */
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  } /* Adjust float height */
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Optional: Style the alert box */
+.alert {
+  text-wrap: balance; /* Improve text balancing in the alert */
+}
