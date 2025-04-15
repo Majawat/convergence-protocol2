@@ -1,6 +1,7 @@
 /**
  * @fileoverview Contains helper functions for updating specific UI parts
  * not directly related to the main unit display (e.g., modals, toasts, selection lists).
+ * UPDATED: Added setElementToFocusAfterClose function.
  */
 
 // Import constants if needed (e.g., from config)
@@ -17,8 +18,50 @@ import {
   getMaxUnderdogPoints,
 } from "./state.js";
 
+// --- Focus Management State ---
 // Variable to store the element that triggered the modal/toast
+// Kept internal to this module, managed by exported functions.
 let elementToFocusAfterClose = null;
+
+/**
+ * *** ADDED ***
+ * Stores the element that should receive focus when the next modal/toast closes.
+ * Should be called from the 'show.bs.modal' or equivalent event listener.
+ * @param {HTMLElement|null} element - The element to focus, or null.
+ */
+export function setElementToFocusAfterClose(element) {
+  if (element && typeof element.focus === "function") {
+    elementToFocusAfterClose = element;
+    // console.log("DEBUG: Storing element to focus after close:", element);
+  } else {
+    elementToFocusAfterClose = null; // Clear if invalid element provided
+    // console.log("DEBUG: Clearing element to focus after close (invalid element provided).");
+  }
+}
+
+/**
+ * Returns focus to the element stored by setElementToFocusAfterClose.
+ * Should be called from the 'hidden.bs.modal' or 'hidden.bs.toast' event listener.
+ */
+export function handleFocusReturn() {
+  if (elementToFocusAfterClose) {
+    // console.log("DEBUG: Attempting to return focus to:", elementToFocusAfterClose);
+    // Use requestAnimationFrame for smoother focus transition, especially after CSS transitions
+    requestAnimationFrame(() => {
+      try {
+        elementToFocusAfterClose.focus();
+        // console.log("DEBUG: Focus returned successfully.");
+      } catch (e) {
+        console.warn("Could not focus stored trigger element:", e);
+      }
+      elementToFocusAfterClose = null; // Clear stored element after attempting focus
+      // console.log("DEBUG: Cleared stored focus element.");
+    });
+  } else {
+    // console.log("DEBUG: No element stored to return focus to.");
+  }
+}
+// --- End Focus Management ---
 
 /**
  * Displays a list of armies from the campaign data for selection when no armyId is provided.
@@ -189,7 +232,6 @@ export function showToast(message, title = "Update", delay = 5000) {
 }
 
 /**
- * *** NEW ***
  * Shows an interactive Bootstrap Toast message with buttons and returns a Promise.
  * @param {string} message - The message to display in the toast body.
  * @param {string} [title='Confirmation'] - The title for the toast header.
@@ -212,11 +254,12 @@ export function showInteractiveToast(
     }
 
     // Store the currently focused element BEFORE showing the toast
-    if (document.activeElement && document.activeElement !== document.body) {
-      elementToFocusAfterClose = document.activeElement;
-    } else {
-      elementToFocusAfterClose = null; // Ensure it's cleared if nothing specific is focused
-    }
+    // *** Use the new setter function ***
+    setElementToFocusAfterClose(
+      document.activeElement && document.activeElement !== document.body
+        ? document.activeElement
+        : null
+    );
 
     // Clone the template
     const newToastElement =
@@ -257,7 +300,7 @@ export function showInteractiveToast(
         // Manually hide the toast since autohide is false
         const toastInstance = bootstrap.Toast.getInstance(newToastElement);
         if (toastInstance) {
-          toastInstance.hide();
+          toastInstance.hide(); // This will trigger the 'hidden.bs.toast' event
         } else {
           newToastElement.remove(); // Fallback removal
           handleFocusReturn(); // Manually trigger focus return if instance is gone
@@ -271,7 +314,7 @@ export function showInteractiveToast(
     if (closeButton) {
       closeButton.addEventListener("click", () => {
         resolve(null); // Resolve with null if closed without button click
-        // Bootstrap will hide it automatically on btn-close click
+        // Bootstrap will hide it automatically on btn-close click, triggering 'hidden.bs.toast'
       });
     }
 
@@ -332,12 +375,12 @@ export function populateAndShowSpellModal(
   }
 
   // --- Focus Management Setup ---
-  // Store the element that triggered the modal
-  if (document.activeElement && document.activeElement !== document.body) {
-    elementToFocusAfterClose = document.activeElement;
-  } else {
-    elementToFocusAfterClose = null;
-  }
+  // *** Use the new setter function ***
+  setElementToFocusAfterClose(
+    document.activeElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null
+  );
   // Add listener to return focus when modal is hidden
   modalElement.removeEventListener("hidden.bs.modal", handleFocusReturn); // Use generic handler
   modalElement.addEventListener("hidden.bs.modal", handleFocusReturn, {
@@ -392,9 +435,7 @@ export function populateAndShowSpellModal(
                             data-spell-cost="${spellCost}"
                             data-spell-name="${encodeURIComponent(spellName)}"
                             data-caster-id="${casterUnit.selectionId}"
-                            data-army-id="${
-                              armyId || ""
-                            }" {/* Ensure armyId is not null */}
+                            data-army-id="${armyId || ""}"
                             ${!canCast ? "disabled" : ""}>
                         ${UI_ICONS.castSpell} Cast
                     </button>
@@ -422,32 +463,6 @@ export function populateAndShowSpellModal(
   }
 }
 
-// --- Focus Management Functions ---
-
-/**
- * *** RENAMED from handleModalHidden ***
- * Returns focus to the element that triggered the modal or toast.
- */
-export function handleFocusReturn() {
-  if (
-    elementToFocusAfterClose &&
-    typeof elementToFocusAfterClose.focus === "function"
-  ) {
-    requestAnimationFrame(() => {
-      // Use rAF for smoother focus transition
-      try {
-        elementToFocusAfterClose.focus();
-      } catch (e) {
-        console.warn("Could not focus stored trigger element:", e);
-      }
-      elementToFocusAfterClose = null; // Clear stored element
-    });
-  } else {
-    elementToFocusAfterClose = null; // Clear if no valid element
-  }
-}
-
-// --- ADDED: Function to display Stratagems ---
 /**
  * Displays the Universal and selected Doctrine's stratagems in the modal.
  * @param {string} armyId - The ID of the currently loaded army.

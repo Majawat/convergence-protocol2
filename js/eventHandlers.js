@@ -1,5 +1,7 @@
 /**
  * @fileoverview Handles user interactions and events for the OPR Army Tracker.
+ * UPDATED: Added _handleUnderdogPointAdjustClick function definition.
+ * UPDATED: Modified modal 'show' listener to use setElementToFocusAfterClose from uiHelpers.
  */
 
 // Imports from other modules
@@ -43,14 +45,15 @@ import {
 } from "./ui.js";
 import {
   showToast,
-  showInteractiveToast, 
+  showInteractiveToast,
   populateAndShowSpellModal,
   updateRoundUI,
   updateCommandPointsDisplay,
   populateDoctrineSelector,
   displayStratagems,
-  handleFocusReturn,
+  handleFocusReturn, // Keep importing this
   updateUnderdogPointsDisplay,
+  setElementToFocusAfterClose, // *** ADDED: Import the new setter ***
 } from "./uiHelpers.js";
 
 // --- Internal Helper Functions ---
@@ -878,13 +881,118 @@ async function _handleResetAllDataClick() {
   }
 }
 
+// --- *** ADDED: Stratagem and CP/UP Handlers *** ---
+
+/**
+ * Handles clicking the activate button for a stratagem.
+ * @param {HTMLButtonElement} buttonElement - The button that was clicked.
+ */
+async function _handleActivateStratagemClick(buttonElement) {
+  const stratName = decodeURIComponent(buttonElement.dataset.stratagemName);
+  const stratCost = parseInt(buttonElement.dataset.stratagemCost, 10);
+  const armyId = buttonElement.dataset.armyId;
+
+  if (isNaN(stratCost) || !stratName || !armyId) {
+    console.error("Stratagem button missing required data attributes.");
+    showToast("Error activating stratagem: Missing data.", "Error");
+    return;
+  }
+
+  const currentCP = getCommandPoints(armyId);
+
+  if (currentCP < stratCost) {
+    showToast(
+      `Not enough Command Points for ${stratName}.`,
+      "Activation Failed"
+    );
+    return;
+  }
+
+  // Confirmation (optional, but good for costly stratagems)
+  const confirm = await showInteractiveToast(
+    `Activate Stratagem "${stratName}" for ${stratCost} CP?`,
+    "Confirm Stratagem",
+    [
+      {
+        text: `Activate (${stratCost} CP)`,
+        value: "activate",
+        style: "success",
+      },
+      { text: "Cancel", value: "cancel", style: "secondary" },
+    ]
+  );
+
+  if (confirm === "activate") {
+    const newCP = currentCP - stratCost;
+    setCommandPoints(armyId, newCP); // Update state
+    updateCommandPointsDisplay(armyId, newCP, getMaxCommandPoints(armyId)); // Update main UI
+    // Update modal UI (CP display and button states)
+    displayStratagems(armyId, getSelectedDoctrine(armyId));
+    // Show confirmation
+    showToast(`Activated: ${stratName}`, "Stratagem Used");
+    console.log(`Stratagem "${stratName}" activated for ${stratCost} CP.`);
+  } else {
+    console.log(`Stratagem "${stratName}" activation cancelled.`);
+  }
+}
+
+/**
+ * Handles manual adjustment of Command Points via modal buttons.
+ * @param {number} adjustment - Amount to adjust by (+1 or -1).
+ */
+function _handleManualCpAdjustClick(adjustment) {
+  const armyId = getCurrentArmyId();
+  if (!armyId) return;
+
+  const currentCP = getCommandPoints(armyId);
+  const maxCP = getMaxCommandPoints(armyId);
+  const newCP = currentCP + adjustment;
+
+  // Clamp value
+  if (newCP >= 0 && newCP <= maxCP) {
+    setCommandPoints(armyId, newCP); // Update state
+    updateCommandPointsDisplay(armyId, newCP, maxCP); // Update main UI
+    // Update modal UI (CP display and button states)
+    displayStratagems(armyId, getSelectedDoctrine(armyId));
+    console.log(`Manually adjusted CP by ${adjustment} to ${newCP}`);
+  } else {
+    console.warn(
+      `Manual CP adjustment (${adjustment}) would exceed limits (0-${maxCP}). No change.`
+    );
+  }
+}
+
+/**
+ * Handles manual adjustment of Underdog Points via header buttons.
+ * @param {number} adjustment - Amount to adjust by (+1 or -1).
+ */
+function _handleUnderdogPointAdjustClick(adjustment) {
+  const armyId = getCurrentArmyId();
+  if (!armyId) return;
+
+  const currentUP = getUnderdogPoints(armyId);
+  const maxUP = getMaxUnderdogPoints(armyId);
+  const newUP = currentUP + adjustment;
+
+  // Clamp value
+  if (newUP >= 0 && newUP <= maxUP) {
+    setUnderdogPoints(armyId, newUP); // Update state
+    updateUnderdogPointsDisplay(armyId, newUP, maxUP); // Update UI display
+    console.log(`Manually adjusted UP by ${adjustment} to ${newUP}`);
+  } else {
+    console.warn(
+      `Manual UP adjustment (${adjustment}) would exceed limits (0-${maxUP}). No change.`
+    );
+  }
+}
+
 // --- Main Event Listener & Setup ---
 
 function handleInteractionClick(event) {
   const unitCard = event.target.closest(".unit-card");
   const spellModal = event.target.closest("#viewSpellsModal");
   const stratagemModal = event.target.closest("#stratagemModal");
-  const upDisplay = event.target.closest("#underdog-points-display");
+  const upDisplay = event.target.closest("#underdog-points-display"); // Target the display div
   const resetArmyButton = event.target.closest("#reset-army-data-button");
   const resetAllButton = event.target.closest("#reset-all-data-button");
 
@@ -893,15 +1001,24 @@ function handleInteractionClick(event) {
   } else if (resetArmyButton) {
     _handleResetArmyDataClick();
   } else if (unitCard) {
-    // ... (rest of unit card logic remains the same) ...
     const cardUnitId = unitCard.dataset.unitId;
     const armyId = unitCard.dataset.armyId;
     if (!cardUnitId || !armyId) return;
-    if (
-      unitCard.classList.contains("unit-destroyed") ||
-      unitCard.classList.contains("unit-routed")
-    )
-      return;
+    // Check if unit is inactive before processing clicks on its elements
+    const unitStatus = getUnitStateValue(
+      armyId,
+      cardUnitId,
+      "status",
+      "active"
+    );
+    if (unitStatus === "destroyed" || unitStatus === "routed") {
+      // Only allow the reset button on inactive cards
+      const resetButton = event.target.closest(".unit-reset-btn");
+      if (resetButton) {
+        _handleResetUnitClick(resetButton, armyId, cardUnitId);
+      }
+      return; // Prevent other interactions on inactive cards
+    }
 
     const modelElement = event.target.closest(".clickable-model");
     const woundButton = event.target.closest(".wound-apply-btn");
@@ -931,11 +1048,9 @@ function handleInteractionClick(event) {
     else if (moraleWoundsButton)
       _handleMoraleWoundsClick(moraleWoundsButton, armyId, cardUnitId);
   } else if (spellModal) {
-    // ... (spell modal logic remains the same) ...
     const castButton = event.target.closest(".cast-spell-btn");
     if (castButton) _handleCastSpellClick(castButton);
   } else if (stratagemModal) {
-    // ... (stratagem modal logic remains the same) ...
     const activateButton = event.target.closest(".activate-stratagem-btn");
     const removeCpButton = event.target.closest("#manual-cp-remove");
     const addCpButton = event.target.closest("#manual-cp-add");
@@ -954,7 +1069,7 @@ function handleInteractionClick(event) {
       _handleManualCpAdjustClick(1);
     }
   } else if (upDisplay) {
-    // ... (underdog points logic remains the same) ...
+    // Check clicks within the UP display area
     const removeUpButton = event.target.closest("#manual-up-remove");
     const addUpButton = event.target.closest("#manual-up-add");
 
@@ -1003,13 +1118,11 @@ export function setupEventListeners(armyId) {
   const stratagemModalElement = document.getElementById("stratagemModal");
   if (stratagemModalElement) {
     stratagemModalElement.addEventListener("show.bs.modal", (event) => {
-      // Store the trigger element for focus return
-      if (event.relatedTarget) {
-        // *** CHANGE: Use generic focus variable ***
-        elementToFocusAfterClose = event.relatedTarget;
-      } else {
-        elementToFocusAfterClose = document.activeElement;
-      }
+      // *** UPDATED: Use the imported setter ***
+      setElementToFocusAfterClose(
+        event.relatedTarget || document.activeElement
+      );
+
       // Populate selector when modal opens
       populateDoctrineSelector(armyId);
       // Update CP display in modal header
@@ -1018,7 +1131,7 @@ export function setupEventListeners(armyId) {
         getCommandPoints(armyId),
         getMaxCommandPoints(armyId)
       );
-      // --- ADDED: Display stratagems on modal open ---
+      // Display stratagems on modal open
       const currentDoctrine = getSelectedDoctrine(armyId);
       displayStratagems(armyId, currentDoctrine);
       console.log(
@@ -1030,11 +1143,11 @@ export function setupEventListeners(armyId) {
     // Add listener to return focus when modal is hidden
     stratagemModalElement.removeEventListener(
       "hidden.bs.modal",
-      handleFocusReturn // *** CHANGE: Use generic handler ***
+      handleFocusReturn // Use the imported handler
     );
     stratagemModalElement.addEventListener(
       "hidden.bs.modal",
-      handleFocusReturn, // *** CHANGE: Use generic handler ***
+      handleFocusReturn, // Use the imported handler
       { once: true }
     );
 
@@ -1045,7 +1158,7 @@ export function setupEventListeners(armyId) {
         const selectedDoctrineId = event.target.value;
         setSelectedDoctrine(armyId, selectedDoctrineId || null); // Save selection (null if default selected)
         console.log(`Doctrine selected: ${selectedDoctrineId}`);
-        // --- ADDED: Trigger display of stratagems on change ---
+        // Trigger display of stratagems on change
         displayStratagems(armyId, selectedDoctrineId || null);
       });
       console.log("Doctrine selector change listener attached.");
