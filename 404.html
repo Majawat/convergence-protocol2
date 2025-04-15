@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Page Not Found</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <script type="module" src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    </head>
+  <body class="bg-body text-body">
+    <nav
+      class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm"
+    >
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">Convergence Protocol</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="army.html">View Armies</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="campaign.html">Campaign Status</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="rules.html">Rules Reference</a>
+            </li>
+          </ul>
+          <div class="dropdown">
+            <button
+              class="btn btn-sm btn-secondary dropdown-toggle"
+              type="button"
+              id="themeDropdown"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="bi bi-circle-half theme-icon-active"></i> Theme
+            </button>
+            <ul
+              class="dropdown-menu dropdown-menu-end"
+              aria-labelledby="themeDropdown"
+            >
+              <li>
+                <button
+                  class="dropdown-item d-flex align-items-center"
+                  type="button"
+                  data-bs-theme-value="light"
+                >
+                  <i class="bi bi-sun-fill me-2"></i> Light
+                </button>
+              </li>
+              <li>
+                <button
+                  class="dropdown-item d-flex align-items-center"
+                  type="button"
+                  data-bs-theme-value="dark"
+                >
+                  <i class="bi bi-moon-stars-fill me-2"></i> Dark
+                </button>
+              </li>
+              <li>
+                <button
+                  class="dropdown-item d-flex align-items-center"
+                  type="button"
+                  data-bs-theme-value="auto"
+                >
+                  <i class="bi bi-circle-half me-2"></i> Auto
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container-fluid px-4 my-4 text-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style="height: 200px; width: 100%"
+        class="mb-4"
+        id="404-icon"
+      >
+        <g transform="translate(0,0)">
+          <path
+            d="M268.725 389.28l3.74 28.7h-30.89l3.74-28.7a11.705 11.705 0 1 1 23.41 0zm33.84-71.83a29.5 29.5 0 1 0 29.5 29.5 29.5 29.5 0 0 0-29.51-29.5zm-94.4 0a29.5 29.5 0 1 0 29.5 29.5 29.5 29.5 0 0 0-29.51-29.5zm245.71-62c0 98.2-48.22 182.68-117.39 220.24-46 28.26-112.77 28.26-156.19 2.5-71.72-36.21-122.17-122.29-122.17-222.73 0-78.16 30.54-147.63 77.89-191.67 0 0-42.08 82.86 9.1 135-11.67-173.77 169.28-63 118-184 151.79 83.33 9.14 105 84.1 148.21 0 0 66.21 47 36.4-91.73 42.95 43.99 70.25 110.3 70.25 184.19zm-68.54 29.87c-2.45-65.49-54.88-119.59-120.26-124.07-3.06-.21-6.15-.31-9.16-.31a129.4 129.4 0 0 0-129.43 129.35 132.15 132.15 0 0 0 24.51 76v25a35 35 0 0 0 34.74 34.69h6.26v16.61a34.66 34.66 0 0 0 34.71 34.39h61.78a34.48 34.48 0 0 0 34.51-34.39v-16.61h5.38a34.89 34.89 0 0 0 34.62-34.75v-28a129.32 129.32 0 0 0 22.33-77.9z"
+            fill="var(--bs-body-color)"
+            fill-opacity="1"
+          ></path>
+        </g>
+      </svg>
+      <div
+        class="alert alert-danger mx-auto col-md-8 col-lg-6"
+        role="alert"
+      >
+        <h1><span class="error-text"></span> - PAGE NOT FOUND</h1>
+        <hr />
+        <h5 class="text-balance">
+          Cogitator subroutine reports no data found for this designation.
+        </h5>
+        <p class="mb-0 mt-3">
+          <small class="text-muted d-block text-end"
+            >Error Code: <span id="error-code">ALPHA-THETA-404</span></small
+          >
+        </p>
+      </div>
+
+      <a href="index.html" class="button btn btn-primary mt-3"
+        >Return to Protocol Hub</a
+      >
+    </main>
+
+    <footer class="container mt-5 py-3 border-top">
+      <p class="text-center text-muted">&copy; 2025 Convergence Protocol Tracker</p>
+      </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Simple random error code generator (optional)
+      function generateRandomCode() {
+        const prefixes = ["OMEGA", "EXCOMMUNICATUS", "INQUISITORIAL", "LEGION", "PRIMARIS", "REDEMPTION", "ADEPTO"];
+        const middles = ["REX", "THETA", "AUXILIA", "HERETICUS", "CRUSADE", "ASTARTES", "MECHANICUS"];
+        const suffixes = ["404", "00M42", "XVIII", "M31", "M41", "XVI", "1011", "VOID"];
+        return `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${middles[Math.floor(Math.random() * middles.length)]}-${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        const errorCodeElement = document.getElementById("error-code");
+        if (errorCodeElement) {
+          errorCodeElement.textContent = generateRandomCode();
+        }
+      });
+    </script>
+    </body>
+</html>
