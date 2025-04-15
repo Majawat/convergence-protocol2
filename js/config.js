@@ -12,20 +12,22 @@ export const config = {
   THEME_STORAGE_KEY: "theme",
   DOCTRINES_CACHE_KEY: "oprDoctrinesCache",
   CAMPAIGN_POINTS_CACHE_KEY: "oprCampaignPointsCache",
+  DEFINITIONS_CACHE_KEY: "oprDefinitionsCache",
 
   // Game Rules
   MAX_SPELL_TOKENS: 6,
-  GAME_SYSTEM_ID: 2,
+  GAME_SYSTEM_ID: 2, // Assuming Grimdark Future = 2
   COMMAND_POINTS_PER_1000: 4,
   UNDERDOG_POINTS_PER_DELTA: 50,
 
   // API Endpoints & Data URLs
   CAMPAIGN_DATA_URL: "./data/campaign.json",
   DOCTRINES_DATA_URL: "./data/rules/doctrines.json",
+  CUSTOM_DEFINITIONS_URL: "./data/rules/custom-definitions.json",
   ARMYFORGE_LIST_API_URL_BASE:
     "https://army-forge.onepagerules.com/api/tts?id=",
   ARMYFORGE_BOOK_API_URL_BASE:
-    "https://army-forge.onepagerules.com/api/army-books/",
+    "https://army-forge.onepagerules.com/api/army-books/", // {factionId}?gameSystem={gameSystemId}
   ARMYFORGE_COMMON_RULES_API_URL_BASE:
     "https://army-forge.onepagerules.com/api/rules/common/",
 };

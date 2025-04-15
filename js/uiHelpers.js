@@ -17,8 +17,8 @@ import {
   getMaxUnderdogPoints,
 } from "./state.js";
 
-// Variable to store the element that triggered the modal
-let modalTriggerElement = null;
+// Variable to store the element that triggered the modal/toast
+let elementToFocusAfterClose = null;
 
 /**
  * Displays a list of armies from the campaign data for selection when no armyId is provided.
@@ -149,7 +149,10 @@ export function showToast(message, title = "Update", delay = 5000) {
 
   if (toastTimestampElement) {
     const now = new Date();
-    toastTimestampElement.textContent = now.toLocaleTimeString();
+    toastTimestampElement.textContent = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }); // Format time
   }
 
   // Append to container
@@ -186,6 +189,131 @@ export function showToast(message, title = "Update", delay = 5000) {
 }
 
 /**
+ * *** NEW ***
+ * Shows an interactive Bootstrap Toast message with buttons and returns a Promise.
+ * @param {string} message - The message to display in the toast body.
+ * @param {string} [title='Confirmation'] - The title for the toast header.
+ * @param {Array<object>} buttons - Array of button objects, e.g., [{text: 'Yes', value: 'yes', style: 'primary'}, {text: 'No', value: 'no', style: 'secondary'}]
+ * @returns {Promise<string|null>} A promise that resolves with the 'value' of the clicked button, or null if dismissed via the close button.
+ */
+export function showInteractiveToast(
+  message,
+  title = "Confirmation",
+  buttons = []
+) {
+  return new Promise((resolve) => {
+    const toastContainer = document.querySelector(".toast-container");
+    const toastTemplate = document.getElementById("interactiveToastTemplate");
+
+    if (!toastContainer || !toastTemplate) {
+      console.error("Interactive toast container or template not found.");
+      resolve(null); // Resolve with null on error
+      return;
+    }
+
+    // Store the currently focused element BEFORE showing the toast
+    if (document.activeElement && document.activeElement !== document.body) {
+      elementToFocusAfterClose = document.activeElement;
+    } else {
+      elementToFocusAfterClose = null; // Ensure it's cleared if nothing specific is focused
+    }
+
+    // Clone the template
+    const newToastElement =
+      toastTemplate.content.firstElementChild.cloneNode(true);
+    const toastId = `interactive-toast-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 7)}`;
+    newToastElement.id = toastId;
+
+    // Populate the new toast
+    const toastTitleElement = newToastElement.querySelector(".toast-title");
+    const toastBodyElement = newToastElement.querySelector(".toast-body");
+    const buttonsContainer = newToastElement.querySelector(
+      ".toast-buttons-container"
+    );
+
+    if (toastTitleElement) toastTitleElement.textContent = title;
+    if (toastBodyElement) toastBodyElement.textContent = message;
+    if (!buttonsContainer) {
+      console.error(
+        "Buttons container not found in interactive toast template."
+      );
+      resolve(null);
+      return;
+    }
+
+    // Add buttons dynamically
+    buttons.forEach((buttonConfig) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `btn btn-sm btn-${
+        buttonConfig.style || "secondary"
+      } ms-1`; // Add margin between buttons
+      button.textContent = buttonConfig.text;
+      button.dataset.value = buttonConfig.value; // Store the value to resolve with
+      button.addEventListener("click", () => {
+        resolve(buttonConfig.value); // Resolve the promise with the button's value
+        // Manually hide the toast since autohide is false
+        const toastInstance = bootstrap.Toast.getInstance(newToastElement);
+        if (toastInstance) {
+          toastInstance.hide();
+        } else {
+          newToastElement.remove(); // Fallback removal
+          handleFocusReturn(); // Manually trigger focus return if instance is gone
+        }
+      });
+      buttonsContainer.appendChild(button);
+    });
+
+    // Handle dismissal via the 'X' button
+    const closeButton = newToastElement.querySelector(".btn-close");
+    if (closeButton) {
+      closeButton.addEventListener("click", () => {
+        resolve(null); // Resolve with null if closed without button click
+        // Bootstrap will hide it automatically on btn-close click
+      });
+    }
+
+    // Append to container
+    toastContainer.appendChild(newToastElement);
+
+    // Initialize Bootstrap Toast
+    if (typeof bootstrap !== "undefined" && bootstrap.Toast) {
+      try {
+        const toast = new bootstrap.Toast(newToastElement, {
+          autohide: false, // Ensure it doesn't autohide
+        });
+
+        // Add event listener to remove the toast from DOM and handle focus return
+        newToastElement.addEventListener(
+          "hidden.bs.toast",
+          () => {
+            newToastElement.remove();
+            handleFocusReturn(); // Call focus return handler
+          },
+          { once: true }
+        );
+
+        toast.show();
+      } catch (error) {
+        console.error("Error showing interactive Bootstrap toast:", error);
+        newToastElement.remove(); // Clean up
+        handleFocusReturn(); // Attempt focus return even on error
+        resolve(null);
+      }
+    } else {
+      console.warn(
+        "Bootstrap Toast component not found. Cannot display interactive toast."
+      );
+      newToastElement.remove(); // Clean up
+      handleFocusReturn(); // Attempt focus return
+      resolve(null);
+    }
+  });
+}
+
+/**
  * Populates and shows the spell list modal (#viewSpellsModal).
  * Also sets up listeners to handle focus management on hide.
  * @param {object} casterUnit - The processed caster unit data (hero or base unit).
@@ -206,11 +334,13 @@ export function populateAndShowSpellModal(
   // --- Focus Management Setup ---
   // Store the element that triggered the modal
   if (document.activeElement && document.activeElement !== document.body) {
-    modalTriggerElement = document.activeElement;
+    elementToFocusAfterClose = document.activeElement;
+  } else {
+    elementToFocusAfterClose = null;
   }
   // Add listener to return focus when modal is hidden
-  modalElement.removeEventListener("hidden.bs.modal", handleModalHidden); // Use generic handler
-  modalElement.addEventListener("hidden.bs.modal", handleModalHidden, {
+  modalElement.removeEventListener("hidden.bs.modal", handleFocusReturn); // Use generic handler
+  modalElement.addEventListener("hidden.bs.modal", handleFocusReturn, {
     once: true,
   });
   // --- End Focus Management ---
@@ -248,12 +378,14 @@ export function populateAndShowSpellModal(
       const spellName = spell.name || "Unnamed Spell";
 
       listItem.innerHTML = `
-                <div class="me-auto mb-1"> <span class="fw-bold spell-name">${spellName}</span>
+                <div class="me-auto mb-1">
+                    <span class="fw-bold spell-name">${spellName}</span>
                     <small class="spell-effect d-block text-muted">${
                       spell.effect || "No description."
                     }</small>
                 </div>
-                <div class="d-flex align-items-center gap-2"> <span class="badge bg-info rounded-pill spell-cost-badge" title="Token Cost">${spellCost}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-info rounded-pill spell-cost-badge" title="Token Cost">${spellCost}</span>
                     <button type="button"
                             class="btn btn-sm btn-success cast-spell-btn"
                             title="Cast ${spellName}"
@@ -282,31 +414,36 @@ export function populateAndShowSpellModal(
       modalInstance.show();
     } catch (error) {
       console.error("Error showing spell modal:", error);
-      modalElement.removeEventListener("hidden.bs.modal", handleModalHidden); // Clean up listener if show fails
+      modalElement.removeEventListener("hidden.bs.modal", handleFocusReturn); // Clean up listener if show fails
     }
   } else {
     console.warn("Bootstrap Modal component not found.");
-    modalElement.removeEventListener("hidden.bs.modal", handleModalHidden); // Clean up listener if BS missing
+    modalElement.removeEventListener("hidden.bs.modal", handleFocusReturn); // Clean up listener if BS missing
   }
 }
 
 // --- Focus Management Functions ---
 
-/** Returns focus to the element that triggered the modal */
-export function handleModalHidden() {
-  // Made generic
-  if (modalTriggerElement && typeof modalTriggerElement.focus === "function") {
+/**
+ * *** RENAMED from handleModalHidden ***
+ * Returns focus to the element that triggered the modal or toast.
+ */
+export function handleFocusReturn() {
+  if (
+    elementToFocusAfterClose &&
+    typeof elementToFocusAfterClose.focus === "function"
+  ) {
     requestAnimationFrame(() => {
       // Use rAF for smoother focus transition
       try {
-        modalTriggerElement.focus();
+        elementToFocusAfterClose.focus();
       } catch (e) {
         console.warn("Could not focus stored trigger element:", e);
       }
-      modalTriggerElement = null; // Clear stored element
+      elementToFocusAfterClose = null; // Clear stored element
     });
   } else {
-    modalTriggerElement = null; // Clear if no valid element
+    elementToFocusAfterClose = null; // Clear if no valid element
   }
 }
 
@@ -356,30 +493,30 @@ export function displayStratagems(armyId, selectedDoctrineId) {
       const stratDataId = `${doctrine.id}-${strat.name.replace(/\s+/g, "-")}`;
 
       listHTML += `
-              <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap gap-2 px-0 py-2">
-                  <div class="me-auto">
-                      <strong class="stratagem-name">${stratName}</strong>
-                      <small class="stratagem-description d-block text-muted">${stratDesc}</small>
-                  </div>
-                  <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-warning text-dark rounded-pill stratagem-cost-badge" title="Command Point Cost">${cost} pt${
+                <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap gap-2 px-0 py-2">
+                    <div class="me-auto">
+                        <strong class="stratagem-name">${stratName}</strong>
+                        <small class="stratagem-description d-block text-muted">${stratDesc}</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-warning text-dark rounded-pill stratagem-cost-badge" title="Command Point Cost">${cost} pt${
         cost !== 1 ? "s" : ""
       }</span>
-                      <button type="button"
-                              class="btn btn-sm btn-success activate-stratagem-btn"
-                              title="Activate ${stratName}"
-                              data-stratagem-id="${stratDataId}"
-                              data-stratagem-name="${encodeURIComponent(
-                                stratName
-                              )}"
-                              data-stratagem-cost="${cost}"
-                              data-army-id="${armyId || ""}"
-                              ${!canAfford ? "disabled" : ""}>
-                          Activate
-                      </button>
-                  </div>
-              </li>
-          `;
+                        <button type="button"
+                                class="btn btn-sm btn-success activate-stratagem-btn"
+                                title="Activate ${stratName}"
+                                data-stratagem-id="${stratDataId}"
+                                data-stratagem-name="${encodeURIComponent(
+                                  stratName
+                                )}"
+                                data-stratagem-cost="${cost}"
+                                data-army-id="${armyId || ""}"
+                                ${!canAfford ? "disabled" : ""}>
+                            Activate
+                        </button>
+                    </div>
+                </li>
+            `;
     });
 
     listHTML += "</ul>";

@@ -43,76 +43,15 @@ import {
 } from "./ui.js";
 import {
   showToast,
+  showInteractiveToast, 
   populateAndShowSpellModal,
   updateRoundUI,
   updateCommandPointsDisplay,
   populateDoctrineSelector,
   displayStratagems,
-  handleModalHidden,
+  handleFocusReturn,
   updateUnderdogPointsDisplay,
 } from "./uiHelpers.js";
-
-// Variable to store the element that triggered the modal
-let modalTriggerElement = null;
-
-// --- Placeholder for a more robust interactive toast/modal system ---
-/**
- * Shows a message with interactive buttons and returns a Promise resolving with the clicked button's value.
- * Replace this with your actual modal/toast implementation.
- * @param {string} message - The message to display.
- * @param {string[]} buttons - An array of button labels (e.g., ["Yes", "No"], ["Pass", "Fail"], ["Win", "Lose", "Tie"]).
- * @param {string} [title='Input Needed'] - Optional title.
- * @returns {Promise<string|null>} A promise resolving with the text of the clicked button, or null if cancelled.
- */
-async function showInteractivePrompt(
-  message,
-  buttons = ["OK"],
-  title = "Input Needed"
-) {
-  console.warn(
-    "Using placeholder showInteractivePrompt. Implement a real modal/toast system."
-  );
-  // Simple prompt for now, replace with UI
-  let choice = null;
-  if (buttons.length === 2 && buttons[0] === "Yes" && buttons[1] === "No") {
-    choice = confirm(`${title}\n\n${message}`) ? "Yes" : "No";
-  } else if (
-    buttons.length === 2 &&
-    buttons[0] === "Pass" &&
-    buttons[1] === "Fail"
-  ) {
-    choice = confirm(`${title}\n\n${message}\n\nOK for Pass, Cancel for Fail`)
-      ? "Pass"
-      : "Fail";
-  } else if (
-    buttons.length === 3 &&
-    buttons[0] === "Win" &&
-    buttons[1] === "Lose" &&
-    buttons[2] === "Tie"
-  ) {
-    let validInput = false;
-    while (!validInput) {
-      const input = prompt(`${title}\n\n${message}\n\nEnter W, L, or T:`);
-      if (input === null) {
-        choice = null;
-        validInput = true;
-      } else {
-        const upperInput = input.toUpperCase();
-        if (["W", "L", "T"].includes(upperInput)) {
-          choice =
-            upperInput === "W" ? "Win" : upperInput === "L" ? "Lose" : "Tie";
-          validInput = true;
-        } else {
-          alert("Invalid input. Please enter W, L, or T.");
-        }
-      }
-    }
-  } else {
-    alert(`${title}\n\n${message}`);
-    choice = buttons[0] || null;
-  }
-  return Promise.resolve(choice);
-}
 
 // --- Internal Helper Functions ---
 
@@ -376,14 +315,21 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
   const heroData = getJoinedHeroData(cardUnitId);
   const heroId = heroData ? heroData.selectionId : null;
 
-  const confirmReset = await showInteractivePrompt(
-    `Fully reset ${
+  const confirmReset = await showInteractiveToast(
+    `Reset ${
       baseUnitData.customName || baseUnitData.originalName
     } (HP, Status, Action)?`,
-    ["Reset", "Cancel"],
-    "Confirm Reset"
+    "Confirm Reset",
+    [
+      { text: "Reset", value: "reset", style: "danger" },
+      { text: "Cancel", value: "cancel", style: "secondary" },
+    ]
   );
-  if (confirmReset !== "Reset") return;
+
+  if (confirmReset !== "reset") {
+    console.log("Unit reset cancelled.");
+    return;
+  }
 
   console.log(
     `Resetting unit state for card unit ${cardUnitId}` +
@@ -610,24 +556,31 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
       console.log(`Resolving melee outcome for charger ${cardUnitId}`);
 
       // 1. Ask for Melee Outcome (for the CHARGING unit)
-      const outcome = await showInteractivePrompt(
+      const outcome = await showInteractiveToast(
         `Did ${
           unitData.customName || cardUnitId
         } (the Charger) WIN, LOSE, or TIE the melee?`,
-        ["Win", "Lose", "Tie"],
-        "Melee: Charger Outcome?"
+        "Melee: Charger Outcome?",
+        [
+          { text: "Win", value: "Win", style: "success" },
+          { text: "Lose", value: "Lose", style: "danger" },
+          { text: "Tie", value: "Tie", style: "warning" },
+        ]
       );
 
       if (outcome === "Lose") {
         console.log(`Charging unit ${cardUnitId} lost melee. Checking morale.`);
         const quality = unitData.quality;
         // 2. Ask for Morale Result
-        const moraleResult = await showInteractivePrompt(
+        const moraleResult = await showInteractiveToast(
           `MELEE MORALE TEST (Quality ${quality}+): Did ${
             unitData.customName || cardUnitId
           } PASS or FAIL?`,
-          ["Pass", "Fail"],
-          "Melee: Charger Morale"
+          "Melee: Charger Morale",
+          [
+            { text: "Pass", value: "Pass", style: "success" },
+            { text: "Fail", value: "Fail", style: "danger" },
+          ]
         );
 
         if (moraleResult === "Fail") {
@@ -681,10 +634,13 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   if (!unitData) return;
 
   // 1. Ask if THIS unit Struck Back (for fatigue)
-  const didStrikeBack = await showInteractivePrompt(
+  const didStrikeBack = await showInteractiveToast(
     `Did ${unitData.customName || cardUnitId} Strike Back in this melee?`,
-    ["Yes", "No"],
-    "Melee: Strike Back?"
+    "Melee: Strike Back?",
+    [
+      { text: "Yes", value: "Yes", style: "primary" },
+      { text: "No", value: "No", style: "secondary" },
+    ]
   );
 
   if (didStrikeBack === "Yes") {
@@ -711,22 +667,29 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   }
 
   // 2. Ask for Melee Outcome for THIS unit
-  const outcome = await showInteractivePrompt(
+  const outcome = await showInteractiveToast(
     `Did ${
       unitData.customName || unitData.originalName
     } WIN, LOSE, or TIE the melee?`,
-    ["Win", "Lose", "Tie"],
-    "Melee: Outcome?"
+    "Melee: Outcome?",
+    [
+      { text: "Win", value: "Win", style: "success" },
+      { text: "Lose", value: "Lose", style: "danger" },
+      { text: "Tie", value: "Tie", style: "warning" },
+    ]
   );
 
   if (outcome === "Lose") {
     console.log(`Unit ${cardUnitId} lost melee. Checking morale.`);
     const quality = unitData.quality;
     // 3. Ask for Morale Result
-    const moraleResult = await showInteractivePrompt(
+    const moraleResult = await showInteractiveToast(
       `MELEE MORALE TEST (Quality ${quality}+): Did the unit PASS or FAIL?`,
-      ["Pass", "Fail"],
-      "Melee: Morale Test"
+      "Melee: Morale Test",
+      [
+        { text: "Pass", value: "Pass", style: "success" },
+        { text: "Fail", value: "Fail", style: "danger" },
+      ]
     );
 
     if (moraleResult === "Fail") {
@@ -784,11 +747,15 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
     return;
   }
 
-  const moraleResult = await showInteractivePrompt(
+  const moraleResult = await showInteractiveToast(
     `WOUNDS MORALE TEST (Quality ${quality}+): Did the unit PASS or FAIL?`,
-    ["Pass", "Fail"],
-    "Wounds: Morale Test"
+    "Wounds: Morale Test",
+    [
+      { text: "Pass", value: "Pass", style: "success" },
+      { text: "Fail", value: "Fail", style: "danger" },
+    ]
   );
+
   if (moraleResult === "Fail") {
     console.log(`Unit ${cardUnitId} fails morale from wounds -> SHAKEN!`);
     updateUnitStateValue(armyId, cardUnitId, "shaken", true);
@@ -805,6 +772,112 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
   }
 }
 
+/**
+ * Handles click on the "Reset Current Army Data" button.
+ * Confirms with the user, clears storage for the CURRENT army, and reloads the page.
+ * @private
+ */
+async function _handleResetArmyDataClick() {
+  const armyId = getCurrentArmyId();
+  if (!armyId) {
+    showToast("Cannot reset: No army is currently loaded.", "Error");
+    return;
+  }
+  const armyData = getLoadedArmyData(); // Get data for the name
+  const armyName = armyData?.meta?.name || `Army (${armyId})`;
+
+  // Confirmation Dialog using interactive toast
+  const confirmed = await showInteractiveToast(
+    `WARNING!\n\nThis will permanently delete all saved progress (HP, status, CP, UP, doctrine selection) for "${armyName}" and reload its data from scratch.\n\nAre you absolutely sure you want to proceed?`,
+    "Confirm Current Army Reset",
+    [
+      { text: "Reset Current Army", value: "reset", style: "danger" },
+      { text: "Cancel", value: "cancel", style: "secondary" },
+    ]
+  );
+
+  if (confirmed === "reset") {
+    console.log(`Resetting data for army ${armyId}...`);
+
+    // 1. Clear Persistent State for this army
+    resetArmyState(armyId); // Clears localStorage item
+
+    // 2. Clear Session Caches (Optional but recommended)
+    // Clear points cache to force recalculation if user navigates back/forth
+    sessionStorage.removeItem(config.CAMPAIGN_POINTS_CACHE_KEY);
+    console.log("Cleared relevant session storage caches.");
+
+    // 3. Show feedback and reload
+    showToast(
+      `Resetting data for ${armyName}... Page will reload.`,
+      "Resetting",
+      3000
+    );
+    // Use setTimeout to allow toast to show before reload potentially interrupts it
+    setTimeout(() => {
+      window.location.reload();
+    }, 500); // Short delay
+  } else {
+    console.log("Army data reset cancelled by user.");
+  }
+}
+
+/**
+ * Handles click on the "Reset ALL Data" button.
+ * Confirms with the user, clears ALL localStorage and sessionStorage, and reloads the page.
+ * @private
+ */
+async function _handleResetAllDataClick() {
+  console.log("Reset ALL Data button clicked.");
+
+  // Confirmation Dialog using interactive toast
+  const confirmed = await showInteractiveToast(
+    `EXTREME WARNING!\n\nThis will permanently delete ALL saved progress for ALL armies, campaign data, cached rules, theme settings, etc. Everything will be wiped from browser storage.\n\nThis action cannot be undone.\n\nAre you absolutely, positively sure?`,
+    "Confirm FULL Data Reset",
+    [
+      { text: "DELETE EVERYTHING", value: "reset_all", style: "danger" },
+      { text: "Cancel", value: "cancel", style: "secondary" },
+    ]
+  );
+
+  if (confirmed === "reset_all") {
+    console.warn(`RESETTING ALL BROWSER STORAGE FOR THIS SITE...`);
+
+    // 1. Clear ALL localStorage
+    try {
+      localStorage.clear();
+      console.log("Cleared ALL localStorage.");
+    } catch (e) {
+      console.error("Error clearing localStorage:", e);
+      showToast("Error clearing local storage.", "Error");
+      // Continue to session storage clear even if local fails
+    }
+
+    // 2. Clear ALL sessionStorage
+    try {
+      sessionStorage.clear();
+      console.log("Cleared ALL sessionStorage.");
+    } catch (e) {
+      console.error("Error clearing sessionStorage:", e);
+      showToast("Error clearing session storage.", "Error");
+    }
+
+    // 3. Show feedback and reload
+    showToast(
+      `Resetting ALL application data... Page will reload.`,
+      "Full Reset",
+      3000
+    );
+    // Use setTimeout to allow toast to show before reload potentially interrupts it
+    setTimeout(() => {
+      // Reload to the base page without any army selected
+      window.location.href = "army.html";
+    }, 500); // Short delay
+  } else {
+    console.log("Full data reset cancelled by user.");
+  }
+}
+
 // --- Main Event Listener & Setup ---
 
 function handleInteractionClick(event) {
@@ -812,11 +885,15 @@ function handleInteractionClick(event) {
   const spellModal = event.target.closest("#viewSpellsModal");
   const stratagemModal = event.target.closest("#stratagemModal");
   const upDisplay = event.target.closest("#underdog-points-display");
-  const resetButton = event.target.closest("#reset-army-data-button");
+  const resetArmyButton = event.target.closest("#reset-army-data-button");
+  const resetAllButton = event.target.closest("#reset-all-data-button");
 
-  if (resetButton) {
+  if (resetAllButton) {
+    _handleResetAllDataClick();
+  } else if (resetArmyButton) {
     _handleResetArmyDataClick();
   } else if (unitCard) {
+    // ... (rest of unit card logic remains the same) ...
     const cardUnitId = unitCard.dataset.unitId;
     const armyId = unitCard.dataset.armyId;
     if (!cardUnitId || !armyId) return;
@@ -854,9 +931,11 @@ function handleInteractionClick(event) {
     else if (moraleWoundsButton)
       _handleMoraleWoundsClick(moraleWoundsButton, armyId, cardUnitId);
   } else if (spellModal) {
+    // ... (spell modal logic remains the same) ...
     const castButton = event.target.closest(".cast-spell-btn");
     if (castButton) _handleCastSpellClick(castButton);
   } else if (stratagemModal) {
+    // ... (stratagem modal logic remains the same) ...
     const activateButton = event.target.closest(".activate-stratagem-btn");
     const removeCpButton = event.target.closest("#manual-cp-remove");
     const addCpButton = event.target.closest("#manual-cp-add");
@@ -875,6 +954,7 @@ function handleInteractionClick(event) {
       _handleManualCpAdjustClick(1);
     }
   } else if (upDisplay) {
+    // ... (underdog points logic remains the same) ...
     const removeUpButton = event.target.closest("#manual-up-remove");
     const addUpButton = event.target.closest("#manual-up-add");
 
@@ -883,164 +963,6 @@ function handleInteractionClick(event) {
     } else if (addUpButton) {
       _handleUnderdogPointAdjustClick(1); // Call handler with +1
     }
-  }
-}
-
-/**
- * Handles clicks on the manual Command Point adjustment buttons (+/-).
- * @param {number} adjustment - The amount to adjust by (+1 or -1).
- * @private
- */
-function _handleManualCpAdjustClick(adjustment) {
-  const armyId = getCurrentArmyId();
-  if (!armyId) return;
-
-  const currentPoints = getCommandPoints(armyId);
-  const maxPoints = getMaxCommandPoints(armyId); // Needed for update display
-  const newPoints = currentPoints + adjustment;
-
-  // setCommandPoints handles clamping between 0 and maxPoints
-  setCommandPoints(armyId, newPoints);
-
-  // Update the UI display (both header and modal)
-  const updatedPoints = getCommandPoints(armyId); // Get the clamped value
-  updateCommandPointsDisplay(armyId, updatedPoints, maxPoints);
-
-  // Re-display stratagems to update button states
-  const selectedDoctrine = getSelectedDoctrine(armyId);
-  displayStratagems(armyId, selectedDoctrine);
-
-  console.log(`Manual CP adjustment: ${adjustment}. New CP: ${updatedPoints}`);
-}
-
-/**
- * Handles clicks on the "Activate" button for a stratagem.
- * @param {HTMLElement} buttonElement - The clicked button element.
- * @private
- */
-function _handleActivateStratagemClick(buttonElement) {
-  const armyId = buttonElement.dataset.armyId;
-  const stratName = decodeURIComponent(buttonElement.dataset.stratagemName);
-  const stratCost = parseInt(buttonElement.dataset.stratagemCost, 10);
-  // const stratId = buttonElement.dataset.stratagemId; // Available if needed later
-
-  if (!armyId || isNaN(stratCost) || !stratName) {
-    console.error(
-      "Activate button missing required data:",
-      buttonElement.dataset
-    );
-    showToast("Error activating stratagem: Missing data.", "Error");
-    return;
-  }
-
-  const currentPoints = getCommandPoints(armyId);
-  const maxPoints = getMaxCommandPoints(armyId); // For display update
-
-  if (currentPoints >= stratCost) {
-    const newPoints = currentPoints - stratCost;
-    setCommandPoints(armyId, newPoints); // Update state
-
-    // Update UI displays
-    updateCommandPointsDisplay(armyId, newPoints, maxPoints);
-
-    // Re-render stratagems to update button states
-    const selectedDoctrine = getSelectedDoctrine(armyId);
-    displayStratagems(armyId, selectedDoctrine);
-
-    // Notify user
-    showToast(`Stratagem Activated: ${stratName}`, "Stratagem Used");
-    console.log(
-      `Activated Stratagem: ${stratName} for ${stratCost} CP. New CP: ${newPoints}`
-    );
-
-    // Reminder: The app does NOT execute the stratagem's effect.
-    // The player needs to apply the effect based on the toast/rules.
-  } else {
-    showToast(
-      `Insufficient Command Points to activate ${stratName} (Cost: ${stratCost}, Have: ${currentPoints}).`,
-      "Activation Failed"
-    );
-  }
-}
-
-/**
- * Handles clicks on the manual Underdog Point adjustment buttons (+/-).
- * @param {number} adjustment - The amount to adjust by (+1 or -1).
- * @private
- */
-function _handleUnderdogPointAdjustClick(adjustment) {
-  const armyId = getCurrentArmyId();
-  if (!armyId) return;
-
-  const currentPoints = getUnderdogPoints(armyId);
-  const maxPoints = getMaxUnderdogPoints(armyId); // Needed for clamping and display
-  const newPoints = currentPoints + adjustment;
-
-  // setUnderdogPoints handles clamping between 0 and maxPoints
-  setUnderdogPoints(armyId, newPoints);
-
-  // Update the UI display
-  const updatedPoints = getUnderdogPoints(armyId); // Get the clamped value
-  updateUnderdogPointsDisplay(armyId, updatedPoints, maxPoints);
-
-  // Show toast for spending (decrementing)
-  if (adjustment === -1 && currentPoints > 0) {
-    showToast(
-      `Underdog Point Spent!\nApply +/- 1 to the entire roll.`,
-      "Underdog Point"
-    );
-  }
-
-  console.log(`Manual UP adjustment: ${adjustment}. New UP: ${updatedPoints}`);
-}
-
-/**
- * Handles click on the "Reset Army Data" button.
- * Confirms with the user, clears storage, and reloads the page.
- * @private
- */
-async function _handleResetArmyDataClick() {
-  const armyId = getCurrentArmyId();
-  if (!armyId) {
-    showToast("Cannot reset: No army is currently loaded.", "Error");
-    return;
-  }
-  const armyData = getLoadedArmyData(); // Get data for the name
-  const armyName = armyData?.meta?.name || `Army (${armyId})`;
-
-  // Confirmation Dialog
-  const confirmed = confirm(
-    `WARNING!\n\nThis will permanently delete all saved progress (HP, status, CP, UP, doctrine selection) for "${armyName}" and reload its data from scratch.\n\nAre you absolutely sure you want to proceed?`
-  );
-
-  if (confirmed) {
-    console.log(`Resetting data for army ${armyId}...`);
-
-    // 1. Clear Persistent State for this army
-    resetArmyState(armyId); // Clears localStorage item
-
-    // 2. Clear Session Caches (Optional but recommended)
-    // Clear points cache to force recalculation if user navigates back/forth
-    sessionStorage.removeItem(config.CAMPAIGN_POINTS_CACHE_KEY);
-    // Could also clear book/rules/doctrine caches if needed, but points is most relevant here
-    // sessionStorage.removeItem(config.ARMY_BOOKS_CACHE_KEY);
-    // sessionStorage.removeItem(config.DOCTRINES_CACHE_KEY);
-    // const rulesCacheKey = config.COMMON_RULES_CACHE_KEY_PREFIX + config.GAME_SYSTEM_ID;
-    // sessionStorage.removeItem(rulesCacheKey);
-    console.log("Cleared relevant session storage caches.");
-
-    // 3. Show feedback and reload
-    showToast(
-      `Resetting data for ${armyName}... Page will reload.`,
-      "Resetting",
-      3000
-    );
-    // Use setTimeout to allow toast to show before reload potentially interrupts it
-    setTimeout(() => {
-      window.location.reload();
-    }, 500); // Short delay
-  } else {
-    console.log("Army data reset cancelled by user.");
   }
 }
 
@@ -1083,9 +1005,10 @@ export function setupEventListeners(armyId) {
     stratagemModalElement.addEventListener("show.bs.modal", (event) => {
       // Store the trigger element for focus return
       if (event.relatedTarget) {
-        modalTriggerElement = event.relatedTarget;
+        // *** CHANGE: Use generic focus variable ***
+        elementToFocusAfterClose = event.relatedTarget;
       } else {
-        modalTriggerElement = document.activeElement;
+        elementToFocusAfterClose = document.activeElement;
       }
       // Populate selector when modal opens
       populateDoctrineSelector(armyId);
@@ -1107,11 +1030,11 @@ export function setupEventListeners(armyId) {
     // Add listener to return focus when modal is hidden
     stratagemModalElement.removeEventListener(
       "hidden.bs.modal",
-      handleModalHidden
-    ); // Use generic handler
+      handleFocusReturn // *** CHANGE: Use generic handler ***
+    );
     stratagemModalElement.addEventListener(
       "hidden.bs.modal",
-      handleModalHidden,
+      handleFocusReturn, // *** CHANGE: Use generic handler ***
       { once: true }
     );
 

@@ -1,9 +1,14 @@
 {
   "rules": [
     {
-      "id": "dangerous-terrain",
+      "id": "dangerousTerrain",
       "name": "Dangerous Terrain",
       "description": "Models moving across dangerous terrain, or that activate in it, must roll one die (or as many as their tough value), and for each roll of 1 the unit takes a wound."
+    },
+    {
+      "id": "underdogPoints",
+      "name": "Underdog Point",
+      "description": "Each underdog point can be spent to modify all dice in a friendly or enemy roll by +1 or -1, but only one point can be spent per roll."
     }
   ]
 }

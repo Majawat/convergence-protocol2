@@ -1,45 +1,33 @@
 /**
- * @fileoverview Handles fetching campaign data, army books, common rules, and doctrines. // <-- UPDATED description
+ * @fileoverview Handles fetching campaign data, army books, common rules, doctrines,
+ * custom definitions, and consolidating rule/term definitions.
  */
 import { config } from "./config.js";
 
-/**
- * Fetches the main campaign data file.
- * @returns {Promise<object|null>} The parsed campaign data or null on error.
- */
-export async function loadCampaignData() {
+// --- Public Fetch Functions ---
+
+/** Fetches campaign data. */
+async function loadCampaignData() {
   try {
     const response = await fetch(config.CAMPAIGN_DATA_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     console.log("Campaign data loaded successfully.");
     return data;
   } catch (error) {
     console.error("Error loading campaign data:", error);
-    // Error display should be handled by the caller
     return null;
   }
 }
 
-/**
- * Fetches the random events data file (e.g., data/rules/random-events.json).
- * Assumes a structure like { "events": [...] }
- * @returns {Promise<object|null>} The parsed random events data or null on error.
- */
-export async function loadRandomEventsData() {
-  const eventsUrl = "./data/rules/random-events.json"; // Adjust path as needed
+/** Fetches random events data. */
+async function loadRandomEventsData() {
+  const eventsUrl = "./data/rules/random-events.json";
   try {
     console.log(`Fetching random events data from: ${eventsUrl}`);
     const response = await fetch(eventsUrl);
-    if (!response.ok) {
-      throw new Error(
-        `HTTP error loading random events! status: ${response.status}`
-      );
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
-    // Basic validation
     if (data && Array.isArray(data.events)) {
       console.log("Random events data loaded successfully.");
       return data;
@@ -49,124 +37,78 @@ export async function loadRandomEventsData() {
     }
   } catch (error) {
     console.error("Error loading random events data:", error);
-    // Re-throw error to be caught by the caller (e.g., in rules.js)
     throw error;
   }
 }
 
-/**
- * Fetches the missions data file (e.g., data/missions.json).
- * Assumes a structure like { "missions": [...] }
- * @returns {Promise<object|null>} The parsed missions data or null on error.
- */
-export async function loadMissionsData() {
-  // Define the path to your missions file
-  const missionsUrl = "./data/missions.json"; // Adjusted path based on project structure
+/** Fetches missions data. */
+async function loadMissionsData() {
+  const missionsUrl = "./data/missions.json";
   try {
     console.log(`Fetching missions data from: ${missionsUrl}`);
     const response = await fetch(missionsUrl);
     if (!response.ok) {
-      // It's okay if missions.json doesn't exist, return null gracefully
       if (response.status === 404) {
-        console.warn(
-          "missions.json not found. Proceeding without mission details."
-        );
+        console.warn("missions.json not found.");
         return null;
       }
-      throw new Error(
-        `HTTP error loading missions! status: ${response.status}`
-      );
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    // Basic validation
     if (data && Array.isArray(data.missions)) {
       console.log("Missions data loaded successfully.");
       return data;
     } else {
-      console.warn(
-        "Invalid or empty missions data structure found in missions.json."
-      );
+      console.warn("Invalid missions data structure found.");
       return null;
     }
   } catch (error) {
     console.error("Error loading missions data:", error);
-    // Don't throw, allow the app to continue without mission data
     return null;
   }
 }
 
-// --- UPDATED: Function to load a specific battle report ---
-/**
- * Fetches a specific battle report JSON file based on mission ID or file path.
- * @param {number|string} missionIdOrPath - The ID of the mission report or the direct path to the JSON file.
- * @returns {Promise<object|null>} The parsed battle report data or null on error.
- */
-export async function loadBattleReport(missionIdOrPath) {
-  if (missionIdOrPath === undefined || missionIdOrPath === null) {
-    console.error("Invalid missionId or path provided for loadBattleReport");
+/** Fetches a specific battle report. */
+async function loadBattleReport(reportPath) {
+  if (!reportPath) {
+    console.error("Invalid path provided for loadBattleReport");
     return null;
   }
-
-  let reportUrl;
-  let missionId;
-
-  // Check if it's a path or just an ID
-  if (typeof missionIdOrPath === "string" && missionIdOrPath.includes("/")) {
-    reportUrl = missionIdOrPath;
-    // Attempt to extract mission ID from path if needed, otherwise set to null
-    const match = missionIdOrPath.match(/mission(\d+)\.json$/);
-    missionId = match ? parseInt(match[1], 10) : null;
-    console.log(`Fetching battle report from path: ${reportUrl}`);
-  } else {
-    // Assume it's an ID and construct the path
-    missionId = parseInt(missionIdOrPath, 10);
-    if (isNaN(missionId)) {
-      console.error("Invalid missionId provided:", missionIdOrPath);
-      return null;
-    }
-    reportUrl = `./data/battle-reports/mission${missionId}.json`; // Path convention
-    console.log(
-      `Fetching battle report for mission ${missionId} from: ${reportUrl}`
-    );
-  }
-
+  console.log(`Fetching battle report from path: ${reportPath}`);
   try {
-    const response = await fetch(reportUrl);
+    const response = await fetch(reportPath);
     if (!response.ok) {
-      // Handle 404 gracefully - the report might just not exist yet
       if (response.status === 404) {
-        console.warn(`Battle report not found at: ${reportUrl}`);
+        console.warn(`Battle report not found at: ${reportPath}`);
         return null;
       }
       throw new Error(
-        `HTTP error loading battle report ${reportUrl}! status: ${response.status}`
+        `HTTP error loading battle report ${reportPath}! status: ${response.status}`
       );
     }
     const data = await response.json();
-    console.log(`Battle report loaded successfully from ${reportUrl}.`);
-    // Add missionId to the data object if it wasn't inferred from path or is missing
-    if (missionId !== null && !data.missionId) {
-      data.missionId = missionId;
+    console.log(`Battle report loaded successfully from ${reportPath}.`);
+    if (!data.missionId) {
+      const match = reportPath.match(/mission(\d+)\.json$/);
+      if (match) data.missionId = parseInt(match[1], 10);
     }
     return data;
   } catch (error) {
-    console.error(`Error loading battle report from ${reportUrl}:`, error);
-    return null; // Allow Promise.allSettled or individual catches to handle it
+    console.error(`Error loading battle report from ${reportPath}:`, error);
+    return null;
   }
 }
 
-/**
- * Fetches the doctrines data file, utilizing sessionStorage.
- * @returns {Promise<object|null>} The parsed doctrines data or null on error.
- */
-async function loadDoctrinesData() {
+// --- Internal Helper Functions for loadGameData ---
+
+/** Fetches doctrines, using cache. */
+async function _loadDoctrinesDataInternal() {
+  // Renamed slightly for clarity
   const cacheKey = config.DOCTRINES_CACHE_KEY;
   try {
-    // Try loading from cache first
     const cachedData = sessionStorage.getItem(cacheKey);
     if (cachedData) {
       const parsedData = JSON.parse(cachedData);
-      // Basic validation
       if (parsedData && Array.isArray(parsedData.doctrines)) {
         console.log("Doctrines data loaded from cache.");
         return parsedData;
@@ -175,311 +117,313 @@ async function loadDoctrinesData() {
         sessionStorage.removeItem(cacheKey);
       }
     }
-
-    // Fetch from URL if not in cache or cache was invalid
     console.log("Fetching doctrines data from URL...");
     const response = await fetch(config.DOCTRINES_DATA_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-
-    // Validate fetched data before caching
     if (data && Array.isArray(data.doctrines)) {
       console.log("Doctrines data fetched successfully.");
-      // Cache the valid data
       try {
         sessionStorage.setItem(cacheKey, JSON.stringify(data));
-        console.log("Cached doctrines data.");
-      } catch (cacheError) {
-        console.error("Error caching doctrines data:", cacheError);
+      } catch (e) {
+        console.error("Error caching doctrines:", e);
       }
       return data;
     } else {
-      console.error("Fetched doctrines data is invalid:", data);
-      return null;
+      throw new Error("Fetched doctrines data is invalid");
     }
   } catch (error) {
     console.error("Error loading doctrines data:", error);
+    return null; // Return null on error
+  }
+}
+
+/** Fetches custom definitions. */
+async function _loadCustomDefinitionsDataInternal() {
+  try {
+    console.log(
+      `Fetching custom definitions from: ${config.CUSTOM_DEFINITIONS_URL}`
+    );
+    const response = await fetch(config.CUSTOM_DEFINITIONS_URL);
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log("No custom definitions file found (optional).");
+        return null;
+      }
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    const data = await response.json();
+    if (data && typeof data === "object") {
+      console.log("Custom definitions data loaded successfully.");
+      return data;
+    } else {
+      console.warn("Invalid or empty custom definitions data structure found.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error loading custom definitions data:", error);
+    return null;
+  }
+}
+
+/** Fetches common rules and traits from API. */
+async function _loadCommonDataInternal(gameSystemId) {
+  const commonRulesUrl = `${config.ARMYFORGE_COMMON_RULES_API_URL_BASE}${gameSystemId}`;
+  try {
+    console.log(`Fetching common rules/traits from: ${commonRulesUrl}`);
+    const response = await fetch(commonRulesUrl);
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const data = await response.json();
+    if (data && (Array.isArray(data.rules) || Array.isArray(data.traits))) {
+      console.log("Common rules/traits data fetched successfully.");
+      return data;
+    } else {
+      console.warn("Fetched common rules/traits data seems invalid.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Failed to fetch common rules/traits:", error);
+    return null;
+  }
+}
+
+/** Fetches army book data from API. */
+async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
+  const url = `${config.ARMYFORGE_BOOK_API_URL_BASE}${factionId}?gameSystem=${gameSystem}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const bookData = await response.json();
+    return { factionId, bookData, factionName };
+  } catch (error) {
+    console.error(
+      `Failed to fetch army book ${factionName} (${factionId}):`,
+      error
+    );
     return null;
   }
 }
 
 /**
- * Fetches Army Book data, Common Rules data, AND Doctrines data, utilizing sessionStorage. // <-- UPDATED description
- * @param {object} campaignData - The loaded campaign data (used only for identifying army books).
- * @returns {Promise<{armyBooks: object, commonRules: object, doctrines: object|null}>} Object containing the loaded data. // <-- UPDATED return type
+ * Fetches Army Book data, Common Rules/Traits, Custom Definitions, AND Doctrines data.
+ * Consolidates all rule/term definitions into a single object, using sessionStorage for caching definitions.
+ * @param {object} campaignData - The loaded campaign data.
+ * @returns {Promise<{
+ * armyBooks: object,
+ * commonRules: object,
+ * doctrines: object|null,
+ * definitions: object
+ * }>} Object containing the loaded data and the consolidated definitions.
  */
-export async function loadGameData(campaignData) {
-  if (!campaignData || !campaignData.armies) {
-    console.warn("No campaign data or armies found for loading game data.");
-    // <-- UPDATED return structure -->
-    return { armyBooks: {}, commonRules: {}, doctrines: null };
-  }
+async function loadGameData(campaignData) {
+  const requiredGsId = config.GAME_SYSTEM_ID;
+  const definitionsCacheKey = config.DEFINITIONS_CACHE_KEY;
+  let definitions = {};
+  let armyBooks = {};
+  let commonRulesResult = null;
+  let doctrinesDataResult = null;
 
-  let cachedBooks = {};
-  let cachedCommonRules = {}; // Will only hold rules for the required system ID
-
-  // --- Step 1: Load Army Books Cache ---
+  // --- Step 1: Check Definitions Cache ---
   try {
-    const cachedBooksData = sessionStorage.getItem(config.ARMY_BOOKS_CACHE_KEY);
-    if (cachedBooksData) {
-      cachedBooks = JSON.parse(cachedBooksData) || {};
-      console.log("Loaded Army Books cache.");
+    const cachedDefinitions = sessionStorage.getItem(definitionsCacheKey);
+    if (cachedDefinitions) {
+      const parsedDefs = JSON.parse(cachedDefinitions);
+      if (
+        parsedDefs &&
+        typeof parsedDefs === "object" &&
+        Object.keys(parsedDefs).length > 0
+      ) {
+        console.log(
+          `Definitions loaded from sessionStorage cache (${
+            Object.keys(parsedDefs).length
+          } terms).`
+        );
+        definitions = parsedDefs;
+        // Still need to load army books and doctrines (which might also be cached)
+        const doctrinesPromise = _loadDoctrinesDataInternal();
+        const factionPromises = [];
+        if (campaignData && campaignData.armies) {
+          const uniqueFactions = new Map();
+          campaignData.armies.forEach((army) => {
+            (army.faction || []).forEach((fac) => {
+              if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id))
+                uniqueFactions.set(fac.id, fac);
+            });
+          });
+          uniqueFactions.forEach((faction) =>
+            factionPromises.push(
+              _loadArmyBookDataInternal(
+                faction.id,
+                faction.gameSystem,
+                faction.name || faction.id
+              )
+            )
+          );
+        }
+        const [doctrinesResult, ...bookResults] = await Promise.all([
+          doctrinesPromise,
+          ...factionPromises,
+        ]);
+        doctrinesDataResult = doctrinesResult;
+        bookResults.forEach((result) => {
+          if (result && result.bookData)
+            armyBooks[result.factionId] = result.bookData;
+        });
+        return {
+          armyBooks,
+          commonRules: {},
+          doctrines: doctrinesDataResult,
+          definitions,
+        };
+      } else {
+        console.warn(
+          "Invalid definitions data found in cache. Clearing and fetching fresh."
+        );
+        sessionStorage.removeItem(definitionsCacheKey);
+      }
     }
   } catch (e) {
-    console.warn("Could not parse Army Books cache.", e);
-    cachedBooks = {};
+    console.error("Error reading definitions cache:", e);
+    sessionStorage.removeItem(definitionsCacheKey);
   }
 
-  // --- Step 2: Identify Required Factions (for Army Books) ---
-  const factionsToFetch = new Map(); // { factionId: gameSystemId }
-  campaignData.armies.forEach((army) => {
-    if (army.faction) {
-      army.faction.forEach((fac) => {
-        if (fac.id && fac.gameSystem) {
-          // Check if army book needs fetching
-          if (!cachedBooks[fac.id]) {
-            if (!factionsToFetch.has(fac.id)) {
-              factionsToFetch.set(fac.id, fac.gameSystem);
-            }
-          }
+  // --- Step 2: Fetch Base Data (If Definitions Not Cached) ---
+  console.log("Definitions not cached or invalid. Fetching all game data...");
+  const doctrinesPromise = _loadDoctrinesDataInternal();
+  const customDefsPromise = _loadCustomDefinitionsDataInternal();
+  const commonDataPromise = _loadCommonDataInternal(requiredGsId);
+
+  const [commonData, customDefsData, doctrinesResult] = await Promise.all([
+    commonDataPromise,
+    customDefsPromise,
+    doctrinesPromise,
+  ]);
+  doctrinesDataResult = doctrinesResult;
+
+  // --- Step 3: Process Base Definitions (Custom > Common) ---
+  if (customDefsData) {
+    (customDefsData.rules || []).forEach((rule) => {
+      if (rule.name && rule.description)
+        definitions[rule.name] = {
+          description: rule.description,
+          type: "rules",
+          source: "Custom",
+        };
+    });
+    (customDefsData.traits || []).forEach((trait) => {
+      if (trait.name && trait.description)
+        definitions[trait.name] = {
+          description: trait.description,
+          type: "traits",
+          source: "Custom",
+        };
+    });
+  }
+  if (commonData) {
+    commonRulesResult = { [requiredGsId]: commonData };
+    (commonData.rules || []).forEach((rule) => {
+      if (rule.name && rule.description && !definitions[rule.name])
+        definitions[rule.name] = {
+          description: rule.description,
+          type: "rules",
+          source: "Common",
+        };
+    });
+    (commonData.traits || []).forEach((trait) => {
+      if (trait.name && trait.description && !definitions[trait.name])
+        definitions[trait.name] = {
+          description: trait.description,
+          type: "traits",
+          source: "Common",
+        };
+    });
+  }
+
+  // --- Step 4: Load Faction Data (Army Books) ---
+  const factionPromises = [];
+  if (campaignData && campaignData.armies) {
+    const uniqueFactions = new Map();
+    campaignData.armies.forEach((army) => {
+      (army.faction || []).forEach((fac) => {
+        if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id))
+          uniqueFactions.set(fac.id, fac);
+      });
+    });
+    uniqueFactions.forEach((faction) =>
+      factionPromises.push(
+        _loadArmyBookDataInternal(
+          faction.id,
+          faction.gameSystem,
+          faction.name || faction.id
+        )
+      )
+    );
+  }
+  const bookResults = await Promise.all(factionPromises);
+
+  // --- Step 5: Process Faction Definitions (Rules & Spells) ---
+  bookResults.forEach((result) => {
+    if (result && result.bookData) {
+      const { factionId, bookData, factionName } = result;
+      armyBooks[factionId] = bookData;
+      (bookData.specialRules || []).forEach((rule) => {
+        if (rule.name && rule.description && !definitions[rule.name])
+          definitions[rule.name] = {
+            description: rule.description,
+            type: "special-rules",
+            source: factionName,
+          };
+      });
+      (bookData.spells || []).forEach((spell) => {
+        if (spell.name && spell.effect) {
+          const spellKey = `${spell.name} (${factionName})`;
+          if (!definitions[spellKey])
+            definitions[spellKey] = {
+              description: spell.effect,
+              type: "spells",
+              source: factionName,
+              threshold: spell.threshold || 0,
+            };
         }
       });
     }
   });
 
-  // --- Step 3: Load Required Common Rules Cache ---
-  const requiredGsId = config.GAME_SYSTEM_ID;
-  const rulesCacheKey = config.COMMON_RULES_CACHE_KEY_PREFIX + requiredGsId;
-  let commonRulesNeedFetching = true; // Assume fetch is needed initially
-
-  console.log(
-    `Attempting to load Common Rules cache for System ${requiredGsId}...`
-  );
+  // --- Step 6: Cache Consolidated Definitions ---
   try {
-    const cachedRulesData = sessionStorage.getItem(rulesCacheKey);
-    if (cachedRulesData) {
-      const parsedRules = JSON.parse(cachedRulesData);
-      // Validate the cached data structure
-      if (
-        parsedRules &&
-        parsedRules.rules &&
-        Array.isArray(parsedRules.rules)
-      ) {
-        cachedCommonRules[requiredGsId] = parsedRules; // Store in the object with the correct key
-        commonRulesNeedFetching = false; // Cache is valid, no fetch needed
-        console.log(
-          `Loaded valid Common Rules cache for System ${requiredGsId}.`
-        );
-      } else {
-        console.log(
-          `Cached Common Rules data for System ${requiredGsId} was invalid or empty.`
-        );
-        sessionStorage.removeItem(rulesCacheKey); // Remove invalid cache entry
-      }
-    } else {
-      console.log(`No Common Rules cache found for System ${requiredGsId}.`);
+    if (Object.keys(definitions).length > 0) {
+      sessionStorage.setItem(definitionsCacheKey, JSON.stringify(definitions));
+      console.log(
+        `Saved ${
+          Object.keys(definitions).length
+        } definitions to sessionStorage cache.`
+      );
     }
   } catch (e) {
-    console.warn(
-      `Could not parse Common Rules cache for System ${requiredGsId}.`,
-      e
-    );
-    sessionStorage.removeItem(rulesCacheKey); // Remove potentially corrupted cache entry
+    console.error("Error saving definitions to sessionStorage cache:", e);
+    if (e.name === "QuotaExceededError")
+      console.error("SessionStorage quota exceeded. Definitions not cached.");
   }
 
-  // --- Step 4: Queue Fetches for Missing Data ---
-  const fetchPromises = [];
-
-  // Queue Army Book fetches
-  if (factionsToFetch.size > 0) {
-    console.log("Army Books to fetch:", Array.from(factionsToFetch.keys()));
-    factionsToFetch.forEach((gameSystem, factionId) => {
-      const url = `${config.ARMYFORGE_BOOK_API_URL_BASE}${factionId}?gameSystem=${gameSystem}`;
-      fetchPromises.push(
-        fetch(url)
-          .then((response) => {
-            if (!response.ok)
-              throw new Error(
-                `Book ${factionId}: ${response.statusText} (${response.status})`
-              );
-            return response.json();
-          })
-          .then((bookData) => ({
-            type: "book",
-            factionId,
-            bookData,
-            status: "fulfilled",
-          }))
-          .catch((error) => {
-            console.error(`Fetch failed for Book ${factionId}:`, error);
-            return {
-              type: "book",
-              factionId,
-              status: "rejected",
-              reason: error,
-            };
-          })
-      );
-    });
-  } else {
-    console.log("All required Army Books already cached.");
-  }
-
-  // Queue Common Rules fetch (only if needed)
-  let rulesWereFetched = false;
-  if (commonRulesNeedFetching) {
-    console.log(
-      `Common Rules for System ${requiredGsId} not cached or invalid. Queueing fetch.`
-    );
-    const url = `${config.ARMYFORGE_COMMON_RULES_API_URL_BASE}${requiredGsId}`;
-    fetchPromises.push(
-      fetch(url)
-        .then((response) => {
-          if (!response.ok)
-            throw new Error(
-              `Common Rules ${requiredGsId}: ${response.statusText} (${response.status})`
-            );
-          return response.json();
-        })
-        .then((rulesData) => ({
-          type: "rules",
-          gameSystemId: requiredGsId,
-          rulesData,
-          status: "fulfilled",
-        }))
-        .catch((error) => {
-          console.error(
-            `Fetch failed for Common Rules ${requiredGsId}:`,
-            error
-          );
-          return {
-            type: "rules",
-            gameSystemId: requiredGsId,
-            status: "rejected",
-            reason: error,
-          };
-        })
-    );
-    rulesWereFetched = true; // Mark that we attempted to fetch rules
-  } else {
-    console.log(
-      `Valid Common Rules for System ${requiredGsId} already loaded.`
-    );
-  }
-
-  // <-- ADDED: Queue Doctrines fetch (uses its own caching logic) -->
-  // We always call loadDoctrinesData, it handles caching internally
-  const doctrinesPromise = loadDoctrinesData().then((doctrines) => ({
-    type: "doctrines",
-    data: doctrines,
-  }));
-  fetchPromises.push(doctrinesPromise);
-
-  // --- Step 5: Execute Fetches ---
   console.log(
-    `Executing ${fetchPromises.length} fetches (including doctrines)...`
-  ); // <-- UPDATED log
-  const results = await Promise.allSettled(fetchPromises);
-  console.log("Fetches complete. Processing results...");
-
-  let fetchedRulesAreValid = false; // Track if the fetched rules (if any) are valid
-  let fetchedDoctrinesData = null; // <-- ADDED: To store fetched doctrines
-
-  results.forEach((result) => {
-    if (result.status === "fulfilled" && result.value) {
-      const data = result.value;
-
-      // Handle doctrines separately
-      if (data.type === "doctrines") {
-        fetchedDoctrinesData = data.data; // Store the result of loadDoctrinesData
-        if (fetchedDoctrinesData) {
-          console.log("Doctrines data processed successfully.");
-        } else {
-          console.warn("Doctrines data failed to load or was invalid.");
-        }
-        return; // Skip the rest for doctrines
-      }
-
-      // Existing logic for books and rules
-      if (data.status === "fulfilled") {
-        if (data.type === "book") {
-          cachedBooks[data.factionId] = data.bookData;
-          console.log(`Successfully fetched Army Book: ${data.factionId}`);
-        } else if (
-          data.type === "rules" &&
-          data.gameSystemId === requiredGsId
-        ) {
-          // Validate fetched rules data
-          if (
-            data.rulesData &&
-            data.rulesData.rules &&
-            Array.isArray(data.rulesData.rules)
-          ) {
-            cachedCommonRules[data.gameSystemId] = data.rulesData;
-            fetchedRulesAreValid = true; // Mark fetched rules as valid
-            console.log(
-              `Successfully fetched Common Rules: System ${data.gameSystemId}`
-            );
-          } else {
-            console.warn(
-              `Fetched Common Rules for System ${data.gameSystemId} appear invalid. Data:`,
-              data.rulesData
-            );
-          }
-        }
-      } else {
-        console.warn(
-          `Fetch promise fulfilled but operation failed for ${data.type} ${
-            data.factionId || data.gameSystemId
-          }:`,
-          data.reason
-        );
-      }
-    } else if (result.status === "rejected") {
-      console.error(`Fetch promise rejected:`, result.reason);
-    }
-  });
-
-  // --- Step 6: Save Updated Caches (Doctrines are cached within loadDoctrinesData) ---
-  try {
-    // Save Army Books if any were fetched
-    if (factionsToFetch.size > 0) {
-      sessionStorage.setItem(
-        config.ARMY_BOOKS_CACHE_KEY,
-        JSON.stringify(cachedBooks)
-      );
-      console.log("Updated Army Books cache in sessionStorage.");
-    }
-    // Save Common Rules ONLY if they were successfully fetched AND validated
-    if (rulesWereFetched && fetchedRulesAreValid) {
-      sessionStorage.setItem(
-        rulesCacheKey,
-        JSON.stringify(cachedCommonRules[requiredGsId])
-      );
-      console.log(
-        `Updated Common Rules cache for System ${requiredGsId} in sessionStorage.`
-      );
-    } else if (rulesWereFetched && !fetchedRulesAreValid) {
-      console.log(
-        `Skipping saving rules cache for System ${requiredGsId} as fetched data was invalid.`
-      );
-    }
-  } catch (error) {
-    console.error("Error saving data cache to sessionStorage:", error);
-  }
-
-  // --- Step 7: Return Loaded Data ---
-  // Ensure the returned object uses the specific required GsId as the key if rules exist
-  const finalCommonRules = cachedCommonRules[requiredGsId]
-    ? { [requiredGsId]: cachedCommonRules[requiredGsId] }
-    : {};
-  console.log("Returning game data. Common Rules object:", finalCommonRules);
-  // <-- UPDATED return structure -->
+    `Finished loading game data. Total unique definitions: ${
+      Object.keys(definitions).length
+    }`
+  );
   return {
-    armyBooks: cachedBooks,
-    commonRules: finalCommonRules,
-    doctrines: fetchedDoctrinesData, // Return the loaded/cached doctrines
+    armyBooks: armyBooks,
+    commonRules: commonRulesResult || {},
+    doctrines: doctrinesDataResult,
+    definitions: definitions,
   };
 }
+
+// *** ADDED Export for the internal doctrine loader ***
+export {
+  loadCampaignData,
+  loadRandomEventsData,
+  loadMissionsData,
+  loadBattleReport,
+  loadGameData,
+  _loadDoctrinesDataInternal as loadDoctrinesData, // Export the internal function
+};

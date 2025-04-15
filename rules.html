@@ -18,52 +18,170 @@
     <link rel="stylesheet" href="css/style.css" />
     <style>
       /* Custom styles for rules page */
-      .accordion-button:not(.collapsed) {
-        color: var(--bs-primary-text-emphasis);
-        background-color: var(--bs-primary-bg-subtle);
+      .rule-subsection {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: var(--bs-tertiary-bg);
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: var(--bs-border-radius);
       }
-      /* --- REMOVED .rules-table styles --- */
-
-      .rule-name {
-        /* Now used in cards */
-        font-weight: bold;
-        color: var(--bs-info); /* Or another highlight color */
-        display: block; /* Ensure name is on its own line */
-        margin-bottom: 0.25rem;
+      .rule-subsection h5,
+      .rule-subsection h6 {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--bs-border-color-translucent);
       }
-      /* Ensure list styling inside descriptions is visible */
-      .accordion-body ul,
-      .accordion-body ol {
+      .rule-subsection h6 {
+        font-size: 1rem;
+        margin-top: 1rem;
+      }
+      .rule-subsection ul,
+      .rule-subsection ol {
         padding-left: 1.5rem;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0;
       }
-      .accordion-body li {
+      .rule-subsection li {
         margin-bottom: 0.25rem;
       }
-
-      /* --- ADDED Card Styles --- */
-      .event-card {
-        height: 100%; /* Make cards in a row equal height */
+      .rule-subsection p:last-child {
+        margin-bottom: 0;
       }
+      .rule-subsection table {
+        font-size: 0.9em;
+      }
+      .rule-subsection table th,
+      .rule-subsection table td {
+        padding: 0.4rem 0.5rem;
+        vertical-align: middle;
+      }
+      .rule-subsection table caption {
+        caption-side: top;
+        font-weight: bold;
+        padding-top: 0.5rem;
+        padding-bottom: 0.25rem;
+        color: var(--bs-body-color);
+      }
+      .d6-roll-column {
+        text-align: center !important;
+        white-space: nowrap;
+        width: 1%;
+      }
+
+      /* Card Styles for Doctrines and Events */
+      .doctrine-card,
+      .event-card {
+        height: 100%;
+      }
+      .doctrine-card .card-header,
       .event-card .card-header {
         font-weight: bold;
       }
+      .doctrine-card .card-body,
       .event-card .card-body {
-        font-size: 0.9rem; /* Slightly smaller text in cards */
+        font-size: 0.9rem;
+      }
+      .doctrine-card .list-group-item,
+      .event-card .list-group-item {
+        font-size: 0.85rem;
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 1px solid var(--bs-border-color-translucent);
+      }
+      .doctrine-card .list-group-item:last-child,
+      .event-card .list-group-item:last-child {
+        border-bottom: none;
+      }
+      .doctrine-card .badge,
+      .event-card .badge {
+        flex-shrink: 0;
+      }
+      /* Badge Wrapping Fix */
+      .doctrine-card .list-group-item,
+      .rule-subsection .list-group-item {
+        flex-wrap: nowrap !important;
+      }
+      .doctrine-card .list-group-item .me-auto,
+      .rule-subsection .list-group-item .me-auto {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .doctrine-card .list-group-item .stratagem-actions,
+      .rule-subsection .list-group-item .stratagem-actions {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      /* Universal Doctrine Background Fix */
+      .rule-subsection .list-group-item {
+        background-color: var(--bs-card-bg);
       }
       .event-card .effect-section {
         margin-top: 0.75rem;
         padding-top: 0.75rem;
         border-top: 1px solid var(--bs-border-color-translucent);
       }
-      /* Specific formatting for Time Warp stats */
       .time-warp-stats ul {
         list-style: none;
         padding-left: 0;
       }
       .time-warp-stats li {
         margin-bottom: 0.1rem;
+      }
+
+      /* Collapse Trigger Heading Style */
+      h2[data-bs-toggle="collapse"] {
+        cursor: pointer;
+        display: inline-block;
+        border-bottom: 1px dashed transparent;
+        transition: border-color 0.2s ease-in-out;
+        position: relative;
+        padding-right: 1.5em;
+      }
+      h2[data-bs-toggle="collapse"]:hover {
+        border-bottom-color: var(--bs-primary);
+      }
+      h2[data-bs-toggle="collapse"]::after {
+        content: " ▼";
+        font-size: 0.7em;
+        vertical-align: middle;
+        display: inline-block;
+        transition: transform 0.2s ease-in-out;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%) rotate(0deg);
+        margin-left: 0;
+      }
+      h2[data-bs-toggle="collapse"][aria-expanded="true"]::after {
+        transform: translateY(-50%) rotate(180deg);
+      }
+
+      /* Floating Nav Button */
+      .floating-nav-button {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 1030;
+      }
+
+      /* Scroll Margin for Fixed Navbar */
+      section[id] {
+        scroll-margin-top: 70px;
+      }
+
+      .definition {
+        border-bottom: 1px dotted var(--bs-primary); /* Indicate interactivity */
+        cursor: help; /* Change cursor on hover */
+        /* color: var(--bs-link-color); Optional: make it look like a link */
+      }
+      /* Ensure popovers inherit theme */
+      .popover {
+        --bs-popover-bg: var(--bs-body-bg);
+        --bs-popover-border-color: var(--bs-border-color-translucent);
+        --bs-popover-header-bg: var(--bs-secondary-bg);
+        --bs-popover-header-color: var(--bs-body-color);
+        --bs-popover-body-color: var(--bs-body-color);
       }
     </style>
   </head>
@@ -151,128 +269,847 @@
     <main class="container mt-4">
       <h1 class="mb-4">Rules Reference</h1>
 
-      <div class="accordion" id="rulesAccordion">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingCoreRules">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseCoreRules"
-              aria-expanded="false"
-              aria-controls="collapseCoreRules"
-            >
-              <i class="bi bi-book-half me-2"></i> Core Rules (GF v3.4.1)
-            </button>
-          </h2>
-          <div
-            id="collapseCoreRules"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingCoreRules"
-            data-bs-parent="#rulesAccordion"
-          >
-            <div class="accordion-body">
-              <p class="text-muted">
-                Core rules content to be added here by transcribing from the
-                Beginner's Guide PDF.
-              </p>
-            </div>
+      <section id="core-rules" class="mb-4">
+        <h2>
+          <i class="bi bi-book-half me-2"></i>Core Rules Summary (GF v3.4.1)
+        </h2>
+        <div class="rule-subsection">
+          <h5>Game Structure</h5>
+          <p class="allow-definitions">
+            Games consist of <strong>Rounds</strong> (usually 4). Each round
+            consists of alternating player <strong>Turns</strong>. Each turn
+            consists of one unit <strong>Activation</strong>.
+          </p>
+          <ul class="allow-definitions">
+            <li>
+              Player who finished activating first last round goes first in the
+              next round.
+            </li>
+            <li>
+              After 4 rounds, check mission objectives to determine the winner.
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Activation Actions</h5>
+          <p class="allow-definitions">
+            Activate one unit per turn. Choose one action:
+          </p>
+          <div class="table-responsive">
+            <table class="table table-sm table-striped table-bordered">
+              <thead class="table-dark">
+                <tr>
+                  <th>Action</th>
+                  <th>Movement</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody class="allow-definitions">
+                <tr>
+                  <td><strong>Hold</strong></td>
+                  <td>0"</td>
+                  <td>Can shoot</td>
+                </tr>
+                <tr>
+                  <td><strong>Advance</strong></td>
+                  <td>Up to 6"</td>
+                  <td>Can shoot after moving</td>
+                </tr>
+                <tr>
+                  <td><strong>Rush</strong></td>
+                  <td>Up to 12"</td>
+                  <td>Cannot shoot</td>
+                </tr>
+                <tr>
+                  <td><strong>Charge</strong></td>
+                  <td>Up to 12"</td>
+                  <td>Move into base contact for Melee.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
+        <div class="rule-subsection">
+          <h5>Shooting Sequence</h5>
+          <ol class="allow-definitions">
+            <li>
+              <strong>Determine Attacks:</strong> Sum Attack values of shooting
+              models in range & LoS.
+            </li>
+            <li>
+              <strong>Roll to Hit:</strong> Roll Quality tests for each attack.
+              Success = Hit.
+            </li>
+            <li>
+              <strong>Roll to Block:</strong> Target rolls Defense tests for
+              each hit. Success = Block. Fail = Wound.
+            </li>
+            <li>
+              <strong>Remove Casualties:</strong> Remove one model per Wound
+              taken.
+            </li>
+          </ol>
+        </div>
+        <div class="rule-subsection">
+          <h5>Melee Sequence</h5>
+          <ul class="allow-definitions">
+            <li>
+              <strong>Charge Moves:</strong> Move up to 12" to base contact (or
+              as close as possible). Target models move up to 3" into base
+              contact.
+            </li>
+            <li>
+              <strong>Who Can Strike:</strong> Models within 2" horizontally AND
+              4" vertically of an enemy model.
+            </li>
+            <li>
+              <strong>Melee Sequence (Attacker & Defender):</strong>
+              <ol>
+                <li>
+                  Determine Attacks: Sum Attack values of striking models.
+                </li>
+                <li>Roll to Hit: Roll Quality tests. Success = Hit.</li>
+                <li>
+                  Roll to Block: Target rolls Defense tests. Success = Block.
+                  Fail = Wound.
+                </li>
+                <li>Remove Casualties: Remove one model per Wound taken.</li>
+              </ol>
+            </li>
+            <li>
+              <strong>Return Strikes:</strong> Defender may choose to strike
+              back after the attacker finishes.
+            </li>
+            <li>
+              <strong>Fatigue:</strong> After attacking in melee (charging or
+              striking back) for the *first time* in a round, the unit only hits
+              on unmodified 6s in melee for the rest of that round.
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Melee Resolution</h5>
+          <ul class="allow-definitions">
+            <li>
+              <strong>Determine Winner:</strong> Compare total wounds caused by
+              each unit. Unit that caused more wounds wins. Tie if wounds are
+              equal or zero.
+            </li>
+            <li>
+              <strong>Morale Test:</strong> Only the LOSER of the melee takes a
+              morale test.
+            </li>
+            <li>
+              <strong>Consolidation Moves:</strong>
+              <ul>
+                <li>
+                  If one unit was destroyed/routed: Winner moves up to 3".
+                </li>
+                <li>
+                  If neither unit destroyed/routed: Charger moves back 1" (if
+                  possible).
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Morale</h5>
+          <ul class="allow-definitions">
+            <li>
+              <strong>When to Test:</strong>
+              <ul>
+                <li>
+                  End of activation if unit took wounds AND is now at half
+                  starting size/toughness or less.
+                </li>
+                <li>After losing a melee.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Test:</strong> Roll one die, succeed on unit's Quality
+              value or higher.
+            </li>
+            <li>
+              <strong>Outcomes (Activations where Wounds are taken):</strong>
+              <ul>
+                <li>Pass = No effect.</li>
+                <li>Fail = Shaken.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Outcomes (Melee Loss):</strong>
+              <ul>
+                <li>Pass = No effect.</li>
+                <li>Fail = Shaken.</li>
+                <li>Fail while at <= half strength = Routed.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Shaken Effects:</strong> Must Hold action to recover.
+              Counts as Fatigued. Auto-fails morale tests. Cannot contest/seize
+              objectives.
+            </li>
+            <li>
+              <strong>Routed Effects:</strong> Unit is removed from play as
+              casualty.
+            </li>
+          </ul>
+        </div>
+        <div class="rule-subsection">
+          <h5>Basic Terrain Effects</h5>
+          <ul class="allow-definitions">
+            <li>
+              <strong>Cover:</strong> +1 Defense vs Shooting if majority of unit
+              models are inside/behind.
+            </li>
+            <li>
+              <strong>Difficult:</strong> Max 6" move if any model moves through
+              it.
+            </li>
+            <li>
+              <strong>Dangerous:</strong> Roll 1 die per model (or Tough value)
+              moving through/activating in it. On a 1, unit takes 1 wound.
+            </li>
+          </ul>
+        </div>
+      </section>
 
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingCampaignRules">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseCampaignRules"
-              aria-expanded="false"
-              aria-controls="collapseCampaignRules"
-            >
-              <i class="bi bi-map-fill me-2"></i> Campaign Rules (v3.4.0)
-            </button>
-          </h2>
-          <div
-            id="collapseCampaignRules"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingCampaignRules"
-            data-bs-parent="#rulesAccordion"
-          >
-            <div class="accordion-body">
-              <p class="text-muted">
-                Campaign rules content to be added here by transcribing from the
-                Campaign Rules PDF.
-              </p>
-            </div>
+      <section id="campaign-rules" class="mb-4">
+        <h2>
+          <i class="bi bi-map-fill me-2"></i>Campaign Rules Summary (v3.4.0)
+        </h2>
+        <div class="rule-subsection">
+          <h5>Campaign Flow (Checklist)</h5>
+          <ol>
+            <li>Mission Setup (Points, Underdog, Objectives)</li>
+            <li>Play Mission (4+ rounds)</li>
+            <li>Check for Casualties</li>
+            <li>Earn Experience (XP)</li>
+            <li>Upgrade Armies</li>
+            <li>Recruit Units</li>
+          </ol>
+        </div>
+        <div class="rule-subsection">
+          <h5>Pre-Mission Setup</h5>
+          <div class="allow-definitions">
+            <h6>Army Size Limit</h6>
+            <p>
+              No army may have > 250pts more than the lowest point value army in
+              the match.
+            </p>
+            <h6>Underdog Bonus</h6>
+            <p>
+              Get 1 Underdog Point (UP) for every 50pts difference below the
+              highest point value army. Spend 1 UP to modify any single roll
+              (friendly or enemy) by +/- 1.
+            </p>
+            <h6>Special Objectives</h6>
+            <p>Roll D6 for a bonus objective (worth 75pts if completed):</p>
+          </div>
+          <div class="table-responsive mt-2">
+            <table class="table table-sm table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th class="d6-roll-column">D6 Roll</th>
+                  <th>Objective</th>
+                  <th>Condition</th>
+                </tr>
+              </thead>
+              <tbody class="allow-definitions">
+                <tr>
+                  <td class="d6-roll-column">1</td>
+                  <td>Mastery</td>
+                  <td>Friendly unit in each table quarter at end.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">2</td>
+                  <td>Honor</td>
+                  <td>No enemy units in own deployment zone at end.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">3</td>
+                  <td>Casting</td>
+                  <td>Attempt to cast a spell each round.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">4</td>
+                  <td>Recovery</td>
+                  <td>First player to stop a unit from being Shaken.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">5</td>
+                  <td>Rage</td>
+                  <td>First player to destroy an enemy unit.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">6</td>
+                  <td>Destruction</td>
+                  <td>Destroy the most expensive enemy unit.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
+        <div class="rule-subsection">
+          <h5>Post-Mission Steps</h5>
+          <div class="allow-definitions">
+            <h6>Mission Rewards</h6>
+            <p>Winner gets 2 VP + 150pts. Loser(s) get 300pts.</p>
+            <h6>Casualties (Destroyed/Routed Units)</h6>
+          </div>
+          <div class="table-responsive mt-2 mb-2">
+            <table class="table table-sm table-bordered table-striped">
+              <caption>
+                Regular Unit Casualties
+              </caption>
+              <thead class="table-dark">
+                <tr>
+                  <th class="d6-roll-column">D6 Roll</th>
+                  <th>Result</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody class="allow-definitions">
+                <tr>
+                  <td class="d6-roll-column">1</td>
+                  <td>Dead</td>
+                  <td>Remove unit from army.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">2-5</td>
+                  <td>Recovered</td>
+                  <td>No penalties.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">6</td>
+                  <td>Natural Talent</td>
+                  <td>Recovers and gains +1 XP.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-responsive mt-2 mb-2">
+            <table class="table table-sm table-bordered table-striped">
+              <caption>
+                Hero Unit Casualties
+              </caption>
+              <thead class="table-dark">
+                <tr>
+                  <th class="d6-roll-column">D6 Roll</th>
+                  <th>Result</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody class="allow-definitions">
+                <tr>
+                  <td class="d6-roll-column">1</td>
+                  <td>Dead</td>
+                  <td>Remove hero from army.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">2</td>
+                  <td>Chest Wound</td>
+                  <td>Gets -1 to Defense rolls. (-5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">3</td>
+                  <td>Blinded Eye</td>
+                  <td>Gets -1 to Shooting hit rolls. (-5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">4</td>
+                  <td>Arm Injury</td>
+                  <td>Gets -1 to Melee hit rolls. (-5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">5</td>
+                  <td>Traumatized</td>
+                  <td>Gets -1 to Morale tests. (-5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">6</td>
+                  <td>Smashed Leg</td>
+                  <td>Moves -1" Advance / -2" Rush/Charge. (-5pts)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-responsive mt-2 mb-2">
+            <table class="table table-sm table-bordered table-striped">
+              <caption>
+                Hero Unit Talents (on D6=6 Casualty Roll)
+              </caption>
+              <thead class="table-dark">
+                <tr>
+                  <th class="d6-roll-column">D6 Roll</th>
+                  <th>Talent</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody class="allow-definitions">
+                <tr>
+                  <td class="d6-roll-column">1</td>
+                  <td>Natural Talent</td>
+                  <td>Recovers and gets +1 XP. (+5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">2</td>
+                  <td>Motivated</td>
+                  <td>Always passes first morale test of match. (+5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">3</td>
+                  <td>Crazed</td>
+                  <td>Gets +1 Attack in melee when charging. (+5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">4</td>
+                  <td>Bitter Rivalry</td>
+                  <td>Gets +1 to hit vs enemy Heroes. (+5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">5</td>
+                  <td>Horrible Scars</td>
+                  <td>Enemies get -1 to hit in melee vs hero. (+5pts)</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">6</td>
+                  <td>Toughened</td>
+                  <td>Gets Tough(+1). (+5pts)</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="small text-muted allow-definitions">
+              Re-roll if trait already gained.
+            </p>
+          </div>
+          <div class="allow-definitions">
+            <h6>XP Earning</h6>
+            <ul>
+              <li>+1 XP: Unit was not a casualty.</li>
+              <li>+1 XP: Unit killed an enemy unit.</li>
+              <li>+2 XP: Unit killed an enemy HERO unit.</li>
+              <li>+3 XP: Unit killed an enemy HERO and its joined unit.</li>
+            </ul>
+            <h6>Leveling Up (at 5 XP)</h6>
+            <p>
+              Unit becomes more expensive and gains a Trait (Regular Unit) or
+              Skill Set/Trait (Hero Unit).
+            </p>
+          </div>
+          <div class="table-responsive mt-2 mb-2">
+            <table class="table table-sm table-bordered table-striped">
+              <caption>
+                Regular Unit Traits (Roll D6)
+              </caption>
+              <thead class="table-dark">
+                <tr>
+                  <th class="d6-roll-column">D6 Roll</th>
+                  <th>Trait</th>
+                  <th>Effect (+25pts Cost)</th>
+                </tr>
+              </thead>
+              <tbody class="allow-definitions">
+                <tr>
+                  <td class="d6-roll-column">1</td>
+                  <td>Agile</td>
+                  <td>Moves +1" Advance / +2" Rush/Charge.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">2</td>
+                  <td>Headstrong</td>
+                  <td>Gets +1 to Morale tests.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">3</td>
+                  <td>Specialist</td>
+                  <td>Gets +1 to hit rolls in Melee OR Shooting (pick one).</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">4</td>
+                  <td>Resilient</td>
+                  <td>Gets +1 to Defense rolls.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">5</td>
+                  <td>Elite</td>
+                  <td>May re-roll one roll of any kind once per game.</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">6</td>
+                  <td>Fast Learner</td>
+                  <td>May pick any other trait from this list.</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="small text-muted allow-definitions">
+              Re-roll if trait already gained (except Specialist).
+            </p>
+          </div>
+          <div class="table-responsive mt-2 mb-2">
+            <table class="table table-sm table-bordered table-striped">
+              <caption>
+                Hero Leveling: Initial Skill Set (Roll D6)
+              </caption>
+              <thead class="table-dark">
+                <tr>
+                  <th class="d6-roll-column">D6 Roll</th>
+                  <th>Skill Set(s)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="d6-roll-column">1-2</td>
+                  <td>Captain OR Support</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">3-4</td>
+                  <td>Fighter OR Shooter</td>
+                </tr>
+                <tr>
+                  <td class="d6-roll-column">5-6</td>
+                  <td>Pathfinder OR Healer</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="allow-definitions">
+            Each time the Hero levels up (including the first), roll D6 for a
+            Skill Trait from their chosen set(s). Re-roll if trait already
+            gained. If all 3 traits from the first set are gained, roll for a
+            second set.
+          </p>
+          <div class="row row-cols-1 row-cols-md-2 g-3 mt-1">
+            <div class="col">
+              <table class="table table-sm table-bordered table-striped">
+                <caption>
+                  Captain Skills
+                </caption>
+                <thead class="table-dark">
+                  <tr>
+                    <th class="d6-roll-column">D6</th>
+                    <th>Trait</th>
+                  </tr>
+                </thead>
+                <tbody class="allow-definitions">
+                  <tr>
+                    <td class="d6-roll-column">1-2</td>
+                    <td>Leader: Friendly units within 6" get +1 to morale.</td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">3-4</td>
+                    <td>
+                      Instigator: Friendly units activating within 6" get +1 to
+                      hit in melee.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">5-6</td>
+                    <td>
+                      Tactician: Friendly units activating within 6" get +1 to
+                      hit when shooting.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col">
+              <table class="table table-sm table-bordered table-striped">
+                <caption>
+                  Support Skills
+                </caption>
+                <thead class="table-dark">
+                  <tr>
+                    <th class="d6-roll-column">D6</th>
+                    <th>Trait</th>
+                  </tr>
+                </thead>
+                <tbody class="allow-definitions">
+                  <tr>
+                    <td class="d6-roll-column">1-2</td>
+                    <td>
+                      Vanguard: Friendly units activating within 6" move +4" on
+                      Charge.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">3-4</td>
+                    <td>
+                      Scavenger: Friendly units activating within 6" get +6"
+                      range when shooting.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">5-6</td>
+                    <td>Mastermind: Enemy units within 6" get -1 Defense.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col">
+              <table class="table table-sm table-bordered table-striped">
+                <caption>
+                  Fighter Skills
+                </caption>
+                <thead class="table-dark">
+                  <tr>
+                    <th class="d6-roll-column">D6</th>
+                    <th>Trait</th>
+                  </tr>
+                </thead>
+                <tbody class="allow-definitions">
+                  <tr>
+                    <td class="d6-roll-column">1-2</td>
+                    <td>
+                      Duellist: Enemy units get -1 to hit in melee vs hero.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">3-4</td>
+                    <td>Fanatic: Hero gets +1 Attack in melee.</td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">5-6</td>
+                    <td>
+                      Berserker: Enemies get -1 to morale tests in melee vs
+                      hero.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col">
+              <table class="table table-sm table-bordered table-striped">
+                <caption>
+                  Shooter Skills
+                </caption>
+                <thead class="table-dark">
+                  <tr>
+                    <th class="d6-roll-column">D6</th>
+                    <th>Trait</th>
+                  </tr>
+                </thead>
+                <tbody class="allow-definitions">
+                  <tr>
+                    <td class="d6-roll-column">1-2</td>
+                    <td>Hunter: Hero may shoot even after Rush actions.</td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">3-4</td>
+                    <td>Destroyer: Hero gets AP(+1) when shooting.</td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">5-6</td>
+                    <td>
+                      Suppressor: Enemies shot by hero get -1 to hit shooting
+                      until end of round.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col">
+              <table class="table table-sm table-bordered table-striped">
+                <caption>
+                  Pathfinder Skills
+                </caption>
+                <thead class="table-dark">
+                  <tr>
+                    <th class="d6-roll-column">D6</th>
+                    <th>Trait</th>
+                  </tr>
+                </thead>
+                <tbody class="allow-definitions">
+                  <tr>
+                    <td class="d6-roll-column">1-2</td>
+                    <td>Runner: Hero always moves +2" (even in terrain).</td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">3-4</td>
+                    <td>
+                      Prowler: Enemies >12" get -1 to hit shooting vs hero.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">5-6</td>
+                    <td>Climber: Hero ignores difficult terrain effects.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col">
+              <table class="table table-sm table-bordered table-striped">
+                <caption>
+                  Healer Skills
+                </caption>
+                <thead class="table-dark">
+                  <tr>
+                    <th class="d6-roll-column">D6</th>
+                    <th>Trait</th>
+                  </tr>
+                </thead>
+                <tbody class="allow-definitions">
+                  <tr>
+                    <td class="d6-roll-column">1-2</td>
+                    <td>
+                      Chemist: Friendly units within 6" get +1 morale in melee.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">3-4</td>
+                    <td>
+                      Herbalist: Friendly units within 6" ignore wounds on 6+.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="d6-roll-column">5-6</td>
+                    <td>
+                      Warden: Friendly units within 6" stop being Shaken on hero
+                      activation.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <h6 class="allow-definitions">Upgrading & Recruiting</h6>
+          <p class="allow-definitions">
+            Spend earned points on unit upgrades or new units. Upgrades can be
+            sold for half price (round down to nearest 5). Recruit up to 1 new
+            Hero per mission (max 3 total). Recruit regular units freely (one
+            can start with 5XP for +50pts). Units/armies can be disbanded.
+          </p>
+        </div>
+      </section>
 
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingRandomEvents">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseRandomEvents"
-              aria-expanded="false"
-              aria-controls="collapseRandomEvents"
+      <section id="command-points-section" class="mb-4">
+        <h2>
+          <i class="bi bi-binoculars-fill me-2"></i>Command Points & Stratagems
+        </h2>
+        <div class="rule-subsection mb-3">
+          <h5>Command Point Generation (Fixed)</h5>
+          <p class="allow-definitions">
+            Players get <strong>4 Command Points (CP)</strong> per 1000pts in
+            their army list at the start of the game.
+          </p>
+        </div>
+        <div class="rule-subsection mb-3">
+          <h5>Using Stratagems</h5>
+          <p class="allow-definitions">
+            At any point during the game (friendly or enemy activation), players
+            may spend CP to activate Stratagems. Each specific Stratagem can
+            only be used once per unit activation.
+          </p>
+          <p class="allow-definitions">
+            Players always have access to the
+            <strong>Universal Doctrine</strong> Stratagems below, plus the
+            Stratagems from <strong>one</strong> other Doctrine chosen before
+            the game begins (see options below).
+          </p>
+        </div>
+        <div id="doctrines-display">
+          <div class="text-center p-3">
+            <div
+              class="spinner-border spinner-border-sm text-warning"
+              role="status"
             >
-              <i class="bi bi-dice-3-fill me-2"></i> Random Events
-            </button>
-          </h2>
-          <div
-            id="collapseRandomEvents"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingRandomEvents"
-            data-bs-parent="#rulesAccordion"
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Loading Doctrines & Stratagems...</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="glossary" class="mb-4">
+        <h2
+          class="mb-3"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseGlossary"
+          aria-expanded="true"
+          aria-controls="collapseGlossary"
+          title="Click to toggle Glossary"
+        >
+          <i class="bi bi-journal-text me-2"></i> Glossary
+        </h2>
+        <div class="collapse show" id="collapseGlossary">
+          <p
+            class="text-muted p-3 border rounded bg-body-tertiary allow-definitions"
           >
-            <div class="accordion-body">
-              <p class="text-muted small">
-                At the start of each round, roll D6. On a 5+, roll 2D6 (reading
-                them like D66, e.g., a 2 and a 5 is 25) and consult the events
-                below.
-              </p>
-              <div id="random-events-display">
-                <div class="text-center p-3">
-                  <div class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <span class="ms-2">Loading Random Events...</span>
-                </div>
+            A glossary of special rules and terms will be added here later.
+            Tooltips will also be added throughout the rules for quick
+            definitions.
+          </p>
+          <div id="glossary-content-display"></div>
+        </div>
+      </section>
+
+      <section id="random-events" class="mb-4">
+        <h2
+          class="mb-3"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseRandomEvents"
+          aria-expanded="true"
+          aria-controls="collapseRandomEvents"
+          title="Click to toggle Random Events table"
+        >
+          <i class="bi bi-dice-3-fill me-2"></i> Random Events
+        </h2>
+        <div class="collapse show" id="collapseRandomEvents">
+          <p class="text-muted small mb-3 allow-definitions">
+            At the start of each round, roll D6. On a 5+, roll 2D6 (reading them
+            like D66, e.g., a 2 and a 5 is 25) and consult the events below.
+          </p>
+          <div id="random-events-display">
+            <div class="text-center p-3">
+              <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
               </div>
+              <span class="ms-2">Loading Random Events...</span>
             </div>
           </div>
         </div>
-
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingGlossary">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseGlossary"
-              aria-expanded="false"
-              aria-controls="collapseGlossary"
-            >
-              <i class="bi bi-journal-text me-2"></i> Glossary (Future)
-            </button>
-          </h2>
-          <div
-            id="collapseGlossary"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingGlossary"
-            data-bs-parent="#rulesAccordion"
-          >
-            <div class="accordion-body">
-              <p class="text-muted">
-                A glossary of special rules and terms will be added here later.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
     </main>
+
+    <div class="floating-nav-button btn-group dropup">
+      <button
+        type="button"
+        class="btn btn-secondary dropdown-toggle"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+        title="Jump to Section"
+      >
+        <i class="bi bi-compass-fill"></i> Jump To
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <a class="dropdown-item" href="#core-rules"
+            ><i class="bi bi-book-half me-2"></i>Core Rules</a
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" href="#campaign-rules"
+            ><i class="bi bi-map-fill me-2"></i>Campaign Rules</a
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" href="#command-points-section"
+            ><i class="bi bi-binoculars-fill me-2"></i>Command Points</a
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" href="#glossary"
+            ><i class="bi bi-journal-text me-2"></i>Glossary</a
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" href="#random-events"
+            ><i class="bi bi-dice-3-fill me-2"></i>Random Events</a
+          >
+        </li>
+      </ul>
+    </div>
 
     <footer class="container mt-5 py-3 border-top">
       <p class="text-center text-muted">&copy; 2025 OPR Army Tracker</p>
@@ -301,6 +1138,31 @@
           </div>
         </div>
       </template>
+      <template id="interactiveToastTemplate">
+        <div
+          class="toast"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          data-bs-autohide="false"
+        >
+          <div class="toast-header">
+            <strong class="me-auto toast-title">Confirmation</strong>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="toast-body" style="white-space: pre-wrap">
+            Interactive message goes here.
+          </div>
+          <div
+            class="mt-2 pt-2 border-top toast-buttons-container p-2 text-end"
+          ></div>
+        </div>
+      </template>
       <div
         id="themeToast"
         class="toast"
@@ -327,6 +1189,7 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <script type="module" src="js/definitions.js"></script>
     <script type="module" src="js/rules.js"></script>
   </body>
 </html>
