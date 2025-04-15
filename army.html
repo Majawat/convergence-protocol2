@@ -14,6 +14,52 @@
     />
     <script type="module" src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .floating-buttons {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 1030; /* Below modals but above most content */
+        display: flex;
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 0.5rem; /* Space between buttons */
+      }
+      #backToTopBtn {
+        display: none; /* Hidden by default */
+        opacity: 0; /* Start transparent for fade */
+        transition: opacity 0.3s ease-in-out;
+      }
+      #backToTopBtn.show {
+        display: inline-block;
+        opacity: 1;
+      }
+      /* Offset for fixed navbar when scrolling to unit cards */
+      #army-units-container > .col > .unit-card[id] {
+        scroll-margin-top: 75px;
+      }
+      /* Style links in offcanvas */
+      #offcanvas-unit-list .list-group-item {
+        cursor: pointer;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+      #offcanvas-unit-list .list-group-item:hover {
+        background-color: var(--bs-secondary-bg-subtle);
+      }
+      /* Ensure popovers inherit theme */
+      .popover {
+        --bs-popover-bg: var(--bs-body-bg);
+        --bs-popover-border-color: var(--bs-border-color-translucent);
+        --bs-popover-header-bg: var(--bs-secondary-bg);
+        --bs-popover-header-color: var(--bs-body-color);
+        --bs-popover-body-color: var(--bs-body-color);
+      }
+      /* Definition Popover Styling */
+      .definition {
+        border-bottom: 1px dotted var(--bs-primary);
+        cursor: help;
+      }
+    </style>
   </head>
   <body class="bg-body text-body">
     <nav
@@ -49,7 +95,6 @@
               <a class="nav-link" href="rules.html">Rules Reference</a>
             </li>
           </ul>
-
           <div class="dropdown">
             <button
               class="btn btn-sm btn-secondary dropdown-toggle"
@@ -100,10 +145,8 @@
         <h1 id="army-title-h1" class="flex-grow-1 mb-0 me-3">
           Loading Army...
         </h1>
-
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <h3 id="round-display" class="mb-0 order-1 order-md-0"></h3>
-
           <div
             id="command-points-display"
             class="point-display mb-0 order-2 order-md-1"
@@ -113,7 +156,6 @@
             <span> / </span>
             <span id="command-points-max">--</span>
           </div>
-
           <div
             id="underdog-points-display"
             class="point-display mb-0 order-3 order-md-2"
@@ -145,7 +187,6 @@
               </button>
             </div>
           </div>
-
           <div class="d-flex gap-2 order-0 order-md-3">
             <button
               id="army-info-button"
@@ -424,7 +465,6 @@
           </div>
         </div>
       </template>
-
       <template id="interactiveToastTemplate">
         <div
           class="toast"
@@ -450,7 +490,6 @@
           ></div>
         </div>
       </template>
-
       <div
         id="themeToast"
         class="toast"
@@ -458,6 +497,51 @@
         aria-live="assertive"
         aria-atomic="true"
       ></div>
+    </div>
+
+    <div
+      class="offcanvas offcanvas-start"
+      tabindex="-1"
+      id="unitListOffcanvas"
+      aria-labelledby="unitListOffcanvasLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="unitListOffcanvasLabel">
+          <i class="bi bi-list-ul me-2"></i>Unit List
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body p-0">
+        <ul class="list-group list-group-flush" id="offcanvas-unit-list">
+          <li class="list-group-item text-muted">Loading units...</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="floating-buttons">
+      <button
+        class="btn btn-primary btn-sm mb-1"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#unitListOffcanvas"
+        aria-controls="unitListOffcanvas"
+        title="Show Unit List"
+      >
+        <i class="bi bi-list-ul"></i> Units
+      </button>
+      <button
+        class="btn btn-secondary btn-sm"
+        type="button"
+        id="backToTopBtn"
+        title="Back to Top"
+      >
+        <i class="bi bi-arrow-up"></i> Top
+      </button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

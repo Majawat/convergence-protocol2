@@ -1,6 +1,7 @@
 /**
- * @fileoverview Main application entry point and orchestration.
+ * @fileoverview Main application entry point and orchestration for army.html.
  * Loads data, initializes state, sets up UI, and attaches event listeners.
+ * Includes Offcanvas unit navigation with status icons and Back-to-Top functionality.
  */
 
 // Core Imports
@@ -9,38 +10,42 @@ import { loadCampaignData, loadGameData } from "./dataLoader.js";
 import { fetchArmyData } from "./api.js";
 import { processArmyData } from "./dataProcessor.js";
 import {
-  // State Setters
+  // State Setters / Getters / Updaters (ensure all needed are imported)
   setCampaignData,
-  setArmyBooksData,
-  setCommonRulesData,
-  setDoctrinesData,
-  setLoadedArmyData,
-  setUnderdogPoints,
-  setMaxUnderdogPoints,
-  // State Getters
   getCampaignData,
+  setArmyBooksData,
+  getArmyBooksData,
+  setCommonRulesData,
   getCommonRulesData,
+  setDoctrinesData,
   getDoctrinesData,
-  getCurrentRound,
-  getUnitStateValue,
-  getModelStateValue,
+  setLoadedArmyData,
   getLoadedArmyData,
+  setUnderdogPoints,
+  getUnderdogPoints,
+  setMaxUnderdogPoints,
+  getMaxUnderdogPoints,
+  setDefinitions,
+  getDefinitions,
+  setCommandPoints,
+  getCommandPoints,
+  setSelectedDoctrine,
+  getSelectedDoctrine,
+  getCurrentRound,
+  setCurrentRound,
+  incrementCurrentRound,
+  getUnitStateValue,
+  updateUnitStateValue,
+  getModelStateValue,
+  updateModelStateValue,
+  getCurrentArmyId,
+  getMaxCommandPoints,
+  getArmyListPoints,
+  updateArmyListPoints,
   getCurrentArmyHeroTargets,
   getCurrentArmyUnitMap,
   getUnitData,
   getJoinedHeroData,
-  getCurrentArmyId,
-  getCommandPoints,
-  getMaxCommandPoints,
-  getUnderdogPoints,
-  getMaxUnderdogPoints,
-  getArmyListPoints,
-  // State Updaters
-  updateUnitStateValue,
-  updateModelStateValue,
-  updateArmyListPoints,
-  setCommandPoints,
-  setSelectedDoctrine,
 } from "./state.js";
 import { loadArmyState, saveArmyState } from "./storage.js";
 import { displayArmyUnits } from "./ui.js";
@@ -51,9 +56,11 @@ import {
   updateCommandPointsDisplay,
   updateUnderdogPointsDisplay,
   showToast,
+  handleFocusReturn,
 } from "./uiHelpers.js";
 import { setupEventListeners } from "./eventHandlers.js";
 import { findTargetModelForWound } from "./gameLogic.js";
+import { initializeDefinitionsSystem } from "./definitions.js";
 
 // --- Helper Functions ---
 
@@ -62,7 +69,7 @@ import { findTargetModelForWound } from "./gameLogic.js";
  * @param {string} armyId
  */
 function _initializeWoundHighlights(armyId) {
-  const processedArmy = getLoadedArmyData(); // Gets in-memory processed data
+  const processedArmy = getLoadedArmyData();
   if (!processedArmy || !processedArmy.units) return;
   console.log(`DEBUG: Initializing wound highlights for army ${armyId}...`);
   processedArmy.units
@@ -76,7 +83,6 @@ function _initializeWoundHighlights(armyId) {
         .map((heroId) => processedArmy.unitMap[heroId])
         .find((hero) => hero?.joinToUnitId === cardUnitId);
       const baseUnitData = processedArmy.unitMap[cardUnitId];
-
       const initialTargetModel = findTargetModelForWound(
         baseUnitData,
         heroData
@@ -168,7 +174,6 @@ function _loadStateAndSyncHp(armyId, processedArmy) {
       armyState.units = {};
       stateNeedsSave = true;
     }
-
     if (stateNeedsSave) {
       saveArmyState(armyId, armyState);
       console.log(`DEBUG: Synced CP/MaxCP/ListPoints in state for ${armyId}.`);
@@ -274,14 +279,181 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
     updateUnderdogPointsDisplay(armyIdToLoad, calculatedUP, calculatedUP);
   } catch (error) {
     console.error("DEBUG: Error during UP calculation:", error);
-    showToast(
-      "Error calculating Underdog Points. Please track manually.",
-      "Error"
-    );
-    updateUnderdogPointsDisplay(armyIdToLoad, 0, 0); // Show 0/0 on error
+    showToast("Error calculating Underdog Points.", "Error");
+    updateUnderdogPointsDisplay(armyIdToLoad, 0, 0);
     setMaxUnderdogPoints(armyIdToLoad, 0);
     setUnderdogPoints(armyIdToLoad, 0);
   }
+}
+
+/**
+ * Populates the offcanvas menu with links to unit cards, including status icons.
+ * @param {object} processedArmy - The fully processed army data object.
+ */
+function populateUnitOffcanvas(processedArmy) {
+  const listElement = document.getElementById("offcanvas-unit-list");
+  const offcanvasElement = document.getElementById("unitListOffcanvas");
+  if (
+    !listElement ||
+    !offcanvasElement ||
+    !processedArmy ||
+    !processedArmy.units
+  ) {
+    console.error(
+      "Cannot populate unit offcanvas: Element or army data missing."
+    );
+    if (listElement)
+      listElement.innerHTML =
+        '<li class="list-group-item text-danger">Error loading list.</li>';
+    return;
+  }
+
+  listElement.innerHTML = ""; // Clear previous items
+  const armyId = processedArmy.meta.id; // Get current army ID
+
+  const offcanvasInstance =
+    bootstrap.Offcanvas.getInstance(offcanvasElement) ||
+    new bootstrap.Offcanvas(offcanvasElement);
+  const navbarHeight =
+    document.querySelector(".navbar.fixed-top")?.offsetHeight || 60;
+
+  processedArmy.units
+    .filter(
+      (unit) =>
+        !(unit.isHero && processedArmy.heroJoinTargets?.[unit.selectionId])
+    )
+    .sort((a, b) =>
+      (a.customName || a.originalName).localeCompare(
+        b.customName || b.originalName
+      )
+    )
+    .forEach((unit) => {
+      const listItem = document.createElement("li");
+      // Get unit state for icons
+      const status = getUnitStateValue(
+        armyId,
+        unit.selectionId,
+        "status",
+        "active"
+      );
+      const isShaken = getUnitStateValue(
+        armyId,
+        unit.selectionId,
+        "shaken",
+        false
+      );
+      const isFatigued = getUnitStateValue(
+        armyId,
+        unit.selectionId,
+        "fatigued",
+        false
+      );
+      const action = getUnitStateValue(
+        armyId,
+        unit.selectionId,
+        "action",
+        null
+      );
+      const isActivated = action !== null;
+
+      let iconHTML = "";
+      let itemClass = "list-group-item list-group-item-action"; // Base class
+
+      // Determine icon and class based on priority: Destroyed/Routed > Shaken > Fatigued > Activated
+      if (status === "destroyed" || status === "routed") {
+        iconHTML = `<i class="bi bi-x-octagon-fill text-danger" title="${
+          status === "destroyed" ? "Destroyed" : "Routed"
+        }"></i>`;
+        itemClass += " text-decoration-line-through text-muted"; // Style the item itself
+      } else if (isShaken) {
+        iconHTML = `<i class="bi bi-exclamation-triangle-fill text-warning" title="Shaken"></i>`;
+      } else if (isFatigued) {
+        iconHTML = `<i class="bi bi-clock-history text-info" title="Fatigued"></i>`;
+      } else if (isActivated) {
+        iconHTML = `<i class="bi bi-check-circle-fill text-success" title="Activated (${action})"></i>`;
+      } else {
+        iconHTML = `<i class="bi bi-circle" title="Ready"></i>`; // Placeholder for ready units
+      }
+
+      listItem.className = itemClass;
+
+      const link = document.createElement("a");
+      link.href = `#unit-card-${unit.selectionId}`;
+      link.style.textDecoration = "none";
+      link.style.color = "inherit";
+      link.style.display = "block";
+      // Add icons and text inside the link for better alignment
+      link.innerHTML = `
+              <span class="unit-status-icons me-2" style="min-width: 1.2em; display: inline-block; text-align: center;">${iconHTML}</span>
+              ${unit.customName || unit.originalName}
+          `;
+
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        const targetId = `unit-card-${unit.selectionId}`;
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          const targetPosition =
+            targetElement.getBoundingClientRect().top +
+            window.scrollY -
+            navbarHeight -
+            10;
+          window.scrollTo({ top: targetPosition, behavior: "smooth" });
+        }
+        offcanvasInstance.hide();
+      });
+
+      listItem.appendChild(link);
+      listElement.appendChild(listItem);
+    });
+
+  if (listElement.children.length === 0) {
+    listElement.innerHTML =
+      '<li class="list-group-item text-muted">No units found in army.</li>';
+  }
+}
+
+/** Handles Back to Top button visibility and click */
+function setupBackToTopButton() {
+  const btn = document.getElementById("backToTopBtn");
+  if (!btn) return;
+  let isVisible = false; // Track visibility state
+
+  const checkScroll = () => {
+    const shouldBeVisible = window.scrollY > 200;
+    if (shouldBeVisible && !isVisible) {
+      btn.style.opacity = "0"; // Start transparent
+      btn.style.display = "inline-block";
+      requestAnimationFrame(() => {
+        // Ensure display is set before starting transition
+        requestAnimationFrame(() => {
+          btn.style.opacity = "1";
+        }); // Fade in
+      });
+      isVisible = true;
+    } else if (!shouldBeVisible && isVisible) {
+      btn.style.opacity = "0"; // Fade out
+      // Use transitionend event to set display none after fade
+      btn.addEventListener(
+        "transitionend",
+        () => {
+          if (btn.style.opacity === "0") {
+            // Check if it's still meant to be hidden
+            btn.style.display = "none";
+          }
+        },
+        { once: true }
+      );
+      isVisible = false;
+    }
+  };
+
+  window.addEventListener("scroll", checkScroll, { passive: true });
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  checkScroll(); // Initial check
+  console.log("Back to Top button initialized.");
 }
 
 // --- Main Application Logic ---
@@ -327,8 +499,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (stratButton) stratButton.disabled = true;
     const startRoundButton = document.getElementById("start-round-button");
     if (startRoundButton) startRoundButton.disabled = true;
-
-    // REMOVED: Background pre-initialization - now happens on army load if needed.
 
     return; // Stop execution
   }
@@ -523,6 +693,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     _initializeWoundHighlights(armyIdToLoad);
     console.log("DEBUG: Units displayed.");
 
+    // Step 9.5: Populate Offcanvas, Setup Back-to-Top, Init Popovers
+    populateUnitOffcanvas(processedArmy);
+    setupBackToTopButton();
+    initializeDefinitionsSystem(); // Initialize popovers AFTER units are on page
+
     // Update Round, CP, UP displays
     console.log("DEBUG: Updating Round, CP, and UP displays...");
     updateRoundUI(getCurrentRound());
@@ -531,7 +706,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       getCommandPoints(armyIdToLoad),
       getMaxCommandPoints(armyIdToLoad)
     );
-    // UP display was already updated by calculateAndSetUP
 
     // Step 8: Setup Event Listeners
     console.log("DEBUG: Setting up event listeners...");
@@ -546,8 +720,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       console.warn("DEBUG: Start Round button not found after main load!");
     }
-
-    // --- REMOVED Background UP Calculation ---
 
     console.log("DEBUG: Application initialization complete.");
   } catch (error) {

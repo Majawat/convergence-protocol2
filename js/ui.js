@@ -63,7 +63,9 @@ function _createWeaponTableHTML(loadout, formatRuleFn) {
       weapon.range ? `${weapon.range}"` : "-"
     }</td><td class="text-center">${
       weapon.attacks ? `A${weapon.attacks}` : "-"
-    }</td><td class="text-center">${aggWeapon.apValue}</td><td>${
+    }</td><td class="text-center">${
+      aggWeapon.apValue
+    }</td><td class="allow-definitions">${
       aggWeapon.otherRulesString
     }</td></tr>`;
   });
@@ -99,7 +101,9 @@ function _createUnitCardHeaderHTML(baseUnit, hero) {
     }</span></span>`;
     metaHtml += `<span class="info-separator">|</span><span class="info-item base-info">${
       UI_ICONS.base
-    } ${unitBase ? unitBase + "mm" : "N/A"}</span>`;
+    } ${
+      unitBase && unitBase.toLowerCase() !== "none" ? unitBase + "mm" : "N/A"
+    }</span>`;
   }
   const statusIndicatorHTML = `<span class="header-status-indicators ms-2 small" data-unit-id="${baseUnit.selectionId}"><span class="fatigue-indicator text-warning" style="display: none;" title="Fatigued"><i class="bi bi-clock-history fs-6"></i></span><span class="shaken-indicator text-warning" style="display: none;" title="Shaken"><i class="bi bi-exclamation-triangle-fill fs-6"></i></span></span>`;
   return `<div class="card-header bg-body-tertiary"><div class="d-flex justify-content-between align-items-start flex-wrap gap-1"><div class="unit-card-header-content"><h5 class="mb-0 card-title d-flex align-items-center">${title}${statusIndicatorHTML}</h5><small class="text-muted d-block">${subtitle}</small><div class="header-meta-info text-muted mt-1">${metaHtml}</div></div></div><div class="btn-group btn-group-sm header-button-group"><button type="button" class="btn btn-outline-danger wound-apply-btn" title="Apply Wound (Auto-Target)">${UI_ICONS.woundApply}</button><button type="button" class="btn btn-outline-secondary unit-reset-btn" title="Reset Unit State (HP, Status, Action)">${UI_ICONS.woundReset}</button></div></div>`;
@@ -527,7 +531,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         unitIsCaster && actualCasterUnitId === hero.selectionId
           ? _createCasterControlsHTML(casterLevel, initialTokens)
           : ""
-      }<div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
+      }<div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary allow-definitions">${
         heroRules || "None"
       }</span></div><div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
         hero.loadout,
@@ -555,9 +559,12 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         baseUnit.cost
       } pts</span><span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
         baseUnit.xp || 0
-      }</span></span><span class="info-item base-info">${UI_ICONS.base} ${
-        unitBase ? unitBase + "mm" : "N/A"
-      }</span></div><div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
+      }</span></span><span class="info-item base-info">${UI_ICONS.base} 
+        ${
+          unitBase && unitBase.toLowerCase() !== "none"
+            ? unitBase + "mm"
+            : "N/A"
+        }</span></div><div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary allow-definitions">${
         unitRules || "None"
       }</span></div><div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
         baseUnit.loadout,
@@ -574,7 +581,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         unitIsCaster
           ? _createCasterControlsHTML(casterLevel, initialTokens)
           : ""
-      }<div class="mb-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary">${
+      }<div class="mb-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary allow-definitions">${
         unitRules || "None"
       }</span></div><div class="mb-0 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
         baseUnit.loadout,
