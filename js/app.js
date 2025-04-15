@@ -329,6 +329,8 @@ function populateUnitOffcanvas(processedArmy) {
     )
     .forEach((unit) => {
       const listItem = document.createElement("li");
+      listItem.dataset.unitId = unit.selectionId; // *** ADDED THIS LINE ***
+
       // Get unit state for icons
       const status = getUnitStateValue(
         armyId,
@@ -354,7 +356,7 @@ function populateUnitOffcanvas(processedArmy) {
         "action",
         null
       );
-      const isActivated = action !== null;
+      const isActivated = action !== null && !isShaken; // Adjusted logic
 
       let iconHTML = "";
       let itemClass = "list-group-item list-group-item-action"; // Base class

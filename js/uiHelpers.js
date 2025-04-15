@@ -1,7 +1,6 @@
 /**
  * @fileoverview Contains helper functions for updating specific UI parts
- * not directly related to the main unit display (e.g., modals, toasts, selection lists).
- * UPDATED: Added setElementToFocusAfterClose function.
+ * not directly related to the main unit display (e.g., modals, toasts, selection lists, offcanvas).
  */
 
 // Import constants if needed (e.g., from config)
@@ -11,21 +10,21 @@ import {
   getCurrentArmyId,
   getDoctrinesData,
   getSelectedDoctrine,
-  setSelectedDoctrine,
   getCommandPoints,
   getMaxCommandPoints,
   getUnderdogPoints,
   getMaxUnderdogPoints,
+  getUnitStateValue, // <-- Added for offcanvas update
+  getCurrentArmyHeroTargets, // <-- Added for offcanvas update
 } from "./state.js";
 
 // --- Focus Management State ---
-// Variable to store the element that triggered the modal/toast
+// Variable to store the element that triggered the modal/toast/offcanvas
 // Kept internal to this module, managed by exported functions.
 let elementToFocusAfterClose = null;
 
 /**
- * *** ADDED ***
- * Stores the element that should receive focus when the next modal/toast closes.
+ * Stores the element that should receive focus when the next modal/toast/offcanvas closes.
  * Should be called from the 'show.bs.modal' or equivalent event listener.
  * @param {HTMLElement|null} element - The element to focus, or null.
  */
@@ -41,7 +40,7 @@ export function setElementToFocusAfterClose(element) {
 
 /**
  * Returns focus to the element stored by setElementToFocusAfterClose.
- * Should be called from the 'hidden.bs.modal' or 'hidden.bs.toast' event listener.
+ * Should be called from the 'hidden.bs.modal' or 'hidden.bs.toast' or 'hidden.bs.offcanvas' event listener.
  */
 export function handleFocusReturn() {
   if (elementToFocusAfterClose) {
@@ -254,7 +253,6 @@ export function showInteractiveToast(
     }
 
     // Store the currently focused element BEFORE showing the toast
-    // *** Use the new setter function ***
     setElementToFocusAfterClose(
       document.activeElement && document.activeElement !== document.body
         ? document.activeElement
@@ -375,7 +373,6 @@ export function populateAndShowSpellModal(
   }
 
   // --- Focus Management Setup ---
-  // *** Use the new setter function ***
   setElementToFocusAfterClose(
     document.activeElement && document.activeElement !== document.body
       ? document.activeElement
@@ -621,7 +618,6 @@ export function updateRoundUI(roundNumber) {
   }
 }
 
-// --- Function to update Command Points Display ---
 /**
  * Updates the command points display elements (main header and modal header).
  * @param {string} armyId - The ID of the current army.
@@ -767,7 +763,60 @@ export function populateDoctrineSelector(armyId) {
     }
   });
 
-  console.log(
-    `Doctrine selector populated. Current selection: ${currentlySelected}`
+  // console.log(`Doctrine selector populated. Current selection: ${currentlySelected}`);
+}
+
+/**
+ * *** NEW FUNCTION ***
+ * Updates the status icon and styling for a specific unit in the off-canvas list.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} unitId - The selectionId of the unit to update.
+ */
+export function updateOffcanvasUnitStatus(armyId, unitId) {
+  const listItem = document.querySelector(
+    `#offcanvas-unit-list li[data-unit-id="${unitId}"]`
   );
+  if (!listItem) {
+    console.warn(
+      `Offcanvas list item not found for unit ${unitId}. Cannot update status.`
+    );
+    return;
+  }
+
+  const iconContainer = listItem.querySelector(".unit-status-icons");
+  if (!iconContainer) {
+    console.warn(`Icon container not found for offcanvas unit ${unitId}.`);
+    return;
+  }
+
+  // Get current state values
+  const status = getUnitStateValue(armyId, unitId, "status", "active");
+  const isShaken = getUnitStateValue(armyId, unitId, "shaken", false);
+  const isFatigued = getUnitStateValue(armyId, unitId, "fatigued", false);
+  const action = getUnitStateValue(armyId, unitId, "action", null);
+  const isActivated = action !== null && !isShaken; // Activated only if action is set AND not shaken
+
+  let iconHTML = "";
+  let itemClass = "list-group-item list-group-item-action"; // Base class
+
+  // Determine icon and class based on priority
+  if (status === "destroyed" || status === "routed") {
+    iconHTML = `<i class="bi bi-x-octagon-fill text-danger" title="${
+      status === "destroyed" ? "Destroyed" : "Routed"
+    }"></i>`;
+    itemClass += " text-decoration-line-through text-muted"; // Style the item itself
+  } else if (isShaken) {
+    iconHTML = `<i class="bi bi-exclamation-triangle-fill text-warning" title="Shaken"></i>`;
+  } else if (isFatigued) {
+    iconHTML = `<i class="bi bi-clock-history text-info" title="Fatigued"></i>`;
+  } else if (isActivated) {
+    iconHTML = `<i class="bi bi-check-circle-fill text-success" title="Activated (${action})"></i>`;
+  } else {
+    iconHTML = `<i class="bi bi-circle" title="Ready"></i>`; // Placeholder for ready units
+  }
+
+  // Update the icon and the list item's class
+  iconContainer.innerHTML = iconHTML;
+  listItem.className = itemClass;
+  listItem.dataset.unitId = unitId; // Ensure dataset attribute is present
 }

@@ -1,5 +1,7 @@
 /**
  * @fileoverview Handles user interactions and events for the OPR Army Tracker.
+ * Includes logic for applying wounds, managing tokens, actions, morale,
+ * stratagems, and resetting state.
  */
 
 // Imports from other modules
@@ -49,13 +51,19 @@ import {
   updateCommandPointsDisplay,
   populateDoctrineSelector,
   displayStratagems,
-  handleFocusReturn, // Keep importing this
+  handleFocusReturn,
   updateUnderdogPointsDisplay,
-  setElementToFocusAfterClose, // Import the setter
+  setElementToFocusAfterClose,
+  updateOffcanvasUnitStatus, // *** ADDED IMPORT ***
 } from "./uiHelpers.js";
 
 // --- Internal Helper Functions ---
 
+/**
+ * Clears the target highlight from models within a specific unit card.
+ * @param {string} unitSelectionId - The selectionId of the unit card.
+ * @private
+ */
 function _clearTargetHighlight(unitSelectionId) {
   const card = document.getElementById(`unit-card-${unitSelectionId}`);
   if (!card) return;
@@ -63,6 +71,12 @@ function _clearTargetHighlight(unitSelectionId) {
   if (highlighted) highlighted.classList.remove("target-model");
 }
 
+/**
+ * Highlights the specified model element within a unit card as the next auto-target.
+ * @param {string} unitSelectionId - The selectionId of the unit card.
+ * @param {string | null} modelId - The ID of the model to highlight, or null to clear.
+ * @private
+ */
 function _highlightNextAutoTargetModel(unitSelectionId, modelId) {
   _clearTargetHighlight(unitSelectionId);
   if (!modelId) return;
@@ -75,6 +89,12 @@ function _highlightNextAutoTargetModel(unitSelectionId, modelId) {
   }
 }
 
+/**
+ * Finds the actual caster unit (either base or joined hero) for a given card ID.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @returns {object | null} The processed caster unit data, or null if not a caster.
+ * @private
+ */
 function _findActualCaster(cardUnitId) {
   const unitData = getUnitData(cardUnitId);
   if (unitData?.casterLevel > 0) return unitData;
@@ -85,6 +105,14 @@ function _findActualCaster(cardUnitId) {
 
 // --- Action Functions ---
 
+/**
+ * Applies a wound to a model in the unit.
+ * Handles auto-targeting or specific model targeting.
+ * Updates model HP, checks for unit destruction, and updates UI.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @param {string | null} [specificModelId=null] - The ID of the specific model to wound, or null for auto-target.
+ */
 function applyWound(armyId, cardUnitId, specificModelId = null) {
   const baseUnitData = getUnitData(cardUnitId);
   if (!baseUnitData) {
@@ -95,33 +123,40 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
   }
   const heroData = getJoinedHeroData(cardUnitId);
   let targetModel = null;
-  let modelUnitId = null;
+  let modelUnitId = null; // The ID of the unit the target model belongs to (base or hero)
 
+  // --- Determine Target Model ---
   if (specificModelId) {
+    // Find the specific model in base or hero unit
     targetModel = baseUnitData.models.find(
       (m) => m.modelId === specificModelId
     );
-    if (targetModel) modelUnitId = cardUnitId;
-    else if (heroData) {
+    if (targetModel) {
+      modelUnitId = cardUnitId;
+    } else if (heroData) {
       targetModel = heroData.models.find((m) => m.modelId === specificModelId);
       if (targetModel) modelUnitId = heroData.selectionId;
     }
+    // Check if the specifically targeted model is already removed
     if (targetModel && targetModel.currentHp <= 0) {
       showToast(
         `Model ${targetModel.modelId.split("_").pop()} is already removed.`
       );
-      targetModel = null;
+      targetModel = null; // Don't proceed with wounding
       modelUnitId = null;
     }
   } else {
+    // Auto-target: Find the next model according to rules
     targetModel = findTargetModelForWound(baseUnitData, heroData);
-    if (targetModel)
+    if (targetModel) {
       modelUnitId = targetModel.isHero ? heroData.selectionId : cardUnitId;
+    }
   }
 
+  // --- Apply Wound if Target Found ---
   if (targetModel && modelUnitId) {
     const newHp = Math.max(0, targetModel.currentHp - 1);
-    targetModel.currentHp = newHp; // Update in-memory model
+    targetModel.currentHp = newHp; // Update in-memory model (important for subsequent calls)
     updateModelStateValue(
       armyId,
       modelUnitId,
@@ -136,6 +171,8 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
       targetModel.maxHp
     );
 
+    // --- Check for Unit Destruction ---
+    // Re-fetch data to ensure we have the latest HP values after potential updates
     const baseUnitDataForDestroyCheck = getUnitData(cardUnitId);
     const heroDataForDestroyCheck = getJoinedHeroData(cardUnitId);
     const allModels = [
@@ -149,7 +186,7 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
       "active"
     );
     const isUnitDestroyed =
-      currentStatus === "active" &&
+      currentStatus === "active" && // Only destroy if currently active
       allModels.length > 0 &&
       allModels.every((m) => m.currentHp <= 0);
 
@@ -157,20 +194,27 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
       console.log(
         `Unit ${cardUnitId} (and potentially joined hero) is Destroyed.`
       );
+      // Update state for base unit
       updateUnitStateValue(armyId, cardUnitId, "status", "destroyed");
-      if (heroDataForDestroyCheck)
+      // Update state for hero unit if present
+      if (heroDataForDestroyCheck) {
         updateUnitStateValue(
           armyId,
           heroDataForDestroyCheck.selectionId,
           "status",
           "destroyed"
         );
+      }
+      // Update UI
       collapseDestroyedCard(cardUnitId);
+      updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
       showToast(
         `${baseUnitDataForDestroyCheck?.customName || cardUnitId} Destroyed!`,
         "Unit Destroyed"
       );
+      _clearTargetHighlight(cardUnitId); // Clear highlight on destruction
     } else {
+      // Highlight the next model to be wounded if the unit is not destroyed
       const nextAutoTarget = findTargetModelForWound(
         baseUnitDataForDestroyCheck,
         heroDataForDestroyCheck
@@ -181,14 +225,17 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
       );
     }
   } else {
+    // No valid target model found (either none left or specific target invalid)
     const currentStatus = getUnitStateValue(
       armyId,
       cardUnitId,
       "status",
       "active"
     );
-    if (currentStatus === "active") showToast("All models in unit removed.");
-    _clearTargetHighlight(cardUnitId);
+    if (currentStatus === "active") {
+      showToast("All models in unit removed.");
+    }
+    _clearTargetHighlight(cardUnitId); // Clear highlight if no models left
   }
 }
 
@@ -221,10 +268,12 @@ function handleStartRoundClick(armyId) {
   let stateChanged = false;
   const casterUpdates = [];
   const heroTargets = getCurrentArmyHeroTargets();
+  const unitsToUpdateOffcanvas = new Set(); // Track units needing offcanvas update
 
   currentArmyProcessedData.units.forEach((unit) => {
     const unitId = unit.selectionId;
     if (!armyState.units[unitId]) {
+      // Initialize state if missing (shouldn't happen often after app.js init)
       armyState.units[unitId] = {
         status: "active",
         shaken: false,
@@ -238,22 +287,34 @@ function handleStartRoundClick(armyId) {
       stateChanged = true;
     }
     const unitState = armyState.units[unitId];
-    if (unitState.status === "destroyed" || unitState.status === "routed")
+    // Skip updates for units already removed from play
+    if (unitState.status === "destroyed" || unitState.status === "routed") {
       return;
+    }
+
+    // Determine the card ID (could be the base unit or the hero if joined)
     const cardId = heroTargets?.[unitId] || unitId;
+
+    // Reset action
     if (unitState.action !== null) {
       unitState.action = null;
       stateChanged = true;
+      unitsToUpdateOffcanvas.add(cardId); // Mark for offcanvas update
     }
+    // Reset fatigue
     if (unitState.fatigued !== false) {
       unitState.fatigued = false;
-      updateFatiguedStatusUI(cardId, false);
+      updateFatiguedStatusUI(cardId, false); // Update card indicator
       stateChanged = true;
+      unitsToUpdateOffcanvas.add(cardId); // Mark for offcanvas update
     }
+    // Reset melee attack flag
     if (unitState.attackedInMeleeThisRound !== false) {
       unitState.attackedInMeleeThisRound = false;
       stateChanged = true;
     }
+
+    // Generate spell tokens for casters
     if (unit.casterLevel > 0) {
       const currentTokens = unitState.tokens || 0;
       const tokensToAdd = unit.casterLevel;
@@ -268,7 +329,7 @@ function handleStartRoundClick(armyId) {
           name: unit.customName || unit.originalName,
           added: actualTokensAdded,
           total: newTokens,
-          unitId: unitId,
+          unitId: unitId, // Use actual caster unit ID
           casterLevel: unit.casterLevel,
         });
         stateChanged = true;
@@ -276,18 +337,26 @@ function handleStartRoundClick(armyId) {
     }
   });
 
-  if (stateChanged) saveArmyState(armyId, armyState);
-  console.log(
-    `State updated and saved for start of round ${newRound} for army ${armyId}.`
-  );
-  resetAllActionButtonsUI();
+  if (stateChanged) {
+    saveArmyState(armyId, armyState);
+    console.log(
+      `State updated and saved for start of round ${newRound} for army ${armyId}.`
+    );
+  }
 
+  // Update UI after state is saved
+  resetAllActionButtonsUI(); // Resets buttons on cards
+
+  // Update offcanvas for units whose state changed
+  unitsToUpdateOffcanvas.forEach((id) => updateOffcanvasUnitStatus(armyId, id));
+
+  // Display toast message
   let toastMessage = `Round ${newRound} Started!\nAll Unit Actions & Fatigue reset.`;
   if (casterUpdates.length > 0) {
     toastMessage += "\nSpell Tokens Generated:";
     casterUpdates.forEach((update) => {
-      const cardUnitId = heroTargets?.[update.unitId] || update.unitId;
-      updateTokenDisplay(cardUnitId, update.total, update.casterLevel);
+      const cardUnitId = heroTargets?.[update.unitId] || update.unitId; // Find the card ID
+      updateTokenDisplay(cardUnitId, update.total, update.casterLevel); // Update card display
       toastMessage += `\n- ${update.name}: +${update.added
         .toString()
         .padStart(1, "\u00A0")}, now ${update.total}`;
@@ -300,22 +369,48 @@ function handleStartRoundClick(armyId) {
 
 // --- Specific Click Handlers ---
 
+/**
+ * Handles clicking on a specific model display element to apply a wound.
+ * @param {HTMLElement} targetElement - The clicked model element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 function _handleModelWoundClick(targetElement, armyId, cardUnitId) {
   const modelId = targetElement.dataset.modelId;
-  if (modelId) applyWound(armyId, cardUnitId, modelId);
-  else console.warn("Clicked model element missing data-model-id attribute.");
+  if (modelId) {
+    applyWound(armyId, cardUnitId, modelId);
+  } else {
+    console.warn("Clicked model element missing data-model-id attribute.");
+  }
 }
 
+/**
+ * Handles clicking the auto-wound button in the card header.
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 function _handleAutoWoundButtonClick(targetElement, armyId, cardUnitId) {
-  applyWound(armyId, cardUnitId, null);
+  applyWound(armyId, cardUnitId, null); // Pass null for auto-target
 }
 
+/**
+ * Handles clicking the reset button in the card header.
+ * Prompts for confirmation, then resets the unit's state (HP, status, action).
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
   const baseUnitData = getUnitData(cardUnitId);
   if (!baseUnitData) return;
   const heroData = getJoinedHeroData(cardUnitId);
   const heroId = heroData ? heroData.selectionId : null;
 
+  // Confirmation prompt
   const confirmReset = await showInteractiveToast(
     `Reset ${
       baseUnitData.customName || baseUnitData.originalName
@@ -344,10 +439,14 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
     return;
   }
 
+  // Helper function to reset state for a single unit (base or hero)
   const resetUnitState = (unitId, unitData) => {
-    if (!armyState.units[unitId]) return false;
+    if (!armyState.units[unitId]) return false; // Skip if state doesn't exist
+
     const unitState = armyState.units[unitId];
     let unitModified = false;
+
+    // Reset statuses
     if (unitState.shaken !== false) {
       unitState.shaken = false;
       unitModified = true;
@@ -368,16 +467,21 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
       unitState.status = "active";
       unitModified = true;
     }
+
+    // Reset model HP
     unitData.models.forEach((model) => {
-      if (unitState.models?.[model.modelId]?.currentHp !== model.maxHp) {
-        if (!unitState.models) unitState.models = {};
-        if (!unitState.models[model.modelId])
-          unitState.models[model.modelId] = {};
+      if (!unitState.models) unitState.models = {}; // Ensure models object exists
+      if (!unitState.models[model.modelId])
+        unitState.models[model.modelId] = {}; // Ensure model object exists
+
+      if (unitState.models[model.modelId].currentHp !== model.maxHp) {
         unitState.models[model.modelId].currentHp = model.maxHp;
+        // Update in-memory data as well
         const targetModel = (getUnitData(unitId)?.models || []).find(
           (m) => m.modelId === model.modelId
         );
         if (targetModel) targetModel.currentHp = model.maxHp;
+        // Update display for this specific model
         updateModelDisplay(cardUnitId, model.modelId, model.maxHp, model.maxHp);
         unitModified = true;
       }
@@ -385,10 +489,12 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
     return unitModified;
   };
 
+  // Reset state for base unit and hero (if applicable)
   if (resetUnitState(cardUnitId, baseUnitData)) stateChanged = true;
   if (heroData && heroId && resetUnitState(heroId, heroData))
     stateChanged = true;
 
+  // Save state if changes were made
   if (stateChanged) {
     saveArmyState(armyId, armyState);
     showToast(
@@ -397,8 +503,14 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
       }.`,
       "Unit Reset"
     );
+    // Update the offcanvas after saving the reset state
+    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
   }
+
+  // Reset the card's overall UI appearance
   resetCardUI(cardUnitId);
+
+  // Re-highlight the next target model
   const nextAutoTarget = findTargetModelForWound(baseUnitData, heroData);
   _highlightNextAutoTargetModel(
     cardUnitId,
@@ -406,6 +518,13 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
   );
 }
 
+/**
+ * Handles clicking the add token button for a caster unit.
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 function _handleAddTokenClick(targetElement, armyId, cardUnitId) {
   const actualCasterUnit = _findActualCaster(cardUnitId);
   if (!actualCasterUnit) {
@@ -423,6 +542,13 @@ function _handleAddTokenClick(targetElement, armyId, cardUnitId) {
   }
 }
 
+/**
+ * Handles clicking the remove token button for a caster unit.
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 function _handleRemoveTokenClick(targetElement, armyId, cardUnitId) {
   const actualCasterUnit = _findActualCaster(cardUnitId);
   if (!actualCasterUnit) {
@@ -438,6 +564,14 @@ function _handleRemoveTokenClick(targetElement, armyId, cardUnitId) {
   }
 }
 
+/**
+ * Handles clicking the view spells button for a caster unit.
+ * Populates and shows the spell modal.
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 function _handleViewSpellsClick(targetElement, armyId, cardUnitId) {
   const actualCasterUnit = _findActualCaster(cardUnitId);
   if (!actualCasterUnit) {
@@ -445,44 +579,73 @@ function _handleViewSpellsClick(targetElement, armyId, cardUnitId) {
     return;
   }
   const casterUnitId = actualCasterUnit.selectionId;
-  const casterFactionId = actualCasterUnit.factionId;
+  const casterFactionId = actualCasterUnit.factionId; // Use stored faction ID
   const armyBooks = getArmyBooksData();
-  const spellList = armyBooks[casterFactionId]?.spells || null;
+  const spellList = armyBooks[casterFactionId]?.spells || null; // Get spells for the caster's faction
   const currentTokens = getUnitStateValue(armyId, casterUnitId, "tokens", 0);
+
   populateAndShowSpellModal(actualCasterUnit, spellList, currentTokens);
 }
 
+/**
+ * Handles clicking the cast spell button within the spell modal.
+ * Reduces tokens, updates UI, and shows a confirmation toast.
+ * @param {HTMLButtonElement} buttonElement - The clicked cast button.
+ * @private
+ */
 function _handleCastSpellClick(buttonElement) {
   const spellCost = parseInt(buttonElement.dataset.spellCost, 10);
   const spellName = decodeURIComponent(buttonElement.dataset.spellName);
-  const casterId = buttonElement.dataset.casterId;
+  const casterId = buttonElement.dataset.casterId; // This is the actual caster unit's ID
   const armyId = buttonElement.dataset.armyId;
+
   if (isNaN(spellCost) || !casterId || !armyId) {
     console.error("Cast button missing required data attributes.");
     showToast("Error casting spell: Missing data.", "Error");
     return;
   }
+
   const currentTokens = getUnitStateValue(armyId, casterId, "tokens", 0);
+
   if (currentTokens >= spellCost) {
     const newTokens = currentTokens - spellCost;
     updateUnitStateValue(armyId, casterId, "tokens", newTokens);
+
+    // Find the card ID this caster belongs to (could be hero joined to another unit)
     const heroTargets = getCurrentArmyHeroTargets();
-    const cardUnitId = heroTargets?.[casterId] || casterId;
-    const casterUnitData = getUnitData(casterId);
-    if (casterUnitData)
+    let cardUnitId = casterId; // Assume caster is the base unit initially
+    // Check if this caster ID is a hero joined to another unit
+    const targetUnitId = heroTargets?.[casterId];
+    if (targetUnitId) {
+      cardUnitId = targetUnitId; // The card ID is the unit the hero joined
+    }
+
+    // Update the token display on the correct card
+    const casterUnitData = getUnitData(casterId); // Get data for the actual caster
+    if (casterUnitData) {
       updateTokenDisplay(cardUnitId, newTokens, casterUnitData.casterLevel);
+    }
+
+    // Update token count in the modal
     const modalTokenDisplay = document.getElementById(
       "modalCasterTokenDisplay"
     );
-    if (modalTokenDisplay)
+    if (modalTokenDisplay) {
       modalTokenDisplay.innerHTML = `${UI_ICONS.spellTokens} Tokens: <span class="fw-bold">${newTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
+    }
+
+    // Update button disabled states in the modal
     const modalElement = document.getElementById("viewSpellsModal");
     if (modalElement) {
       modalElement.querySelectorAll(".cast-spell-btn").forEach((btn) => {
         const cost = parseInt(btn.dataset.spellCost, 10);
-        if (!isNaN(cost)) btn.disabled = newTokens < cost;
+        if (!isNaN(cost)) {
+          btn.disabled = newTokens < cost;
+        }
       });
     }
+
+    // Show confirmation toast
     showToast(
       `Casting ${spellName}! Player rolls 4+ to succeed.\nCasters within 18" may spend a Spell Token to modify the roll.`,
       "Spell Cast"
@@ -492,47 +655,61 @@ function _handleCastSpellClick(buttonElement) {
   }
 }
 
+/**
+ * Handles clicking an action button (Hold, Advance, Rush, Charge, Recover).
+ * Updates the unit's action state, fatigue status (for Charge), and UI.
+ * Triggers melee resolution flow immediately after a Charge action.
+ * @param {HTMLElement} targetElement - The clicked action button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
   const actionType = targetElement.dataset.action;
   if (!actionType) return;
 
   const isShaken = getUnitStateValue(armyId, cardUnitId, "shaken", false);
   const currentAction = getUnitStateValue(armyId, cardUnitId, "action", null);
-  const unitData = getUnitData(cardUnitId);
+  const unitData = getUnitData(cardUnitId); // Base unit data for the card
   if (!unitData) return; // Need unit data
 
+  // --- Handle Shaken Units ---
   if (isShaken) {
     if (actionType === "Recover") {
       console.log(`Unit ${cardUnitId} recovering from Shaken.`);
       updateUnitStateValue(armyId, cardUnitId, "shaken", false);
       updateUnitStateValue(armyId, cardUnitId, "action", null); // Deactivate after recovery
-      updateShakenStatusUI(cardUnitId, false); // Update indicator & buttons
+      updateShakenStatusUI(cardUnitId, false); // Update card indicator & buttons
+      updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
       showToast(
         `${unitData?.customName || cardUnitId} recovered from Shaken.`,
         "Recovery"
       );
     } else {
+      // Prevent other actions if shaken
       showToast("Shaken unit must Recover.", "Action Blocked");
     }
-    return;
+    return; // Stop further processing if shaken
   }
 
+  // --- Handle Non-Shaken Units ---
   let newAction = null;
   if (currentAction === actionType) {
-    newAction = null; // Deactivate
+    // Deactivate if clicking the currently active action
+    newAction = null;
     console.log(`Unit ${cardUnitId} deactivated.`);
-    // Update state and UI immediately for deactivation
     updateUnitStateValue(armyId, cardUnitId, "action", newAction);
-    updateActionButtonsUI(cardUnitId, newAction, false);
+    updateActionButtonsUI(cardUnitId, newAction, false); // Update card buttons
+    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
   } else {
-    newAction = actionType; // Activate
+    // Activate with the new action
+    newAction = actionType;
     console.log(`Unit ${cardUnitId} activated with action: ${newAction}`);
-
-    // Update state and UI first
     updateUnitStateValue(armyId, cardUnitId, "action", newAction);
-    updateActionButtonsUI(cardUnitId, newAction, false); // Pass isShaken = false
+    updateActionButtonsUI(cardUnitId, newAction, false); // Update card buttons
+    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
 
-    // --- CHARGE ACTION: Apply fatigue and RESOLVE MELEE for the CHARGER ---
+    // --- Specific Logic for Charge Action ---
     if (newAction === "Charge") {
       // Apply fatigue if first melee attack this round
       const isFirstMeleeCharge = !getUnitStateValue(
@@ -549,12 +726,15 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
           "attackedInMeleeThisRound",
           true
         );
-        updateFatiguedStatusUI(cardUnitId, true);
+        updateFatiguedStatusUI(cardUnitId, true); // Update card indicator
+        updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
         console.log(`Unit ${cardUnitId} is now Fatigued from charging.`);
       }
 
       // --- Immediately trigger melee resolution flow for the CHARGER ---
       console.log(`Resolving melee outcome for charger ${cardUnitId}`);
+      const heroData = getJoinedHeroData(cardUnitId); // Get hero data if present
+      const effectiveQuality = heroData ? heroData.quality : unitData.quality; // Use hero quality if joined
 
       // 1. Ask for Melee Outcome (for the CHARGING unit)
       const outcome = await showInteractiveToast(
@@ -571,10 +751,9 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
 
       if (outcome === "Lose") {
         console.log(`Charging unit ${cardUnitId} lost melee. Checking morale.`);
-        const quality = unitData.quality;
         // 2. Ask for Morale Result
         const moraleResult = await showInteractiveToast(
-          `MELEE MORALE TEST (Quality ${quality}+): Did ${
+          `MELEE MORALE TEST (Quality ${effectiveQuality}+): Did ${
             unitData.customName || cardUnitId
           } PASS or FAIL?`,
           "Melee: Charger Morale",
@@ -586,14 +765,23 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
 
         if (moraleResult === "Fail") {
           // 3. Check half strength for Routing
-          const isHalf = checkHalfStrength(unitData);
+          const isHalf = checkHalfStrength(unitData); // Check base unit strength
 
           if (isHalf) {
             console.log(
               `Unit ${cardUnitId} fails morale at half strength -> ROUTED!`
             );
             updateUnitStateValue(armyId, cardUnitId, "status", "routed");
-            collapseRoutedCard(cardUnitId);
+            // Update hero status if joined
+            if (heroData)
+              updateUnitStateValue(
+                armyId,
+                heroData.selectionId,
+                "status",
+                "routed"
+              );
+            collapseRoutedCard(cardUnitId); // Update card UI
+            updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
             showToast(
               `${unitData.customName || cardUnitId} Routed!`,
               "Melee Outcome"
@@ -601,7 +789,8 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
           } else {
             console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
             updateUnitStateValue(armyId, cardUnitId, "shaken", true);
-            updateShakenStatusUI(cardUnitId, true);
+            updateShakenStatusUI(cardUnitId, true); // Update card UI
+            updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
             showToast(
               `${unitData.customName || cardUnitId} became Shaken!`,
               "Melee Outcome"
@@ -629,10 +818,20 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
   }
 }
 
+/**
+ * Handles clicking the "Resolve Melee" button.
+ * Prompts the user for the outcome and updates unit state (fatigue, shaken, routed).
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   console.log(`Resolving melee outcome for ${cardUnitId}`);
-  const unitData = getUnitData(cardUnitId);
+  const unitData = getUnitData(cardUnitId); // Base unit data
   if (!unitData) return;
+  const heroData = getJoinedHeroData(cardUnitId); // Get hero data if present
+  const effectiveQuality = heroData ? heroData.quality : unitData.quality; // Use hero quality if joined
 
   // 1. Ask if THIS unit Struck Back (for fatigue)
   const didStrikeBack = await showInteractiveToast(
@@ -645,6 +844,7 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   );
 
   if (didStrikeBack === "Yes") {
+    // Apply fatigue if first melee attack this round
     const isFirstMelee = !getUnitStateValue(
       armyId,
       cardUnitId,
@@ -659,7 +859,8 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
         "attackedInMeleeThisRound",
         true
       );
-      updateFatiguedStatusUI(cardUnitId, true);
+      updateFatiguedStatusUI(cardUnitId, true); // Update card indicator
+      updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
       console.log(`Unit ${cardUnitId} is now Fatigued from striking back.`);
     }
   } else if (didStrikeBack === null) {
@@ -682,10 +883,9 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
 
   if (outcome === "Lose") {
     console.log(`Unit ${cardUnitId} lost melee. Checking morale.`);
-    const quality = unitData.quality;
     // 3. Ask for Morale Result
     const moraleResult = await showInteractiveToast(
-      `MELEE MORALE TEST (Quality ${quality}+): Did the unit PASS or FAIL?`,
+      `MELEE MORALE TEST (Quality ${effectiveQuality}+): Did the unit PASS or FAIL?`,
       "Melee: Morale Test",
       [
         { text: "Pass", value: "Pass", style: "success" },
@@ -695,14 +895,22 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
 
     if (moraleResult === "Fail") {
       // 4. Check half strength for Routing
-      const isHalf = checkHalfStrength(unitData);
+      const isHalf = checkHalfStrength(unitData); // Check base unit strength
 
       if (isHalf) {
         console.log(
           `Unit ${cardUnitId} fails morale at half strength -> ROUTED!`
         );
         updateUnitStateValue(armyId, cardUnitId, "status", "routed");
-        collapseRoutedCard(cardUnitId);
+        if (heroData)
+          updateUnitStateValue(
+            armyId,
+            heroData.selectionId,
+            "status",
+            "routed"
+          ); // Update hero status
+        collapseRoutedCard(cardUnitId); // Update card UI
+        updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
         showToast(
           `${unitData.customName || cardUnitId} Routed!`,
           "Melee Outcome"
@@ -710,7 +918,8 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
       } else {
         console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
         updateUnitStateValue(armyId, cardUnitId, "shaken", true);
-        updateShakenStatusUI(cardUnitId, true);
+        updateShakenStatusUI(cardUnitId, true); // Update card UI
+        updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
         showToast(
           `${unitData.customName || cardUnitId} became Shaken!`,
           "Melee Outcome"
@@ -734,11 +943,22 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
   }
 }
 
+/**
+ * Handles clicking the "Check Morale (Wounds)" button.
+ * Only proceeds if unit is <= half strength. Prompts user for morale result.
+ * @param {HTMLElement} targetElement - The clicked button element.
+ * @param {string} armyId - The ID of the current army.
+ * @param {string} cardUnitId - The selectionId of the unit card displayed.
+ * @private
+ */
 async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
   console.log(`Manual morale check for wounds for ${cardUnitId}`);
-  const unitData = getUnitData(cardUnitId);
+  const unitData = getUnitData(cardUnitId); // Base unit data
   if (!unitData) return;
-  const quality = unitData.quality;
+  const heroData = getJoinedHeroData(cardUnitId); // Get hero data if present
+  const effectiveQuality = heroData ? heroData.quality : unitData.quality; // Use hero quality if joined
+
+  // Check if unit is at half strength or less
   const isHalf = checkHalfStrength(unitData);
   if (!isHalf) {
     showToast(
@@ -748,8 +968,9 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
     return;
   }
 
+  // Prompt for morale test result
   const moraleResult = await showInteractiveToast(
-    `WOUNDS MORALE TEST (Quality ${quality}+): Did the unit PASS or FAIL?`,
+    `WOUNDS MORALE TEST (Quality ${effectiveQuality}+): Did the unit PASS or FAIL?`,
     "Wounds: Morale Test",
     [
       { text: "Pass", value: "Pass", style: "success" },
@@ -760,7 +981,8 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
   if (moraleResult === "Fail") {
     console.log(`Unit ${cardUnitId} fails morale from wounds -> SHAKEN!`);
     updateUnitStateValue(armyId, cardUnitId, "shaken", true);
-    updateShakenStatusUI(cardUnitId, true);
+    updateShakenStatusUI(cardUnitId, true); // Update card UI
+    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
     showToast(
       `${unitData.customName || cardUnitId} became Shaken!`,
       "Morale Check"
@@ -879,11 +1101,12 @@ async function _handleResetAllDataClick() {
   }
 }
 
-// --- *** ADDED: Stratagem and CP/UP Handlers *** ---
+// --- Stratagem and CP/UP Handlers ---
 
 /**
- * Handles clicking the activate button for a stratagem.
+ * Handles clicking the activate button for a stratagem in the modal.
  * @param {HTMLButtonElement} buttonElement - The button that was clicked.
+ * @private
  */
 async function _handleActivateStratagemClick(buttonElement) {
   const stratName = decodeURIComponent(buttonElement.dataset.stratagemName);
@@ -937,6 +1160,7 @@ async function _handleActivateStratagemClick(buttonElement) {
 /**
  * Handles manual adjustment of Command Points via modal buttons.
  * @param {number} adjustment - Amount to adjust by (+1 or -1).
+ * @private
  */
 function _handleManualCpAdjustClick(adjustment) {
   const armyId = getCurrentArmyId();
@@ -963,6 +1187,7 @@ function _handleManualCpAdjustClick(adjustment) {
 /**
  * Handles manual adjustment of Underdog Points via header buttons.
  * @param {number} adjustment - Amount to adjust by (+1 or -1).
+ * @private
  */
 function _handleUnderdogPointAdjustClick(adjustment) {
   const armyId = getCurrentArmyId();
@@ -986,38 +1211,59 @@ function _handleUnderdogPointAdjustClick(adjustment) {
 
 // --- Main Event Listener & Setup ---
 
+/**
+ * Global click handler for various interactions within the army tracker UI.
+ * Delegates actions based on the clicked element's closest relevant parent or class.
+ * @param {Event} event - The click event object.
+ */
 function handleInteractionClick(event) {
   const unitCard = event.target.closest(".unit-card");
   const spellModal = event.target.closest("#viewSpellsModal");
   const stratagemModal = event.target.closest("#stratagemModal");
-  const upDisplay = event.target.closest("#underdog-points-display"); // Target the display div
+  const upDisplay = event.target.closest("#underdog-points-display");
   const resetArmyButton = event.target.closest("#reset-army-data-button");
   const resetAllButton = event.target.closest("#reset-all-data-button");
 
+  // --- Reset Buttons ---
   if (resetAllButton) {
     _handleResetAllDataClick();
-  } else if (resetArmyButton) {
+    return; // Stop processing if reset all clicked
+  }
+  if (resetArmyButton) {
     _handleResetArmyDataClick();
-  } else if (unitCard) {
+    return; // Stop processing if reset army clicked
+  }
+
+  // --- Underdog Points Buttons ---
+  if (upDisplay) {
+    const removeUpButton = event.target.closest("#manual-up-remove");
+    const addUpButton = event.target.closest("#manual-up-add");
+    if (removeUpButton) {
+      _handleUnderdogPointAdjustClick(-1);
+      return;
+    }
+    if (addUpButton) {
+      _handleUnderdogPointAdjustClick(1);
+      return;
+    }
+  }
+
+  // --- Unit Card Interactions ---
+  if (unitCard) {
     const cardUnitId = unitCard.dataset.unitId;
     const armyId = unitCard.dataset.armyId;
     if (!cardUnitId || !armyId) return;
-    // Check if unit is inactive before processing clicks on its elements
+
+    // Check if unit is inactive before processing most clicks
     const unitStatus = getUnitStateValue(
       armyId,
       cardUnitId,
       "status",
       "active"
     );
-    if (unitStatus === "destroyed" || unitStatus === "routed") {
-      // Only allow the reset button on inactive cards
-      const resetButton = event.target.closest(".unit-reset-btn");
-      if (resetButton) {
-        _handleResetUnitClick(resetButton, armyId, cardUnitId);
-      }
-      return; // Prevent other interactions on inactive cards
-    }
+    const isInactive = unitStatus === "destroyed" || unitStatus === "routed";
 
+    // Find the specific element clicked within the card
     const modelElement = event.target.closest(".clickable-model");
     const woundButton = event.target.closest(".wound-apply-btn");
     const resetButton = event.target.closest(".unit-reset-btn");
@@ -1028,6 +1274,15 @@ function handleInteractionClick(event) {
     const resolveMeleeButton = event.target.closest(".resolve-melee-btn");
     const moraleWoundsButton = event.target.closest(".morale-wounds-btn");
 
+    // Only allow reset button on inactive cards
+    if (isInactive) {
+      if (resetButton) {
+        _handleResetUnitClick(resetButton, armyId, cardUnitId);
+      }
+      return; // Prevent other interactions on inactive cards
+    }
+
+    // Handle active card interactions
     if (modelElement) _handleModelWoundClick(modelElement, armyId, cardUnitId);
     else if (woundButton)
       _handleAutoWoundButtonClick(woundButton, armyId, cardUnitId);
@@ -1045,42 +1300,38 @@ function handleInteractionClick(event) {
       _handleResolveMeleeClick(resolveMeleeButton, armyId, cardUnitId);
     else if (moraleWoundsButton)
       _handleMoraleWoundsClick(moraleWoundsButton, armyId, cardUnitId);
-  } else if (spellModal) {
+
+    return; // Stop processing after handling card interaction
+  }
+
+  // --- Spell Modal Interactions ---
+  if (spellModal) {
     const castButton = event.target.closest(".cast-spell-btn");
-    if (castButton) _handleCastSpellClick(castButton);
-  } else if (stratagemModal) {
+    if (castButton) {
+      _handleCastSpellClick(castButton);
+    }
+    return; // Stop processing after handling spell modal interaction
+  }
+
+  // --- Stratagem Modal Interactions ---
+  if (stratagemModal) {
     const activateButton = event.target.closest(".activate-stratagem-btn");
     const removeCpButton = event.target.closest("#manual-cp-remove");
     const addCpButton = event.target.closest("#manual-cp-add");
 
     if (activateButton) {
-      console.log(
-        "Activate Stratagem Clicked:",
-        activateButton.dataset.stratagemName
-      );
       _handleActivateStratagemClick(activateButton);
     } else if (removeCpButton) {
-      console.log("Manual CP Remove Clicked");
       _handleManualCpAdjustClick(-1);
     } else if (addCpButton) {
-      console.log("Manual CP Add Clicked");
       _handleManualCpAdjustClick(1);
     }
-  } else if (upDisplay) {
-    // Check clicks within the UP display area
-    const removeUpButton = event.target.closest("#manual-up-remove");
-    const addUpButton = event.target.closest("#manual-up-add");
-
-    if (removeUpButton) {
-      _handleUnderdogPointAdjustClick(-1); // Call handler with -1
-    } else if (addUpButton) {
-      _handleUnderdogPointAdjustClick(1); // Call handler with +1
-    }
+    return; // Stop processing after handling stratagem modal interaction
   }
 }
 
 /**
- * Updates the screen diagnostic display element.
+ * Updates the screen diagnostic display element with current window dimensions and theme.
  */
 function updateScreenDiagnostics() {
   const widthDisplay = document.getElementById("screenWidthDisplay");
@@ -1097,39 +1348,49 @@ function updateScreenDiagnostics() {
   }
 }
 
+/**
+ * Sets up all necessary event listeners for the application.
+ * Should be called once after the initial UI is rendered.
+ * @param {string} armyId - The ID of the currently loaded army.
+ */
 export function setupEventListeners(armyId) {
+  // Remove any existing listener to prevent duplicates if called multiple times
   document.body.removeEventListener("click", handleInteractionClick);
+  // Add the main interaction listener
   document.body.addEventListener("click", handleInteractionClick);
   console.log("Global interaction click listener attached.");
 
+  // --- Start Round Button Listener ---
   const startRoundButton = document.getElementById("start-round-button");
   if (startRoundButton) {
+    // Clone and replace to ensure old listeners are removed
     const newButton = startRoundButton.cloneNode(true);
     startRoundButton.parentNode.replaceChild(newButton, startRoundButton);
+    // Add the listener to the new button
     newButton.addEventListener("click", () => handleStartRoundClick(armyId));
     console.log("Start Round button listener attached.");
   } else {
     console.warn("Start Round button not found.");
   }
 
-  // --- Stratagem Modal Listener ---
+  // --- Stratagem Modal Listeners ---
   const stratagemModalElement = document.getElementById("stratagemModal");
   if (stratagemModalElement) {
+    // Listener for when the modal is about to be shown
     stratagemModalElement.addEventListener("show.bs.modal", (event) => {
-      // *** UPDATED: Use the imported setter ***
+      // Store the element that triggered the modal for focus return
       setElementToFocusAfterClose(
         event.relatedTarget || document.activeElement
       );
-
-      // Populate selector when modal opens
+      // Populate the doctrine selector dropdown
       populateDoctrineSelector(armyId);
-      // Update CP display in modal header
+      // Update the Command Points display in the modal header
       updateCommandPointsDisplay(
         armyId,
         getCommandPoints(armyId),
         getMaxCommandPoints(armyId)
       );
-      // Display stratagems on modal open
+      // Display the stratagems based on the currently selected doctrine
       const currentDoctrine = getSelectedDoctrine(armyId);
       displayStratagems(armyId, currentDoctrine);
       console.log(
@@ -1138,25 +1399,28 @@ export function setupEventListeners(armyId) {
         }.`
       );
     });
-    // Add listener to return focus when modal is hidden
+
+    // Listener for when the modal has finished hiding
     stratagemModalElement.removeEventListener(
       "hidden.bs.modal",
-      handleFocusReturn // Use the imported handler
-    );
+      handleFocusReturn
+    ); // Remove previous listener if any
     stratagemModalElement.addEventListener(
       "hidden.bs.modal",
-      handleFocusReturn, // Use the imported handler
-      { once: true }
-    );
+      handleFocusReturn,
+      {
+        once: true,
+      }
+    ); // Add listener to return focus
 
-    // Add listener for doctrine selection change
+    // Listener for changes in the doctrine selector dropdown
     const doctrineSelector = document.getElementById("doctrineSelector");
     if (doctrineSelector) {
       doctrineSelector.addEventListener("change", (event) => {
         const selectedDoctrineId = event.target.value;
-        setSelectedDoctrine(armyId, selectedDoctrineId || null); // Save selection (null if default selected)
+        setSelectedDoctrine(armyId, selectedDoctrineId || null); // Save the selection
         console.log(`Doctrine selected: ${selectedDoctrineId}`);
-        // Trigger display of stratagems on change
+        // Update the displayed stratagems when the selection changes
         displayStratagems(armyId, selectedDoctrineId || null);
       });
       console.log("Doctrine selector change listener attached.");
@@ -1167,44 +1431,59 @@ export function setupEventListeners(armyId) {
     console.warn("Stratagem modal element not found.");
   }
 
-  // --- *** ADDED: Army Info Modal Listeners *** ---
+  // --- Army Info Modal Listeners ---
   const armyInfoModalElement = document.getElementById("armyInfoModal");
   if (armyInfoModalElement) {
+    // Listener for when the modal is about to be shown
     armyInfoModalElement.addEventListener("show.bs.modal", (event) => {
-      // Store the trigger element for focus return
+      // Store the element that triggered the modal for focus return
       setElementToFocusAfterClose(
         event.relatedTarget || document.activeElement
       );
       console.log("Army Info modal opened.");
     });
-    // Add listener to return focus when modal is hidden
+    // Listener for when the modal has finished hiding
     armyInfoModalElement.removeEventListener(
       "hidden.bs.modal",
-      handleFocusReturn // Use the imported handler
-    );
+      handleFocusReturn
+    ); // Remove previous listener if any
     armyInfoModalElement.addEventListener(
       "hidden.bs.modal",
-      handleFocusReturn, // Use the imported handler
+      handleFocusReturn,
       { once: true }
-    );
+    ); // Add listener to return focus
     console.log("Army Info modal listeners attached.");
   } else {
     console.warn("Army Info modal element not found.");
   }
-  // --- *** END ADDED *** ---
 
-  const initialRound = getCurrentRound();
-  const roundDisplayElement = document.getElementById("round-display");
-  // Ensure round display element exists before setting text content
-  if (roundDisplayElement) {
-    roundDisplayElement.textContent =
-      initialRound >= 1 ? `Round ${initialRound}` : "";
+  // --- Offcanvas Listeners ---
+  const offcanvasElement = document.getElementById("unitListOffcanvas");
+  if (offcanvasElement) {
+    // Listener for when the offcanvas is about to be shown
+    offcanvasElement.addEventListener("show.bs.offcanvas", (event) => {
+      // Store the element that triggered the offcanvas for focus return
+      setElementToFocusAfterClose(
+        event.relatedTarget || document.activeElement
+      );
+      console.log("Unit list offcanvas opened.");
+    });
+    // Listener for when the offcanvas has finished hiding
+    offcanvasElement.removeEventListener(
+      "hidden.bs.offcanvas",
+      handleFocusReturn
+    ); // Remove previous listener if any
+    offcanvasElement.addEventListener(
+      "hidden.bs.offcanvas",
+      handleFocusReturn,
+      { once: true }
+    ); // Add listener to return focus
+    console.log("Offcanvas listeners attached.");
   } else {
-    // Attempt to create it if missing (logic moved to updateRoundUI)
-    updateRoundUI(initialRound);
+    console.warn("Unit list offcanvas element not found.");
   }
 
-  // --- Screen Diagnostics ---
+  // --- Screen Diagnostics Listeners ---
   updateScreenDiagnostics(); // Initial display
   window.addEventListener("resize", updateScreenDiagnostics); // Update on resize
   const themeDropdown = document.getElementById("themeDropdown");
@@ -1227,5 +1506,4 @@ export function setupEventListeners(armyId) {
       });
   }
   console.log("Screen diagnostic listeners attached.");
-  // --- End Screen Diagnostics ---
-}
+} // End setupEventListeners
