@@ -244,12 +244,11 @@ function displayCurrentMission(missionsData) {
                          : ""
                      }
                 </div>
-                <div class="card-footer text-muted">
-                   Status: ${currentMission.status} ${
-      currentMission.points
-        ? ` | Recommended Points: ${currentMission.points}`
-        : ""
-    } ${
+                <div class="card-footer text-muted"> ${
+                  currentMission.points
+                    ? `Base Points: ${currentMission.points}`
+                    : ""
+                } ${
       currentMission.datetime
         ? `| Scheduled: ${new Date(currentMission.datetime).toLocaleString()}`
         : ""

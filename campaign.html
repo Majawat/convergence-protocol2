@@ -16,38 +16,6 @@
     />
     <script type="module" src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      /* Add specific styles for campaign page if needed */
-      .leaderboard-table th,
-      .leaderboard-table td {
-        vertical-align: middle;
-        text-align: center;
-      }
-      .leaderboard-table th:nth-child(2), /* Player */
-      .leaderboard-table td:nth-child(2), /* Player */
-      .leaderboard-table th:nth-child(3), /* Army */
-      .leaderboard-table td:nth-child(3) {
-        /* Army */
-        text-align: left;
-      }
-      .battle-report-img {
-        max-width: 100%;
-        height: auto;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-        border-radius: var(--bs-border-radius);
-      }
-      /* Style for upcoming mission list items */
-      .upcoming-mission-item {
-        background-color: var(--bs-secondary-bg);
-      }
-      .upcoming-mission-item h6 {
-        margin-bottom: 0.1rem;
-      }
-      .upcoming-mission-item .text-muted {
-        font-size: 0.9em;
-      }
-    </style>
   </head>
   <body class="bg-body text-body">
     <nav
@@ -185,6 +153,7 @@
           </div>
         </div>
       </section>
+
       <div
         class="modal fade"
         id="battleReportModal"

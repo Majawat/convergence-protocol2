@@ -1,25 +1,11 @@
 /* Custom CSS rules for OPR Army Tracker */
 
-/* Basic Body & Card Styles */
+/* --- Base & General Styles --- */
 body {
   padding-top: 56px; /* Navbar height */
   padding-bottom: 50px; /* Footer spacing */
 }
-.unit-card {
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden; /* Prevent content overflow issues */
-  transition: opacity 0.3s ease, filter 0.3s ease; /* Added for destroyed/routed */
-}
-.unit-card .card-body {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  font-size: 0.95rem; /* Slightly larger base font for card body */
-  position: relative; /* Needed for overlays */
-}
+
 .stat-icon {
   width: 1.1em;
   height: 1.1em;
@@ -27,6 +13,7 @@ body {
   margin-right: 0.2em;
   flex-shrink: 0;
 }
+
 .lg-stat-icon {
   /* For Effective Stats */
   width: 1.3em;
@@ -35,33 +22,61 @@ body {
   margin-right: 0.3em;
   flex-shrink: 0;
 }
+
 .table > :not(caption) > * > * {
   /* Table cell content */
   padding: 0.3rem 0.3rem;
   font-size: 0.9em;
   vertical-align: middle;
 }
+
 .table thead th {
   /* Table header */
   font-size: 0.85em;
   padding: 0.2rem 0.3rem;
 }
+
+.btn i.bi {
+  /* Align icons in buttons */
+  vertical-align: -0.125em;
+}
+
+/* --- Unit Card Styles (army.html) --- */
+.unit-card {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* Prevent content overflow issues */
+  transition: opacity 0.3s ease, filter 0.3s ease; /* Added for destroyed/routed */
+}
+
+.unit-card .card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem; /* Slightly larger base font for card body */
+  position: relative; /* Needed for overlays */
+}
+
 .card-body strong.d-block {
   /* Section headings */
   margin-bottom: 0.5rem !important;
   font-size: 0.95em;
 }
 
-/* Header */
+/* Card Header */
 .card-header {
   position: relative;
   padding-right: 5rem; /* Space for absolute buttons */
 }
+
 .unit-card-header-content {
   /* Container for title/subtitle */
   flex-grow: 1;
   margin-right: 1rem;
 }
+
 .header-meta-info {
   /* Container for Models/Points/XP/Base in header */
   font-size: 0.85em;
@@ -71,14 +86,17 @@ body {
   gap: 0.5rem; /* Add gap */
   align-items: center;
 }
+
 .header-meta-info .info-separator {
   display: none; /* Hide separators, use gap instead */
 }
+
 .header-meta-info .info-item {
   display: flex;
   align-items: center;
   gap: 0.2rem;
 }
+
 .header-meta-info .xp-badge {
   font-size: 0.9em;
 }
@@ -88,10 +106,6 @@ body {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-}
-.btn i.bi {
-  /* Align icons in buttons */
-  vertical-align: -0.125em;
 }
 
 /* Effective Stats Bar */
@@ -105,6 +119,7 @@ body {
   align-items: center;
   text-align: center;
 }
+
 .effective-stats .stat-item {
   display: flex;
   align-items: center;
@@ -119,6 +134,7 @@ body {
   gap: 0.5rem;
   order: 10; /* Force grid to bottom */
 }
+
 .model-display {
   display: flex;
   flex-direction: column;
@@ -129,28 +145,34 @@ body {
   background-color: var(--bs-tertiary-bg);
   transition: all 0.2s ease;
 }
+
 .model-display.clickable-model:hover {
   cursor: pointer;
   background-color: var(--bs-secondary-bg);
   box-shadow: 0 0 0 2px var(--bs-secondary);
 }
+
 .model-display.model-removed {
   opacity: 0.4;
   text-decoration: line-through;
 }
+
 .model-display.model-removed.clickable-model:hover {
   cursor: default;
   background-color: var(--bs-tertiary-bg);
   box-shadow: none;
 }
+
 .model-display.target-model {
   border-width: 2px;
   border-color: var(--bs-secondary) !important;
   box-shadow: none;
 }
+
 .model-display .hero-icon-color svg {
   fill: var(--bs-warning);
 }
+
 .model-icon svg {
   width: 1.5em;
   height: 1.5em;
@@ -158,6 +180,7 @@ body {
   fill: currentColor;
   pointer-events: none;
 }
+
 .model-hp-bar-container {
   width: 100%;
   height: 8px;
@@ -167,15 +190,18 @@ body {
   margin-bottom: 0.25rem;
   pointer-events: none;
 }
+
 .model-hp-bar {
   height: 100%;
   transition: width 0.3s ease, background-color 0.3s ease;
 }
+
 .model-hp-text {
   font-size: 0.75em;
   line-height: 1;
   pointer-events: none;
 }
+
 .model-name {
   font-size: 0.7em;
   line-height: 1.1;
@@ -187,6 +213,7 @@ body {
   text-overflow: ellipsis;
   pointer-events: none;
 }
+
 .wound-apply-btn i,
 .unit-reset-btn i, /* Updated class */
 .token-add-btn i,
@@ -198,6 +225,7 @@ body {
 .details-section {
   margin-bottom: 0.5rem; /* Reduced margin */
 }
+
 .sub-section,
 .normal-unit-details {
   padding: 0.75rem;
@@ -208,9 +236,11 @@ body {
   display: flex;
   flex-direction: column;
 }
+
 .sub-section:last-child {
   margin-bottom: 0;
 }
+
 .sub-section h6 {
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
@@ -218,6 +248,7 @@ body {
   font-weight: bold;
   font-size: 0.95em;
 }
+
 .sub-stats-row {
   display: flex;
   flex-wrap: wrap;
@@ -226,11 +257,13 @@ body {
   justify-content: flex-start;
   align-items: center;
 }
+
 .sub-stats-row .stat-item {
   display: flex;
   align-items: center;
   gap: 0.3rem;
 }
+
 .info-line {
   display: flex;
   justify-content: space-between;
@@ -239,14 +272,17 @@ body {
   margin-bottom: 0.5rem;
   font-size: 0.9em;
 }
+
 .info-line .info-item {
   display: flex;
   align-items: center;
   gap: 0.3rem;
 }
+
 .info-line .xp-badge {
   font-size: 0.9em;
 }
+
 .sub-section .table,
 .normal-unit-details .table {
   margin-top: auto;
@@ -258,12 +294,14 @@ body {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
 }
+
 .caster-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
 .caster-level-badge {
   font-weight: bold;
   font-size: 0.9em;
@@ -273,6 +311,7 @@ body {
   border: 1px solid var(--bs-border-color-translucent);
   white-space: nowrap;
 }
+
 .token-controls {
   display: flex;
   align-items: center;
@@ -282,11 +321,13 @@ body {
   border-radius: var(--bs-border-radius);
   padding: 0.1rem 0.3rem;
 }
+
 .token-controls .btn {
   padding: 0.1rem 0.3rem;
   font-size: 0.9em;
   line-height: 1;
 }
+
 .token-count-display {
   font-weight: bold;
   padding: 0 0.4rem;
@@ -298,11 +339,13 @@ body {
   align-items: center;
   gap: 0.3rem;
 }
+
 .token-icon {
   width: 1em;
   height: 1em;
   fill: var(--bs-info);
 }
+
 .view-spells-btn {
   margin-left: auto;
 }
@@ -314,14 +357,15 @@ body {
 }
 
 /* --- Activation Styles --- */
-
 .action-controls {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem; /* Reduced margin */
 }
+
 .action-controls .btn-group {
   width: 100%;
 }
+
 .action-controls .action-btn {
   flex-grow: 1;
   font-size: 0.85em;
@@ -330,15 +374,18 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .action-btn.action-selected {
   font-weight: bold;
   box-shadow: inset 0 0 0 2px var(--bs-primary-border-subtle);
 }
+
 .unit-card.unit-activated {
   opacity: 0.85;
   border-color: var(--bs-primary);
   box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.5);
 }
+
 .unit-activated .action-btn:disabled:not(.action-selected) {
   opacity: 0.5;
   cursor: not-allowed;
@@ -351,6 +398,7 @@ body {
   border-color: var(--bs-warning);
   box-shadow: 0 0 8px rgba(var(--bs-warning-rgb), 0.5);
 }
+
 .unit-card.unit-shaken .card-body::before {
   content: "";
   position: absolute;
@@ -363,6 +411,7 @@ body {
   pointer-events: none;
   border-radius: var(--bs-card-inner-border-radius);
 }
+
 .unit-card.unit-shaken .card-body > * {
   position: relative;
   z-index: 2;
@@ -375,6 +424,7 @@ body {
   gap: 0.4em; /* Space between icons */
   vertical-align: middle; /* Align with title text */
 }
+
 .header-status-indicators .fatigue-indicator i,
 .header-status-indicators .shaken-indicator i {
   vertical-align: -0.1em; /* Fine-tune icon alignment */
@@ -385,16 +435,19 @@ body {
   opacity: 0.65; /* Make slightly less faded */
   filter: grayscale(85%);
 }
+
 /* Disable interactions on the body content */
 .unit-card.unit-is-inactive .card-body {
   pointer-events: none;
 }
+
 /* Explicitly re-enable pointer events for the reset button in the header */
 .unit-card.unit-is-inactive .card-header .unit-reset-btn {
   pointer-events: auto !important;
   opacity: 1 !important; /* Make sure it's not faded */
   cursor: pointer !important; /* Ensure cursor indicates clickable */
 }
+
 /* Ensure other header buttons remain disabled visually if needed */
 .unit-card.unit-is-inactive .card-header .wound-apply-btn {
   pointer-events: none;
@@ -439,6 +492,8 @@ body {
   margin-bottom: 0.5rem; /* Space below buttons */
 }
 
+/* --- UI Elements --- */
+
 /* Screen Diagnostics */
 #screenDiagnostics {
   font-size: 0.75rem;
@@ -461,18 +516,21 @@ body {
 #spellListContainer .list-group-item {
   background-color: var(--bs-body-bg);
 }
+
 #spellListContainer .spell-cost {
   font-weight: bold;
   color: var(--bs-info);
   margin-left: 0.5rem;
   font-size: 0.9em;
 }
+
 #spellListContainer .spell-effect {
   font-size: 0.9em;
   color: var(--bs-secondary-color);
   display: block;
   margin-top: 0.25rem;
 }
+
 #spellListContainer .spell-info-icon {
   cursor: help;
   margin-left: 0.5rem;
@@ -495,14 +553,17 @@ body {
   background-color: var(--bs-tertiary-bg);
   border: 1px solid var(--bs-border-color);
 }
+
 #command-points-value {
   font-weight: bold;
 }
+
 /* Style for the CP icon placeholder */
 .cp-icon-placeholder .bi {
   color: var(--bs-warning); /* Default color */
   transition: color 0.3s ease; /* Smooth color transition */
 }
+
 .cp-icon-placeholder.text-secondary .bi {
   color: var(--bs-secondary); /* Color when points are zero */
 }
@@ -519,19 +580,23 @@ body {
   background-color: var(--bs-tertiary-bg);
   border: 1px solid var(--bs-border-color);
 }
+
 #underdog-points-value {
   font-weight: bold;
   min-width: 5ch; /* Give space for "Calculating..." */
   text-align: center;
 }
+
 /* Style for the UP icon placeholder */
 .up-icon-placeholder .bi {
   color: var(--bs-info); /* Default color (e.g., blue) */
   transition: color 0.3s ease;
 }
+
 .up-icon-placeholder.text-secondary .bi {
   color: var(--bs-secondary); /* Color when points are zero */
 }
+
 /* Style for UP +/- buttons */
 #underdog-points-display .btn-group .btn {
   padding: 0.1rem 0.4rem;
@@ -545,21 +610,24 @@ body {
   padding: 0.1rem 0.4rem;
   line-height: 1;
 }
+
 /* Style for the modal CP icon placeholder */
 #modal-command-points-display .cp-icon-placeholder .bi {
   color: var(--bs-warning); /* Default color */
   transition: color 0.3s ease;
 }
+
 #modal-command-points-display .cp-icon-placeholder.text-secondary .bi {
   color: var(--bs-secondary); /* Color when points are zero */
 }
 
-/* --- ADDED: Stratagem Display Styles --- */
+/* Stratagem Display Area */
 #stratagemDisplayArea .stratagem-list .list-group-item {
   border-left: 0;
   border-right: 0;
   border-top-width: 0; /* Remove top border */
 }
+
 #stratagemDisplayArea .stratagem-list .list-group-item:first-child {
   border-top-width: 1px; /* Add border back to the first item */
 }
@@ -567,29 +635,23 @@ body {
 #stratagemDisplayArea .stratagem-name {
   font-size: 1.05em;
 }
+
 #stratagemDisplayArea .stratagem-description {
   font-size: 0.9em;
   white-space: normal; /* Allow wrapping */
 }
+
 #stratagemDisplayArea .stratagem-cost-badge {
   font-size: 0.85em;
   padding: 0.3em 0.5em;
 }
+
 #stratagemDisplayArea .activate-stratagem-btn {
   font-size: 0.85em;
   padding: 0.25rem 0.5rem;
 }
-/* Style for the modal CP icon placeholder */
-#modal-command-points-display .cp-icon-placeholder .bi {
-  color: var(--bs-warning); /* Default color */
-  transition: color 0.3s ease;
-}
-#modal-command-points-display .cp-icon-placeholder.text-secondary .bi {
-  color: var(--bs-secondary); /* Color when points are zero */
-}
 
 /* --- 404 Page Specific Styles --- */
-
 /* 404/40K Glitch Effect */
 @keyframes textFlicker {
   0%,
@@ -663,7 +725,7 @@ body {
   text-wrap: balance; /* Improve text balancing in the alert */
 }
 
-/* Optional CSS for Compact Glossary Cards */
+/* --- Glossary Styles (rules.html) --- */
 .glossary-card .card-header {
   padding: 0.4rem 0.6rem; /* Reduced header padding */
   background-color: var(--bs-secondary-bg); /* Subtle background */
@@ -689,13 +751,326 @@ body {
   line-height: 1.4; /* Adjust line height for readability */
 }
 
-/* Ensure popovers from glossary definitions are readable */
+/* --- Popover & Definition Styles (Consolidated from army.html & rules.html) --- */
+/* Ensure popovers inherit theme variables correctly */
+.popover {
+  --bs-popover-bg: var(--bs-body-bg);
+  --bs-popover-border-color: var(--bs-border-color-translucent);
+  --bs-popover-header-bg: var(--bs-secondary-bg);
+  --bs-popover-header-color: var(--bs-body-color);
+  --bs-popover-body-color: var(--bs-body-color);
+}
+
+/* Style popover content */
 .popover-header {
   font-size: 1rem;
 }
+
 .popover-body {
   font-size: 0.9rem;
 }
+
 .popover-body p {
   margin-bottom: 0.5rem;
+}
+
+/* Style for clickable definition terms */
+.definition {
+  border-bottom: 1px dotted var(--bs-primary); /* Indicate interactivity */
+  cursor: help; /* Change cursor on hover */
+}
+
+/* --- Styles moved from index.html <style> block --- */
+/* Note: Original body padding rule already exists at top */
+.hero-section {
+  padding: 3rem 1rem; /* Adjusted padding */
+  text-align: center;
+}
+
+.hero-buttons .btn {
+  margin: 0.5rem; /* Space between buttons */
+}
+
+.dashboard-card {
+  height: 100%;
+}
+
+/* Updated: Styles for leaderboard snapshot table */
+.leaderboard-snapshot-table th,
+.leaderboard-snapshot-table td {
+  padding: 0.4rem 0.5rem; /* Adjust padding */
+  font-size: 0.9rem;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.leaderboard-snapshot-table th:nth-child(2), /* Player */
+.leaderboard-snapshot-table td:nth-child(2) {
+  /* Player */
+  text-align: left;
+  font-weight: 500;
+}
+
+.leaderboard-snapshot-table th:nth-child(3), /* Army */
+.leaderboard-snapshot-table td:nth-child(3) {
+  /* Army */
+  text-align: left;
+  font-size: 0.85em;
+  color: var(--bs-secondary-color);
+}
+
+.dashboard-card .card-title i {
+  vertical-align: -0.125em; /* Align icons better */
+}
+
+/* --- Styles moved from army.html <style> block --- */
+.floating-buttons {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1030; /* Below modals but above most content */
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  gap: 0.5rem; /* Space between buttons */
+}
+
+#backToTopBtn {
+  display: none; /* Hidden by default */
+  opacity: 0; /* Start transparent for fade */
+  transition: opacity 0.3s ease-in-out;
+}
+
+#backToTopBtn.show {
+  display: inline-block;
+  opacity: 1;
+}
+
+/* Offset for fixed navbar when scrolling to unit cards */
+#army-units-container > .col > .unit-card[id] {
+  scroll-margin-top: 75px;
+}
+
+/* Style links in offcanvas */
+#offcanvas-unit-list .list-group-item {
+  cursor: pointer;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+#offcanvas-unit-list .list-group-item:hover {
+  background-color: var(--bs-secondary-bg-subtle);
+}
+/* Note: .popover and .definition styles moved to consolidated section above */
+
+/* --- Styles moved from campaign.html <style> block --- */
+.leaderboard-table th,
+.leaderboard-table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.leaderboard-table th:nth-child(2), /* Player */
+.leaderboard-table td:nth-child(2), /* Player */
+.leaderboard-table th:nth-child(3), /* Army */
+.leaderboard-table td:nth-child(3) {
+  /* Army */
+  text-align: left;
+}
+
+.battle-report-img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--bs-border-radius);
+}
+
+/* Style for upcoming mission list items */
+.upcoming-mission-item {
+  background-color: var(--bs-secondary-bg);
+}
+
+.upcoming-mission-item h6 {
+  margin-bottom: 0.1rem;
+}
+
+.upcoming-mission-item .text-muted {
+  font-size: 0.9em;
+}
+
+/* --- Styles moved from rules.html <style> block --- */
+.rule-subsection {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color-translucent);
+  border-radius: var(--bs-border-radius);
+}
+
+.rule-subsection h5,
+.rule-subsection h6 {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.rule-subsection h6 {
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.rule-subsection ul,
+.rule-subsection ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0;
+}
+
+.rule-subsection li {
+  margin-bottom: 0.25rem;
+}
+
+.rule-subsection p:last-child {
+  margin-bottom: 0;
+}
+
+.rule-subsection table {
+  font-size: 0.9em;
+}
+
+.rule-subsection table th,
+.rule-subsection table td {
+  padding: 0.4rem 0.5rem;
+  vertical-align: middle;
+}
+
+.rule-subsection table caption {
+  caption-side: top;
+  font-weight: bold;
+  padding-top: 0.5rem;
+  padding-bottom: 0.25rem;
+  color: var(--bs-body-color);
+}
+
+.d6-roll-column {
+  text-align: center !important;
+  white-space: nowrap;
+  width: 1%;
+}
+
+/* Card Styles for Doctrines and Events */
+.doctrine-card,
+.event-card {
+  height: 100%;
+}
+
+.doctrine-card .card-header,
+.event-card .card-header {
+  font-weight: bold;
+}
+
+.doctrine-card .card-body,
+.event-card .card-body {
+  font-size: 0.9rem;
+}
+
+.doctrine-card .list-group-item,
+.event-card .list-group-item {
+  font-size: 0.85rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.doctrine-card .list-group-item:last-child,
+.event-card .list-group-item:last-child {
+  border-bottom: none;
+}
+
+.doctrine-card .badge,
+.event-card .badge {
+  flex-shrink: 0;
+}
+
+/* Badge Wrapping Fix */
+.doctrine-card .list-group-item,
+.rule-subsection .list-group-item {
+  flex-wrap: nowrap !important;
+}
+
+.doctrine-card .list-group-item .me-auto,
+.rule-subsection .list-group-item .me-auto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doctrine-card .list-group-item .stratagem-actions,
+.rule-subsection .list-group-item .stratagem-actions {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Universal Doctrine Background Fix */
+.rule-subsection .list-group-item {
+  background-color: var(--bs-card-bg);
+}
+
+.event-card .effect-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bs-border-color-translucent);
+}
+
+.time-warp-stats ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.time-warp-stats li {
+  margin-bottom: 0.1rem;
+}
+
+/* Collapse Trigger Heading Style */
+h2[data-bs-toggle="collapse"] {
+  cursor: pointer;
+  display: inline-block;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.2s ease-in-out;
+  position: relative;
+  padding-right: 1.5em;
+}
+
+h2[data-bs-toggle="collapse"]:hover {
+  border-bottom-color: var(--bs-primary);
+}
+
+h2[data-bs-toggle="collapse"]::after {
+  content: " ▼";
+  font-size: 0.7em;
+  vertical-align: middle;
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  margin-left: 0;
+}
+
+h2[data-bs-toggle="collapse"][aria-expanded="true"]::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Floating Nav Button */
+.floating-nav-button {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1030;
+}
+
+/* Scroll Margin for Fixed Navbar */
+section[id] {
+  scroll-margin-top: 70px;
 }

@@ -14,52 +14,6 @@
     />
     <script type="module" src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      .floating-buttons {
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        z-index: 1030; /* Below modals but above most content */
-        display: flex;
-        flex-direction: column; /* Stack buttons vertically */
-        gap: 0.5rem; /* Space between buttons */
-      }
-      #backToTopBtn {
-        display: none; /* Hidden by default */
-        opacity: 0; /* Start transparent for fade */
-        transition: opacity 0.3s ease-in-out;
-      }
-      #backToTopBtn.show {
-        display: inline-block;
-        opacity: 1;
-      }
-      /* Offset for fixed navbar when scrolling to unit cards */
-      #army-units-container > .col > .unit-card[id] {
-        scroll-margin-top: 75px;
-      }
-      /* Style links in offcanvas */
-      #offcanvas-unit-list .list-group-item {
-        cursor: pointer;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-      }
-      #offcanvas-unit-list .list-group-item:hover {
-        background-color: var(--bs-secondary-bg-subtle);
-      }
-      /* Ensure popovers inherit theme */
-      .popover {
-        --bs-popover-bg: var(--bs-body-bg);
-        --bs-popover-border-color: var(--bs-border-color-translucent);
-        --bs-popover-header-bg: var(--bs-secondary-bg);
-        --bs-popover-header-color: var(--bs-body-color);
-        --bs-popover-body-color: var(--bs-body-color);
-      }
-      /* Definition Popover Styling */
-      .definition {
-        border-bottom: 1px dotted var(--bs-primary);
-        cursor: help;
-      }
-    </style>
   </head>
   <body class="bg-body text-body">
     <nav

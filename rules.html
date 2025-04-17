@@ -16,174 +16,6 @@
     />
     <script type="module" src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      /* Custom styles for rules page */
-      .rule-subsection {
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background-color: var(--bs-tertiary-bg);
-        border: 1px solid var(--bs-border-color-translucent);
-        border-radius: var(--bs-border-radius);
-      }
-      .rule-subsection h5,
-      .rule-subsection h6 {
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid var(--bs-border-color-translucent);
-      }
-      .rule-subsection h6 {
-        font-size: 1rem;
-        margin-top: 1rem;
-      }
-      .rule-subsection ul,
-      .rule-subsection ol {
-        padding-left: 1.5rem;
-        margin-bottom: 0;
-      }
-      .rule-subsection li {
-        margin-bottom: 0.25rem;
-      }
-      .rule-subsection p:last-child {
-        margin-bottom: 0;
-      }
-      .rule-subsection table {
-        font-size: 0.9em;
-      }
-      .rule-subsection table th,
-      .rule-subsection table td {
-        padding: 0.4rem 0.5rem;
-        vertical-align: middle;
-      }
-      .rule-subsection table caption {
-        caption-side: top;
-        font-weight: bold;
-        padding-top: 0.5rem;
-        padding-bottom: 0.25rem;
-        color: var(--bs-body-color);
-      }
-      .d6-roll-column {
-        text-align: center !important;
-        white-space: nowrap;
-        width: 1%;
-      }
-
-      /* Card Styles for Doctrines and Events */
-      .doctrine-card,
-      .event-card {
-        height: 100%;
-      }
-      .doctrine-card .card-header,
-      .event-card .card-header {
-        font-weight: bold;
-      }
-      .doctrine-card .card-body,
-      .event-card .card-body {
-        font-size: 0.9rem;
-      }
-      .doctrine-card .list-group-item,
-      .event-card .list-group-item {
-        font-size: 0.85rem;
-        padding-top: 0.4rem;
-        padding-bottom: 0.4rem;
-        background-color: transparent;
-        border: none;
-        border-bottom: 1px solid var(--bs-border-color-translucent);
-      }
-      .doctrine-card .list-group-item:last-child,
-      .event-card .list-group-item:last-child {
-        border-bottom: none;
-      }
-      .doctrine-card .badge,
-      .event-card .badge {
-        flex-shrink: 0;
-      }
-      /* Badge Wrapping Fix */
-      .doctrine-card .list-group-item,
-      .rule-subsection .list-group-item {
-        flex-wrap: nowrap !important;
-      }
-      .doctrine-card .list-group-item .me-auto,
-      .rule-subsection .list-group-item .me-auto {
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .doctrine-card .list-group-item .stratagem-actions,
-      .rule-subsection .list-group-item .stratagem-actions {
-        flex-shrink: 0;
-        white-space: nowrap;
-      }
-      /* Universal Doctrine Background Fix */
-      .rule-subsection .list-group-item {
-        background-color: var(--bs-card-bg);
-      }
-      .event-card .effect-section {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
-        border-top: 1px solid var(--bs-border-color-translucent);
-      }
-      .time-warp-stats ul {
-        list-style: none;
-        padding-left: 0;
-      }
-      .time-warp-stats li {
-        margin-bottom: 0.1rem;
-      }
-
-      /* Collapse Trigger Heading Style */
-      h2[data-bs-toggle="collapse"] {
-        cursor: pointer;
-        display: inline-block;
-        border-bottom: 1px dashed transparent;
-        transition: border-color 0.2s ease-in-out;
-        position: relative;
-        padding-right: 1.5em;
-      }
-      h2[data-bs-toggle="collapse"]:hover {
-        border-bottom-color: var(--bs-primary);
-      }
-      h2[data-bs-toggle="collapse"]::after {
-        content: " ▼";
-        font-size: 0.7em;
-        vertical-align: middle;
-        display: inline-block;
-        transition: transform 0.2s ease-in-out;
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%) rotate(0deg);
-        margin-left: 0;
-      }
-      h2[data-bs-toggle="collapse"][aria-expanded="true"]::after {
-        transform: translateY(-50%) rotate(180deg);
-      }
-
-      /* Floating Nav Button */
-      .floating-nav-button {
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        z-index: 1030;
-      }
-
-      /* Scroll Margin for Fixed Navbar */
-      section[id] {
-        scroll-margin-top: 70px;
-      }
-
-      .definition {
-        border-bottom: 1px dotted var(--bs-primary); /* Indicate interactivity */
-        cursor: help; /* Change cursor on hover */
-        /* color: var(--bs-link-color); Optional: make it look like a link */
-      }
-      /* Ensure popovers inherit theme */
-      .popover {
-        --bs-popover-bg: var(--bs-body-bg);
-        --bs-popover-border-color: var(--bs-border-color-translucent);
-        --bs-popover-header-bg: var(--bs-secondary-bg);
-        --bs-popover-header-color: var(--bs-body-color);
-        --bs-popover-body-color: var(--bs-body-color);
-      }
-    </style>
   </head>
   <body class="bg-body text-body">
     <nav
@@ -1032,61 +864,80 @@
         >
           <i class="bi bi-journal-text me-2"></i> Glossary
         </h2>
-        <div id="collapseGlossary" class="accordion-collapse" aria-labelledby="headingGlossary" data-bs-parent="#rulesAccordion">
+        <div
+          id="collapseGlossary"
+          class="accordion-collapse"
+          aria-labelledby="headingGlossary"
+          data-bs-parent="#rulesAccordion"
+        >
           <div class="accordion-body">
-              <div class="mb-3">
-                  <input type="search" class="form-control" id="glossary-search" placeholder="Search terms and descriptions..." aria-label="Search Glossary">
-              </div>
-  
-              <div id="glossary-no-results" class="alert alert-warning d-none" role="alert">
-                  No matching terms found.
-              </div>
-  
-              <div id="glossary-items-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
-                  <div class="col">
-                      <div class="placeholder-glow" aria-hidden="true">
-                          <div class="card">
-                              <div class="card-header placeholder"> &nbsp; </div>
-                              <div class="card-body">
-                                  <span class="placeholder col-7"></span>
-                                  <span class="placeholder col-4"></span>
-                                  <span class="placeholder col-4"></span>
-                                  <span class="placeholder col-6"></span>
-                                  <span class="placeholder col-8"></span>
-                              </div>
-                          </div>
-                      </div>
+            <div class="mb-3">
+              <input
+                type="search"
+                class="form-control"
+                id="glossary-search"
+                placeholder="Search terms and descriptions..."
+                aria-label="Search Glossary"
+              />
+            </div>
+
+            <div
+              id="glossary-no-results"
+              class="alert alert-warning d-none"
+              role="alert"
+            >
+              No matching terms found.
+            </div>
+
+            <div
+              id="glossary-items-container"
+              class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2"
+            >
+              <div class="col">
+                <div class="placeholder-glow" aria-hidden="true">
+                  <div class="card">
+                    <div class="card-header placeholder">&nbsp;</div>
+                    <div class="card-body">
+                      <span class="placeholder col-7"></span>
+                      <span class="placeholder col-4"></span>
+                      <span class="placeholder col-4"></span>
+                      <span class="placeholder col-6"></span>
+                      <span class="placeholder col-8"></span>
+                    </div>
                   </div>
-                   <div class="col d-none d-md-block"> <div class="placeholder-glow" aria-hidden="true">
-                          <div class="card">
-                              <div class="card-header placeholder"> &nbsp; </div>
-                              <div class="card-body">
-                                  <span class="placeholder col-7"></span>
-                                  <span class="placeholder col-4"></span>
-                                  <span class="placeholder col-4"></span>
-                                  <span class="placeholder col-6"></span>
-                                  <span class="placeholder col-8"></span>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-                   <div class="col d-none d-lg-block"> <div class="placeholder-glow" aria-hidden="true">
-                          <div class="card">
-                              <div class="card-header placeholder"> &nbsp; </div>
-                              <div class="card-body">
-                                  <span class="placeholder col-7"></span>
-                                  <span class="placeholder col-4"></span>
-                                  <span class="placeholder col-4"></span>
-                                  <span class="placeholder col-6"></span>
-                                  <span class="placeholder col-8"></span>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
+                </div>
               </div>
-  
+              <div class="col d-none d-md-block">
+                <div class="placeholder-glow" aria-hidden="true">
+                  <div class="card">
+                    <div class="card-header placeholder">&nbsp;</div>
+                    <div class="card-body">
+                      <span class="placeholder col-7"></span>
+                      <span class="placeholder col-4"></span>
+                      <span class="placeholder col-4"></span>
+                      <span class="placeholder col-6"></span>
+                      <span class="placeholder col-8"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col d-none d-lg-block">
+                <div class="placeholder-glow" aria-hidden="true">
+                  <div class="card">
+                    <div class="card-header placeholder">&nbsp;</div>
+                    <div class="card-body">
+                      <span class="placeholder col-7"></span>
+                      <span class="placeholder col-4"></span>
+                      <span class="placeholder col-4"></span>
+                      <span class="placeholder col-6"></span>
+                      <span class="placeholder col-8"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-      </div>
+        </div>
       </section>
 
       <section id="random-events" class="mb-4">
