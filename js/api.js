@@ -1,22 +1,30 @@
 /**
  * @fileoverview Handles fetching army data from the OPR Army Forge API,
- * implementing client-side caching using sessionStorage and Last-Modified headers.
+ * implementing client-side caching using sessionStorage.
+ * Uses HEAD request for Last-Modified timestamp, then GET for data.
+ * Validates cache using HEAD request and Last-Modified header.
  */
 
-import { config } from "./config.js";
+import { config } from "./config.js"; // Assuming config.js exports CACHE_PREFIX, TIMESTAMP_PREFIX, ARMYFORGE_LIST_API_URL_BASE
 import { showToast } from "./uiHelpers.js"; // For cache notifications
 
 /**
  * Fetches army data from the One Page Rules Army Forge API, using sessionStorage for caching.
- * Validates cache using the Last-Modified header.
+ * Fetches fresh data using HEAD (for Last-Modified) then GET (for data).
+ * Validates cache using HEAD request and Last-Modified header.
  *
  * @param {string} armyId - The specific ID of the army list on Army Forge.
  * @returns {Promise<object|null>} A promise that resolves to the JSON data object, or null if the fetch fails.
  */
 async function fetchArmyData(armyId) {
+  if (!armyId) {
+    console.error("[Cache] No armyId provided.");
+    return null;
+  }
+
   const apiUrl = `${config.ARMYFORGE_LIST_API_URL_BASE}${armyId}`;
-  const cacheKey = `${config.CACHE_PREFIX}${armyId}`;
-  const timestampKey = `${config.TIMESTAMP_PREFIX}${armyId}`;
+  const cacheKey = `${config.CACHE_PREFIX}${armyId}`; //
+  const timestampKey = `${config.TIMESTAMP_PREFIX}${armyId}`; //
 
   console.log(`[Cache] Attempting to fetch data for armyId: ${armyId}`);
 
@@ -33,11 +41,16 @@ async function fetchArmyData(armyId) {
       const headResponse = await fetch(apiUrl, { method: "HEAD" });
 
       if (!headResponse.ok) {
-        // If HEAD fails, proceed to full fetch (maybe API changed or issue occurred)
+        // If HEAD fails for validation, proceed to full fetch
         console.warn(
-          `[Cache] HEAD request failed for ${armyId} (Status: ${headResponse.status}). Fetching fresh data.`
+          `[Cache] Validation HEAD request failed for ${armyId} (Status: ${headResponse.status}). Fetching fresh data.`
         );
-        return await _fetchAndCacheData(apiUrl, cacheKey, timestampKey, armyId);
+        return await _fetchFreshDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          armyId
+        );
       }
 
       const serverLastModified = headResponse.headers.get("Last-Modified");
@@ -47,7 +60,6 @@ async function fetchArmyData(armyId) {
         console.log(
           `[Cache] Cache is valid for ${armyId}. Returning cached data.`
         );
-        showToast(`Using cached army data for ${armyId}.`, "Cache Hit", 2000);
         // Parse and return cached data
         try {
           return JSON.parse(cachedDataJSON);
@@ -59,18 +71,35 @@ async function fetchArmyData(armyId) {
           // If parsing fails, treat cache as invalid and fetch fresh
           sessionStorage.removeItem(cacheKey);
           sessionStorage.removeItem(timestampKey);
-          return await _fetchAndCacheData(
+          return await _fetchFreshDataWithHeadGet(
             apiUrl,
             cacheKey,
             timestampKey,
             armyId
           );
         }
+      } else if (!serverLastModified) {
+        console.warn(
+          `[Cache] No Last-Modified header found during validation HEAD for ${armyId}. Fetching fresh data.`
+        );
+        // Treat as potentially outdated if server stops sending header
+        return await _fetchFreshDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          armyId
+        );
       } else {
         console.log(
           `[Cache] Cache outdated for ${armyId} (Server: ${serverLastModified}, Cached: ${cachedTimestamp}). Fetching fresh data.`
         );
         // Cache is outdated, proceed to full fetch
+        return await _fetchFreshDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          armyId
+        );
       }
     } catch (error) {
       console.error(
@@ -78,19 +107,30 @@ async function fetchArmyData(armyId) {
         error
       );
       // If validation fails (e.g., network error), proceed to full fetch as fallback
+      return await _fetchFreshDataWithHeadGet(
+        apiUrl,
+        cacheKey,
+        timestampKey,
+        armyId
+      );
     }
   } else {
     console.log(
       `[Cache] No valid cache found for ${armyId}. Fetching fresh data.`
     );
+    // 4. Fetch fresh data (if no cache)
+    return await _fetchFreshDataWithHeadGet(
+      apiUrl,
+      cacheKey,
+      timestampKey,
+      armyId
+    );
   }
-
-  // 4. Fetch fresh data (if no cache, cache outdated, or validation failed)
-  return await _fetchAndCacheData(apiUrl, cacheKey, timestampKey, armyId);
 }
 
 /**
- * Performs a GET request to fetch data, caches it, and returns the data.
+ * Fetches fresh data using a HEAD request (for timestamp) followed by a GET request (for data).
+ * Caches the data and timestamp if both are successfully retrieved.
  * Internal helper function for fetchArmyData.
  * @param {string} apiUrl - The API endpoint URL.
  * @param {string} cacheKey - The sessionStorage key for the data.
@@ -99,56 +139,107 @@ async function fetchArmyData(armyId) {
  * @returns {Promise<object|null>} A promise that resolves to the JSON data object, or null if the fetch fails.
  * @private
  */
-async function _fetchAndCacheData(apiUrl, cacheKey, timestampKey, armyId) {
+async function _fetchFreshDataWithHeadGet(
+  apiUrl,
+  cacheKey,
+  timestampKey,
+  armyId
+) {
   console.log(
-    `[Cache] Fetching fresh data via GET for ${armyId} from ${apiUrl}`
+    `[Cache] Fetching fresh data via HEAD+GET for ${armyId} from ${apiUrl}`
   );
+  let lastModifiedFromHead = null;
+  let dataFromGet = null;
+
   try {
-    const response = await fetch(apiUrl); // Default is GET
-
-    if (!response.ok) {
-      throw new Error(
-        `HTTP error! status: ${response.status} - ${response.statusText}`
-      );
-    }
-
-    const data = await response.json();
-    console.log(`[Cache] Headers for ${armyId}:`, response.headers);
-    const lastModified = response.headers.get("Last-Modified");
-
-    // 5. Store fetched data and timestamp in sessionStorage
-    if (lastModified) {
-      try {
-        sessionStorage.setItem(cacheKey, JSON.stringify(data));
-        sessionStorage.setItem(timestampKey, lastModified);
-        console.log(`[Cache] Stored fresh data and timestamp for ${armyId}.`);
-      } catch (storageError) {
-        console.error(
-          `[Cache] Error saving to sessionStorage for ${armyId}:`,
-          storageError
-        );
-        // Consider potential QuotaExceededError
-        if (storageError.name === "QuotaExceededError") {
-          showToast(
-            "Cache storage full. Could not save army data.",
-            "Cache Warning"
+    // --- HEAD Request ---
+    try {
+      console.log(`[Cache] Performing HEAD request for ${armyId}...`);
+      const headResponse = await fetch(apiUrl, { method: "HEAD" });
+      if (headResponse.ok) {
+        lastModifiedFromHead = headResponse.headers.get("Last-Modified");
+        if (lastModifiedFromHead) {
+          console.log(
+            `[Cache] HEAD request successful, Last-Modified: ${lastModifiedFromHead}`
+          );
+        } else {
+          console.warn(
+            `[Cache] HEAD request successful but no Last-Modified header found for ${armyId}.`
           );
         }
+      } else {
+        console.warn(
+          `[Cache] HEAD request failed for ${armyId} (Status: ${headResponse.status}). Proceeding with GET.`
+        );
+        // Don't throw error yet, maybe GET still works
       }
-    } else {
-      console.warn(
-        `[Cache] No Last-Modified header found in GET response for ${armyId}. Cannot cache effectively.`
+    } catch (headError) {
+      console.error(
+        `[Cache] Error during initial HEAD request for ${armyId}:`,
+        headError
       );
-      // Optionally clear old cache if timestamp is missing now
-      sessionStorage.removeItem(cacheKey);
-      sessionStorage.removeItem(timestampKey);
+      // Continue to GET request as fallback
     }
 
-    console.log(`[Cache] Successfully fetched fresh data for ${armyId}.`);
-    return data;
+    // --- GET Request ---
+    console.log(`[Cache] Performing GET request for ${armyId}...`);
+    const getResponse = await fetch(apiUrl); // Default is GET
+    if (!getResponse.ok) {
+      throw new Error(
+        `GET request failed! status: ${getResponse.status} - ${getResponse.statusText}`
+      );
+    }
+    dataFromGet = await getResponse.json();
+    console.log(`[Cache] GET request successful for ${armyId}.`);
+
+    // --- Cache and Return ---
+    if (dataFromGet) {
+      // Only cache if we got data
+      if (lastModifiedFromHead) {
+        // Only cache timestamp if HEAD succeeded
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify(dataFromGet));
+          sessionStorage.setItem(timestampKey, lastModifiedFromHead);
+          console.log(`[Cache] Stored fresh data and timestamp for ${armyId}.`);
+        } catch (storageError) {
+          console.error(
+            `[Cache] Error saving to sessionStorage for ${armyId}:`,
+            storageError
+          );
+          if (storageError.name === "QuotaExceededError") {
+            showToast(
+              //
+              "Cache storage full. Could not save army data.",
+              "Cache Warning"
+            );
+          }
+          // Clear potentially partial cache entries if storage fails
+          sessionStorage.removeItem(cacheKey);
+          sessionStorage.removeItem(timestampKey);
+        }
+      } else {
+        // We got data, but no timestamp from HEAD. Cannot cache effectively.
+        console.warn(
+          `[Cache] Fetched data via GET but failed to get Last-Modified via HEAD for ${armyId}. Cannot cache timestamp.`
+        );
+        // Ensure no stale timestamp is left if data is fetched but timestamp isn't
+        sessionStorage.removeItem(timestampKey);
+        // Optionally store data without timestamp? Decided against it for simplicity.
+        // sessionStorage.setItem(cacheKey, JSON.stringify(dataFromGet));
+        // Best to clear both if timestamp is missing, to trigger fresh fetch next time.
+        sessionStorage.removeItem(cacheKey);
+      }
+      return dataFromGet; // Return the data even if caching failed
+    } else {
+      // This case should technically be caught by the !getResponse.ok check, but added for safety
+      throw new Error("GET request succeeded but returned no data.");
+    }
   } catch (error) {
-    console.error(`[Cache] Could not fetch army data for ${armyId}:`, error);
-    showToast(`Failed to fetch army data for ${armyId}.`, "Fetch Error");
+    console.error(
+      `[Cache] Could not fetch fresh army data via HEAD+GET for ${armyId}:`,
+      error
+    );
+    showToast(`Failed to fetch army data for ${armyId}.`, "Fetch Error"); //
     // Attempt to clear potentially inconsistent cache entries on error
     sessionStorage.removeItem(cacheKey);
     sessionStorage.removeItem(timestampKey);
