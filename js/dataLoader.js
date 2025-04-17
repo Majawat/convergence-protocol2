@@ -367,7 +367,7 @@ async function loadGameData(campaignData) {
         definitions,
         rule.name,
         rule.description,
-        "rules",
+        "Rules",
         "Custom"
       );
     });
@@ -376,7 +376,7 @@ async function loadGameData(campaignData) {
         definitions,
         trait.name,
         trait.description,
-        "traits",
+        "Traits",
         "Custom"
       );
     });
@@ -389,7 +389,7 @@ async function loadGameData(campaignData) {
         definitions,
         rule.name,
         rule.description,
-        "rules",
+        "Rules",
         "Common"
       );
     });
@@ -398,7 +398,7 @@ async function loadGameData(campaignData) {
         definitions,
         trait.name,
         trait.description,
-        "traits",
+        "Traits",
         "Common"
       );
     });
@@ -439,7 +439,7 @@ async function loadGameData(campaignData) {
           definitions,
           rule.name,
           rule.description,
-          "special-rules",
+          "Special Rules",
           factionName
         );
       });
@@ -451,7 +451,7 @@ async function loadGameData(campaignData) {
           definitions,
           spell.name,
           spell.effect,
-          "spells",
+          "Spells",
           factionName
         );
         // If threshold needs storing, add it to the definition object if creating new
