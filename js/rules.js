@@ -89,7 +89,7 @@ function displayRandomEvents(eventsData) {
                        )}</span> ${renderHTML(event.title)}
                     </div>
                     <div class="card-body d-flex flex-column">
-                        <p class="text-muted fst-italic mb-2 allow-definitions">${renderHTML(
+                        <p class="text-muted fst-italic mb-2">${renderHTML(
                           event.description
                         )}</p>
                         ${
