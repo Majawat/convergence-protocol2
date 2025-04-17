@@ -4,18 +4,26 @@
  * Initializes definition popovers.
  */
 
-// *** UPDATED: Import loadDoctrinesData correctly ***
-import { loadRandomEventsData, loadDoctrinesData } from "./dataLoader.js";
+// *** MODIFIED Imports ***
+import {
+  loadRandomEventsData,
+  loadDoctrinesData,
+  loadGameData, // <-- IMPORT loadGameData
+} from "./dataLoader.js";
 import { showToast } from "./uiHelpers.js";
-import { UI_ICONS } from "./config.js";
+import { UI_ICONS, config } from "./config.js"; // <-- IMPORT config if needed by loadGameData implicitly
 import { initializeDefinitionsSystem } from "./definitions.js";
-// *** REMOVED: No longer need getDoctrinesData from state here ***
-// import { getDefinitions } from "./state.js"; // Keep getDefinitions if initializeDefinitionsSystem uses it internally
+// import { getCampaignData } from "./state.js"; // <-- Probably don't need campaignData here directly
 
 // --- UI Element References ---
+// (Keep existing code here)
 let randomEventsDisplayElement;
 let doctrinesDisplayElement;
 let glossaryContentDisplayElement;
+
+// --- Functions ---
+// (Keep existing initializeUIReferences, formatTextToParagraphs, renderHTML, displayRandomEvents, displayDoctrines here)
+// ... (previous functions) ...
 
 /**
  * Initializes UI element references.
@@ -27,8 +35,6 @@ function initializeUIReferences() {
     "glossary-content-display"
   );
 }
-
-// --- UI Rendering Functions ---
 
 /** Formats text to paragraphs */
 function formatTextToParagraphs(text = "") {
@@ -203,25 +209,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeUIReferences();
 
   try {
-    // *** UPDATED: Fetch events and doctrines explicitly ***
-    const eventsDataPromise = loadRandomEventsData();
-    const doctrinesDataPromise = loadDoctrinesData(); // Uses cache if available
+    // --- MODIFIED Data Loading ---
+    // Note: loadGameData needs campaignData. If campaignData isn't loaded globally
+    // before this script runs, you might need to load it first or pass null/empty.
+    // Assuming campaignData might not be strictly needed just for definitions caching part:
+    const dummyCampaignDataForDefinitions = { armies: [] }; // Pass dummy data if books aren't needed
 
-    // Wait for both fetches to complete
-    const [eventsData, doctrinesData] = await Promise.all([
+    // Fetch essential data concurrently
+    const eventsDataPromise = loadRandomEventsData();
+    const doctrinesDataPromise = loadDoctrinesData(); // Uses its own cache
+    // ** ADDED **: Ensure definitions are loaded/cached
+    const definitionsLoadPromise = loadGameData(
+      dummyCampaignDataForDefinitions
+    ); // Uses sessionStorage for definitions
+
+    // Wait for all necessary data
+    // We specifically need definitionsLoadPromise to finish before initializing popovers.
+    const [eventsData, doctrinesData, gameDataResult] = await Promise.all([
       eventsDataPromise,
       doctrinesDataPromise,
+      definitionsLoadPromise,
     ]);
 
     // Display dynamic sections using the fetched/cached data
     displayRandomEvents(eventsData);
-    displayDoctrines(doctrinesData); // Pass the loaded data
+    displayDoctrines(doctrinesData);
+    initializeDefinitionsSystem();
 
-    // Initialize popovers AFTER dynamic content is rendered
-    // Ensure definitions cache has been populated by app.js or another initializer first
-    setTimeout(() => {
-      initializeDefinitionsSystem();
-    }, 100);
   } catch (error) {
     console.error("Error loading rules page data:", error);
     showToast("Failed to load some rules data.", "Error");
