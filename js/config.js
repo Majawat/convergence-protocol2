@@ -13,6 +13,8 @@ export const config = {
   DOCTRINES_CACHE_KEY: "oprDoctrinesCache",
   CAMPAIGN_POINTS_CACHE_KEY: "oprCampaignPointsCache",
   DEFINITIONS_CACHE_KEY: "oprDefinitionsCache",
+  CACHE_PREFIX: "oprArmyData_",
+  TIMESTAMP_PREFIX: "oprArmyTimestamp_",
 
   // Game Rules
   MAX_SPELL_TOKENS: 6,
