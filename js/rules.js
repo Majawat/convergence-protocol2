@@ -1,29 +1,25 @@
 /**
  * @fileoverview Logic for the Rules Reference page.
- * Handles fetching and displaying Random Events and Doctrines.
+ * Handles fetching and displaying Random Events, Doctrines, and a searchable Glossary.
  * Initializes definition popovers.
  */
 
-// *** MODIFIED Imports ***
 import {
   loadRandomEventsData,
   loadDoctrinesData,
-  loadGameData, // <-- IMPORT loadGameData
+  loadGameData,
 } from "./dataLoader.js";
 import { showToast } from "./uiHelpers.js";
-import { UI_ICONS, config } from "./config.js"; // <-- IMPORT config if needed by loadGameData implicitly
+import { config } from "./config.js";
 import { initializeDefinitionsSystem } from "./definitions.js";
-// import { getCampaignData } from "./state.js"; // <-- Probably don't need campaignData here directly
+import { getDefinitions } from "./state.js"; // Import getDefinitions directly
 
 // --- UI Element References ---
-// (Keep existing code here)
 let randomEventsDisplayElement;
 let doctrinesDisplayElement;
-let glossaryContentDisplayElement;
-
-// --- Functions ---
-// (Keep existing initializeUIReferences, formatTextToParagraphs, renderHTML, displayRandomEvents, displayDoctrines here)
-// ... (previous functions) ...
+let glossarySearchInput;
+let glossaryItemsContainer;
+let glossaryNoResultsElement;
 
 /**
  * Initializes UI element references.
@@ -31,40 +27,82 @@ let glossaryContentDisplayElement;
 function initializeUIReferences() {
   randomEventsDisplayElement = document.getElementById("random-events-display");
   doctrinesDisplayElement = document.getElementById("doctrines-display");
-  glossaryContentDisplayElement = document.getElementById(
-    "glossary-content-display"
-  );
+  glossarySearchInput = document.getElementById("glossary-search");
+  glossaryItemsContainer = document.getElementById("glossary-items-container");
+  glossaryNoResultsElement = document.getElementById("glossary-no-results");
+
+  // Basic check if elements exist
+  if (!randomEventsDisplayElement)
+    console.error("Element #random-events-display not found.");
+  if (!doctrinesDisplayElement)
+    console.error("Element #doctrines-display not found.");
+  if (!glossarySearchInput)
+    console.error("Element #glossary-search not found.");
+  if (!glossaryItemsContainer)
+    console.error("Element #glossary-items-container not found.");
+  if (!glossaryNoResultsElement)
+    console.error("Element #glossary-no-results not found.");
 }
 
-/** Formats text to paragraphs */
+// --- Utility Functions ---
+
+/**
+ * Basic HTML escaping function.
+ * @param {string} unsafe - The string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeHtml(unsafe) {
+  if (typeof unsafe !== "string") return ""; // Handle non-string input
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
+ * Formats text block into HTML paragraphs. Handles undefined/null input.
+ * @param {string} text - The text to format.
+ * @returns {string} HTML string with paragraphs.
+ */
 function formatTextToParagraphs(text = "") {
-  if (!text) return "";
-  const sanitizedText = text.replace(/<script.*?>.*?<\/script>/gi, "");
+  if (!text) return ""; // Return empty string if input is null, undefined, or empty
+  // Basic sanitization attempt (consider a more robust library if complex HTML is expected)
+  const sanitizedText = text
+    .toString()
+    .replace(/<script.*?>.*?<\/script>/gi, "");
+  // Split by double newline first, then single if needed
   let paragraphs = sanitizedText.split("\n\n");
-  if (paragraphs.length <= 1) {
+  if (paragraphs.length <= 1 && sanitizedText.includes("\n")) {
     paragraphs = sanitizedText.split("\n");
   }
+  // Filter empty paragraphs and wrap
   return paragraphs
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph.length > 0)
-    .map((paragraph) => `<p>${renderHTML(paragraph)}</p>`)
+    .map((paragraph) => `<p class="mb-2">${renderHTML(paragraph)}</p>`) // Use mb-2 for compactness
     .join("");
 }
 
-/** Safely renders HTML */
+/**
+ * Safely renders potentially unsafe HTML content by removing script tags. Handles undefined/null input.
+ * @param {string} content - HTML content string.
+ * @returns {string} Sanitized HTML string.
+ */
 function renderHTML(content) {
+  if (typeof content !== "string") return ""; // Handle non-string input
   const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = content || "";
+  tempDiv.innerHTML = content || ""; // Ensure innerHTML gets a string
   tempDiv.querySelectorAll("script").forEach((script) => script.remove());
   return tempDiv.innerHTML;
 }
 
+// --- UI Rendering Functions ---
+
 /** Renders Random Events */
 function displayRandomEvents(eventsData) {
-  if (!randomEventsDisplayElement) {
-    console.error("Random Events display element not found.");
-    return;
-  }
+  if (!randomEventsDisplayElement) return; // Already checked in init
   if (
     !eventsData ||
     !Array.isArray(eventsData.events) ||
@@ -89,7 +127,7 @@ function displayRandomEvents(eventsData) {
                        )}</span> ${renderHTML(event.title)}
                     </div>
                     <div class="card-body d-flex flex-column">
-                        <p class="text-muted fst-italic mb-2">${renderHTML(
+                        <p class="text-muted fst-italic mb-2 allow-definitions">${renderHTML(
                           event.description
                         )}</p>
                         ${
@@ -108,17 +146,12 @@ function displayRandomEvents(eventsData) {
 
 /** Renders Doctrines and Stratagems */
 function displayDoctrines(doctrinesData) {
-  if (!doctrinesDisplayElement) {
-    console.error("Doctrines display element not found.");
-    return;
-  }
-  // Use the passed-in data
+  if (!doctrinesDisplayElement) return; // Already checked in init
   if (
     !doctrinesData ||
     !Array.isArray(doctrinesData.doctrines) ||
     doctrinesData.doctrines.length === 0
   ) {
-    // Display error if data is invalid/null after loading attempt
     doctrinesDisplayElement.innerHTML = `<div class="alert alert-warning" role="alert">Could not load or find doctrines data.</div>`;
     return;
   }
@@ -202,40 +235,160 @@ function displayDoctrines(doctrinesData) {
   doctrinesDisplayElement.innerHTML = doctrinesHTML;
 }
 
+// --- Glossary Functions ---
+
+/**
+ * Renders the glossary items into the container.
+ * @param {object} defs - The definitions object from state.
+ * @param {HTMLElement} container - The container element for glossary items.
+ */
+function renderGlossary(defs, container) {
+  if (!defs || !container) return;
+
+  const terms = Object.keys(defs).sort((a, b) => a.localeCompare(b)); // Sort terms alphabetically
+  let html = ""; // Build HTML string
+
+  if (terms.length === 0) {
+    container.innerHTML = '<p class="text-muted">No definitions loaded.</p>';
+    return;
+  }
+
+  terms.forEach((term) => {
+    const definition = defs[term];
+    if (!definition || !definition.description) return; // Skip if definition is invalid
+
+    // Store lowercased versions in data attributes for case-insensitive search
+    const lowerTerm = escapeHtml((term || "").toLowerCase());
+    const lowerDescription = escapeHtml(
+      (definition.description || "").toLowerCase()
+    );
+
+    // Use smaller heading (h6) and padding for compactness
+    html += `
+        <div class="col glossary-item" data-term="${lowerTerm}" data-description="${lowerDescription}">
+            <div class="card h-100 shadow-sm glossary-card">
+                <div class="card-header p-2">
+                    <h6 class="mb-0 glossary-term">${escapeHtml(term)}</h6>
+                    <div>
+                      ${
+                        definition.type
+                          ? `<span class="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill me-1 small">${escapeHtml(
+                              definition.type
+                            )}</span>`
+                          : ""
+                      }
+                      ${
+                        definition.source
+                          ? `<span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill small">${escapeHtml(
+                              definition.source
+                            )}</span>`
+                          : ""
+                      }
+                    </div>
+                </div>
+                <div class="card-body p-2 glossary-description small allow-definitions">
+                    ${formatTextToParagraphs(definition.description)}
+                </div>
+            </div>
+        </div>`;
+  });
+
+  container.innerHTML = html; // Set the generated HTML
+  console.log(`Rendered ${terms.length} glossary items.`);
+}
+
+/**
+ * Filters the glossary items based on the search query.
+ * @param {string} query - The search query.
+ * @param {HTMLElement} container - The container element holding glossary items.
+ * @param {HTMLElement} noResultsEl - The element to show when no results are found.
+ */
+function filterGlossary(query, container, noResultsEl) {
+  if (!container || !noResultsEl) return;
+
+  const lowerQuery = query.toLowerCase().trim();
+  const items = container.querySelectorAll(".glossary-item");
+  let visibleCount = 0;
+
+  items.forEach((item) => {
+    const term = item.dataset.term || "";
+    const description = item.dataset.description || "";
+    // Check if term or description includes the query
+    const isMatch =
+      lowerQuery === "" ||
+      term.includes(lowerQuery) ||
+      description.includes(lowerQuery);
+
+    item.classList.toggle("d-none", !isMatch); // Hide if not a match
+    if (isMatch) {
+      visibleCount++;
+    }
+  });
+
+  // Toggle the 'no results' message
+  noResultsEl.classList.toggle("d-none", visibleCount > 0 || lowerQuery === "");
+
+  // console.debug(`Filtered glossary: "${query}", Visible: ${visibleCount}`);
+}
+
 // --- Initialization ---
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("Rules JS loaded.");
-  initializeUIReferences();
+  initializeUIReferences(); // Get references to DOM elements
+
+  // Check if essential elements are found before proceeding
+  if (
+    !randomEventsDisplayElement ||
+    !doctrinesDisplayElement ||
+    !glossaryItemsContainer ||
+    !glossarySearchInput ||
+    !glossaryNoResultsElement
+  ) {
+    console.error(
+      "One or more essential UI elements for rules page not found. Aborting initialization."
+    );
+    showToast("Error initializing rules page UI.", "Error");
+    return;
+  }
 
   try {
-    // --- MODIFIED Data Loading ---
-    // Note: loadGameData needs campaignData. If campaignData isn't loaded globally
-    // before this script runs, you might need to load it first or pass null/empty.
-    // Assuming campaignData might not be strictly needed just for definitions caching part:
-    const dummyCampaignDataForDefinitions = { armies: [] }; // Pass dummy data if books aren't needed
-
     // Fetch essential data concurrently
     const eventsDataPromise = loadRandomEventsData();
     const doctrinesDataPromise = loadDoctrinesData(); // Uses its own cache
-    // ** ADDED **: Ensure definitions are loaded/cached
+    // Ensure definitions are loaded/cached by loadGameData
+    // Pass dummy campaign data if army books aren't needed for definitions cache
+    const dummyCampaignDataForDefinitions = { armies: [] };
     const definitionsLoadPromise = loadGameData(
       dummyCampaignDataForDefinitions
-    ); // Uses sessionStorage for definitions
+    );
 
     // Wait for all necessary data
-    // We specifically need definitionsLoadPromise to finish before initializing popovers.
     const [eventsData, doctrinesData, gameDataResult] = await Promise.all([
       eventsDataPromise,
       doctrinesDataPromise,
-      definitionsLoadPromise,
+      definitionsLoadPromise, // Make sure definitions are loaded/cached
     ]);
 
-    // Display dynamic sections using the fetched/cached data
+    // Display dynamic sections
     displayRandomEvents(eventsData);
     displayDoctrines(doctrinesData);
-    initializeDefinitionsSystem();
 
+    // --- Glossary Initialization ---
+    const definitions = getDefinitions(); // Get definitions AFTER loadGameData has run
+    renderGlossary(definitions, glossaryItemsContainer); // Render the initial glossary list
+
+    // Add search listener AFTER rendering
+    glossarySearchInput.addEventListener("input", () => {
+      filterGlossary(
+        glossarySearchInput.value,
+        glossaryItemsContainer,
+        glossaryNoResultsElement
+      );
+    });
+
+    // Initialize popovers on the whole page AFTER dynamic content (including glossary) is rendered
+    initializeDefinitionsSystem();
   } catch (error) {
     console.error("Error loading rules page data:", error);
     showToast("Failed to load some rules data.", "Error");
@@ -244,15 +397,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       randomEventsDisplayElement &&
       !randomEventsDisplayElement.innerHTML.includes("card")
     ) {
-      // Check if not already populated
       randomEventsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Error loading random events. Check console.</div>`;
     }
     if (
       doctrinesDisplayElement &&
       !doctrinesDisplayElement.innerHTML.includes("card")
     ) {
-      // Check if not already populated
       doctrinesDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Error loading doctrines. Check console.</div>`;
+    }
+    if (
+      glossaryItemsContainer &&
+      !glossaryItemsContainer.innerHTML.includes("card")
+    ) {
+      glossaryItemsContainer.innerHTML = `<div class="alert alert-danger" role="alert">Error loading glossary. Check console.</div>`;
     }
   }
 });

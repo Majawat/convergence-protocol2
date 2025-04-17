@@ -662,3 +662,40 @@ body {
 .alert {
   text-wrap: balance; /* Improve text balancing in the alert */
 }
+
+/* Optional CSS for Compact Glossary Cards */
+.glossary-card .card-header {
+  padding: 0.4rem 0.6rem; /* Reduced header padding */
+  background-color: var(--bs-secondary-bg); /* Subtle background */
+}
+
+.glossary-card .card-header h6 {
+  font-size: 0.95rem; /* Slightly smaller heading */
+  margin-bottom: 0.1rem; /* Reduce space below heading */
+}
+
+.glossary-card .card-header .badge {
+  font-size: 0.7em; /* Smaller badges */
+  padding: 0.2em 0.4em;
+}
+
+.glossary-card .card-body {
+  padding: 0.6rem; /* Reduced body padding */
+  font-size: 0.875rem; /* Slightly smaller body text */
+}
+
+.glossary-card .card-body p {
+  margin-bottom: 0.4rem; /* Reduced paragraph spacing */
+  line-height: 1.4; /* Adjust line height for readability */
+}
+
+/* Ensure popovers from glossary definitions are readable */
+.popover-header {
+  font-size: 1rem;
+}
+.popover-body {
+  font-size: 0.9rem;
+}
+.popover-body p {
+  margin-bottom: 0.5rem;
+}

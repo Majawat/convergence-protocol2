@@ -1032,16 +1032,61 @@
         >
           <i class="bi bi-journal-text me-2"></i> Glossary
         </h2>
-        <div class="collapse show" id="collapseGlossary">
-          <p
-            class="text-muted p-3 border rounded bg-body-tertiary allow-definitions"
-          >
-            A glossary of special rules and terms will be added here later.
-            Tooltips will also be added throughout the rules for quick
-            definitions.
-          </p>
-          <div id="glossary-content-display"></div>
-        </div>
+        <div id="collapseGlossary" class="accordion-collapse" aria-labelledby="headingGlossary" data-bs-parent="#rulesAccordion">
+          <div class="accordion-body">
+              <div class="mb-3">
+                  <input type="search" class="form-control" id="glossary-search" placeholder="Search terms and descriptions..." aria-label="Search Glossary">
+              </div>
+  
+              <div id="glossary-no-results" class="alert alert-warning d-none" role="alert">
+                  No matching terms found.
+              </div>
+  
+              <div id="glossary-items-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+                  <div class="col">
+                      <div class="placeholder-glow" aria-hidden="true">
+                          <div class="card">
+                              <div class="card-header placeholder"> &nbsp; </div>
+                              <div class="card-body">
+                                  <span class="placeholder col-7"></span>
+                                  <span class="placeholder col-4"></span>
+                                  <span class="placeholder col-4"></span>
+                                  <span class="placeholder col-6"></span>
+                                  <span class="placeholder col-8"></span>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                   <div class="col d-none d-md-block"> <div class="placeholder-glow" aria-hidden="true">
+                          <div class="card">
+                              <div class="card-header placeholder"> &nbsp; </div>
+                              <div class="card-body">
+                                  <span class="placeholder col-7"></span>
+                                  <span class="placeholder col-4"></span>
+                                  <span class="placeholder col-4"></span>
+                                  <span class="placeholder col-6"></span>
+                                  <span class="placeholder col-8"></span>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                   <div class="col d-none d-lg-block"> <div class="placeholder-glow" aria-hidden="true">
+                          <div class="card">
+                              <div class="card-header placeholder"> &nbsp; </div>
+                              <div class="card-body">
+                                  <span class="placeholder col-7"></span>
+                                  <span class="placeholder col-4"></span>
+                                  <span class="placeholder col-4"></span>
+                                  <span class="placeholder col-6"></span>
+                                  <span class="placeholder col-8"></span>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+  
+          </div>
+      </div>
       </section>
 
       <section id="random-events" class="mb-4">
