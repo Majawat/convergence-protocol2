@@ -1,11 +1,13 @@
 /**
  * @fileoverview Handles fetching campaign data, army books, common rules, doctrines,
- * custom definitions, and consolidating rule/term definitions.
+ * custom definitions, and consolidating rule/term definitions with multiple source tracking.
  */
 import { config } from "./config.js";
+import { setDefinitions } from "./state.js"; // Import setter to save definitions
 
 // --- Public Fetch Functions ---
-
+// (loadCampaignData, loadRandomEventsData, loadMissionsData, loadBattleReport remain the same)
+// ... previous fetch functions ...
 /** Fetches campaign data. */
 async function loadCampaignData() {
   try {
@@ -103,7 +105,6 @@ async function loadBattleReport(reportPath) {
 
 /** Fetches doctrines, using cache. */
 async function _loadDoctrinesDataInternal() {
-  // Renamed slightly for clarity
   const cacheKey = config.DOCTRINES_CACHE_KEY;
   try {
     const cachedData = sessionStorage.getItem(cacheKey);
@@ -194,6 +195,7 @@ async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const bookData = await response.json();
+    // Add factionName to the result for easier access later
     return { factionId, bookData, factionName };
   } catch (error) {
     console.error(
@@ -205,8 +207,53 @@ async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
 }
 
 /**
+ * Helper function to add or update a definition in the consolidated object.
+ * Handles multiple sources. Assumes description/type are consistent if term exists.
+ * @param {object} definitions - The master definitions object being built.
+ * @param {string} term - The term (rule name, trait name, spell name).
+ * @param {string} description - The term's description.
+ * @param {string} type - The type of definition (e.g., 'rules', 'traits', 'spells').
+ * @param {string} source - The source of this definition (e.g., 'Common', 'Custom', 'Army Book Name').
+ */
+function addOrUpdateDefinition(definitions, term, description, type, source) {
+  if (!term || !description || !type || !source) {
+    console.warn("Skipping definition due to missing info:", {
+      term,
+      description,
+      type,
+      source,
+    });
+    return;
+  }
+
+  // Use the term directly as the key
+  const key = term;
+
+  if (definitions[key]) {
+    // Term exists, add source if not already present
+    if (!definitions[key].sources.includes(source)) {
+      definitions[key].sources.push(source);
+      // Optional: Sort sources alphabetically for consistent display
+      definitions[key].sources.sort();
+    }
+    // Optional: Could add logic here to verify description matches if needed
+    // if (definitions[key].description !== description) {
+    //     console.warn(`Definition mismatch for term "${key}" from source "${source}". Keeping original description.`);
+    // }
+  } else {
+    // Term doesn't exist, create new entry
+    definitions[key] = {
+      description: description,
+      type: type,
+      sources: [source], // Initialize sources array
+    };
+  }
+}
+
+/**
  * Fetches Army Book data, Common Rules/Traits, Custom Definitions, AND Doctrines data.
- * Consolidates all rule/term definitions into a single object, using sessionStorage for caching definitions.
+ * Consolidates all rule/term definitions into a single object with multiple source tracking,
+ * using sessionStorage for caching definitions.
  * @param {object} campaignData - The loaded campaign data.
  * @returns {Promise<{
  * armyBooks: object,
@@ -218,7 +265,7 @@ async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
 async function loadGameData(campaignData) {
   const requiredGsId = config.GAME_SYSTEM_ID;
   const definitionsCacheKey = config.DEFINITIONS_CACHE_KEY;
-  let definitions = {};
+  let definitions = {}; // Initialize empty definitions object
   let armyBooks = {};
   let commonRulesResult = null;
   let doctrinesDataResult = null;
@@ -228,10 +275,14 @@ async function loadGameData(campaignData) {
     const cachedDefinitions = sessionStorage.getItem(definitionsCacheKey);
     if (cachedDefinitions) {
       const parsedDefs = JSON.parse(cachedDefinitions);
+      // Add basic validation for the new structure (check for sources array)
+      const firstKey = Object.keys(parsedDefs)[0];
       if (
         parsedDefs &&
         typeof parsedDefs === "object" &&
-        Object.keys(parsedDefs).length > 0
+        Object.keys(parsedDefs).length > 0 &&
+        (!firstKey ||
+          (parsedDefs[firstKey] && Array.isArray(parsedDefs[firstKey].sources))) // Check if first item has sources array
       ) {
         console.log(
           `Definitions loaded from sessionStorage cache (${
@@ -239,6 +290,7 @@ async function loadGameData(campaignData) {
           } terms).`
         );
         definitions = parsedDefs;
+
         // Still need to load army books and doctrines (which might also be cached)
         const doctrinesPromise = _loadDoctrinesDataInternal();
         const factionPromises = [];
@@ -246,8 +298,10 @@ async function loadGameData(campaignData) {
           const uniqueFactions = new Map();
           campaignData.armies.forEach((army) => {
             (army.faction || []).forEach((fac) => {
-              if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id))
+              // Ensure faction has ID and gameSystem before adding
+              if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id)) {
                 uniqueFactions.set(fac.id, fac);
+              }
             });
           });
           uniqueFactions.forEach((faction) =>
@@ -255,11 +309,12 @@ async function loadGameData(campaignData) {
               _loadArmyBookDataInternal(
                 faction.id,
                 faction.gameSystem,
-                faction.name || faction.id
+                faction.name || faction.id // Use name if available, fallback to id
               )
             )
           );
         }
+
         const [doctrinesResult, ...bookResults] = await Promise.all([
           doctrinesPromise,
           ...factionPromises,
@@ -269,22 +324,26 @@ async function loadGameData(campaignData) {
           if (result && result.bookData)
             armyBooks[result.factionId] = result.bookData;
         });
+
+        // Return cached definitions along with newly fetched books/doctrines
         return {
           armyBooks,
-          commonRules: {},
+          commonRules: {}, // Common rules weren't fetched if definitions were cached
           doctrines: doctrinesDataResult,
           definitions,
         };
       } else {
         console.warn(
-          "Invalid definitions data found in cache. Clearing and fetching fresh."
+          "Invalid or outdated definitions data found in cache. Clearing and fetching fresh."
         );
         sessionStorage.removeItem(definitionsCacheKey);
+        definitions = {}; // Reset definitions object
       }
     }
   } catch (e) {
     console.error("Error reading definitions cache:", e);
     sessionStorage.removeItem(definitionsCacheKey);
+    definitions = {}; // Reset definitions object
   }
 
   // --- Step 2: Fetch Base Data (If Definitions Not Cached) ---
@@ -301,41 +360,47 @@ async function loadGameData(campaignData) {
   doctrinesDataResult = doctrinesResult;
 
   // --- Step 3: Process Base Definitions (Custom > Common) ---
+  // Custom definitions take priority for description/type if names clash
   if (customDefsData) {
     (customDefsData.rules || []).forEach((rule) => {
-      if (rule.name && rule.description)
-        definitions[rule.name] = {
-          description: rule.description,
-          type: "rules",
-          source: "Custom",
-        };
+      addOrUpdateDefinition(
+        definitions,
+        rule.name,
+        rule.description,
+        "rules",
+        "Custom"
+      );
     });
     (customDefsData.traits || []).forEach((trait) => {
-      if (trait.name && trait.description)
-        definitions[trait.name] = {
-          description: trait.description,
-          type: "traits",
-          source: "Custom",
-        };
+      addOrUpdateDefinition(
+        definitions,
+        trait.name,
+        trait.description,
+        "traits",
+        "Custom"
+      );
     });
   }
+  // Add common rules/traits, adding 'Common' source if term exists, creating if not
   if (commonData) {
-    commonRulesResult = { [requiredGsId]: commonData };
+    commonRulesResult = { [requiredGsId]: commonData }; // Store for return if needed
     (commonData.rules || []).forEach((rule) => {
-      if (rule.name && rule.description && !definitions[rule.name])
-        definitions[rule.name] = {
-          description: rule.description,
-          type: "rules",
-          source: "Common",
-        };
+      addOrUpdateDefinition(
+        definitions,
+        rule.name,
+        rule.description,
+        "rules",
+        "Common"
+      );
     });
     (commonData.traits || []).forEach((trait) => {
-      if (trait.name && trait.description && !definitions[trait.name])
-        definitions[trait.name] = {
-          description: trait.description,
-          type: "traits",
-          source: "Common",
-        };
+      addOrUpdateDefinition(
+        definitions,
+        trait.name,
+        trait.description,
+        "traits",
+        "Common"
+      );
     });
   }
 
@@ -345,8 +410,9 @@ async function loadGameData(campaignData) {
     const uniqueFactions = new Map();
     campaignData.armies.forEach((army) => {
       (army.faction || []).forEach((fac) => {
-        if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id))
+        if (fac.id && fac.gameSystem && !uniqueFactions.has(fac.id)) {
           uniqueFactions.set(fac.id, fac);
+        }
       });
     });
     uniqueFactions.forEach((faction) =>
@@ -354,7 +420,7 @@ async function loadGameData(campaignData) {
         _loadArmyBookDataInternal(
           faction.id,
           faction.gameSystem,
-          faction.name || faction.id
+          faction.name || faction.id // Use name for source tracking
         )
       )
     );
@@ -365,65 +431,66 @@ async function loadGameData(campaignData) {
   bookResults.forEach((result) => {
     if (result && result.bookData) {
       const { factionId, bookData, factionName } = result;
-      armyBooks[factionId] = bookData;
+      armyBooks[factionId] = bookData; // Store full book data
+
+      // Process special rules
       (bookData.specialRules || []).forEach((rule) => {
-        if (rule.name && rule.description && !definitions[rule.name])
-          definitions[rule.name] = {
-            description: rule.description,
-            type: "special-rules",
-            source: factionName,
-          };
+        addOrUpdateDefinition(
+          definitions,
+          rule.name,
+          rule.description,
+          "special-rules",
+          factionName
+        );
       });
+
+      // Process spells
       (bookData.spells || []).forEach((spell) => {
-        if (spell.name && spell.effect) {
-          const spellKey = `${spell.name} (${factionName})`;
-          if (!definitions[spellKey])
-            definitions[spellKey] = {
-              description: spell.effect,
-              type: "spells",
-              source: factionName,
-              threshold: spell.threshold || 0,
-            };
+        // Use spell name directly as the term for potential merging across factions
+        addOrUpdateDefinition(
+          definitions,
+          spell.name,
+          spell.effect,
+          "spells",
+          factionName
+        );
+        // If threshold needs storing, add it to the definition object if creating new
+        if (
+          spell.threshold &&
+          definitions[spell.name] &&
+          definitions[spell.name].threshold === undefined
+        ) {
+          definitions[spell.name].threshold = spell.threshold;
         }
       });
     }
   });
 
   // --- Step 6: Cache Consolidated Definitions ---
-  try {
-    if (Object.keys(definitions).length > 0) {
-      sessionStorage.setItem(definitionsCacheKey, JSON.stringify(definitions));
-      console.log(
-        `Saved ${
-          Object.keys(definitions).length
-        } definitions to sessionStorage cache.`
-      );
-    }
-  } catch (e) {
-    console.error("Error saving definitions to sessionStorage cache:", e);
-    if (e.name === "QuotaExceededError")
-      console.error("SessionStorage quota exceeded. Definitions not cached.");
-  }
+  // Use the imported setter function from state.js
+  setDefinitions(definitions); // setDefinitions handles logging and error catching
 
   console.log(
     `Finished loading game data. Total unique definitions: ${
       Object.keys(definitions).length
     }`
   );
+
+  // Return all loaded data
   return {
     armyBooks: armyBooks,
     commonRules: commonRulesResult || {},
     doctrines: doctrinesDataResult,
-    definitions: definitions,
+    definitions: definitions, // Return the consolidated definitions
   };
 }
 
-// *** ADDED Export for the internal doctrine loader ***
+// Export necessary functions
 export {
   loadCampaignData,
   loadRandomEventsData,
   loadMissionsData,
   loadBattleReport,
   loadGameData,
-  _loadDoctrinesDataInternal as loadDoctrinesData, // Export the internal function
+  _loadDoctrinesDataInternal as loadDoctrinesData, // Export the internal function correctly
 };

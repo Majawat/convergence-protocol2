@@ -8,6 +8,7 @@ import {
   loadRandomEventsData,
   loadDoctrinesData,
   loadGameData,
+  loadCampaignData, // <-- IMPORT loadCampaignData
 } from "./dataLoader.js";
 import { showToast } from "./uiHelpers.js";
 import { config } from "./config.js";
@@ -15,12 +16,16 @@ import { initializeDefinitionsSystem } from "./definitions.js";
 import { getDefinitions } from "./state.js"; // Import getDefinitions directly
 
 // --- UI Element References ---
+// (Keep existing code here)
 let randomEventsDisplayElement;
 let doctrinesDisplayElement;
 let glossarySearchInput;
 let glossaryItemsContainer;
 let glossaryNoResultsElement;
 
+// --- Functions ---
+// (Keep existing initializeUIReferences, escapeHtml, formatTextToParagraphs, renderHTML, displayRandomEvents, displayDoctrines, renderGlossary, filterGlossary here)
+// ... All previous functions ...
 /**
  * Initializes UI element references.
  */
@@ -43,8 +48,6 @@ function initializeUIReferences() {
   if (!glossaryNoResultsElement)
     console.error("Element #glossary-no-results not found.");
 }
-
-// --- Utility Functions ---
 
 /**
  * Basic HTML escaping function.
@@ -97,8 +100,6 @@ function renderHTML(content) {
   tempDiv.querySelectorAll("script").forEach((script) => script.remove());
   return tempDiv.innerHTML;
 }
-
-// --- UI Rendering Functions ---
 
 /** Renders Random Events */
 function displayRandomEvents(eventsData) {
@@ -235,8 +236,6 @@ function displayDoctrines(doctrinesData) {
   doctrinesDisplayElement.innerHTML = doctrinesHTML;
 }
 
-// --- Glossary Functions ---
-
 /**
  * Renders the glossary items into the container.
  * @param {object} defs - The definitions object from state.
@@ -255,36 +254,60 @@ function renderGlossary(defs, container) {
 
   terms.forEach((term) => {
     const definition = defs[term];
-    if (!definition || !definition.description) return; // Skip if definition is invalid
+    // Ensure definition has description and sources array before rendering
+    if (
+      !definition ||
+      !definition.description ||
+      !Array.isArray(definition.sources)
+    )
+      return;
 
     // Store lowercased versions in data attributes for case-insensitive search
     const lowerTerm = escapeHtml((term || "").toLowerCase());
-    const lowerDescription = escapeHtml(
-      (definition.description || "").toLowerCase()
+    // Combine description and sources for searching
+    const lowerDescriptionAndSources = escapeHtml(
+      `${(definition.description || "").toLowerCase()} ${definition.sources
+        .join(" ")
+        .toLowerCase()}`
     );
+
+    // --- Generate badges for multiple sources ---
+    let sourceBadges = "";
+    if (definition.sources && definition.sources.length > 0) {
+      sourceBadges = definition.sources
+        .map((source) => {
+          let badgeClass =
+            "bg-secondary-subtle border-secondary-subtle text-secondary-emphasis"; // Default
+          if (source === "Common") {
+            badgeClass =
+              "bg-primary-subtle border-primary-subtle text-primary-emphasis";
+          } else if (source === "Custom") {
+            badgeClass =
+              "bg-success-subtle border-success-subtle text-success-emphasis";
+          }
+          // Add more conditions here for specific army book names if desired
+          return `<span class="badge ${badgeClass} border rounded-pill me-1 small">${escapeHtml(
+            source
+          )}</span>`;
+        })
+        .join("");
+    }
+    // --- END Generate badges ---
 
     // Use smaller heading (h6) and padding for compactness
     html += `
-        <div class="col glossary-item" data-term="${lowerTerm}" data-description="${lowerDescription}">
+        <div class="col glossary-item" data-term="${lowerTerm}" data-description="${lowerDescriptionAndSources}">
             <div class="card h-100 shadow-sm glossary-card">
                 <div class="card-header p-2">
-                    <h6 class="mb-0 glossary-term">${escapeHtml(term)}</h6>
-                    <div>
-                      ${
-                        definition.type
-                          ? `<span class="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill me-1 small">${escapeHtml(
-                              definition.type
-                            )}</span>`
-                          : ""
-                      }
-                      ${
-                        definition.source
-                          ? `<span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill small">${escapeHtml(
-                              definition.source
-                            )}</span>`
-                          : ""
-                      }
-                    </div>
+                    <h6 class="mb-1 glossary-term">${escapeHtml(term)}</h6>
+                    <div class="mb-1">${sourceBadges}</div>
+                    ${
+                      definition.type
+                        ? `<span class="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill small">${escapeHtml(
+                            definition.type
+                          )}</span>`
+                        : ""
+                    }
                 </div>
                 <div class="card-body p-2 glossary-description small allow-definitions">
                     ${formatTextToParagraphs(definition.description)}
@@ -311,13 +334,13 @@ function filterGlossary(query, container, noResultsEl) {
   let visibleCount = 0;
 
   items.forEach((item) => {
+    // Check term and the combined description/sources data attribute
     const term = item.dataset.term || "";
-    const description = item.dataset.description || "";
-    // Check if term or description includes the query
+    const descriptionAndSources = item.dataset.description || "";
     const isMatch =
       lowerQuery === "" ||
       term.includes(lowerQuery) ||
-      description.includes(lowerQuery);
+      descriptionAndSources.includes(lowerQuery);
 
     item.classList.toggle("d-none", !isMatch); // Hide if not a match
     if (isMatch) {
@@ -327,8 +350,6 @@ function filterGlossary(query, container, noResultsEl) {
 
   // Toggle the 'no results' message
   noResultsEl.classList.toggle("d-none", visibleCount > 0 || lowerQuery === "");
-
-  // console.debug(`Filtered glossary: "${query}", Visible: ${visibleCount}`);
 }
 
 // --- Initialization ---
@@ -353,22 +374,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    // Fetch essential data concurrently
+    // --- MODIFIED: Load campaign data first ---
+    console.log("Loading campaign data for rules page...");
+    const campaignData = await loadCampaignData();
+    if (!campaignData) {
+      // Handle case where campaign data fails to load (optional, maybe loadGameData can handle null)
+      console.warn(
+        "Failed to load campaign data. Definitions might be incomplete."
+      );
+      // Proceeding anyway, loadGameData might partially work or use cache
+    }
+
+    // Fetch other essential data concurrently, passing REAL campaign data
     const eventsDataPromise = loadRandomEventsData();
     const doctrinesDataPromise = loadDoctrinesData(); // Uses its own cache
-    // Ensure definitions are loaded/cached by loadGameData
-    // Pass dummy campaign data if army books aren't needed for definitions cache
-    const dummyCampaignDataForDefinitions = { armies: [] };
-    const definitionsLoadPromise = loadGameData(
-      dummyCampaignDataForDefinitions
-    );
+    // Ensure definitions are loaded/cached by loadGameData, using actual campaign data
+    const definitionsLoadPromise = loadGameData(campaignData || { armies: [] }); // Pass loaded data or fallback
 
     // Wait for all necessary data
     const [eventsData, doctrinesData, gameDataResult] = await Promise.all([
       eventsDataPromise,
       doctrinesDataPromise,
-      definitionsLoadPromise, // Make sure definitions are loaded/cached
+      definitionsLoadPromise, // Make sure definitions are loaded/cached fully
     ]);
+    // --- END MODIFICATION ---
 
     // Display dynamic sections
     displayRandomEvents(eventsData);
