@@ -5,7 +5,7 @@
  * Validates cache using HEAD request and Last-Modified header.
  */
 
-import { config } from "./config.js"; // Assuming config.js exports CACHE_PREFIX, TIMESTAMP_PREFIX, ARMYFORGE_LIST_API_URL_BASE
+import { config } from "./config.js";
 import { showToast } from "./uiHelpers.js"; // For cache notifications
 
 /**
@@ -23,8 +23,8 @@ async function fetchArmyData(armyId) {
   }
 
   const apiUrl = `${config.ARMYFORGE_LIST_API_URL_BASE}${armyId}`;
-  const cacheKey = `${config.CACHE_PREFIX}${armyId}`; //
-  const timestampKey = `${config.TIMESTAMP_PREFIX}${armyId}`; //
+  const cacheKey = `${config.ARMY_BOOKS_DATA_PREFIX}${armyId}`; //
+  const timestampKey = `${config.ARMY_LIST_TIMESTAMP_PREFIX}${armyId}`; //
 
   console.log(`[Cache] Attempting to fetch data for armyId: ${armyId}`);
 
