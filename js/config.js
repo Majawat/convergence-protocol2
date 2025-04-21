@@ -69,21 +69,21 @@ export const ACTION_BUTTON_CONFIG = {
   Hold: {
     colorTheme: "info", // Bootstrap theme color name
     iconKey: "actionHold", // Key in UI_ICONS
-    baseText: "Hold",
+    baseText: " Hold",
   },
   Advance: {
     colorTheme: "primary",
     iconKey: "actionAdvance",
-    baseText: "Adv",
+    baseText: " Adv",
   },
   Rush: {
     colorTheme: "success",
     iconKey: "actionRush",
-    baseText: "Rush",
+    baseText: " Rush",
   },
   Charge: {
     colorTheme: "danger",
     iconKey: "actionCharge",
-    baseText: "Chg",
+    baseText: " Chg",
   },
 };
