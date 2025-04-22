@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * @fileoverview Handles fetching campaign data, army books, common rules, doctrines,
  * custom definitions, and consolidating rule/term definitions with multiple source tracking.

@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * @fileoverview Logic for the Index/Homepage.
  * Fetches campaign and mission data to display dashboard snapshots.

@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * @fileoverview Contains game rule specific logic functions.
  */

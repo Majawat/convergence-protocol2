@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * @fileoverview Handles saving and loading game state to localStorage using per-army keys and a global game state key.
  */

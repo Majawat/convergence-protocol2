@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * @fileoverview Handles fetching army data from the OPR Army Forge API,
  * implementing client-side caching using sessionStorage.

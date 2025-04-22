@@ -691,7 +691,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     titleH1.textContent = armyInfo.armyName;
     populateArmyInfoModal(armyInfo);
     console.log("DEBUG: Displaying army units...");
-    displayArmyUnits(processedArmy, mainListContainer, {});
+    displayArmyUnits(processedArmy, mainListContainer);
     _initializeWoundHighlights(armyIdToLoad);
     console.log("DEBUG: Units displayed.");
 

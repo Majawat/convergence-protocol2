@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * @fileoverview Configuration constants for the OPR Army Tracker.
  */
