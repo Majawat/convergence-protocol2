@@ -4,7 +4,7 @@
 
 import { config, UI_ICONS, ACTION_BUTTON_CONFIG } from "./config.js"; // Configuration constants
 import { calculateMovement } from "./gameLogic.js"; // Import the new function
-import { getUnitStateValue, getCurrentArmyId, getUnitData } from "./state.js"; // Import state functions
+import { getUnitStateValue, getCurrentArmyId, getUnitState } from "./state.js"; // Import state functions
 
 // --- Helper Functions ---
 
@@ -82,7 +82,14 @@ function _createCasterControlsHTML(casterLevel, initialTokens) {
   return `<div class="caster-section"><div class="caster-controls"><span class="caster-level-badge me-2">Caster(${casterLevel})</span><div class="token-controls"><button type="button" class="btn btn-sm btn-outline-info token-remove-btn" title="Spend Token" ${removeDisabled}>${UI_ICONS.tokenRemove}</button><span class="token-count-display" title="Spell Tokens">${UI_ICONS.spellTokens}<span class="token-count">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span></span><button type="button" class="btn btn-sm btn-outline-info token-add-btn" title="Add Token" ${addDisabled}>${UI_ICONS.tokenAdd}</button></div><button type="button" class="btn btn-sm btn-outline-info view-spells-btn" title="View Spells">${UI_ICONS.viewSpells} View Spells</button></div></div>`;
 }
 
-function _createUnitCardHeaderHTML(baseUnit, hero) {
+/**
+ * @param {object} baseUnit - Processed unit data for the base unit.
+ * @param {object | null} hero - Processed unit data for the joined hero, if any.
+ * @param {string} armyId - The ID of the army this unit belongs to. // <-- Add armyId parameter
+ * @returns {string} HTML string for the card header.
+ * @private
+ */
+function _createUnitCardHeaderHTML(baseUnit, hero, armyId) {
   const title = hero
     ? `${hero.customName || hero.originalName} w/ ${
         baseUnit.customName || baseUnit.originalName
@@ -93,6 +100,7 @@ function _createUnitCardHeaderHTML(baseUnit, hero) {
     : baseUnit.originalName;
   const totalModels = baseUnit.size + (hero ? hero.size : 0);
   const totalPoints = baseUnit.cost + (hero ? hero.cost : 0);
+
   let metaHtml = `<span class="info-item">${totalModels} Models</span><span class="info-separator">|</span><span class="info-item">${totalPoints} pts</span>`;
   if (!hero) {
     const unitBase = baseUnit.bases?.round || baseUnit.bases?.square;
@@ -106,7 +114,93 @@ function _createUnitCardHeaderHTML(baseUnit, hero) {
     }</span>`;
   }
   const statusIndicatorHTML = `<span class="header-status-indicators ms-2 small" data-unit-id="${baseUnit.selectionId}"><span class="fatigue-indicator text-warning" style="display: none;" title="Fatigued"><i class="bi bi-clock-history fs-6"></i></span><span class="shaken-indicator text-warning" style="display: none;" title="Shaken"><i class="bi bi-exclamation-triangle-fill fs-6"></i></span></span>`;
-  return `<div class="card-header bg-body-tertiary"><div class="d-flex justify-content-between align-items-start flex-wrap gap-1"><div class="unit-card-header-content"><h5 class="mb-0 card-title d-flex align-items-center">${title}${statusIndicatorHTML}</h5><small class="text-muted d-block">${subtitle}</small><div class="header-meta-info text-muted mt-1">${metaHtml}</div></div></div><div class="btn-group btn-group-sm header-button-group"><button type="button" class="btn btn-outline-danger wound-apply-btn" title="Apply Wound (Auto-Target)">${UI_ICONS.woundApply}</button><button type="button" class="btn btn-outline-secondary unit-reset-btn" title="Reset Unit State (HP, Status, Action)">${UI_ICONS.woundReset}</button></div></div>`;
+  // Add data attributes to Record Kill button
+  const recordKillButtonHTML = `<button type="button" class="btn btn-outline-danger btn-record-kill" data-army-id="${armyId}" data-unit-id="${baseUnit.selectionId}" title="Record Kill">${UI_ICONS.killCount} <span class="kill-count-badge ms-1 align-middle" title="Kills Recorded">00</span></button>`;
+
+  return `<div class="card-header bg-body-tertiary">
+           <div class="d-flex justify-content-between align-items-start flex-wrap gap-1">
+             <div class="unit-card-header-content">
+               <h5 class="mb-0 card-title d-flex align-items-center">
+                 ${title}
+                 <span>${statusIndicatorHTML}</h5>
+                <small class="text-muted d-block">${subtitle}</small>
+                <div class="header-meta-info text-muted mt-1">${metaHtml}</div>
+                </div>
+                </div>
+                <div class="btn-group btn-group-sm header-button-group">
+                  ${recordKillButtonHTML}
+                  <button type="button" class="btn btn-outline-danger wound-apply-btn" title="Apply Wound (Auto-Target)">${UI_ICONS.woundApply}</button>
+                  <button type="button" class="btn btn-outline-secondary unit-reset-btn" title="Reset Unit State (HP, Status, Action)">${UI_ICONS.woundReset}</button>
+                </div>
+                </div>`;
+}
+
+/**
+ * Updates the kill count badge for a specific unit.
+ * @param {string} armyId - The ID of the army the unit belongs to.
+ * @param {string} unitId - The ID of the unit.
+ */
+function updateKillCountBadge(armyId, unitId) {
+  const cardElement = document.getElementById(`unit-card-${unitId}`);
+  if (!cardElement) return;
+
+  const badgeElement = cardElement.querySelector(".kill-count-badge");
+  if (!badgeElement) return;
+
+  // Get current kill count from state
+  const unitState = getUnitState(armyId, unitId); // Assuming getUnitState is available/imported
+  const killCount = unitState.killsRecorded?.length || 0;
+
+  // Update the badge content (Icon is already in HTML via config)
+  badgeElement.innerHTML = `${killCount}`;
+}
+
+/**
+ * Updates the display area to show who killed a unit, or clears it.
+ * Also adds/removes the class for the undo click handler.
+ * @param {string} armyId - The ID of the army the unit belongs to.
+ * @param {string} unitId - The ID of the unit.
+ */
+function updateKilledByStatusDisplay(armyId, unitId) {
+  const cardElement = document.getElementById(`unit-card-${unitId}`);
+  if (!cardElement) return;
+
+  const unitState = getUnitState(armyId, unitId);
+  const killedByData = unitState.killedBy; // This will be null or an object
+
+  // Find or create a placeholder for the status text
+  let statusDisplayElement = cardElement.querySelector(
+    ".killed-by-status-display"
+  );
+  if (!statusDisplayElement) {
+    statusDisplayElement = document.createElement("div");
+    statusDisplayElement.className =
+      "killed-by-status-display text-muted small mt-1"; // Add classes as needed
+    // Insert it somewhere logical, e.g., after action controls or before models
+    const actionControls = cardElement.querySelector(".action-controls");
+    actionControls?.parentNode?.insertBefore(
+      statusDisplayElement,
+      actionControls.nextSibling
+    );
+  }
+
+  if (killedByData && killedByData.attackerUnitName) {
+    // TODO: Need a way to get the opponent's army name from killedByData.attackerArmyId
+    // For now, just use the ID. You might need to pass lookup data or use another state getter.
+    const opponentArmyName = killedByData.attackerArmyId; // Replace with actual name lookup later
+
+    statusDisplayElement.innerHTML = `Destroyed by: ${killedByData.attackerUnitName} from ${killedByData.attackerArmyName}`;
+    statusDisplayElement.classList.add("clickable-undo-killed-by"); // Make it clickable for undo
+    statusDisplayElement.dataset.armyId = armyId; // Store IDs needed for undo handler
+    statusDisplayElement.dataset.unitId = unitId;
+    statusDisplayElement.title = "Click to undo 'Killed By' status";
+  } else {
+    statusDisplayElement.innerHTML = ""; // Clear the text
+    statusDisplayElement.classList.remove("clickable-undo-killed-by");
+    statusDisplayElement.removeAttribute("data-army-id");
+    statusDisplayElement.removeAttribute("data-unit-id");
+    statusDisplayElement.removeAttribute("title");
+  }
 }
 
 function _createEffectiveStatsHTML(baseUnit, hero) {
@@ -397,10 +491,7 @@ function resetCardUI(cardUnitId) {
 
   // Reset status indicators in header
   updateFatiguedStatusUI(cardUnitId, false);
-  updateShakenStatusUI(cardUnitId, false); // Also resets buttons
-
-  // Note: HP reset is handled separately in _handleResetUnitClick
-  // Note: Card position is NOT reset here, requires manual re-sort or full redraw if needed.
+  updateShakenStatusUI(cardUnitId, false);
 }
 
 // --- Main Display Function ---
@@ -475,6 +566,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
     );
     initialStatesToApply.push({
       unitId: baseUnit.selectionId,
+      armyId: armyId,
       action: initialAction,
       isShaken: initialShaken,
       isFatigued: initialFatigued,
@@ -485,11 +577,11 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
     colDiv.className = "col d-flex";
     const cardDiv = document.createElement("div");
     cardDiv.id = `unit-card-${baseUnit.selectionId}`;
-    cardDiv.dataset.armyId = processedArmy.meta.id;
+    cardDiv.dataset.armyId = armyId;
     cardDiv.dataset.unitId = baseUnit.selectionId;
     cardDiv.className =
       "card unit-card shadow-sm border-secondary-subtle flex-fill";
-    const cardHeaderHTML = _createUnitCardHeaderHTML(baseUnit, hero);
+    const cardHeaderHTML = _createUnitCardHeaderHTML(baseUnit, hero, armyId);
     const effectiveStatsHTML = _createEffectiveStatsHTML(baseUnit, hero);
     const actionControlsHTML = _createActionControlsHTML(baseUnit, hero);
     const modelsHTML = createModelsDisplay(baseUnit, hero);
@@ -605,7 +697,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
 
   requestAnimationFrame(() => {
     initialStatesToApply.forEach(
-      ({ unitId, action, isShaken, isFatigued, status }) => {
+      ({ unitId, armyId, action, isShaken, isFatigued, status }) => {
         updateActionButtonsUI(unitId, action, isShaken); // Handles shaken buttons
         updateFatiguedStatusUI(unitId, isFatigued); // Handles fatigue indicator
         // Apply inactive state if needed
@@ -614,7 +706,8 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         } else if (status === "routed") {
           setUnitInactiveUI(unitId, "ROUTED");
         }
-        // Note: Moving the card happens within setUnitInactiveUI now
+        updateKillCountBadge(armyId, unitId);
+        updateKilledByStatusDisplay(armyId, unitId);
       }
     );
   });
@@ -630,8 +723,10 @@ export {
   resetAllActionButtonsUI,
   updateFatiguedStatusUI,
   updateShakenStatusUI,
-  collapseDestroyedCard, // Keep export name
-  collapseRoutedCard, // Keep export name
+  collapseDestroyedCard,
+  collapseRoutedCard,
   resetCardUI,
-  setUnitInactiveUI, // Export new helper
+  setUnitInactiveUI,
+  updateKillCountBadge,
+  updateKilledByStatusDisplay,
 };

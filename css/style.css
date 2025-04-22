@@ -1074,3 +1074,33 @@ h2[data-bs-toggle="collapse"][aria-expanded="true"]::after {
 section[id] {
   scroll-margin-top: 70px;
 }
+
+/* Style for Kill Count Badge */
+.kill-count-badge {
+  vertical-align: middle; /* Align with text */
+  padding-right: 0.2em;
+}
+
+/* Style for the Record Kill button if needed */
+.btn-record-kill {
+  /* Add specific styles if needed, e.g., padding, margin */
+  font-size: 0.8em; /* Make icon button smaller maybe */
+  padding: 0.2rem 0.4rem;
+  white-space: nowrap;
+}
+
+/* Style for the Killed By status text */
+.killed-by-status-display {
+  /* Add styles if needed, e.g., margin, padding */
+  margin: auto;
+}
+
+/* Make the undo clickable text obvious */
+.clickable-undo-killed-by {
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.clickable-undo-killed-by:hover {
+  color: var(--bs-primary); /* Or another hover color */
+  text-decoration-color: var(--bs-primary);
+}

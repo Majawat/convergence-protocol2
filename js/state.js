@@ -134,7 +134,7 @@ export function getMaxUnderdogPoints(armyId) {
  * @param {string} unitId - The ID of the unit.
  * @returns {object} The unit's state object.
  */
-function getUnitState(armyId, unitId) {
+export function getUnitState(armyId, unitId) {
   const armyState = getArmyState(armyId);
   return (
     armyState.units?.[unitId] || {
@@ -609,7 +609,7 @@ export function addRecordedKill(
  * The corresponding 'killsRecorded' update on the attacker should be handled separately (e.g., by the calling event handler).
  * @param {string} victimArmyId - The ID of the army the victim belongs to.
  * @param {string} victimUnitId - The ID of the unit that was killed.
- * @param {object | null} attackerDetails - Object containing { attackerUnitId, attackerUnitName, attackerArmyId, round } or null to clear.
+ * @param {{ attackerUnitId: string, attackerUnitName: string, attackerArmyName: string, attackerArmyId: string, round: number } | null} attackerDetails - Object containing { attackerUnitId, attackerUnitName, attackerArmyName, attackerArmyId, round } or null to clear.
  * @returns {boolean} True if successful, false otherwise.
  */
 export function setKilledByStatus(victimArmyId, victimUnitId, attackerDetails) {
