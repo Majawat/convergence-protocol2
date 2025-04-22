@@ -643,6 +643,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             limitedWeaponUsed: false,
             tokens: unit.casterLevel > 0 ? 0 : 0,
             models: {},
+            killsRecorded: [],
+            killedBy: null,
           };
           unit.models.forEach((model) => {
             existingState.units[unitId].models[model.modelId] = {

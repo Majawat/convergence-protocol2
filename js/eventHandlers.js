@@ -283,6 +283,8 @@ function handleStartRoundClick(armyId) {
         limitedWeaponUsed: false,
         tokens: 0,
         models: {},
+        killsRecorded: [],
+        killedBy: null,
       };
       stateChanged = true;
     }

@@ -146,6 +146,8 @@ function getUnitState(armyId, unitId) {
       limitedWeaponUsed: false,
       tokens: 0,
       models: {},
+      killsRecorded: [],
+      killedBy: null,
     }
   );
 }
@@ -353,6 +355,8 @@ export function updateUnitStateValue(armyId, unitId, key, value) {
       limitedWeaponUsed: false,
       tokens: 0,
       models: {},
+      killsRecorded: [],
+      killedBy: null,
     };
     console.warn(`Initialized missing unit state for ${unitId} during update.`);
   }
@@ -385,6 +389,8 @@ export function updateModelStateValue(armyId, unitId, modelId, key, value) {
       limitedWeaponUsed: false,
       tokens: 0,
       models: {},
+      killsRecorded: [],
+      killedBy: null,
     };
   }
   if (!currentState.units[unitId].models) {
@@ -538,4 +544,198 @@ export function getJoinedHeroData(baseUnitId) {
   );
 
   return heroId ? armyData.unitMap[heroId] : null;
+}
+
+/**
+ * Adds a kill record to the specified attacker unit's state.
+ * NOTE: This function ONLY updates the attacker's 'killsRecorded'.
+ * The corresponding 'killedBy' update on the victim should be handled separately (e.g., by the calling event handler).
+ * @param {string} attackingArmyId - The ID of the army making the kill.
+ * @param {string} attackerUnitId - The ID of the unit making the kill.
+ * @param {object} victimDetails - Object containing { victimUnitId, victimUnitName, victimArmyId, victimIsHero, round }.
+ * @returns {boolean} True if successful, false otherwise.
+ */
+export function addRecordedKill(
+  attackingArmyId,
+  attackerUnitId,
+  victimDetails
+) {
+  if (
+    !attackingArmyId ||
+    !attackerUnitId ||
+    !victimDetails ||
+    !victimDetails.victimUnitId
+  ) {
+    console.error("addRecordedKill: Missing required parameters.", {
+      attackingArmyId,
+      attackerUnitId,
+      victimDetails,
+    });
+    return false;
+  }
+
+  try {
+    const attackerArmyState = getArmyState(attackingArmyId); // Load current state
+
+    // Ensure the unit exists in the state (getUnitState initializes if needed)
+    const attackerUnitState = getUnitState(attackingArmyId, attackerUnitId);
+    if (!attackerArmyState.units[attackerUnitId]) {
+      attackerArmyState.units[attackerUnitId] = attackerUnitState; // Add if it was newly initialized
+    }
+
+    // Add the kill record (ensure killsRecorded array exists)
+    if (!Array.isArray(attackerArmyState.units[attackerUnitId].killsRecorded)) {
+      attackerArmyState.units[attackerUnitId].killsRecorded = [];
+    }
+    attackerArmyState.units[attackerUnitId].killsRecorded.push(victimDetails);
+
+    saveArmyState(attackingArmyId, attackerArmyState); // Save the updated state
+    console.log(
+      `Kill recorded for ${attackerUnitId} (Army: ${attackingArmyId}) -> Victim: ${victimDetails.victimUnitId}`
+    );
+    return true;
+  } catch (error) {
+    console.error(
+      `Error in addRecordedKill for attacker ${attackerUnitId}:`,
+      error
+    );
+    return false;
+  }
+}
+
+/**
+ * Sets the 'killedBy' status for the specified victim unit.
+ * NOTE: This function ONLY updates the victim's 'killedBy'.
+ * The corresponding 'killsRecorded' update on the attacker should be handled separately (e.g., by the calling event handler).
+ * @param {string} victimArmyId - The ID of the army the victim belongs to.
+ * @param {string} victimUnitId - The ID of the unit that was killed.
+ * @param {object | null} attackerDetails - Object containing { attackerUnitId, attackerUnitName, attackerArmyId, round } or null to clear.
+ * @returns {boolean} True if successful, false otherwise.
+ */
+export function setKilledByStatus(victimArmyId, victimUnitId, attackerDetails) {
+  if (!victimArmyId || !victimUnitId) {
+    console.error("setKilledByStatus: Missing required parameters.", {
+      victimArmyId,
+      victimUnitId,
+    });
+    return false;
+  }
+  // Allow null to clear the status
+  if (
+    attackerDetails &&
+    (!attackerDetails.attackerUnitId || !attackerDetails.attackerArmyId)
+  ) {
+    console.error("setKilledByStatus: Invalid attackerDetails provided.", {
+      attackerDetails,
+    });
+    return false;
+  }
+
+  try {
+    const victimArmyState = getArmyState(victimArmyId);
+
+    // Ensure the unit exists in the state
+    const victimUnitState = getUnitState(victimArmyId, victimUnitId);
+    if (!victimArmyState.units[victimUnitId]) {
+      victimArmyState.units[victimUnitId] = victimUnitState; // Add if newly initialized
+    }
+
+    victimArmyState.units[victimUnitId].killedBy = attackerDetails; // Set or clear the status
+
+    saveArmyState(victimArmyId, victimArmyState);
+    if (attackerDetails) {
+      console.log(
+        `KilledBy status set for ${victimUnitId} (Army: ${victimArmyId}) <- Attacker: ${attackerDetails.attackerUnitId}`
+      );
+    } else {
+      console.log(
+        `KilledBy status cleared for ${victimUnitId} (Army: ${victimArmyId})`
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error(
+      `Error in setKilledByStatus for victim ${victimUnitId}:`,
+      error
+    );
+    return false;
+  }
+}
+
+/**
+ * Removes a specific kill record from the attacker unit's state.
+ * NOTE: This function ONLY updates the attacker's 'killsRecorded'.
+ * The corresponding 'killedBy' status on the victim should be cleared separately (e.g., by the calling event handler).
+ * @param {string} attackingArmyId - The ID of the army that made the kill.
+ * @param {string} attackerUnitId - The ID of the unit that made the kill.
+ * @param {string} victimUnitIdToRemove - The ID of the victim unit whose kill record should be removed.
+ * @returns {boolean} True if successful, false otherwise.
+ */
+export function removeRecordedKill(
+  attackingArmyId,
+  attackerUnitId,
+  victimUnitIdToRemove
+) {
+  if (!attackingArmyId || !attackerUnitId || !victimUnitIdToRemove) {
+    console.error("removeRecordedKill: Missing required parameters.", {
+      attackingArmyId,
+      attackerUnitId,
+      victimUnitIdToRemove,
+    });
+    return false;
+  }
+
+  try {
+    const attackerArmyState = getArmyState(attackingArmyId);
+
+    if (
+      !attackerArmyState.units[attackerUnitId] ||
+      !Array.isArray(attackerArmyState.units[attackerUnitId].killsRecorded)
+    ) {
+      console.warn(
+        `removeRecordedKill: Attacker unit ${attackerUnitId} or its killsRecorded array not found.`
+      );
+      return false; // Nothing to remove
+    }
+
+    const initialKillCount =
+      attackerArmyState.units[attackerUnitId].killsRecorded.length;
+    attackerArmyState.units[attackerUnitId].killsRecorded =
+      attackerArmyState.units[attackerUnitId].killsRecorded.filter(
+        (kill) => kill.victimUnitId !== victimUnitIdToRemove
+      );
+    const finalKillCount =
+      attackerArmyState.units[attackerUnitId].killsRecorded.length;
+
+    if (initialKillCount > finalKillCount) {
+      saveArmyState(attackingArmyId, attackerArmyState);
+      console.log(
+        `Kill record removed for ${attackerUnitId} (Army: ${attackingArmyId}) -> Victim: ${victimUnitIdToRemove}`
+      );
+      return true;
+    } else {
+      console.warn(
+        `removeRecordedKill: Kill record for victim ${victimUnitIdToRemove} not found for attacker ${attackerUnitId}.`
+      );
+      return false; // Indicate nothing was removed
+    }
+  } catch (error) {
+    console.error(
+      `Error in removeRecordedKill for attacker ${attackerUnitId}:`,
+      error
+    );
+    return false;
+  }
+}
+
+/**
+ * Clears the 'killedBy' status for the specified victim unit. (Helper function - simply calls setKilledByStatus with null).
+ * NOTE: This function ONLY clears the victim's 'killedBy'.
+ * The corresponding kill record on the attacker should be removed separately (e.g., by the calling event handler).
+ * @param {string} victimArmyId - The ID of the army the victim belongs to.
+ * @param {string} victimUnitId - The ID of the unit whose killedBy status should be cleared.
+ * @returns {boolean} True if successful, false otherwise.
+ */
+export function clearKilledByStatus(victimArmyId, victimUnitId) {
+  return setKilledByStatus(victimArmyId, victimUnitId, null);
 }
