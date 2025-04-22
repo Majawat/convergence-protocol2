@@ -15,6 +15,8 @@ import {
   getArmyBooksData,
   getCurrentArmyHeroTargets,
   getCurrentArmyId,
+  getAllLoadedArmyData,
+  setKilledByStatus,
   getCurrentRound,
   getCommandPoints,
   getMaxCommandPoints,
@@ -26,6 +28,7 @@ import {
   updateModelStateValue,
   updateUnitStateValue,
   incrementCurrentRound,
+  addRecordedKill,
   setCommandPoints,
   setSelectedDoctrine,
   setUnderdogPoints,
@@ -42,6 +45,10 @@ import {
   collapseDestroyedCard,
   collapseRoutedCard,
   resetCardUI,
+  createOpponentSelectionModal,
+  populateOpponentUnitDropdown,
+  updateKillCountBadge,
+  updateKilledByStatusDisplay,
 } from "./ui.js";
 import {
   showToast,
@@ -54,7 +61,7 @@ import {
   handleFocusReturn,
   updateUnderdogPointsDisplay,
   setElementToFocusAfterClose,
-  updateOffcanvasUnitStatus, // *** ADDED IMPORT ***
+  updateOffcanvasUnitStatus,
 } from "./uiHelpers.js";
 
 // --- Internal Helper Functions ---
@@ -1227,6 +1234,7 @@ function _handleUnderdogPointAdjustClick(adjustment) {
 function handleInteractionClick(event) {
   const unitCard = event.target.closest(".unit-card");
   const spellModal = event.target.closest("#viewSpellsModal");
+  const opponentModal = event.target.closest("#opponentSelectModal");
   const stratagemModal = event.target.closest("#stratagemModal");
   const upDisplay = event.target.closest("#underdog-points-display");
   const resetArmyButton = event.target.closest("#reset-army-data-button");
@@ -1281,6 +1289,7 @@ function handleInteractionClick(event) {
     const actionButton = event.target.closest(".action-btn");
     const resolveMeleeButton = event.target.closest(".resolve-melee-btn");
     const moraleWoundsButton = event.target.closest(".morale-wounds-btn");
+    const recordKillButton = event.target.closest(".btn-record-kill");
 
     // Only allow reset button on inactive cards
     if (isInactive) {
@@ -1308,6 +1317,9 @@ function handleInteractionClick(event) {
       _handleResolveMeleeClick(resolveMeleeButton, armyId, cardUnitId);
     else if (moraleWoundsButton)
       _handleMoraleWoundsClick(moraleWoundsButton, armyId, cardUnitId);
+    else if (recordKillButton) {
+      _handleRecordKillClick(event);
+    }
 
     return; // Stop processing after handling card interaction
   }
@@ -1336,6 +1348,18 @@ function handleInteractionClick(event) {
     }
     return; // Stop processing after handling stratagem modal interaction
   }
+
+  // --- Opponent Selection Modal Interactions ---
+  if (opponentModal) {
+    const confirmOpponentButton = event.target.closest(
+      "#confirm-opponent-selection-btn"
+    );
+    if (confirmOpponentButton) {
+      console.log("DEBUG: Click detected on confirm button via delegation."); // <-- ADD THIS LOG
+      _handleConfirmOpponentSelection(event); // Check if this function name is correct
+      return; // Added return just in case, though likely not needed if last check
+    }
+  }
 }
 
 /**
@@ -1355,6 +1379,171 @@ function updateScreenDiagnostics() {
     themeDisplay.textContent = `Theme: ${currentTheme}`;
   }
 }
+
+/**
+ * Handles clicks on the "Record Kill" button on a unit card.
+ * @param {Event} event - The click event object.
+ */
+function _handleRecordKillClick(event) {
+  const button = event.target.closest(".btn-record-kill");
+  if (!button) return;
+
+  const { armyId, unitId } = button.dataset;
+  if (!armyId || !unitId) {
+    console.error("Missing data attributes on record kill button.");
+    return;
+  }
+
+  console.log(
+    `Record Kill button clicked for Unit: ${unitId}, Army: ${armyId}`
+  );
+  createOpponentSelectionModal(unitId, armyId, "recordKill");
+}
+
+/**
+ * Handles changes on the opponent army dropdown in the selection modal.
+ * @param {Event} event - The change event object.
+ */
+function _handleOpponentArmyChange(event) {
+  const armySelect = event.target;
+  if (!armySelect || armySelect.id !== "modal-opponent-army-select") return;
+
+  const selectedOpponentArmyId = armySelect.value;
+  const modal = armySelect.closest(".modal");
+  const unitSelect = modal
+    ? modal.querySelector("#modal-victim-unit-select")
+    : null;
+
+  if (unitSelect) {
+    populateOpponentUnitDropdown(unitSelect, selectedOpponentArmyId);
+  } else {
+    console.error("Could not find victim unit select element in modal.");
+  }
+}
+
+/**
+ * Handles clicks on the "Confirm" button in the opponent selection modal.
+ * @param {Event} event - The click event object.
+ */
+function _handleConfirmOpponentSelection(event) {
+  console.log("Confirm opponent selection clicked.");
+  const confirmButton = event.target;
+  const modalElement = confirmButton.closest(".modal");
+  if (!modalElement) return;
+
+  const form = modalElement.querySelector("#opponent-select-form");
+  if (!form) return;
+
+  // Retrieve data stored in the modal
+  const actionType = form.querySelector("#modal-action-type")?.value;
+  const triggeringArmyId = form.querySelector(
+    "#modal-triggering-army-id"
+  )?.value;
+  const triggeringUnitId = form.querySelector(
+    "#modal-triggering-unit-id"
+  )?.value;
+  const opponentArmyId = form.querySelector(
+    "#modal-opponent-army-select"
+  )?.value;
+  const victimUnitId = form.querySelector("#modal-victim-unit-select")?.value; // For recordKill, this is the victim
+
+  // Basic validation
+  if (
+    !actionType ||
+    !triggeringArmyId ||
+    !triggeringUnitId ||
+    !opponentArmyId ||
+    !victimUnitId
+  ) {
+    showToast(
+      "Please select both an opponent army and a victim unit.",
+      "Selection Incomplete"
+    );
+    return;
+  }
+
+  const currentRound = getCurrentRound();
+
+  // --- Logic for 'recordKill' action ---
+  if (actionType === "recordKill") {
+    const attackerArmyId = triggeringArmyId;
+    const attackerUnitId = triggeringUnitId;
+
+    // Get necessary details for state functions
+    const allArmies = getAllLoadedArmyData();
+    const victimUnitData = allArmies?.[opponentArmyId]?.unitMap?.[victimUnitId];
+    const attackerUnitData =
+      allArmies?.[attackerArmyId]?.unitMap?.[attackerUnitId];
+
+    if (!victimUnitData || !attackerUnitData) {
+      showToast("Error: Could not find unit data.", "Data Error");
+      console.error("Missing unit data for kill record:", {
+        victimUnitData,
+        attackerUnitData,
+      });
+      return;
+    }
+
+    const victimDetails = {
+      victimUnitId: victimUnitId,
+      victimUnitName: victimUnitData.customName || victimUnitData.originalName,
+      victimArmyId: opponentArmyId,
+      victimIsHero: victimUnitData.isHero || false,
+      round: currentRound,
+    };
+
+    const attackerDetails = {
+      attackerUnitId: attackerUnitId,
+      attackerUnitName:
+        attackerUnitData.customName || attackerUnitData.originalName,
+      attackerArmyId: attackerArmyId,
+      round: currentRound,
+    };
+
+    // Call state functions (Handler calls both)
+    const killRecorded = addRecordedKill(
+      attackerArmyId,
+      attackerUnitId,
+      victimDetails
+    );
+    const killedBySet = setKilledByStatus(
+      opponentArmyId,
+      victimUnitId,
+      attackerDetails
+    );
+
+    if (killRecorded && killedBySet) {
+      // Update UI
+      updateKillCountBadge(attackerArmyId, attackerUnitId);
+      updateKilledByStatusDisplay(opponentArmyId, victimUnitId);
+      showToast("Kill recorded successfully!", "Success");
+    } else {
+      showToast("Failed to update state for kill record.", "Error");
+      // Optional: Add logic to revert partial state changes if one failed
+    }
+  } else if (actionType === "setKilledBy") {
+    // TODO: Implement logic for 'setKilledBy' in Step 4
+    console.log("Set Killed By action confirmation needs implementation.");
+  } else {
+    console.error("Unknown action type in modal confirmation:", actionType);
+  }
+
+  // Close the modal
+  const modalInstance = bootstrap.Modal.getInstance(modalElement);
+  if (modalInstance) {
+    modalInstance.hide();
+  }
+}
+
+// --- Add Change Listener for Modal Dropdown ---
+// It's often easier to add specific listeners for modals when they are shown,
+// but for simplicity here, we can use delegation if the modal container exists permanently.
+// If the container is cleared, this delegated listener might need adjustment.
+document.addEventListener("change", (event) => {
+  if (event.target && event.target.id === "modal-opponent-army-select") {
+    _handleOpponentArmyChange(event);
+  }
+});
 
 /**
  * Sets up all necessary event listeners for the application.

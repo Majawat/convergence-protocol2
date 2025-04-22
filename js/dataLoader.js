@@ -508,5 +508,5 @@ export {
   loadMissionsData,
   loadBattleReport,
   loadGameData,
-  _loadDoctrinesDataInternal as loadDoctrinesData, // Export the internal function correctly
+  _loadDoctrinesDataInternal as loadDoctrinesData,
 };

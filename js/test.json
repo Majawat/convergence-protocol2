@@ -1,0 +1,179 @@
+{
+  "listPoints": 2000,
+  "units": {
+    "vaQwO": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": { "vaQwO_model_1": { "currentHp": 3, "name": null } },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "HyvQz": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "HyvQz_model_1": { "currentHp": 1, "name": null },
+        "HyvQz_model_2": { "currentHp": 1, "name": null },
+        "HyvQz_model_3": { "currentHp": 1, "name": null },
+        "HyvQz_model_4": { "currentHp": 1, "name": null },
+        "HyvQz_model_5": { "currentHp": 1, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "i0JVw": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "i0JVw_model_1": { "currentHp": 3, "name": null },
+        "i0JVw_model_2": { "currentHp": 3, "name": null },
+        "i0JVw_model_3": { "currentHp": 3, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "YLKIO": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": { "YLKIO_model_1": { "currentHp": 6, "name": null } },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "6S1v5": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "6S1v5_model_1": { "currentHp": 3, "name": null },
+        "6S1v5_model_2": { "currentHp": 3, "name": null },
+        "6S1v5_model_3": { "currentHp": 3, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "ZQfqh": {
+      "status": "destroyed",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "ZQfqh_model_1": { "currentHp": 0, "name": null },
+        "ZQfqh_model_2": { "currentHp": 0, "name": null },
+        "ZQfqh_model_3": { "currentHp": 0, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": {
+        "attackerUnitId": "BSRks",
+        "attackerUnitName": "BItchFmalje McGeetits",
+        "attackerArmyName": "abBlulbPbblwkdpGbalyusbwl  albBelkjpurbsluglitlke bludbablerpouberlkjd",
+        "attackerArmyId": "Xo19MAwQPGbs",
+        "round": 69
+      },
+      "attackedInMeleeThisRound": false
+    },
+    "BSRks": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "BSRks_model_1": { "currentHp": 1, "name": null },
+        "BSRks_model_2": { "currentHp": 1, "name": null },
+        "BSRks_model_3": { "currentHp": 1, "name": null },
+        "BSRks_model_4": { "currentHp": 1, "name": null },
+        "BSRks_model_5": { "currentHp": 1, "name": null },
+        "BSRks_model_6": { "currentHp": 1, "name": null },
+        "BSRks_model_7": { "currentHp": 1, "name": null },
+        "BSRks_model_8": { "currentHp": 1, "name": null },
+        "BSRks_model_9": { "currentHp": 1, "name": null },
+        "BSRks_model_10": { "currentHp": 1, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "qBdnz": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "qBdnz_model_1": { "currentHp": 1, "name": null },
+        "qBdnz_model_2": { "currentHp": 1, "name": null },
+        "qBdnz_model_3": { "currentHp": 1, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "g0e15": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "g0e15_model_1": { "currentHp": 1, "name": null },
+        "g0e15_model_2": { "currentHp": 1, "name": null },
+        "g0e15_model_3": { "currentHp": 1, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "VCKal": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": { "VCKal_model_1": { "currentHp": 9, "name": null } },
+      "killsRecorded": [],
+      "killedBy": null
+    },
+    "4JAG5": {
+      "status": "active",
+      "shaken": false,
+      "fatigued": false,
+      "action": null,
+      "limitedWeaponUsed": false,
+      "tokens": 0,
+      "models": {
+        "4JAG5_model_1": { "currentHp": 3, "name": null },
+        "4JAG5_model_2": { "currentHp": 3, "name": null },
+        "4JAG5_model_3": { "currentHp": 3, "name": null }
+      },
+      "killsRecorded": [],
+      "killedBy": null
+    }
+  },
+  "commandPoints": 8,
+  "selectedDoctrine": null,
+  "maxCommandPoints": 8,
+  "underdogPoints": 0,
+  "maxUnderdogPoints": 0
+}

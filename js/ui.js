@@ -3,9 +3,14 @@
  */
 
 import { config, UI_ICONS, ACTION_BUTTON_CONFIG } from "./config.js"; // Configuration constants
-import { calculateMovement } from "./gameLogic.js"; // Import the new function
-import { getUnitStateValue, getCurrentArmyId, getUnitState } from "./state.js"; // Import state functions
-
+import { calculateMovement } from "./gameLogic.js";
+import {
+  getUnitStateValue,
+  getCurrentArmyId,
+  getUnitState,
+  getAllLoadedArmyData,
+  getUnitData,
+} from "./state.js";
 // --- Helper Functions ---
 
 function _formatRule(rule, filterCaster) {
@@ -447,12 +452,12 @@ function setUnitInactiveUI(cardUnitId, statusText) {
   if (cardBody && !cardBody.querySelector(".status-text-overlay")) {
     const overlay = document.createElement("div");
     overlay.className = "status-text-overlay"; // Use class for styling via CSS
-    
+
     const statusLine = document.createElement("div");
     statusLine.textContent = statusText;
     statusLine.className = "status-line"; // Use class for styling via CSS
     overlay.appendChild(statusLine); // Put the status text inside a wrapper
-    
+
     cardBody.appendChild(overlay); // Append to body of card
   }
 
@@ -496,6 +501,163 @@ function resetCardUI(cardUnitId) {
   // Reset status indicators in header
   updateFatiguedStatusUI(cardUnitId, false);
   updateShakenStatusUI(cardUnitId, false);
+}
+
+/**
+ * Populates the victim unit dropdown based on the selected opponent army.
+ * @param {HTMLSelectElement} unitSelectElement - The <select> element for victim units.
+ * @param {string} opponentArmyId - The ID of the selected opponent army.
+ */
+function populateOpponentUnitDropdown(unitSelectElement, opponentArmyId) {
+  if (!unitSelectElement) return;
+  unitSelectElement.innerHTML =
+    '<option value="" selected disabled>-- Select Victim Unit --</option>'; // Clear and add placeholder
+  unitSelectElement.disabled = true; // Disable initially
+
+  if (!opponentArmyId) return; // No opponent selected
+
+  const allArmies = getAllLoadedArmyData(); // Get all loaded army data
+  const opponentArmyData = allArmies ? allArmies[opponentArmyId] : null;
+
+  if (opponentArmyData && opponentArmyData.units) {
+    opponentArmyData.units.forEach((unit) => {
+      // Optional: Filter out already destroyed units if desired
+      // const unitState = getUnitState(opponentArmyId, unit.selectionId);
+      // if (unitState.status === 'active') { ... }
+
+      const option = document.createElement("option");
+      option.value = unit.selectionId; // Use selectionId as value
+      option.textContent = unit.customName || unit.originalName;
+      unitSelectElement.appendChild(option);
+    });
+
+    if (opponentArmyData.units.length > 0) {
+      unitSelectElement.disabled = false; // Enable if units exist
+    }
+  } else {
+    console.warn(`No unit data found for opponent army ID: ${opponentArmyId}`);
+    // Keep dropdown disabled
+  }
+}
+
+/**
+ * Creates and displays the modal for selecting an opponent unit (for kill/killedBy actions).
+ * @param {string} triggeringUnitId - The ID of the unit initiating the action (attacker or victim).
+ * @param {string} triggeringArmyId - The ID of the army initiating the action.
+ * @param {'recordKill' | 'setKilledBy'} actionType - The type of action being performed.
+ */
+function createOpponentSelectionModal(
+  triggeringUnitId,
+  triggeringArmyId,
+  actionType
+) {
+  const modalContainer = document.getElementById(
+    "opponent-select-modal-container"
+  );
+  if (!modalContainer) {
+    console.error(
+      "Modal container #opponent-select-modal-container not found."
+    );
+    return;
+  }
+
+  const triggeringUnitData = getUnitData(triggeringUnitId); // Get data for the triggering unit
+  const triggeringUnitName = triggeringUnitData
+    ? triggeringUnitData.customName || triggeringUnitData.originalName
+    : triggeringUnitId;
+
+  let modalTitle = "";
+  let confirmButtonText = "";
+  if (actionType === "recordKill") {
+    modalTitle = `Record Kill for ${triggeringUnitName}`;
+    confirmButtonText = "Confirm Kill";
+  } else if (actionType === "setKilledBy") {
+    modalTitle = `Who killed ${triggeringUnitName}?`;
+    confirmButtonText = "Confirm Killer";
+  } else {
+    console.error(
+      "Invalid actionType for opponent selection modal:",
+      actionType
+    );
+    return;
+  }
+
+  // Build opponent army options
+  const allArmies = getAllLoadedArmyData();
+  console.log("Data for opponent modal:", allArmies);
+
+  let opponentArmyOptionsHTML =
+    '<option value="" selected disabled>-- Select Opponent Army --</option>';
+  console.log(
+    "Building opponent options. Triggering Army ID:",
+    triggeringArmyId
+  );
+
+  if (allArmies) {
+    Object.entries(allArmies).forEach(([armyId, armyData]) => {
+      console.log("Checking army:", armyId);
+      if (armyId !== triggeringArmyId) {
+        // Exclude self
+        const armyName = armyData.meta?.name || `Army ${armyId}`;
+        opponentArmyOptionsHTML += `<option value="${armyId}">${armyName}</option>`;
+        console.log("Added opponent:", armyId);
+      }
+    });
+  }
+
+  // Modal HTML Structure (using Bootstrap)
+  const modalId = "opponentSelectModal"; // Consistent ID for the modal
+  const modalHTML = `
+    <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="${modalId}Label">${modalTitle}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="opponent-select-form">
+              <input type="hidden" id="modal-action-type" value="${actionType}">
+              <input type="hidden" id="modal-triggering-army-id" value="${triggeringArmyId}">
+              <input type="hidden" id="modal-triggering-unit-id" value="${triggeringUnitId}">
+
+              <div class="mb-3">
+                <label for="modal-opponent-army-select" class="form-label">Opponent Army:</label>
+                <select class="form-select" id="modal-opponent-army-select" required>
+                  ${opponentArmyOptionsHTML}
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="modal-victim-unit-select" class="form-label">Victim Unit:</label>
+                <select class="form-select" id="modal-victim-unit-select" required disabled>
+                  <option value="" selected disabled>-- Select Opponent Army First --</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirm-opponent-selection-btn">${confirmButtonText}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add modal HTML to container and show it
+  modalContainer.innerHTML = modalHTML;
+  const modalElement = document.getElementById(modalId);
+  if (modalElement) {
+    const modalInstance = new bootstrap.Modal(modalElement);
+    // Clear previous modal data on hide
+    modalElement.addEventListener("hidden.bs.modal", () => {
+      modalContainer.innerHTML = ""; // Remove modal HTML from DOM when closed
+    });
+    modalInstance.show();
+  } else {
+    console.error("Failed to find modal element after creation.");
+  }
 }
 
 // --- Main Display Function ---
@@ -717,7 +879,6 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
   });
 }
 
-// Corrected Exports
 export {
   displayArmyUnits,
   updateModelDisplay,
@@ -733,4 +894,6 @@ export {
   setUnitInactiveUI,
   updateKillCountBadge,
   updateKilledByStatusDisplay,
+  createOpponentSelectionModal,
+  populateOpponentUnitDropdown,
 };

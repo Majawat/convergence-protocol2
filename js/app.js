@@ -20,6 +20,7 @@ import {
   setDoctrinesData,
   getDoctrinesData,
   setLoadedArmyData,
+  setCurrentArmyId,
   getLoadedArmyData,
   setUnderdogPoints,
   getUnderdogPoints,
@@ -41,6 +42,7 @@ import {
   getCurrentArmyId,
   getMaxCommandPoints,
   getArmyListPoints,
+  storeAllProcessedArmies,
   updateArmyListPoints,
   getCurrentArmyHeroTargets,
   getCurrentArmyUnitMap,
@@ -483,6 +485,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Step 2: Determine Army to Load
   const urlParams = new URLSearchParams(window.location.search);
   const armyIdToLoad = urlParams.get("armyId");
+  setCurrentArmyId(armyIdToLoad); // Set the current army ID in state
   const armyInfo = armyIdToLoad
     ? campaignArmies.find((a) => a.armyForgeID === armyIdToLoad)
     : null;
@@ -564,6 +567,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Data Load Warning"
       );
     }
+
+    //Store ALL processed data in state
+    storeAllProcessedArmies(allProcessedArmies);
+
     // Check if the currently viewed army failed to load/process
     const processedArmy = allProcessedArmies[armyIdToLoad];
     if (!processedArmy) {

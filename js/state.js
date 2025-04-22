@@ -15,6 +15,7 @@ let armyBooksData = {};
 let commonRulesData = {};
 let doctrinesData = null;
 let loadedArmiesData = {};
+let getCurrentArmyID = null;
 
 // --- Getters ---
 
@@ -66,8 +67,16 @@ export function getLoadedArmyData() {
 
 /** Gets the ID of the currently loaded army, if any */
 export function getCurrentArmyId() {
-  const keys = Object.keys(loadedArmiesData);
-  return keys.length > 0 ? keys[0] : null;
+  return getCurrentArmyID || null; // Return null if not set
+}
+
+/**
+ * Sets the ID of the army currently being viewed in the UI.
+ * @param {string | null} armyId The ID of the army being viewed, or null if none.
+ */
+export function setCurrentArmyId(armyId) {
+  console.log(`DEBUG: Setting currently viewed army ID to: ${armyId}`);
+  getCurrentArmyID = armyId;
 }
 
 // --- Per-Army State Getters (Load from storage on demand) ---
@@ -279,9 +288,37 @@ export function setDefinitions(data) {
   }
 }
 
+/**
+ * Gets the entire object containing all currently loaded processed army data,
+ * keyed by armyId.
+ * @returns {object} An object where keys are armyIds and values are processed army data objects.
+ */
+export function getAllLoadedArmyData() {
+  return loadedArmiesData;
+}
+
+/**
+ * Stores the processed data for ALL loaded armies in the runtime state.
+ * This makes opponent data available for features like kill tracking modals.
+ * @param {Record<string, object>} allProcessedData - An object where keys are armyIds
+ * and values are the processed army data objects.
+ */
+export function storeAllProcessedArmies(allProcessedData) {
+  if (!allProcessedData || typeof allProcessedData !== "object") {
+    console.error("storeAllProcessedArmies: Invalid data provided.");
+    loadedArmiesData = {}; // Reset if invalid data given
+    return;
+  }
+  console.log(
+    `DEBUG: Storing processed data for ${
+      Object.keys(allProcessedData).length
+    } armies in runtime state.`
+  );
+  loadedArmiesData = allProcessedData; // Assign the whole object
+}
+
 /** Stores the processed army data and initializes/updates basic state */
 export function setLoadedArmyData(armyId, processedData) {
-  loadedArmiesData = {}; // Clear previous armies
   if (armyId && processedData) {
     loadedArmiesData[armyId] = processedData;
 
