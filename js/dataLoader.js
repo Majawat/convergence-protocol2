@@ -3,12 +3,12 @@
  * @fileoverview Handles fetching campaign data, army books, common rules, doctrines,
  * custom definitions, and consolidating rule/term definitions with multiple source tracking.
  */
+import { fetchArmyBookData } from "./api.js";
 import { config } from "./config.js";
 import { setDefinitions } from "./state.js"; // Import setter to save definitions
 
 // --- Public Fetch Functions ---
-// (loadCampaignData, loadRandomEventsData, loadMissionsData, loadBattleReport remain the same)
-// ... previous fetch functions ...
+
 /** Fetches campaign data. */
 async function loadCampaignData() {
   try {
@@ -189,18 +189,33 @@ async function _loadCommonDataInternal(gameSystemId) {
   }
 }
 
-/** Fetches army book data from API. */
+/** Fetches army book data from API using the caching mechanism in api.js. */
 async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
-  const url = `${config.ARMYFORGE_BOOK_API_URL_BASE}${factionId}?gameSystem=${gameSystem}`;
+  console.log(
+    `Requesting army book data for ${factionName} (${factionId}) - GS: ${gameSystem}`
+  );
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const bookData = await response.json();
-    // Add factionName to the result for easier access later
+    // Use the caching fetch function from api.js
+    const bookData = await fetchArmyBookData(factionId, gameSystem); // <-- USE THE NEW FUNCTION
+
+    if (!bookData) {
+      // fetchArmyBookData returns null on failure and logs the error internally
+      console.warn(
+        `Failed to fetch or load cached army book ${factionName} (${factionId}) after fetch attempt.`
+      );
+      return null; // Propagate failure
+    }
+
+    console.log(
+      `Successfully loaded army book data for ${factionName} (${factionId})`
+    );
+    // Add factionName to the result for easier access later if needed by the caller
     return { factionId, bookData, factionName };
   } catch (error) {
+    // This catch might be redundant if fetchArmyBookData handles its errors,
+    // but can catch unexpected issues during the call itself.
     console.error(
-      `Failed to fetch army book ${factionName} (${factionId}):`,
+      `Unexpected error calling fetchArmyBookData for ${factionName} (${factionId}):`,
       error
     );
     return null;

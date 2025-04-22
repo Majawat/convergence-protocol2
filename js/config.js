@@ -6,7 +6,8 @@
 // Main configuration settings
 export const config = {
   // Storage Keys
-  ARMY_BOOKS_CACHE_KEY: "oprArmyBooksCache",
+  ARMY_BOOKS_DATA_PREFIX: "oprArmyBooksCache_",
+  ARMY_BOOKS_TIMESTAMP_PREFIX: "oprArmyBooksTimestamp_",
   COMMON_RULES_CACHE_KEY_PREFIX: "oprCommonRulesCache_",
   ARMY_STATE_KEY_PREFIX: "oprArmyTracker_state_",
   GAME_STATE_KEY: "oprArmyTracker_gameState",
@@ -14,8 +15,8 @@ export const config = {
   DOCTRINES_CACHE_KEY: "oprDoctrinesCache",
   CAMPAIGN_POINTS_CACHE_KEY: "oprCampaignPointsCache",
   DEFINITIONS_CACHE_KEY: "oprDefinitionsCache",
-  CACHE_PREFIX: "oprArmyData_",
-  TIMESTAMP_PREFIX: "oprArmyTimestamp_",
+  ARMY_LIST_DATA_PREFIX: "oprArmyData_",
+  ARMY_LIST_TIMESTAMP_PREFIX: "oprArmyTimestamp_",
 
   // Game Rules
   MAX_SPELL_TOKENS: 6,
@@ -69,21 +70,21 @@ export const ACTION_BUTTON_CONFIG = {
   Hold: {
     colorTheme: "info", // Bootstrap theme color name
     iconKey: "actionHold", // Key in UI_ICONS
-    baseText: "Hold",
+    baseText: " Hold",
   },
   Advance: {
     colorTheme: "primary",
     iconKey: "actionAdvance",
-    baseText: "Adv",
+    baseText: " Adv",
   },
   Rush: {
     colorTheme: "success",
     iconKey: "actionRush",
-    baseText: "Rush",
+    baseText: " Rush",
   },
   Charge: {
     colorTheme: "danger",
     iconKey: "actionCharge",
-    baseText: "Chg",
+    baseText: " Chg",
   },
 };
