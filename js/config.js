@@ -57,7 +57,7 @@ export const UI_ICONS = {
   woundApply: `<i class="bi bi-heartbreak" aria-label="Apply wounds icon"></i>`,
   woundReset: `<i class="bi bi-arrow-clockwise" aria-label="Reset unit icon"></i>`,
   tokenAdd: `<i class="bi bi-plus" aria-label="Add token icon"></i>`,
-  tokenRemove: `<i class="bi bi-dash" aria-label="Remove token icon"</i>`,
+  tokenRemove: `<i class="bi bi-dash" aria-label="Remove token icon"></i>`,
   viewSpells: `<i class="bi bi-book" aria-label="View Spells icon"></i>`,
   castSpell: `<i class="bi bi-magic" aria-label="Cast Spell icon"</i>`,
   selectItem: `<i class="bi bi-chevron-right" aria-label="Select Item icon"></i>`,
