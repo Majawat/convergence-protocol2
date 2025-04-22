@@ -215,7 +215,7 @@ body {
 }
 
 .wound-apply-btn i,
-.unit-reset-btn i, /* Updated class */
+.unit-reset-btn i,
 .token-add-btn i,
 .token-remove-btn i {
   pointer-events: none;
@@ -454,32 +454,31 @@ body {
   opacity: 0.65; /* Match card opacity */
 }
 
-/* Status Text Overlay */
 .status-text-overlay {
   position: absolute;
-  /* Position it over the action/manual trigger area */
-  top: 40px; /* Adjust as needed based on effective stats height */
+  top: 70px;
   left: var(--bs-card-spacer-x);
   right: var(--bs-card-spacer-x);
-  /* Height can be adjusted or let content define it */
-  padding: 1rem 0.5rem; /* Add some padding */
+  padding: 1rem 0.5rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 1.75rem; /* Adjust size */
+  background-color: rgba(var(--bs-body-bg-rgb), 0.7);
+  z-index: 5;
+  border-radius: var(--bs-border-radius);
+  pointer-events: auto;
+}
+
+.status-line {
+  font-size: 1.75rem;
   font-weight: bold;
-  color: rgba(var(--bs-body-color-rgb), 0.7); /* Slightly more opaque text */
-  background-color: rgba(
-    var(--bs-body-bg-rgb),
-    0.7
-  ); /* Semi-transparent background */
-  z-index: 5; /* Ensure it's above most body content */
+  color: rgba(var(--bs-body-color-rgb), 0.7);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  border-radius: var(--bs-border-radius); /* Add rounded corners */
   text-transform: uppercase;
   text-align: center;
-  pointer-events: auto; /* Allow clicking through if needed, but likely not */
 }
+
 
 /* Ensure recover button fits */
 .action-controls .recover-btn {
@@ -1093,6 +1092,7 @@ section[id] {
 .killed-by-status-display {
   /* Add styles if needed, e.g., margin, padding */
   margin: auto;
+  text-align: center;
 }
 
 /* Make the undo clickable text obvious */

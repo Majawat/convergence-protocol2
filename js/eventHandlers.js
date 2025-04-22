@@ -488,6 +488,12 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
         unitModified = true;
       }
     });
+
+    // Reset killedBy
+    if (unitState.killedBy) {
+      unitState.killedBy = null;
+      unitModified = true;
+    }
     return unitModified;
   };
 

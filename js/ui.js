@@ -176,20 +176,19 @@ function updateKilledByStatusDisplay(armyId, unitId) {
     statusDisplayElement = document.createElement("div");
     statusDisplayElement.className =
       "killed-by-status-display text-muted small mt-1"; // Add classes as needed
-    // Insert it somewhere logical, e.g., after action controls or before models
-    const actionControls = cardElement.querySelector(".action-controls");
-    actionControls?.parentNode?.insertBefore(
-      statusDisplayElement,
-      actionControls.nextSibling
-    );
+    statusDisplayElement.style.display = "block";
+
+    const statusOverlay = cardElement.querySelector(".status-text-overlay");
+    statusOverlay?.appendChild(statusDisplayElement);
   }
 
-  if (killedByData && killedByData.attackerUnitName) {
-    // TODO: Need a way to get the opponent's army name from killedByData.attackerArmyId
-    // For now, just use the ID. You might need to pass lookup data or use another state getter.
-    const opponentArmyName = killedByData.attackerArmyId; // Replace with actual name lookup later
-
-    statusDisplayElement.innerHTML = `Destroyed by: ${killedByData.attackerUnitName} from ${killedByData.attackerArmyName}`;
+  if (
+    killedByData &&
+    killedByData.attackerUnitName &&
+    killedByData.attackerArmyName
+  ) {
+    // Update the status display with the kill information
+    statusDisplayElement.innerHTML = `Destroyed by ${killedByData.attackerUnitName} from ${killedByData.attackerArmyName}`;
     statusDisplayElement.classList.add("clickable-undo-killed-by"); // Make it clickable for undo
     statusDisplayElement.dataset.armyId = armyId; // Store IDs needed for undo handler
     statusDisplayElement.dataset.unitId = unitId;
@@ -448,8 +447,13 @@ function setUnitInactiveUI(cardUnitId, statusText) {
   if (cardBody && !cardBody.querySelector(".status-text-overlay")) {
     const overlay = document.createElement("div");
     overlay.className = "status-text-overlay"; // Use class for styling via CSS
-    overlay.textContent = statusText;
-    cardBody.appendChild(overlay); // Append to body
+    
+    const statusLine = document.createElement("div");
+    statusLine.textContent = statusText;
+    statusLine.className = "status-line"; // Use class for styling via CSS
+    overlay.appendChild(statusLine); // Put the status text inside a wrapper
+    
+    cardBody.appendChild(overlay); // Append to body of card
   }
 
   // --- Move Card to End ---
