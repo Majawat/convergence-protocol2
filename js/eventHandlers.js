@@ -212,14 +212,18 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
           "destroyed"
         );
       }
+
       // Update UI
       collapseDestroyedCard(cardUnitId);
-      updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+      updateOffcanvasUnitStatus(armyId, cardUnitId);
       showToast(
         `${baseUnitDataForDestroyCheck?.customName || cardUnitId} Destroyed!`,
         "Unit Destroyed"
       );
       _clearTargetHighlight(cardUnitId); // Clear highlight on destruction
+      console.log(`Triggering 'Set Killed By' modal for destroyed unit ${cardUnitId}`);
+      createOpponentSelectionModal(cardUnitId, armyId, 'setKilledBy');
+
     } else {
       // Highlight the next model to be wounded if the unit is not destroyed
       const nextAutoTarget = findTargetModelForWound(
@@ -930,6 +934,10 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
           `${unitData.customName || cardUnitId} Routed!`,
           "Melee Outcome"
         );
+
+        console.log(`Triggering 'Set Killed By' modal for routed unit ${cardUnitId}`);
+        createOpponentSelectionModal(cardUnitId, armyId, 'setKilledBy');
+
       } else {
         console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
         updateUnitStateValue(armyId, cardUnitId, "shaken", true);
@@ -1224,6 +1232,55 @@ function _handleUnderdogPointAdjustClick(adjustment) {
   }
 }
 
+/**
+ * Handles clicking the manual "Mark Removed" button. Prompts user for
+ * Destroyed/Routed status, updates state/UI, then triggers the 'Set Killed By' modal.
+ * @param {Event} event - The click event object.
+ */
+async function _handleMarkRemovedClick(event) {
+  const button = event.target.closest('.btn-mark-removed');
+  if (!button) return;
+
+  const { armyId, unitId } = button.dataset;
+  if (!armyId || !unitId) return;
+
+  const unitData = getUnitData(unitId);
+  const unitName = unitData?.customName || unitData?.originalName || unitId;
+
+  // 1. Ask user for status
+  const chosenStatus = await showInteractiveToast(
+      `Mark "${unitName}" as Destroyed or Routed?`,
+      "Confirm Unit Removal",
+      [
+          { text: "Destroyed", value: "destroyed", style: "danger" },
+          { text: "Routed", value: "routed", style: "warning" },
+          { text: "Cancel", value: "cancel", style: "secondary" },
+      ]
+  );
+
+  if (chosenStatus === 'destroyed' || chosenStatus === 'routed') {
+      console.log(`Manually marking unit ${unitId} as ${chosenStatus}`);
+      const heroData = getJoinedHeroData(unitId);
+
+      // 2. Update State
+      updateUnitStateValue(armyId, unitId, "status", chosenStatus);
+      if (heroData) updateUnitStateValue(armyId, heroData.selectionId, "status", chosenStatus);
+
+      // 3. Update UI
+      if (chosenStatus === 'destroyed') collapseDestroyedCard(unitId);
+      else collapseRoutedCard(unitId);
+      updateOffcanvasUnitStatus(armyId, unitId);
+      showToast(`${unitName} marked as ${chosenStatus}.`, "Unit Status Updated");
+
+      // 4. Trigger 'Set Killed By' Modal
+      console.log(`Triggering 'Set Killed By' modal for manually removed unit ${unitId}`);
+      createOpponentSelectionModal(unitId, armyId, 'setKilledBy');
+
+  } else {
+      console.log("Manual unit removal cancelled.");
+  }
+}
+
 // --- Main Event Listener & Setup ---
 
 /**
@@ -1346,7 +1403,7 @@ function handleInteractionClick(event) {
     } else if (addCpButton) {
       _handleManualCpAdjustClick(1);
     }
-    return; // Stop processing after handling stratagem modal interaction
+    return; 
   }
 
   // --- Opponent Selection Modal Interactions ---
@@ -1355,9 +1412,9 @@ function handleInteractionClick(event) {
       "#confirm-opponent-selection-btn"
     );
     if (confirmOpponentButton) {
-      console.log("DEBUG: Click detected on confirm button via delegation."); // <-- ADD THIS LOG
-      _handleConfirmOpponentSelection(event); // Check if this function name is correct
-      return; // Added return just in case, though likely not needed if last check
+      console.log("DEBUG: Click detected on confirm button via delegation."); 
+      _handleConfirmOpponentSelection(event);
+      return; 
     }
   }
 }

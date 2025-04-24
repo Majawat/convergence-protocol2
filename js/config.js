@@ -64,6 +64,7 @@ export const UI_ICONS = {
   recover: `<i class="bi bi-bandaid" aria-label="Recover icon"></i>`,
   stratagems: `<i class="bi bi-journal-bookmark-fill" aria-label="Stratagems icon"></i>`,
   killCount: `<i class="bi bi-person-x-fill" aria-label="Kills Recorded"></i>`,
+  markRemoved: `<i class="bi bi-x-octagon" title="Mark Removed"></i>`,
 };
 
 // Static configuration for Action Buttons

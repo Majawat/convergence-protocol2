@@ -752,7 +752,15 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
     const actionControlsHTML = _createActionControlsHTML(baseUnit, hero);
     const modelsHTML = createModelsDisplay(baseUnit, hero);
     // Manual Triggers
-    const manualTriggersHTML = `<div class="manual-triggers mt-2"> <button type="button" class="btn btn-sm btn-outline-danger resolve-melee-btn me-1" title="Report the outcome of a melee combat this unit was involved in.">Resolve Melee</button> <button type="button" class="btn btn-sm btn-outline-secondary morale-wounds-btn" title="Manually trigger a morale check due to taking wounds.">Check Morale (Wounds)</button></div><hr class="my-2">`;
+    const manualTriggersHTML = `<div class="manual-triggers mt-2">
+        <button type="button" class="btn btn-sm btn-outline-danger resolve-melee-btn me-1" title="Report the outcome of a melee combat this unit was involved in.">Resolve Melee</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary morale-wounds-btn" title="Manually trigger a morale check due to taking wounds.">Check Morale</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary btn-mark-removed" data-army-id="${armyId}" data-unit-id="${
+      baseUnit.selectionId
+    }" title="Manually mark unit as Destroyed or Routed and record who did it."> ${
+      UI_ICONS.markRemoved || ""
+    } Mark Removed </button>
+      </div><hr class="my-2">`;
     let cardBodyContentHTML = `<div class="details-section">`;
     if (hero) {
       // Joined unit display logic...
