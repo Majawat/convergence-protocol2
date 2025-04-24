@@ -414,7 +414,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     /* Error handling... */ return;
   }
 
-  mainListContainer.innerHTML = html`<div class="col-12">
+  mainListContainer.innerHTML = `<div class="col-12">
     <div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading Campaign...</span>
@@ -457,7 +457,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // --- Code below only runs if a valid armyId IS found ---
   console.log(`DEBUG: Proceeding to load army: ${armyInfo.armyName} (${armyIdToLoad})`);
-  mainListContainer.innerHTML = html`<div class="col-12">
+  mainListContainer.innerHTML = `<div class="col-12">
     <div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;">
       <div class="spinner-border text-success" role="status">
         <span class="visually-hidden">Loading All Army Data...</span>
