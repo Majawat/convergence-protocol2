@@ -132,30 +132,22 @@ function displayCurrentMission(missionsData) {
   const currentMission = missionsData?.missions?.find((m) => m.status === "current");
   // ... (rest of function remains the same as previous version) ...
   if (currentMission) {
-    let missionHTML = `
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Mission ${currentMission.number}: ${
-      renderHTML(currentMission.title) || "Upcoming Mission"
-    }</h5>
-                </div>
-                <div class="card-body">
-                    ${
-                      currentMission.overview
-                        ? `<p class="card-text lead">${renderHTML(currentMission.overview)}</p><hr>`
-                        : ""
-                    }
-                    ${
-                      currentMission.objective?.primary
-                        ? `<h6>Primary Objective:</h6><p>${renderHTML(
-                            currentMission.objective.primary
-                          )}</p>`
-                        : ""
-                    }
-                    ${
-                      currentMission.objective?.secondary &&
-                      currentMission.objective.secondary.length > 0
-                        ? `<h6>Secondary Objectives:</h6>
+    let missionHTML = html` <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          Mission ${currentMission.number}:
+          ${renderHTML(currentMission.title) || "Upcoming Mission"}
+        </h5>
+      </div>
+      <div class="card-body">
+        ${currentMission.overview
+          ? `<p class="card-text lead">${renderHTML(currentMission.overview)}</p><hr>`
+          : ""}
+        ${currentMission.objective?.primary
+          ? `<h6>Primary Objective:</h6><p>${renderHTML(currentMission.objective.primary)}</p>`
+          : ""}
+        ${currentMission.objective?.secondary && currentMission.objective.secondary.length > 0
+          ? `<h6>Secondary Objectives:</h6>
                          <ul>${currentMission.objective.secondary
                            .map(
                              (obj) =>
@@ -164,11 +156,9 @@ function displayCurrentMission(missionsData) {
                                )}</li>`
                            )
                            .join("")}</ul>`
-                        : ""
-                    }
-                    ${
-                      currentMission.specialRules && currentMission.specialRules.length > 0
-                        ? `<h6>Special Rules:</h6>
+          : ""}
+        ${currentMission.specialRules && currentMission.specialRules.length > 0
+          ? `<h6>Special Rules:</h6>
                          <ul>${currentMission.specialRules
                            .map(
                              (rule) =>
@@ -177,35 +167,23 @@ function displayCurrentMission(missionsData) {
                                )}</li>`
                            )
                            .join("")}</ul>`
-                        : ""
-                    }
-                     ${
-                       currentMission.deployment
-                         ? `<h6 class="mt-3">Deployment:</h6><p>${renderHTML(
-                             currentMission.deployment
-                           )}</p>`
-                         : ""
-                     }
-                     ${
-                       currentMission.victoryConditions?.primary
-                         ? `<h6 class="mt-3">Victory Conditions:</h6><p>${renderHTML(
-                             currentMission.victoryConditions.primary
-                           )}</p>`
-                         : ""
-                     }
-                     ${
-                       currentMission.scoringSystem?.points &&
-                       currentMission.scoringSystem.points.length > 0
-                         ? `<h6 class="mt-3">Scoring:</h6>
+          : ""}
+        ${currentMission.deployment
+          ? `<h6 class="mt-3">Deployment:</h6><p>${renderHTML(currentMission.deployment)}</p>`
+          : ""}
+        ${currentMission.victoryConditions?.primary
+          ? `<h6 class="mt-3">Victory Conditions:</h6><p>${renderHTML(
+              currentMission.victoryConditions.primary
+            )}</p>`
+          : ""}
+        ${currentMission.scoringSystem?.points && currentMission.scoringSystem.points.length > 0
+          ? `<h6 class="mt-3">Scoring:</h6>
                          <ul>${currentMission.scoringSystem.points
                            .map((pt) => `<li>${renderHTML(pt)}</li>`)
                            .join("")}</ul>`
-                         : ""
-                     }
-                     ${
-                       currentMission.terrainSuggestions &&
-                       currentMission.terrainSuggestions.length > 0
-                         ? `<h6 class="mt-3">Terrain Suggestions:</h6>
+          : ""}
+        ${currentMission.terrainSuggestions && currentMission.terrainSuggestions.length > 0
+          ? `<h6 class="mt-3">Terrain Suggestions:</h6>
                          <ul>${currentMission.terrainSuggestions
                            .map(
                              (terrain) =>
@@ -214,21 +192,20 @@ function displayCurrentMission(missionsData) {
                                )}</li>`
                            )
                            .join("")}</ul>`
-                         : ""
-                     }
-                </div>
-                <div class="card-footer text-muted"> ${
-                  currentMission.points ? `Base Points: ${currentMission.points}` : ""
-                } ${
-      currentMission.datetime
-        ? `| Scheduled: ${new Date(currentMission.datetime).toLocaleString()}`
-        : ""
-    }
-                </div>
-            </div>`;
+          : ""}
+      </div>
+      <div class="card-footer text-muted">
+        ${currentMission.points ? `Base Points: ${currentMission.points}` : ""}
+        ${currentMission.datetime
+          ? `| Scheduled: ${new Date(currentMission.datetime).toLocaleString()}`
+          : ""}
+      </div>
+    </div>`;
     currentMissionDisplayElement.innerHTML = missionHTML;
   } else {
-    currentMissionDisplayElement.innerHTML = `<div class="alert alert-info" role="alert">No current mission found. Check missions.json or the campaign may be complete.</div>`;
+    currentMissionDisplayElement.innerHTML = html`<div class="alert alert-info" role="alert">
+      No current mission found. Check missions.json or the campaign may be complete.
+    </div>`;
   }
 }
 
@@ -240,7 +217,9 @@ function displayCurrentMission(missionsData) {
 function displayLeaderboard(campaignData) {
   if (!leaderboardDisplayElement || !campaignData || !campaignData.armies) {
     if (leaderboardDisplayElement)
-      leaderboardDisplayElement.innerHTML = `<div class="alert alert-warning" role="alert">Could not display leaderboard.</div>`;
+      leaderboardDisplayElement.innerHTML = html`<div class="alert alert-warning" role="alert">
+        Could not display leaderboard.
+      </div>`;
     return;
   }
   // ... (rest of function remains the same as previous version) ...
@@ -272,21 +251,22 @@ function displayLeaderboard(campaignData) {
     if (b.vp !== a.vp) return b.vp - a.vp;
     return b.wins - a.wins;
   });
-  let tableHTML = `
-        <table class="table table-striped table-hover table-sm leaderboard-table">
-            <thead class="table-dark">
-                <tr>
-                    <th>Pos</th>
-                    <th>Player</th>
-                    <th>Army</th>
-                    <th>VP</th>
-                    <th>W-L</th>
-                    <th>Spec. Obj</th>
-                    <th>Max Pts</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+  let tableHTML = html`
+    <table class="table table-striped table-hover table-sm leaderboard-table">
+      <thead class="table-dark">
+        <tr>
+          <th>Pos</th>
+          <th>Player</th>
+          <th>Army</th>
+          <th>VP</th>
+          <th>W-L</th>
+          <th>Spec. Obj</th>
+          <th>Max Pts</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `;
   leaderboardData.forEach((army, index) => {
     tableHTML += `
             <tr>
@@ -323,22 +303,24 @@ function displayPastMissions(missionsData) {
   completedMissions.sort((a, b) => (b.number || 0) - (a.number || 0));
   let reportsHTML = '<div class="list-group">';
   completedMissions.forEach((mission) => {
-    reportsHTML += `
-            <button type="button" class="list-group-item list-group-item-action view-report-btn"
-                    data-mission-id="${mission.number}"
-                    data-report-path="${mission.battleReportFile}">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">Mission ${mission.number}: ${
-      renderHTML(mission.title) || "Completed Mission"
-    }</h5>
-                    <small>Winner: ${renderHTML(mission.winner) || "N/A"}</small>
-                </div>
-                <p class="mb-1 text-muted small">${
-                  mission.winningArmy ? `(${renderHTML(mission.winningArmy)})` : ""
-                }</p>
-                <small class="text-muted">Click to view details</small>
-            </button>
-        `;
+    reportsHTML += html`
+      <button
+        type="button"
+        class="list-group-item list-group-item-action view-report-btn"
+        data-mission-id="${mission.number}"
+        data-report-path="${mission.battleReportFile}">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">
+            Mission ${mission.number}: ${renderHTML(mission.title) || "Completed Mission"}
+          </h5>
+          <small>Winner: ${renderHTML(mission.winner) || "N/A"}</small>
+        </div>
+        <p class="mb-1 text-muted small">
+          ${mission.winningArmy ? `(${renderHTML(mission.winningArmy)})` : ""}
+        </p>
+        <small class="text-muted">Click to view details</small>
+      </button>
+    `;
   });
   reportsHTML += "</div>";
   pastMissionsDisplayElement.innerHTML = reportsHTML;
@@ -362,23 +344,21 @@ function displayUpcomingMissions(missionsData) {
   upcomingMissions.sort((a, b) => (a.number || 0) - (b.number || 0));
   let upcomingHTML = '<div class="list-group">';
   upcomingMissions.forEach((mission) => {
-    upcomingHTML += `
-            <div class="list-group-item upcoming-mission-item">
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">Mission ${mission.number}: ${
-      renderHTML(mission.title) || "Upcoming Mission"
-    }</h6>
-                    <small class="text-muted">${renderHTML(mission.month) || ""}${
-      mission.points ? ` | ${mission.points}pts` : ""
-    }</small>
-                </div>
-                ${
-                  mission.overview
-                    ? `<p class="mb-1 small">${renderHTML(mission.overview)}</p>`
-                    : ""
-                }
-            </div>
-        `;
+    upcomingHTML += html`
+      <div class="list-group-item upcoming-mission-item">
+        <div class="d-flex w-100 justify-content-between">
+          <h6 class="mb-1">
+            Mission ${mission.number}: ${renderHTML(mission.title) || "Upcoming Mission"}
+          </h6>
+          <small class="text-muted"
+            >${renderHTML(mission.month) || ""}${mission.points
+              ? ` | ${mission.points}pts`
+              : ""}</small
+          >
+        </div>
+        ${mission.overview ? `<p class="mb-1 small">${renderHTML(mission.overview)}</p>` : ""}
+      </div>
+    `;
   });
   upcomingHTML += "</div>";
   upcomingMissionsDisplayElement.innerHTML = upcomingHTML;
@@ -444,28 +424,25 @@ function showBattleReportModal(missionId) {
     bodyHTML += "<h4>Round Summaries</h4>";
     reportData.rounds.forEach((round) => {
       const formattedDescription = formatTextToParagraphs(round.description);
-      bodyHTML += `
-                <div class="mb-3 p-3 border rounded bg-body-tertiary shadow-sm">
-                    <h6>Round ${round.number}: ${renderHTML(round.title) || ""}</h6>
-                    ${formattedDescription}
-                    ${
-                      round.image
-                        ? `<figure class="figure text-center mt-2"> <img src="${
-                            round.image
-                          }" alt="Round ${
-                            round.number
-                          } image" class="img-fluid battle-report-img figure-img" onerror="this.style.display='none'; this.parentElement.style.display='none'; console.warn('Failed to load report image: ${
-                            round.image
-                          }')"> ${
-                            round.image_caption
-                              ? `<figcaption class="figure-caption">${renderHTML(
-                                  round.image_caption
-                                )}</figcaption>`
-                              : ""
-                          } </figure>`
-                        : ""
-                    }
-                </div> `;
+      bodyHTML += html`
+        <div class="mb-3 p-3 border rounded bg-body-tertiary shadow-sm">
+          <h6>Round ${round.number}: ${renderHTML(round.title) || ""}</h6>
+          ${formattedDescription}
+          ${round.image
+            ? `<figure class="figure text-center mt-2"> <img src="${round.image}" alt="Round ${
+                round.number
+              } image" class="img-fluid battle-report-img figure-img" onerror="this.style.display='none'; this.parentElement.style.display='none'; console.warn('Failed to load report image: ${
+                round.image
+              }')"> ${
+                round.image_caption
+                  ? `<figcaption class="figure-caption">${renderHTML(
+                      round.image_caption
+                    )}</figcaption>`
+                  : ""
+              } </figure>`
+            : ""}
+        </div>
+      `;
     });
     bodyHTML += "<hr>";
   }
@@ -510,7 +487,12 @@ async function handleViewReportClick(event) {
   }
   console.log(`Fetching report for Mission ${missionId} from ${reportPath}`);
   if (battleReportModalBodyElement)
-    battleReportModalBodyElement.innerHTML = `<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading report...</p></div>`;
+    battleReportModalBodyElement.innerHTML = html`<div class="text-center p-4">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading report...</p>
+    </div>`;
   if (battleReportModalLabelElement) battleReportModalLabelElement.textContent = "Loading...";
   if (battleReportModal) battleReportModal.show();
   try {

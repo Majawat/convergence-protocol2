@@ -414,8 +414,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     /* Error handling... */ return;
   }
 
-  mainListContainer.innerHTML =
-    '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading Campaign...</span></div></div></div>';
+  mainListContainer.innerHTML = html`<div class="col-12">
+    <div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading Campaign...</span>
+      </div>
+    </div>
+  </div>`;
 
   // Step 1: Load Campaign Data
   const campaignDataResult = await loadCampaignData();
@@ -452,8 +457,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // --- Code below only runs if a valid armyId IS found ---
   console.log(`DEBUG: Proceeding to load army: ${armyInfo.armyName} (${armyIdToLoad})`);
-  mainListContainer.innerHTML =
-    '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading All Army Data...</span></div></div></div>'; // Updated spinner text
+  mainListContainer.innerHTML = html`<div class="col-12">
+    <div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;">
+      <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Loading All Army Data...</span>
+      </div>
+    </div>
+  </div>`; // Updated spinner text
   titleH1.textContent = `Loading ${armyInfo.armyName}...`;
 
   try {

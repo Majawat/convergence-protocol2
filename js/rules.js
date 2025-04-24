@@ -116,24 +116,26 @@ function displayRandomEvents(eventsData) {
   events.forEach((event) => {
     const formattedEffect = event.effect ? formatTextToParagraphs(event.effect) : "";
     gridHTML += `
-            <div class="col d-flex align-items-stretch">
-                <div class="card event-card shadow-sm w-100">
-                    <div class="card-header">
-                       <span class="badge bg-secondary me-2">${renderHTML(
-                         event.id
-                       )}</span> ${renderHTML(event.title)}
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <p class="text-muted fst-italic mb-2">${renderHTML(event.description)}</p>
-                        ${
-                          formattedEffect
-                            ? `<div class="effect-section allow-definitions"><strong>Effect:</strong> ${formattedEffect}</div>`
-                            : ""
-                        }
-                    </div>
-                </div>
-            </div>
-        `;
+      <div class="col d-flex align-items-stretch">
+        <div class="card event-card shadow-sm w-100">
+          <div class="card-header">
+            <span class="badge bg-secondary me-2">${renderHTML(event.id)}</span> ${renderHTML(
+      event.title
+    )}
+          </div>
+          <div class="card-body d-flex flex-column">
+            <p class="text-muted fst-italic mb-2">${renderHTML(event.description)}</p>
+            ${
+              formattedEffect
+                ? `<div class="effect-section allow-definitions">
+                    <strong>Effect:</strong> ${formattedEffect}
+                  </div>`
+                : ""
+            }
+          </div>
+        </div>
+      </div>
+    `;
   });
   gridHTML += "</div>";
   randomEventsDisplayElement.innerHTML = gridHTML;
@@ -151,7 +153,9 @@ function displayDoctrines(doctrinesData) {
     !Array.isArray(doctrinesData.doctrines) ||
     doctrinesData.doctrines.length === 0
   ) {
-    doctrinesDisplayElement.innerHTML = `<div class="alert alert-warning" role="alert">Could not load or find doctrines data.</div>`;
+    doctrinesDisplayElement.innerHTML = html`<div class="alert alert-warning" role="alert">
+      Could not load or find doctrines data.
+    </div>`;
     return;
   }
 
@@ -170,18 +174,19 @@ function displayDoctrines(doctrinesData) {
       const stratName = strat.name || "Unnamed Stratagem";
       const stratDesc = strat.description || "No description available.";
       listHTML += `
-                <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap px-0 py-1">
-                    <div class="me-auto">
-                        <strong>${renderHTML(stratName)}</strong>
-                        <small class="d-block text-muted allow-definitions">${renderHTML(
-                          stratDesc
-                        )}</small>
-                    </div>
-                    <div class="stratagem-actions d-flex align-items-center gap-2">
-                        <span class="badge bg-warning text-dark rounded-pill" title="Command Point Cost">${cost} CP</span>
-                    </div>
-                </li>
-                `;
+        <li
+          class="list-group-item d-flex justify-content-between align-items-start flex-wrap px-0 py-1">
+          <div class="me-auto">
+            <strong>${renderHTML(stratName)}</strong>
+            <small class="d-block text-muted allow-definitions">${renderHTML(stratDesc)}</small>
+          </div>
+          <div class="stratagem-actions d-flex align-items-center gap-2">
+            <span class="badge bg-warning text-dark rounded-pill" title="Command Point Cost"
+              >${cost} CP</span
+            >
+          </div>
+        </li>
+      `;
     });
     listHTML += "</ul>";
     return listHTML;
@@ -190,11 +195,11 @@ function displayDoctrines(doctrinesData) {
   // Render Universal Doctrine
   if (universalDoctrine) {
     doctrinesHTML += `
-            <div class="rule-subsection mb-3">
-                <h5><i class="bi bi-infinity me-1"></i> Universal Doctrine</h5>
-                ${createStratagemListHTML(universalDoctrine)}
-            </div>
-            `;
+      <div class="rule-subsection mb-3">
+        <h5><i class="bi bi-infinity me-1"></i> Universal Doctrine</h5>
+        ${createStratagemListHTML(universalDoctrine)}
+      </div>
+    `;
   } else {
     doctrinesHTML += '<p class="text-warning">Universal doctrine data not found.</p>';
   }
@@ -210,17 +215,15 @@ function displayDoctrines(doctrinesData) {
     const cardHeaderBg = doctrine.color ? `bg-${doctrine.color}-subtle` : "bg-secondary-subtle";
 
     doctrinesHTML += `
-                <div class="col d-flex">
-                    <div class="card h-100 doctrine-card shadow-sm w-100">
-                        <div class="card-header ${cardHeaderBg}">
-                            <h5 class="mb-0">${iconHTML} ${renderHTML(doctrine.name)}</h5>
-                        </div>
-                        <div class="card-body">
-                            ${createStratagemListHTML(doctrine)}
-                        </div>
-                    </div>
-                </div>
-                `;
+      <div class="col d-flex">
+        <div class="card h-100 doctrine-card shadow-sm w-100">
+          <div class="card-header ${cardHeaderBg}">
+            <h5 class="mb-0">${iconHTML} ${renderHTML(doctrine.name)}</h5>
+          </div>
+          <div class="card-body">${createStratagemListHTML(doctrine)}</div>
+        </div>
+      </div>
+    `;
   });
 
   doctrinesHTML += "</div>";
@@ -286,26 +289,29 @@ function renderGlossary(defs, container) {
 
     // Generate type badge HTML
     const typeBadge = definition.type
-      ? `<span class="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill me-1 small">${escapeHtml(
-          definition.type
-        )}</span>`
+      ? `<span
+          class="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill me-1 small"
+          >${escapeHtml(definition.type)}</span
+        >`
       : "";
 
     // --- Card Structure with Footer ---
-    html += `
-        <div class="col glossary-item" data-term="${lowerTerm}" data-description="${lowerDescriptionAndSources}">
-            <div class="card h-100 shadow-sm glossary-card">
-                <div class="card-header p-2">
-                    <h6 class="mb-0 glossary-term">${escapeHtml(term)}</h6>
-                </div>
-                <div class="card-body p-2 glossary-description small allow-definitions">
-                    ${formatTextToParagraphs(definition.description)}
-                </div>
-                <div class="card-footer p-1 small text-muted d-flex flex-wrap align-items-center">
-                    ${typeBadge} ${sourceBadges}
-                </div>
-            </div>
-        </div>`;
+    html += ` <div
+      class="col glossary-item"
+      data-term="${lowerTerm}"
+      data-description="${lowerDescriptionAndSources}">
+      <div class="card h-100 shadow-sm glossary-card">
+        <div class="card-header p-2">
+          <h6 class="mb-0 glossary-term">${escapeHtml(term)}</h6>
+        </div>
+        <div class="card-body p-2 glossary-description small allow-definitions">
+          ${formatTextToParagraphs(definition.description)}
+        </div>
+        <div class="card-footer p-1 small text-muted d-flex flex-wrap align-items-center">
+          ${typeBadge} ${sourceBadges}
+        </div>
+      </div>
+    </div>`;
   });
 
   container.innerHTML = html; // Set the generated HTML

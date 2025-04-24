@@ -750,3 +750,18 @@ export function updateOffcanvasUnitStatus(armyId, unitId) {
   listItem.className = itemClass;
   listItem.dataset.unitId = unitId; // Ensure dataset attribute is present
 }
+
+/**
+ * Simple identity tag function for template literals.
+ * Primarily used to hint to formatters (like Prettier) that the content is HTML.
+ * @param {TemplateStringsArray} strings Static string parts.
+ * @param  {...any} values Embedded expression values.
+ * @returns {string} The reconstructed string.
+ */
+export function html(strings, ...values) {
+  let str = "";
+  strings.forEach((string, i) => {
+    str += string + (values[i] || "");
+  });
+  return str;
+}

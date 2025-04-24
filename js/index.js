@@ -66,25 +66,25 @@ function displayMissionSnapshot(missionsData) {
   if (currentMission) {
     // Now calls the globally accessible renderHTML helper
     missionSnapshotElement.innerHTML = `
-            <h6 class="card-subtitle mb-2 text-muted">Mission ${currentMission.number || "?"} - ${
-      renderHTML(currentMission.month) || "TBD"
-    }</h6>
-            <p class="card-text"><strong>${
-              renderHTML(currentMission.title) || "Title Missing"
-            }</strong></p>
-            ${
-              currentMission.overview
-                ? `<p class="small">${renderHTML(currentMission.overview.substring(0, 150))}...</p>`
-                : ""
-            }
-            ${
-              currentMission.objective?.primary
-                ? `<p class="small"><strong>Objective:</strong> ${renderHTML(
-                    currentMission.objective.primary.substring(0, 100)
-                  )}...</p>`
-                : ""
-            }
-        `;
+      <h6 class="card-subtitle mb-2 text-muted">
+        Mission ${currentMission.number || "?"} - ${renderHTML(currentMission.month) || "TBD"}
+      </h6>
+      <p class="card-text">
+        <strong>${renderHTML(currentMission.title) || "Title Missing"}</strong>
+      </p>
+      ${
+        currentMission.overview
+          ? `<p class="small">${renderHTML(currentMission.overview.substring(0, 150))}...</p>`
+          : ""
+      }
+      ${
+        currentMission.objective?.primary
+          ? `<p class="small"><strong>Objective:</strong> ${renderHTML(
+              currentMission.objective.primary.substring(0, 100)
+            )}...</p>`
+          : ""
+      }
+    `;
   } else {
     missionSnapshotElement.innerHTML = `<p class="text-muted">No current mission data available.</p>`;
   }
@@ -142,27 +142,28 @@ function displayLeaderboardSnapshot(campaignData) {
 
   // Use table instead of list group
   let tableHTML = `
-        <table class="table table-sm table-hover leaderboard-snapshot-table mb-0">
-            <thead>
-                <tr>
-                    <th>Pos</th>
-                    <th>Player</th>
-                    <th>Army</th>
-                    <th>VP</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+    <table class="table table-sm table-hover leaderboard-snapshot-table mb-0">
+      <thead>
+        <tr>
+          <th>Pos</th>
+          <th>Player</th>
+          <th>Army</th>
+          <th>VP</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `;
   leaderboardData.forEach((player, index) => {
     // Iterate over leaderboardData
     tableHTML += `
-            <tr>
-                <td><span class="badge bg-secondary rounded-pill">${index + 1}</span></td>
-                <td>${renderHTML(player.player)}</td>
-                <td>${renderHTML(player.armyName)}</td>
-                <td><span class="badge bg-primary rounded-pill">${player.vp}</span></td>
-            </tr>
-        `;
+      <tr>
+        <td><span class="badge bg-secondary rounded-pill">${index + 1}</span></td>
+        <td>${renderHTML(player.player)}</td>
+        <td>${renderHTML(player.armyName)}</td>
+        <td><span class="badge bg-primary rounded-pill">${player.vp}</span></td>
+      </tr>
+    `;
   });
   tableHTML += `
             </tbody>
