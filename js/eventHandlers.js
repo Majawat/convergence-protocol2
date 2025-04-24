@@ -88,7 +88,10 @@ function _highlightNextAutoTargetModel(unitSelectionId, modelId) {
   _clearTargetHighlight(unitSelectionId);
   if (!modelId) return;
   const modelElement = document.querySelector(`[data-model-id="${modelId}"]`);
-  if (modelElement && modelElement.closest(".unit-card")?.id === `unit-card-${unitSelectionId}`) {
+  if (
+    modelElement &&
+    modelElement.closest(".unit-card")?.id === `unit-card-${unitSelectionId}`
+  ) {
     modelElement.classList.add("target-model");
   }
 }
@@ -120,7 +123,9 @@ function _findActualCaster(cardUnitId) {
 function applyWound(armyId, cardUnitId, specificModelId = null) {
   const baseUnitData = getUnitData(cardUnitId);
   if (!baseUnitData) {
-    console.error(`Base unit data not found for applyWound: unit ${cardUnitId}`);
+    console.error(
+      `Base unit data not found for applyWound: unit ${cardUnitId}`
+    );
     return;
   }
   const heroData = getJoinedHeroData(cardUnitId);
@@ -130,7 +135,9 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
   // --- Determine Target Model ---
   if (specificModelId) {
     // Find the specific model in base or hero unit
-    targetModel = baseUnitData.models.find((m) => m.modelId === specificModelId);
+    targetModel = baseUnitData.models.find(
+      (m) => m.modelId === specificModelId
+    );
     if (targetModel) {
       modelUnitId = cardUnitId;
     } else if (heroData) {
@@ -139,7 +146,9 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
     }
     // Check if the specifically targeted model is already removed
     if (targetModel && targetModel.currentHp <= 0) {
-      showToast(`Model ${targetModel.modelId.split("_").pop()} is already removed.`);
+      showToast(
+        `Model ${targetModel.modelId.split("_").pop()} is already removed.`
+      );
       targetModel = null; // Don't proceed with wounding
       modelUnitId = null;
     }
@@ -155,8 +164,19 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
   if (targetModel && modelUnitId) {
     const newHp = Math.max(0, targetModel.currentHp - 1);
     targetModel.currentHp = newHp; // Update in-memory model (important for subsequent calls)
-    updateModelStateValue(armyId, modelUnitId, targetModel.modelId, "currentHp", newHp);
-    updateModelDisplay(cardUnitId, targetModel.modelId, newHp, targetModel.maxHp);
+    updateModelStateValue(
+      armyId,
+      modelUnitId,
+      targetModel.modelId,
+      "currentHp",
+      newHp
+    );
+    updateModelDisplay(
+      cardUnitId,
+      targetModel.modelId,
+      newHp,
+      targetModel.maxHp
+    );
 
     // --- Check for Unit Destruction ---
     // Re-fetch data to ensure we have the latest HP values after potential updates
@@ -166,19 +186,31 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
       ...(baseUnitDataForDestroyCheck?.models || []),
       ...(heroDataForDestroyCheck?.models || []),
     ];
-    const currentStatus = getUnitStateValue(armyId, cardUnitId, "status", "active");
+    const currentStatus = getUnitStateValue(
+      armyId,
+      cardUnitId,
+      "status",
+      "active"
+    );
     const isUnitDestroyed =
       currentStatus === "active" && // Only destroy if currently active
       allModels.length > 0 &&
       allModels.every((m) => m.currentHp <= 0);
 
     if (isUnitDestroyed) {
-      console.log(`Unit ${cardUnitId} (and potentially joined hero) is Destroyed.`);
+      console.log(
+        `Unit ${cardUnitId} (and potentially joined hero) is Destroyed.`
+      );
       // Update state for base unit
       updateUnitStateValue(armyId, cardUnitId, "status", "destroyed");
       // Update state for hero unit if present
       if (heroDataForDestroyCheck) {
-        updateUnitStateValue(armyId, heroDataForDestroyCheck.selectionId, "status", "destroyed");
+        updateUnitStateValue(
+          armyId,
+          heroDataForDestroyCheck.selectionId,
+          "status",
+          "destroyed"
+        );
       }
 
       // Update UI
@@ -189,7 +221,9 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
         "Unit Destroyed"
       );
       _clearTargetHighlight(cardUnitId); // Clear highlight on destruction
-      console.log(`Triggering 'Set Killed By' modal for destroyed unit ${cardUnitId}`);
+      console.log(
+        `Triggering 'Set Killed By' modal for destroyed unit ${cardUnitId}`
+      );
       createOpponentSelectionModal(cardUnitId, armyId, "setKilledBy");
     } else {
       // Highlight the next model to be wounded if the unit is not destroyed
@@ -197,11 +231,19 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
         baseUnitDataForDestroyCheck,
         heroDataForDestroyCheck
       );
-      _highlightNextAutoTargetModel(cardUnitId, nextAutoTarget ? nextAutoTarget.modelId : null);
+      _highlightNextAutoTargetModel(
+        cardUnitId,
+        nextAutoTarget ? nextAutoTarget.modelId : null
+      );
     }
   } else {
     // No valid target model found (either none left or specific target invalid)
-    const currentStatus = getUnitStateValue(armyId, cardUnitId, "status", "active");
+    const currentStatus = getUnitStateValue(
+      armyId,
+      cardUnitId,
+      "status",
+      "active"
+    );
     if (currentStatus === "active") {
       showToast("All models in unit removed.");
     }
@@ -290,7 +332,10 @@ function handleStartRoundClick(armyId) {
     if (unit.casterLevel > 0) {
       const currentTokens = unitState.tokens || 0;
       const tokensToAdd = unit.casterLevel;
-      const newTokens = Math.min(config.MAX_SPELL_TOKENS, currentTokens + tokensToAdd);
+      const newTokens = Math.min(
+        config.MAX_SPELL_TOKENS,
+        currentTokens + tokensToAdd
+      );
       const actualTokensAdded = newTokens - currentTokens;
       if (actualTokensAdded > 0) {
         unitState.tokens = newTokens;
@@ -308,7 +353,9 @@ function handleStartRoundClick(armyId) {
 
   if (stateChanged) {
     saveArmyState(armyId, armyState);
-    console.log(`State updated and saved for start of round ${newRound} for army ${armyId}.`);
+    console.log(
+      `State updated and saved for start of round ${newRound} for army ${armyId}.`
+    );
   }
 
   // Update UI after state is saved
@@ -324,9 +371,9 @@ function handleStartRoundClick(armyId) {
     casterUpdates.forEach((update) => {
       const cardUnitId = heroTargets?.[update.unitId] || update.unitId; // Find the card ID
       updateTokenDisplay(cardUnitId, update.total, update.casterLevel); // Update card display
-      toastMessage += `\n- ${update.name}: +${update.added.toString().padStart(1, "\u00A0")}, now ${
-        update.total
-      }`;
+      toastMessage += `\n- ${update.name}: +${update.added
+        .toString()
+        .padStart(1, "\u00A0")}, now ${update.total}`;
     });
   } else {
     toastMessage += "\nNo casters required token updates.";
@@ -379,7 +426,9 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
 
   // Confirmation prompt
   const confirmReset = await showInteractiveToast(
-    `Reset ${baseUnitData.customName || baseUnitData.originalName} (HP, Status, Action)?`,
+    `Reset ${
+      baseUnitData.customName || baseUnitData.originalName
+    } (HP, Status, Action)?`,
     "Confirm Reset",
     [
       { text: "Reset", value: "reset", style: "danger" },
@@ -436,7 +485,8 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
     // Reset model HP
     unitData.models.forEach((model) => {
       if (!unitState.models) unitState.models = {}; // Ensure models object exists
-      if (!unitState.models[model.modelId]) unitState.models[model.modelId] = {}; // Ensure model object exists
+      if (!unitState.models[model.modelId])
+        unitState.models[model.modelId] = {}; // Ensure model object exists
 
       if (unitState.models[model.modelId].currentHp !== model.maxHp) {
         unitState.models[model.modelId].currentHp = model.maxHp;
@@ -461,13 +511,16 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
 
   // Reset state for base unit and hero (if applicable)
   if (resetUnitState(cardUnitId, baseUnitData)) stateChanged = true;
-  if (heroData && heroId && resetUnitState(heroId, heroData)) stateChanged = true;
+  if (heroData && heroId && resetUnitState(heroId, heroData))
+    stateChanged = true;
 
   // Save state if changes were made
   if (stateChanged) {
     saveArmyState(armyId, armyState);
     showToast(
-      `Unit state reset for ${baseUnitData.customName || baseUnitData.originalName}.`,
+      `Unit state reset for ${
+        baseUnitData.customName || baseUnitData.originalName
+      }.`,
       "Unit Reset"
     );
     // Update the offcanvas after saving the reset state
@@ -479,7 +532,10 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
 
   // Re-highlight the next target model
   const nextAutoTarget = findTargetModelForWound(baseUnitData, heroData);
-  _highlightNextAutoTargetModel(cardUnitId, nextAutoTarget ? nextAutoTarget.modelId : null);
+  _highlightNextAutoTargetModel(
+    cardUnitId,
+    nextAutoTarget ? nextAutoTarget.modelId : null
+  );
 }
 
 /**
@@ -591,7 +647,9 @@ function _handleCastSpellClick(buttonElement) {
     }
 
     // Update token count in the modal
-    const modalTokenDisplay = document.getElementById("modalCasterTokenDisplay");
+    const modalTokenDisplay = document.getElementById(
+      "modalCasterTokenDisplay"
+    );
     if (modalTokenDisplay) {
       modalTokenDisplay.innerHTML = `${UI_ICONS.spellTokens} Tokens: <span class="fw-bold">${newTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
     }
@@ -643,7 +701,10 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
       updateUnitStateValue(armyId, cardUnitId, "action", null); // Deactivate after recovery
       updateShakenStatusUI(cardUnitId, false); // Update card indicator & buttons
       updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
-      showToast(`${unitData?.customName || cardUnitId} recovered from Shaken.`, "Recovery");
+      showToast(
+        `${unitData?.customName || cardUnitId} recovered from Shaken.`,
+        "Recovery"
+      );
     } else {
       // Prevent other actions if shaken
       showToast("Shaken unit must Recover.", "Action Blocked");
@@ -679,7 +740,12 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
       );
       if (isFirstMeleeCharge) {
         updateUnitStateValue(armyId, cardUnitId, "fatigued", true);
-        updateUnitStateValue(armyId, cardUnitId, "attackedInMeleeThisRound", true);
+        updateUnitStateValue(
+          armyId,
+          cardUnitId,
+          "attackedInMeleeThisRound",
+          true
+        );
         updateFatiguedStatusUI(cardUnitId, true); // Update card indicator
         updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
         console.log(`Unit ${cardUnitId} is now Fatigued from charging.`);
@@ -692,7 +758,9 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
 
       // 1. Ask for Melee Outcome (for the CHARGING unit)
       const outcome = await showInteractiveToast(
-        `Did ${unitData.customName || cardUnitId} (the Charger) WIN, LOSE, or TIE the melee?`,
+        `Did ${
+          unitData.customName || cardUnitId
+        } (the Charger) WIN, LOSE, or TIE the melee?`,
         "Melee: Charger Outcome?",
         [
           { text: "Win", value: "Win", style: "success" },
@@ -720,19 +788,33 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
           const isHalf = checkHalfStrength(unitData); // Check base unit strength
 
           if (isHalf) {
-            console.log(`Unit ${cardUnitId} fails morale at half strength -> ROUTED!`);
+            console.log(
+              `Unit ${cardUnitId} fails morale at half strength -> ROUTED!`
+            );
             updateUnitStateValue(armyId, cardUnitId, "status", "routed");
             // Update hero status if joined
-            if (heroData) updateUnitStateValue(armyId, heroData.selectionId, "status", "routed");
+            if (heroData)
+              updateUnitStateValue(
+                armyId,
+                heroData.selectionId,
+                "status",
+                "routed"
+              );
             collapseRoutedCard(cardUnitId); // Update card UI
             updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
-            showToast(`${unitData.customName || cardUnitId} Routed!`, "Melee Outcome");
+            showToast(
+              `${unitData.customName || cardUnitId} Routed!`,
+              "Melee Outcome"
+            );
           } else {
             console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
             updateUnitStateValue(armyId, cardUnitId, "shaken", true);
             updateShakenStatusUI(cardUnitId, true); // Update card UI
             updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
-            showToast(`${unitData.customName || cardUnitId} became Shaken!`, "Melee Outcome");
+            showToast(
+              `${unitData.customName || cardUnitId} became Shaken!`,
+              "Melee Outcome"
+            );
           }
         } else if (moraleResult === "Pass") {
           console.log(`Unit ${cardUnitId} passed melee morale test.`);
@@ -783,10 +865,20 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
 
   if (didStrikeBack === "Yes") {
     // Apply fatigue if first melee attack this round
-    const isFirstMelee = !getUnitStateValue(armyId, cardUnitId, "attackedInMeleeThisRound", false);
+    const isFirstMelee = !getUnitStateValue(
+      armyId,
+      cardUnitId,
+      "attackedInMeleeThisRound",
+      false
+    );
     if (isFirstMelee) {
       updateUnitStateValue(armyId, cardUnitId, "fatigued", true);
-      updateUnitStateValue(armyId, cardUnitId, "attackedInMeleeThisRound", true);
+      updateUnitStateValue(
+        armyId,
+        cardUnitId,
+        "attackedInMeleeThisRound",
+        true
+      );
       updateFatiguedStatusUI(cardUnitId, true); // Update card indicator
       updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
       console.log(`Unit ${cardUnitId} is now Fatigued from striking back.`);
@@ -798,7 +890,9 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
 
   // 2. Ask for Melee Outcome for THIS unit
   const outcome = await showInteractiveToast(
-    `Did ${unitData.customName || unitData.originalName} WIN, LOSE, or TIE the melee?`,
+    `Did ${
+      unitData.customName || unitData.originalName
+    } WIN, LOSE, or TIE the melee?`,
     "Melee: Outcome?",
     [
       { text: "Win", value: "Win", style: "success" },
@@ -824,21 +918,37 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
       const isHalf = checkHalfStrength(unitData); // Check base unit strength
 
       if (isHalf) {
-        console.log(`Unit ${cardUnitId} fails morale at half strength -> ROUTED!`);
+        console.log(
+          `Unit ${cardUnitId} fails morale at half strength -> ROUTED!`
+        );
         updateUnitStateValue(armyId, cardUnitId, "status", "routed");
-        if (heroData) updateUnitStateValue(armyId, heroData.selectionId, "status", "routed"); // Update hero status
+        if (heroData)
+          updateUnitStateValue(
+            armyId,
+            heroData.selectionId,
+            "status",
+            "routed"
+          ); // Update hero status
         collapseRoutedCard(cardUnitId); // Update card UI
         updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
-        showToast(`${unitData.customName || cardUnitId} Routed!`, "Melee Outcome");
+        showToast(
+          `${unitData.customName || cardUnitId} Routed!`,
+          "Melee Outcome"
+        );
 
-        console.log(`Triggering 'Set Killed By' modal for routed unit ${cardUnitId}`);
+        console.log(
+          `Triggering 'Set Killed By' modal for routed unit ${cardUnitId}`
+        );
         createOpponentSelectionModal(cardUnitId, armyId, "setKilledBy");
       } else {
         console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
         updateUnitStateValue(armyId, cardUnitId, "shaken", true);
         updateShakenStatusUI(cardUnitId, true); // Update card UI
         updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
-        showToast(`${unitData.customName || cardUnitId} became Shaken!`, "Melee Outcome");
+        showToast(
+          `${unitData.customName || cardUnitId} became Shaken!`,
+          "Melee Outcome"
+        );
       }
     } else if (moraleResult === "Pass") {
       console.log(`Unit ${cardUnitId} passed melee morale test.`);
@@ -898,7 +1008,10 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
     updateUnitStateValue(armyId, cardUnitId, "shaken", true);
     updateShakenStatusUI(cardUnitId, true); // Update card UI
     updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
-    showToast(`${unitData.customName || cardUnitId} became Shaken!`, "Morale Check");
+    showToast(
+      `${unitData.customName || cardUnitId} became Shaken!`,
+      "Morale Check"
+    );
   } else if (moraleResult === "Pass") {
     console.log(`Unit ${cardUnitId} passed wounds morale test.`);
     showToast("Morale test passed.", "Morale Check");
@@ -923,7 +1036,7 @@ async function _handleResetArmyDataClick() {
 
   // Confirmation Dialog using interactive toast
   const confirmed = await showInteractiveToast(
-    html`WARNING! This will permanently delete all saved progress (HP, status, CP, UP, doctrine
+    `WARNING! This will permanently delete all saved progress (HP, status, CP, UP, doctrine
     selection) for "${armyName}" and reload its data from scratch. Are you absolutely sure you want
     to proceed?`,
     "Confirm Current Army Reset",
@@ -945,7 +1058,11 @@ async function _handleResetArmyDataClick() {
     console.log("Cleared relevant session storage caches.");
 
     // 3. Show feedback and reload
-    showToast(`Resetting data for ${armyName}... Page will reload.`, "Resetting", 3000);
+    showToast(
+      `Resetting data for ${armyName}... Page will reload.`,
+      "Resetting",
+      3000
+    );
     // Use setTimeout to allow toast to show before reload potentially interrupts it
     setTimeout(() => {
       window.location.reload();
@@ -965,7 +1082,7 @@ async function _handleResetAllDataClick() {
 
   // Confirmation Dialog using interactive toast
   const confirmed = await showInteractiveToast(
-    html`EXTREME WARNING! This will permanently delete ALL saved progress for ALL armies, campaign
+    `EXTREME WARNING! This will permanently delete ALL saved progress for ALL armies, campaign
     data, cached rules, theme settings, etc. Everything will be wiped from browser storage. This
     action cannot be undone. Are you absolutely, positively sure?`,
     "Confirm FULL Data Reset",
@@ -998,7 +1115,11 @@ async function _handleResetAllDataClick() {
     }
 
     // 3. Show feedback and reload
-    showToast(`Resetting ALL application data... Page will reload.`, "Full Reset", 3000);
+    showToast(
+      `Resetting ALL application data... Page will reload.`,
+      "Full Reset",
+      3000
+    );
     // Use setTimeout to allow toast to show before reload potentially interrupts it
     setTimeout(() => {
       // Reload to the base page without any army selected
@@ -1030,7 +1151,10 @@ async function _handleActivateStratagemClick(buttonElement) {
   const currentCP = getCommandPoints(armyId);
 
   if (currentCP < stratCost) {
-    showToast(`Not enough Command Points for ${stratName}.`, "Activation Failed");
+    showToast(
+      `Not enough Command Points for ${stratName}.`,
+      "Activation Failed"
+    );
     return;
   }
 
@@ -1146,7 +1270,13 @@ async function _handleMarkRemovedClick(event) {
 
     // 2. Update State
     updateUnitStateValue(armyId, unitId, "status", chosenStatus);
-    if (heroData) updateUnitStateValue(armyId, heroData.selectionId, "status", chosenStatus);
+    if (heroData)
+      updateUnitStateValue(
+        armyId,
+        heroData.selectionId,
+        "status",
+        chosenStatus
+      );
 
     // 3. Update UI
     if (chosenStatus === "destroyed") collapseDestroyedCard(unitId);
@@ -1155,7 +1285,9 @@ async function _handleMarkRemovedClick(event) {
     showToast(`${unitName} marked as ${chosenStatus}.`, "Unit Status Updated");
 
     // 4. Trigger 'Set Killed By' Modal
-    console.log(`Triggering 'Set Killed By' modal for manually removed unit ${unitId}`);
+    console.log(
+      `Triggering 'Set Killed By' modal for manually removed unit ${unitId}`
+    );
     createOpponentSelectionModal(unitId, armyId, "setKilledBy");
   } else {
     console.log("Manual unit removal cancelled.");
@@ -1209,7 +1341,12 @@ function handleInteractionClick(event) {
     if (!cardUnitId || !armyId) return;
 
     // Check if unit is inactive before processing most clicks
-    const unitStatus = getUnitStateValue(armyId, cardUnitId, "status", "active");
+    const unitStatus = getUnitStateValue(
+      armyId,
+      cardUnitId,
+      "status",
+      "active"
+    );
     const isInactive = unitStatus === "destroyed" || unitStatus === "routed";
 
     // Find the specific element clicked within the card
@@ -1235,14 +1372,22 @@ function handleInteractionClick(event) {
 
     // Handle active card interactions
     if (modelElement) _handleModelWoundClick(modelElement, armyId, cardUnitId);
-    else if (woundButton) _handleAutoWoundButtonClick(woundButton, armyId, cardUnitId);
-    else if (resetButton) _handleResetUnitClick(resetButton, armyId, cardUnitId);
-    else if (addTokenButton) _handleAddTokenClick(addTokenButton, armyId, cardUnitId);
-    else if (removeTokenButton) _handleRemoveTokenClick(removeTokenButton, armyId, cardUnitId);
-    else if (viewSpellsButton) _handleViewSpellsClick(viewSpellsButton, armyId, cardUnitId);
-    else if (actionButton) _handleActionButtonClick(actionButton, armyId, cardUnitId);
-    else if (resolveMeleeButton) _handleResolveMeleeClick(resolveMeleeButton, armyId, cardUnitId);
-    else if (moraleWoundsButton) _handleMoraleWoundsClick(moraleWoundsButton, armyId, cardUnitId);
+    else if (woundButton)
+      _handleAutoWoundButtonClick(woundButton, armyId, cardUnitId);
+    else if (resetButton)
+      _handleResetUnitClick(resetButton, armyId, cardUnitId);
+    else if (addTokenButton)
+      _handleAddTokenClick(addTokenButton, armyId, cardUnitId);
+    else if (removeTokenButton)
+      _handleRemoveTokenClick(removeTokenButton, armyId, cardUnitId);
+    else if (viewSpellsButton)
+      _handleViewSpellsClick(viewSpellsButton, armyId, cardUnitId);
+    else if (actionButton)
+      _handleActionButtonClick(actionButton, armyId, cardUnitId);
+    else if (resolveMeleeButton)
+      _handleResolveMeleeClick(resolveMeleeButton, armyId, cardUnitId);
+    else if (moraleWoundsButton)
+      _handleMoraleWoundsClick(moraleWoundsButton, armyId, cardUnitId);
     else if (recordKillButton) {
       _handleRecordKillClick(event);
     } else if (markRemovedButton) {
@@ -1279,7 +1424,9 @@ function handleInteractionClick(event) {
 
   // --- Opponent Selection Modal Interactions ---
   if (opponentModal) {
-    const confirmOpponentButton = event.target.closest("#confirm-opponent-selection-btn");
+    const confirmOpponentButton = event.target.closest(
+      "#confirm-opponent-selection-btn"
+    );
     if (confirmOpponentButton) {
       console.log("DEBUG: Click detected on confirm button via delegation.");
       _handleConfirmOpponentSelection(event);
@@ -1297,9 +1444,11 @@ function updateScreenDiagnostics() {
   const themeDisplay = document.getElementById("screenThemeDisplay");
 
   if (widthDisplay) widthDisplay.textContent = `Width: ${window.innerWidth}px`;
-  if (heightDisplay) heightDisplay.textContent = `Height: ${window.innerHeight}px`;
+  if (heightDisplay)
+    heightDisplay.textContent = `Height: ${window.innerHeight}px`;
   if (themeDisplay) {
-    const currentTheme = document.documentElement.getAttribute("data-bs-theme") || "auto";
+    const currentTheme =
+      document.documentElement.getAttribute("data-bs-theme") || "auto";
     themeDisplay.textContent = `Theme: ${currentTheme}`;
   }
 }
@@ -1318,7 +1467,9 @@ function _handleRecordKillClick(event) {
     return;
   }
 
-  console.log(`Record Kill button clicked for Unit: ${unitId}, Army: ${armyId}`);
+  console.log(
+    `Record Kill button clicked for Unit: ${unitId}, Army: ${armyId}`
+  );
   createOpponentSelectionModal(unitId, armyId, "recordKill");
 }
 
@@ -1332,7 +1483,9 @@ function _handleOpponentArmyChange(event) {
 
   const selectedOpponentArmyId = armySelect.value;
   const modal = armySelect.closest(".modal");
-  const unitSelect = modal ? modal.querySelector("#modal-opponent-unit-select") : null;
+  const unitSelect = modal
+    ? modal.querySelector("#modal-opponent-unit-select")
+    : null;
 
   if (unitSelect) {
     populateOpponentUnitDropdown(unitSelect, selectedOpponentArmyId);
@@ -1356,10 +1509,18 @@ function _handleConfirmOpponentSelection(event) {
 
   // Retrieve data stored in the modal
   const actionType = form.querySelector("#modal-action-type")?.value;
-  const triggeringArmyId = form.querySelector("#modal-triggering-army-id")?.value;
-  const triggeringUnitId = form.querySelector("#modal-triggering-unit-id")?.value;
-  const opponentArmyId = form.querySelector("#modal-opponent-army-select")?.value;
-  const selectedOpponentUnitId = form.querySelector("#modal-opponent-unit-select")?.value; // Renamed element ID in ui.js
+  const triggeringArmyId = form.querySelector(
+    "#modal-triggering-army-id"
+  )?.value;
+  const triggeringUnitId = form.querySelector(
+    "#modal-triggering-unit-id"
+  )?.value;
+  const opponentArmyId = form.querySelector(
+    "#modal-opponent-army-select"
+  )?.value;
+  const selectedOpponentUnitId = form.querySelector(
+    "#modal-opponent-unit-select"
+  )?.value; // Renamed element ID in ui.js
 
   // Basic validation
   if (
@@ -1369,7 +1530,10 @@ function _handleConfirmOpponentSelection(event) {
     !opponentArmyId ||
     !selectedOpponentUnitId
   ) {
-    showToast("Please select both an opponent army and a victim unit.", "Selection Incomplete");
+    showToast(
+      "Please select both an opponent army and a victim unit.",
+      "Selection Incomplete"
+    );
     return;
   }
 
@@ -1409,7 +1573,8 @@ function _handleConfirmOpponentSelection(event) {
     // Get necessary details for state functions
     const allArmies = getAllLoadedArmyData();
     const victimUnitData = allArmies?.[opponentArmyId]?.unitMap?.[victimUnitId];
-    const attackerUnitData = allArmies?.[attackerArmyId]?.unitMap?.[attackerUnitId];
+    const attackerUnitData =
+      allArmies?.[attackerArmyId]?.unitMap?.[attackerUnitId];
 
     if (!victimUnitData || !attackerUnitData) {
       showToast("Error: Could not find unit data.", "Data Error");
@@ -1430,14 +1595,23 @@ function _handleConfirmOpponentSelection(event) {
 
     const attackerDetails = {
       attackerUnitId: attackerUnitId,
-      attackerUnitName: attackerUnitData.customName || attackerUnitData.originalName,
+      attackerUnitName:
+        attackerUnitData.customName || attackerUnitData.originalName,
       attackerArmyId: attackerArmyId,
       round: currentRound,
     };
 
     // Call state functions (Handler calls both)
-    const killRecorded = addRecordedKill(attackerArmyId, attackerUnitId, victimDetails);
-    const killedBySet = setKilledByStatus(opponentArmyId, victimUnitId, attackerDetails);
+    const killRecorded = addRecordedKill(
+      attackerArmyId,
+      attackerUnitId,
+      victimDetails
+    );
+    const killedBySet = setKilledByStatus(
+      opponentArmyId,
+      victimUnitId,
+      attackerDetails
+    );
 
     if (killRecorded && killedBySet) {
       // Update UI
@@ -1499,7 +1673,11 @@ function _handleConfirmOpponentSelection(event) {
 
     // 2. Attacker records kill (base + potentially joined hero)
     const attackerHeroId = getPartnerId(attackerArmyId, attackerUnitId);
-    killRecorded = addRecordedKill(attackerArmyId, attackerUnitId, victimRecord);
+    killRecorded = addRecordedKill(
+      attackerArmyId,
+      attackerUnitId,
+      victimRecord
+    );
     if (attackerHeroId) {
       addRecordedKill(attackerArmyId, attackerHeroId, victimRecord);
     }
@@ -1508,9 +1686,11 @@ function _handleConfirmOpponentSelection(event) {
 
     // Update UI
     if (killedBySet) updateKilledByStatusDisplay(victimArmyId, victimUnitId);
-    if (victimHeroId && killedBySet) updateKilledByStatusDisplay(victimArmyId, victimHeroId);
+    if (victimHeroId && killedBySet)
+      updateKilledByStatusDisplay(victimArmyId, victimHeroId);
     if (killRecorded) updateKillCountBadge(attackerArmyId, attackerUnitId);
-    if (attackerHeroId && killRecorded) updateKillCountBadge(attackerArmyId, attackerHeroId);
+    if (attackerHeroId && killRecorded)
+      updateKillCountBadge(attackerArmyId, attackerHeroId);
   } else {
     console.error("Unknown action type in modal confirmation:", actionType);
   }
@@ -1518,7 +1698,9 @@ function _handleConfirmOpponentSelection(event) {
   // --- Final Steps ---
   if (interactionProcessed) {
     showToast(
-      `${actionType === "recordKill" ? "Kill" : "Killer"} recorded successfully!`,
+      `${
+        actionType === "recordKill" ? "Kill" : "Killer"
+      } recorded successfully!`,
       "Success"
     );
   } else {
@@ -1574,11 +1756,17 @@ export function setupEventListeners(armyId) {
     // Listener for when the modal is about to be shown
     stratagemModalElement.addEventListener("show.bs.modal", (event) => {
       // Store the element that triggered the modal for focus return
-      setElementToFocusAfterClose(event.relatedTarget || document.activeElement);
+      setElementToFocusAfterClose(
+        event.relatedTarget || document.activeElement
+      );
       // Populate the doctrine selector dropdown
       populateDoctrineSelector(armyId);
       // Update the Command Points display in the modal header
-      updateCommandPointsDisplay(armyId, getCommandPoints(armyId), getMaxCommandPoints(armyId));
+      updateCommandPointsDisplay(
+        armyId,
+        getCommandPoints(armyId),
+        getMaxCommandPoints(armyId)
+      );
       // Display the stratagems based on the currently selected doctrine
       const currentDoctrine = getSelectedDoctrine(armyId);
       displayStratagems(armyId, currentDoctrine);
@@ -1590,10 +1778,17 @@ export function setupEventListeners(armyId) {
     });
 
     // Listener for when the modal has finished hiding
-    stratagemModalElement.removeEventListener("hidden.bs.modal", handleFocusReturn); // Remove previous listener if any
-    stratagemModalElement.addEventListener("hidden.bs.modal", handleFocusReturn, {
-      once: true,
-    }); // Add listener to return focus
+    stratagemModalElement.removeEventListener(
+      "hidden.bs.modal",
+      handleFocusReturn
+    ); // Remove previous listener if any
+    stratagemModalElement.addEventListener(
+      "hidden.bs.modal",
+      handleFocusReturn,
+      {
+        once: true,
+      }
+    ); // Add listener to return focus
 
     // Listener for changes in the doctrine selector dropdown
     const doctrineSelector = document.getElementById("doctrineSelector");
@@ -1619,12 +1814,21 @@ export function setupEventListeners(armyId) {
     // Listener for when the modal is about to be shown
     armyInfoModalElement.addEventListener("show.bs.modal", (event) => {
       // Store the element that triggered the modal for focus return
-      setElementToFocusAfterClose(event.relatedTarget || document.activeElement);
+      setElementToFocusAfterClose(
+        event.relatedTarget || document.activeElement
+      );
       console.log("Army Info modal opened.");
     });
     // Listener for when the modal has finished hiding
-    armyInfoModalElement.removeEventListener("hidden.bs.modal", handleFocusReturn); // Remove previous listener if any
-    armyInfoModalElement.addEventListener("hidden.bs.modal", handleFocusReturn, { once: true }); // Add listener to return focus
+    armyInfoModalElement.removeEventListener(
+      "hidden.bs.modal",
+      handleFocusReturn
+    ); // Remove previous listener if any
+    armyInfoModalElement.addEventListener(
+      "hidden.bs.modal",
+      handleFocusReturn,
+      { once: true }
+    ); // Add listener to return focus
     console.log("Army Info modal listeners attached.");
   } else {
     console.warn("Army Info modal element not found.");
@@ -1636,12 +1840,21 @@ export function setupEventListeners(armyId) {
     // Listener for when the offcanvas is about to be shown
     offcanvasElement.addEventListener("show.bs.offcanvas", (event) => {
       // Store the element that triggered the offcanvas for focus return
-      setElementToFocusAfterClose(event.relatedTarget || document.activeElement);
+      setElementToFocusAfterClose(
+        event.relatedTarget || document.activeElement
+      );
       console.log("Unit list offcanvas opened.");
     });
     // Listener for when the offcanvas has finished hiding
-    offcanvasElement.removeEventListener("hidden.bs.offcanvas", handleFocusReturn); // Remove previous listener if any
-    offcanvasElement.addEventListener("hidden.bs.offcanvas", handleFocusReturn, { once: true }); // Add listener to return focus
+    offcanvasElement.removeEventListener(
+      "hidden.bs.offcanvas",
+      handleFocusReturn
+    ); // Remove previous listener if any
+    offcanvasElement.addEventListener(
+      "hidden.bs.offcanvas",
+      handleFocusReturn,
+      { once: true }
+    ); // Add listener to return focus
     console.log("Offcanvas listeners attached.");
   } else {
     console.warn("Unit list offcanvas element not found.");
@@ -1654,16 +1867,20 @@ export function setupEventListeners(armyId) {
   if (themeDropdown) {
     // Use setTimeout to ensure the theme attribute has updated after the click event finishes
     document.querySelectorAll("[data-bs-theme-value]").forEach((toggle) => {
-      toggle.addEventListener("click", () => setTimeout(updateScreenDiagnostics, 50));
+      toggle.addEventListener("click", () =>
+        setTimeout(updateScreenDiagnostics, 50)
+      );
     });
     // Also update if OS preference changes (for 'auto' theme)
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-      // Only update if theme is auto or not set
-      const storedTheme = localStorage.getItem(config.THEME_STORAGE_KEY);
-      if (!storedTheme || storedTheme === "auto") {
-        setTimeout(updateScreenDiagnostics, 50);
-      }
-    });
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", () => {
+        // Only update if theme is auto or not set
+        const storedTheme = localStorage.getItem(config.THEME_STORAGE_KEY);
+        if (!storedTheme || storedTheme === "auto") {
+          setTimeout(updateScreenDiagnostics, 50);
+        }
+      });
   }
   console.log("Screen diagnostic listeners attached.");
 } // End setupEventListeners

@@ -34,11 +34,16 @@ function initializeUIReferences() {
   glossaryNoResultsElement = document.getElementById("glossary-no-results");
 
   // Log errors if elements are missing
-  if (!randomEventsDisplayElement) console.error("Element #random-events-display not found.");
-  if (!doctrinesDisplayElement) console.error("Element #doctrines-display not found.");
-  if (!glossarySearchInput) console.error("Element #glossary-search not found.");
-  if (!glossaryItemsContainer) console.error("Element #glossary-items-container not found.");
-  if (!glossaryNoResultsElement) console.error("Element #glossary-no-results not found.");
+  if (!randomEventsDisplayElement)
+    console.error("Element #random-events-display not found.");
+  if (!doctrinesDisplayElement)
+    console.error("Element #doctrines-display not found.");
+  if (!glossarySearchInput)
+    console.error("Element #glossary-search not found.");
+  if (!glossaryItemsContainer)
+    console.error("Element #glossary-items-container not found.");
+  if (!glossaryNoResultsElement)
+    console.error("Element #glossary-no-results not found.");
 }
 
 // --- Utility Functions ---
@@ -68,7 +73,9 @@ function escapeHtml(unsafe) {
 function formatTextToParagraphs(text = "") {
   if (!text) return ""; // Return empty string if input is null, undefined, or empty
   // Basic sanitization attempt
-  const sanitizedText = text.toString().replace(/<script.*?>.*?<\/script>/gi, "");
+  const sanitizedText = text
+    .toString()
+    .replace(/<script.*?>.*?<\/script>/gi, "");
   // Split by double newline first, then single if needed
   let paragraphs = sanitizedText.split("\n\n");
   if (paragraphs.length <= 1 && sanitizedText.includes("\n")) {
@@ -105,7 +112,11 @@ function renderHTML(content) {
 function displayRandomEvents(eventsData) {
   if (!randomEventsDisplayElement) return; // Already checked in init
 
-  if (!eventsData || !Array.isArray(eventsData.events) || eventsData.events.length === 0) {
+  if (
+    !eventsData ||
+    !Array.isArray(eventsData.events) ||
+    eventsData.events.length === 0
+  ) {
     randomEventsDisplayElement.innerHTML = `<div class="alert alert-warning" role="alert">Could not load or find random events data.</div>`;
     return;
   }
@@ -114,17 +125,21 @@ function displayRandomEvents(eventsData) {
   events.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
   let gridHTML = '<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">';
   events.forEach((event) => {
-    const formattedEffect = event.effect ? formatTextToParagraphs(event.effect) : "";
+    const formattedEffect = event.effect
+      ? formatTextToParagraphs(event.effect)
+      : "";
     gridHTML += `
       <div class="col d-flex align-items-stretch">
         <div class="card event-card shadow-sm w-100">
           <div class="card-header">
-            <span class="badge bg-secondary me-2">${renderHTML(event.id)}</span> ${renderHTML(
-      event.title
-    )}
+            <span class="badge bg-secondary me-2">${renderHTML(
+              event.id
+            )}</span> ${renderHTML(event.title)}
           </div>
           <div class="card-body d-flex flex-column">
-            <p class="text-muted fst-italic mb-2">${renderHTML(event.description)}</p>
+            <p class="text-muted fst-italic mb-2">${renderHTML(
+              event.description
+            )}</p>
             ${
               formattedEffect
                 ? `<div class="effect-section allow-definitions">
@@ -153,15 +168,19 @@ function displayDoctrines(doctrinesData) {
     !Array.isArray(doctrinesData.doctrines) ||
     doctrinesData.doctrines.length === 0
   ) {
-    doctrinesDisplayElement.innerHTML = html`<div class="alert alert-warning" role="alert">
+    doctrinesDisplayElement.innerHTML = `<div class="alert alert-warning" role="alert">
       Could not load or find doctrines data.
     </div>`;
     return;
   }
 
   let doctrinesHTML = "";
-  const universalDoctrine = doctrinesData.doctrines.find((d) => d.id === "universal");
-  const selectableDoctrines = doctrinesData.doctrines.filter((d) => d.id !== "universal");
+  const universalDoctrine = doctrinesData.doctrines.find(
+    (d) => d.id === "universal"
+  );
+  const selectableDoctrines = doctrinesData.doctrines.filter(
+    (d) => d.id !== "universal"
+  );
 
   // Helper to create stratagem list HTML for a doctrine
   const createStratagemListHTML = (doctrine) => {
@@ -178,7 +197,9 @@ function displayDoctrines(doctrinesData) {
           class="list-group-item d-flex justify-content-between align-items-start flex-wrap px-0 py-1">
           <div class="me-auto">
             <strong>${renderHTML(stratName)}</strong>
-            <small class="d-block text-muted allow-definitions">${renderHTML(stratDesc)}</small>
+            <small class="d-block text-muted allow-definitions">${renderHTML(
+              stratDesc
+            )}</small>
           </div>
           <div class="stratagem-actions d-flex align-items-center gap-2">
             <span class="badge bg-warning text-dark rounded-pill" title="Command Point Cost"
@@ -201,18 +222,22 @@ function displayDoctrines(doctrinesData) {
       </div>
     `;
   } else {
-    doctrinesHTML += '<p class="text-warning">Universal doctrine data not found.</p>';
+    doctrinesHTML +=
+      '<p class="text-warning">Universal doctrine data not found.</p>';
   }
 
   // Render Selectable Doctrines
   doctrinesHTML += '<h4 class="mt-4">Selectable Doctrines</h4>';
-  doctrinesHTML += "<p>Choose ONE of the following Doctrines before the game begins:</p>";
+  doctrinesHTML +=
+    "<p>Choose ONE of the following Doctrines before the game begins:</p>";
   doctrinesHTML += '<div class="row row-cols-1 row-cols-md-2 g-3">';
 
   selectableDoctrines.forEach((doctrine) => {
     const iconClass = doctrine.icon || "bi-question-circle-fill";
     const iconHTML = `<i class="bi ${iconClass} me-1"></i>`;
-    const cardHeaderBg = doctrine.color ? `bg-${doctrine.color}-subtle` : "bg-secondary-subtle";
+    const cardHeaderBg = doctrine.color
+      ? `bg-${doctrine.color}-subtle`
+      : "bg-secondary-subtle";
 
     doctrinesHTML += `
       <div class="col d-flex">
@@ -239,7 +264,9 @@ function displayDoctrines(doctrinesData) {
  */
 function renderGlossary(defs, container) {
   if (!defs || !container) {
-    console.error("RenderGlossary called with invalid definitions or container.");
+    console.error(
+      "RenderGlossary called with invalid definitions or container."
+    );
     return;
   }
 
@@ -254,7 +281,11 @@ function renderGlossary(defs, container) {
   terms.forEach((term) => {
     const definition = defs[term];
     // Ensure definition has description and sources array before rendering
-    if (!definition || !definition.description || !Array.isArray(definition.sources)) {
+    if (
+      !definition ||
+      !definition.description ||
+      !Array.isArray(definition.sources)
+    ) {
       console.warn(`Skipping invalid definition for term: ${term}`);
       return; // Skip rendering this term
     }
@@ -273,11 +304,14 @@ function renderGlossary(defs, container) {
     if (definition.sources && definition.sources.length > 0) {
       sourceBadges = definition.sources
         .map((source) => {
-          let badgeClass = "bg-secondary-subtle border-secondary-subtle text-secondary-emphasis"; // Default
+          let badgeClass =
+            "bg-secondary-subtle border-secondary-subtle text-secondary-emphasis"; // Default
           if (source === "Common") {
-            badgeClass = "bg-primary-subtle border-primary-subtle text-primary-emphasis";
+            badgeClass =
+              "bg-primary-subtle border-primary-subtle text-primary-emphasis";
           } else if (source === "Custom") {
-            badgeClass = "bg-success-subtle border-success-subtle text-success-emphasis";
+            badgeClass =
+              "bg-success-subtle border-success-subtle text-success-emphasis";
           }
           // Add more conditions here for specific army book names if desired
           return `<span class="badge ${badgeClass} border rounded-pill me-1 small">${escapeHtml(
@@ -327,7 +361,9 @@ function renderGlossary(defs, container) {
  */
 function filterGlossary(query, container, noResultsEl) {
   if (!container || !noResultsEl) {
-    console.error("FilterGlossary called with invalid container or noResults element.");
+    console.error(
+      "FilterGlossary called with invalid container or noResults element."
+    );
     return;
   }
 
@@ -379,7 +415,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("Loading campaign data for rules page...");
     const campaignData = await loadCampaignData();
     if (!campaignData) {
-      console.warn("Failed to load campaign data. Definitions might be incomplete.");
+      console.warn(
+        "Failed to load campaign data. Definitions might be incomplete."
+      );
     }
 
     // Fetch other essential data concurrently, passing REAL campaign data
@@ -404,7 +442,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Add search listener AFTER rendering
     glossarySearchInput.addEventListener("input", () => {
-      filterGlossary(glossarySearchInput.value, glossaryItemsContainer, glossaryNoResultsElement);
+      filterGlossary(
+        glossarySearchInput.value,
+        glossaryItemsContainer,
+        glossaryNoResultsElement
+      );
     });
 
     // Initialize popovers on the whole page AFTER dynamic content (including glossary) is rendered
@@ -413,10 +455,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error loading rules page data:", error);
     showToast("Failed to load some rules data.", "Error");
     // Update specific display areas if possible to indicate failure
-    if (randomEventsDisplayElement && !randomEventsDisplayElement.innerHTML.includes("card")) {
+    if (
+      randomEventsDisplayElement &&
+      !randomEventsDisplayElement.innerHTML.includes("card")
+    ) {
       randomEventsDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Error loading random events. Check console.</div>`;
     }
-    if (doctrinesDisplayElement && !doctrinesDisplayElement.innerHTML.includes("card")) {
+    if (
+      doctrinesDisplayElement &&
+      !doctrinesDisplayElement.innerHTML.includes("card")
+    ) {
       doctrinesDisplayElement.innerHTML = `<div class="alert alert-danger" role="alert">Error loading doctrines. Check console.</div>`;
     }
     if (
