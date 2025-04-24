@@ -1480,7 +1480,7 @@ function _handleOpponentArmyChange(event) {
   const selectedOpponentArmyId = armySelect.value;
   const modal = armySelect.closest(".modal");
   const unitSelect = modal
-    ? modal.querySelector("#modal-victim-unit-select")
+    ? modal.querySelector("#modal-opponent-unit-select")
     : null;
 
   if (unitSelect) {
@@ -1514,7 +1514,6 @@ function _handleConfirmOpponentSelection(event) {
   const opponentArmyId = form.querySelector(
     "#modal-opponent-army-select"
   )?.value;
-  const victimUnitId = form.querySelector("#modal-victim-unit-select")?.value; // For recordKill, this is the victim
   const selectedOpponentUnitId = form.querySelector(
     "#modal-opponent-unit-select"
   )?.value; // Renamed element ID in ui.js
@@ -1525,7 +1524,7 @@ function _handleConfirmOpponentSelection(event) {
     !triggeringArmyId ||
     !triggeringUnitId ||
     !opponentArmyId ||
-    !victimUnitId
+    !selectedOpponentUnitId
   ) {
     showToast(
       "Please select both an opponent army and a victim unit.",
@@ -1628,9 +1627,21 @@ function _handleConfirmOpponentSelection(event) {
 
     const victimBaseDetails = getUnitDetails(victimArmyId, victimUnitId);
     const attackerBaseDetails = getUnitDetails(attackerArmyId, attackerUnitId);
+    console.log(
+      "DEBUG: Victim and attacker details:",
+      {
+        victimBaseDetails,
+        attackerBaseDetails,
+      },
+      { victimArmyId, victimUnitId, attackerArmyId, attackerUnitId }
+    );
 
     if (!victimBaseDetails || !attackerBaseDetails) {
-      /* ... error handling ... */ return;
+      console.log("Error: Could not find unit details for KilledBy update.", {
+        victimBaseDetails,
+        attackerBaseDetails,
+      });
+      return;
     }
 
     // Prepare details objects
@@ -1673,9 +1684,9 @@ function _handleConfirmOpponentSelection(event) {
     if (killedBySet) updateKilledByStatusDisplay(victimArmyId, victimUnitId);
     if (victimHeroId && killedBySet)
       updateKilledByStatusDisplay(victimArmyId, victimHeroId);
-    if (killRecorded) updateKillCountDisplay(attackerArmyId, attackerUnitId);
+    if (killRecorded) updateKillCountBadge(attackerArmyId, attackerUnitId);
     if (attackerHeroId && killRecorded)
-      updateKillCountDisplay(attackerArmyId, attackerHeroId);
+      updateKillCountBadge(attackerArmyId, attackerHeroId);
   } else {
     console.error("Unknown action type in modal confirmation:", actionType);
   }

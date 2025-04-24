@@ -629,8 +629,8 @@ function createOpponentSelectionModal(
               </div>
 
               <div class="mb-3">
-                <label for="modal-victim-unit-select" class="form-label">Victim Unit:</label>
-                <select class="form-select" id="modal-victim-unit-select" required disabled>
+                <label for="modal-opponent-unit-select" class="form-label">Victim Unit:</label>
+                <select class="form-select" id="modal-opponent-unit-select" required disabled>
                   <option value="" selected disabled>-- Select Opponent Army First --</option>
                 </select>
               </div>
