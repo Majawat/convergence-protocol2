@@ -75,9 +75,7 @@ function _initializeWoundHighlights(armyId) {
   if (!processedArmy || !processedArmy.units) return;
   console.log(`DEBUG: Initializing wound highlights for army ${armyId}...`);
   processedArmy.units
-    .filter(
-      (u) => !(u.isHero && processedArmy.heroJoinTargets?.[u.selectionId])
-    )
+    .filter((u) => !(u.isHero && processedArmy.heroJoinTargets?.[u.selectionId]))
     .forEach((baseUnit) => {
       const cardUnitId = baseUnit.selectionId;
       // Get data directly from the in-memory processedArmy object
@@ -85,10 +83,7 @@ function _initializeWoundHighlights(armyId) {
         .map((heroId) => processedArmy.unitMap[heroId])
         .find((hero) => hero?.joinToUnitId === cardUnitId);
       const baseUnitData = processedArmy.unitMap[cardUnitId];
-      const initialTargetModel = findTargetModelForWound(
-        baseUnitData,
-        heroData
-      );
+      const initialTargetModel = findTargetModelForWound(baseUnitData, heroData);
       if (initialTargetModel) {
         const targetModelElement = document.querySelector(
           `#unit-card-${cardUnitId} [data-model-id="${initialTargetModel.modelId}"]`
@@ -217,11 +212,7 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
     allArmyIds.forEach((id) => {
       const state = loadArmyState(id);
       // Check if state and listPoints exist and are valid numbers
-      if (
-        state &&
-        typeof state.listPoints === "number" &&
-        state.listPoints >= 0
-      ) {
+      if (state && typeof state.listPoints === "number" && state.listPoints >= 0) {
         armyPointsData.push({ armyId: id, points: state.listPoints });
       } else {
         console.warn(
@@ -241,9 +232,7 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
     }
 
     if (armyPointsData.length <= 1) {
-      console.log(
-        "DEBUG: Not enough valid army point totals found to calculate Underdog Points."
-      );
+      console.log("DEBUG: Not enough valid army point totals found to calculate Underdog Points.");
       setUnderdogPoints(armyIdToLoad, 0);
       setMaxUnderdogPoints(armyIdToLoad, 0);
       updateUnderdogPointsDisplay(armyIdToLoad, 0, 0);
@@ -254,13 +243,9 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
     const maxPoints = Math.max(...armyPointsData.map((a) => a.points));
 
     // Find the points for the currently viewed army
-    const currentArmyPointsData = armyPointsData.find(
-      (a) => a.armyId === armyIdToLoad
-    );
+    const currentArmyPointsData = armyPointsData.find((a) => a.armyId === armyIdToLoad);
     // If current army's state failed loading, points might be 0 - calculation will still work
-    const currentArmyPoints = currentArmyPointsData
-      ? currentArmyPointsData.points
-      : 0;
+    const currentArmyPoints = currentArmyPointsData ? currentArmyPointsData.points : 0;
 
     let calculatedUP = 0;
     if (currentArmyPoints < maxPoints) {
@@ -295,18 +280,10 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
 function populateUnitOffcanvas(processedArmy) {
   const listElement = document.getElementById("offcanvas-unit-list");
   const offcanvasElement = document.getElementById("unitListOffcanvas");
-  if (
-    !listElement ||
-    !offcanvasElement ||
-    !processedArmy ||
-    !processedArmy.units
-  ) {
-    console.error(
-      "Cannot populate unit offcanvas: Element or army data missing."
-    );
+  if (!listElement || !offcanvasElement || !processedArmy || !processedArmy.units) {
+    console.error("Cannot populate unit offcanvas: Element or army data missing.");
     if (listElement)
-      listElement.innerHTML =
-        '<li class="list-group-item text-danger">Error loading list.</li>';
+      listElement.innerHTML = '<li class="list-group-item text-danger">Error loading list.</li>';
     return;
   }
 
@@ -314,50 +291,21 @@ function populateUnitOffcanvas(processedArmy) {
   const armyId = processedArmy.meta.id; // Get current army ID
 
   const offcanvasInstance =
-    bootstrap.Offcanvas.getInstance(offcanvasElement) ||
-    new bootstrap.Offcanvas(offcanvasElement);
-  const navbarHeight =
-    document.querySelector(".navbar.fixed-top")?.offsetHeight || 60;
+    bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+  const navbarHeight = document.querySelector(".navbar.fixed-top")?.offsetHeight || 60;
 
   processedArmy.units
-    .filter(
-      (unit) =>
-        !(unit.isHero && processedArmy.heroJoinTargets?.[unit.selectionId])
-    )
-    .sort((a, b) =>
-      (a.customName || a.originalName).localeCompare(
-        b.customName || b.originalName
-      )
-    )
+    .filter((unit) => !(unit.isHero && processedArmy.heroJoinTargets?.[unit.selectionId]))
+    .sort((a, b) => (a.customName || a.originalName).localeCompare(b.customName || b.originalName))
     .forEach((unit) => {
       const listItem = document.createElement("li");
       listItem.dataset.unitId = unit.selectionId; // *** ADDED THIS LINE ***
 
       // Get unit state for icons
-      const status = getUnitStateValue(
-        armyId,
-        unit.selectionId,
-        "status",
-        "active"
-      );
-      const isShaken = getUnitStateValue(
-        armyId,
-        unit.selectionId,
-        "shaken",
-        false
-      );
-      const isFatigued = getUnitStateValue(
-        armyId,
-        unit.selectionId,
-        "fatigued",
-        false
-      );
-      const action = getUnitStateValue(
-        armyId,
-        unit.selectionId,
-        "action",
-        null
-      );
+      const status = getUnitStateValue(armyId, unit.selectionId, "status", "active");
+      const isShaken = getUnitStateValue(armyId, unit.selectionId, "shaken", false);
+      const isFatigued = getUnitStateValue(armyId, unit.selectionId, "fatigued", false);
+      const action = getUnitStateValue(armyId, unit.selectionId, "action", null);
       const isActivated = action !== null && !isShaken; // Adjusted logic
 
       let iconHTML = "";
@@ -398,10 +346,7 @@ function populateUnitOffcanvas(processedArmy) {
         const targetElement = document.getElementById(targetId);
         if (targetElement) {
           const targetPosition =
-            targetElement.getBoundingClientRect().top +
-            window.scrollY -
-            navbarHeight -
-            10;
+            targetElement.getBoundingClientRect().top + window.scrollY - navbarHeight - 10;
           window.scrollTo({ top: targetPosition, behavior: "smooth" });
         }
         offcanvasInstance.hide();
@@ -412,8 +357,7 @@ function populateUnitOffcanvas(processedArmy) {
     });
 
   if (listElement.children.length === 0) {
-    listElement.innerHTML =
-      '<li class="list-group-item text-muted">No units found in army.</li>';
+    listElement.innerHTML = '<li class="list-group-item text-muted">No units found in army.</li>';
   }
 }
 
@@ -486,9 +430,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const armyIdToLoad = urlParams.get("armyId");
   setCurrentArmyId(armyIdToLoad); // Set the current army ID in state
-  const armyInfo = armyIdToLoad
-    ? campaignArmies.find((a) => a.armyForgeID === armyIdToLoad)
-    : null;
+  const armyInfo = armyIdToLoad ? campaignArmies.find((a) => a.armyForgeID === armyIdToLoad) : null;
   console.log(`DEBUG: Army ID to load: ${armyIdToLoad}`);
 
   // Step 3: Display Selection or Proceed
@@ -509,9 +451,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // --- Code below only runs if a valid armyId IS found ---
-  console.log(
-    `DEBUG: Proceeding to load army: ${armyInfo.armyName} (${armyIdToLoad})`
-  );
+  console.log(`DEBUG: Proceeding to load army: ${armyInfo.armyName} (${armyIdToLoad})`);
   mainListContainer.innerHTML =
     '<div class="col-12"><div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading All Army Data...</span></div></div></div>'; // Updated spinner text
   titleH1.textContent = `Loading ${armyInfo.armyName}...`;
@@ -549,10 +489,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           fetchProcessErrors++;
         }
       } else {
-        console.warn(
-          `DEBUG: Failed to fetch data for army ID: ${armyId}. Reason:`,
-          result.reason
-        );
+        console.warn(`DEBUG: Failed to fetch data for army ID: ${armyId}. Reason:`, result.reason);
         fetchProcessErrors++;
       }
     }
@@ -581,14 +518,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- END Step 5 ---
 
     // --- Step 5.5: Initialize/Update ALL Army States in localStorage ---
-    console.log(
-      "DEBUG: Initializing/Updating states for all processed armies in localStorage..."
-    );
+    console.log("DEBUG: Initializing/Updating states for all processed armies in localStorage...");
     for (const armyId in allProcessedArmies) {
       const processed = allProcessedArmies[armyId];
       const listPoints = processed.meta.listPoints || 0;
-      const maxCommandPoints =
-        Math.floor(listPoints / 1000) * config.COMMAND_POINTS_PER_1000;
+      const maxCommandPoints = Math.floor(listPoints / 1000) * config.COMMAND_POINTS_PER_1000;
 
       let existingState = loadArmyState(armyId);
       let stateChanged = false;

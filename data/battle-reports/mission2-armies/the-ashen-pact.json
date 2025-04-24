@@ -352,9 +352,7 @@
                 "range": 12,
                 "attacks": 2,
                 "weaponId": "Lnlu85A_",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Shotgun (12\", A2, AP(1))",
                 "count": 1,
                 "dependencies": []
@@ -392,9 +390,7 @@
                 "range": 12,
                 "attacks": 2,
                 "weaponId": "Lnlu85A_",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Shotgun (12\", A2, AP(1))",
                 "count": 1,
                 "dependencies": []
@@ -432,9 +428,7 @@
                 "range": 12,
                 "attacks": 2,
                 "weaponId": "Lnlu85A_",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Shotgun (12\", A2, AP(1))",
                 "count": 1,
                 "dependencies": []
@@ -472,9 +466,7 @@
                 "range": 12,
                 "attacks": 2,
                 "weaponId": "Lnlu85A_",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Shotgun (12\", A2, AP(1))",
                 "count": 1,
                 "dependencies": []
@@ -1425,9 +1417,7 @@
           "range": 0,
           "attacks": 4,
           "weaponId": "gLvu2axn",
-          "specialRules": [
-            { "id": "cavWDboL4ubs", "name": "Rending", "type": "ArmyBookRule" }
-          ],
+          "specialRules": [{ "id": "cavWDboL4ubs", "name": "Rending", "type": "ArmyBookRule" }],
           "label": "Dual Energy Claws (A4, Rending)",
           "dependencies": []
         }
@@ -1662,9 +1652,7 @@
                 "range": 12,
                 "attacks": 1,
                 "weaponId": "dGKJc4Nn",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }],
                 "label": "Plasma Pistol (12\", A1, AP(4))",
                 "count": 1,
                 "dependencies": []

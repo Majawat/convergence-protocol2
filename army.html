@@ -16,9 +16,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="bg-body text-body">
-    <nav
-      class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm"
-    >
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm">
       <div class="container-fluid">
         <a class="navbar-brand" href="index.html">OPR Tracker</a>
         <button
@@ -38,9 +36,7 @@
               <a class="nav-link" href="index.html">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="army.html"
-                >View Armies</a
-              >
+              <a class="nav-link active" aria-current="page" href="army.html">View Armies</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="campaign.html">Campaign Status</a>
@@ -93,27 +89,17 @@
     </nav>
 
     <main class="container mt-4">
-      <div
-        class="d-flex align-items-center justify-content-between gap-3 mb-2 flex-wrap"
-      >
-        <h1 id="army-title-h1" class="flex-grow-1 mb-0 me-3">
-          Loading Army...
-        </h1>
+      <div class="d-flex align-items-center justify-content-between gap-3 mb-2 flex-wrap">
+        <h1 id="army-title-h1" class="flex-grow-1 mb-0 me-3">Loading Army...</h1>
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <h3 id="round-display" class="mb-0 order-1 order-md-0"></h3>
-          <div
-            id="command-points-display"
-            class="point-display mb-0 order-2 order-md-1"
-          >
+          <div id="command-points-display" class="point-display mb-0 order-2 order-md-1">
             <span class="cp-icon-placeholder"></span> <span>Command: </span>
             <span id="command-points-value">--</span>
             <span> / </span>
             <span id="command-points-max">--</span>
           </div>
-          <div
-            id="underdog-points-display"
-            class="point-display mb-0 order-3 order-md-2"
-          >
+          <div id="underdog-points-display" class="point-display mb-0 order-3 order-md-2">
             <span class="up-icon-placeholder"></span> <span>Underdog: </span>
             <span id="underdog-points-value">--</span>
             <div
@@ -162,22 +148,14 @@
             >
               <i class="bi bi-journal-bookmark-fill"></i> Stratagems
             </button>
-            <button
-              id="start-round-button"
-              type="button"
-              class="btn btn-sm btn-success"
-              disabled
-            >
+            <button id="start-round-button" type="button" class="btn btn-sm btn-success" disabled>
               <i class="bi bi-arrow-repeat"></i> Loading
             </button>
           </div>
         </div>
       </div>
       <hr class="mt-2 mb-4" />
-      <div
-        id="army-units-container"
-        class="row row-cols-1 row-cols-lg-2 row-cols-xxl-3 g-4"
-      >
+      <div id="army-units-container" class="row row-cols-1 row-cols-lg-2 row-cols-xxl-3 g-4">
         <div class="col-12">
           <div
             class="d-flex justify-content-center align-items-center mt-5"
@@ -198,21 +176,11 @@
         <span id="screenHeightDisplay">Height: ...</span>
         <span id="screenThemeDisplay">Theme: ...</span>
       </div>
-      <div
-        class="text-center mt-3 d-flex justify-content-center gap-2 flex-wrap"
-      >
-        <button
-          type="button"
-          id="reset-army-data-button"
-          class="btn btn-sm btn-outline-danger"
-        >
+      <div class="text-center mt-3 d-flex justify-content-center gap-2 flex-wrap">
+        <button type="button" id="reset-army-data-button" class="btn btn-sm btn-outline-danger">
           <i class="bi bi-exclamation-triangle"></i> Reset Current Army Data
         </button>
-        <button
-          type="button"
-          id="reset-all-data-button"
-          class="btn btn-sm btn-outline-warning"
-        >
+        <button type="button" id="reset-all-data-button" class="btn btn-sm btn-outline-warning">
           <i class="bi bi-trash3-fill"></i> Reset ALL Data
         </button>
       </div>
@@ -229,9 +197,7 @@
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="armyInfoModalLabel">
-              Army Information
-            </h5>
+            <h5 class="modal-title" id="armyInfoModalLabel">Army Information</h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -254,13 +220,7 @@
             <div id="armyInfoBackstory"></div>
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -276,9 +236,7 @@
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="viewSpellsModalLabel">
-              Available Spells
-            </h5>
+            <h5 class="modal-title" id="viewSpellsModalLabel">Available Spells</h5>
             <span id="modalCasterTokenDisplay" class="ms-auto me-3"></span>
             <button
               type="button"
@@ -289,22 +247,12 @@
           </div>
           <div class="modal-body">
             <p id="noSpellsMessage" class="text-muted" style="display: none">
-              No spells found for this caster's faction or army book data not
-              loaded.
+              No spells found for this caster's faction or army book data not loaded.
             </p>
-            <ul
-              id="spellListContainer"
-              class="list-group list-group-flush"
-            ></ul>
+            <ul id="spellListContainer" class="list-group list-group-flush"></ul>
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -320,9 +268,7 @@
       <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="stratagemModalLabel">
-              Doctrines & Stratagems
-            </h5>
+            <h5 class="modal-title" id="stratagemModalLabel">Doctrines & Stratagems</h5>
             <div class="ms-auto d-flex align-items-center gap-2">
               <div
                 id="modal-cp-adjust-group"
@@ -366,32 +312,18 @@
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label for="doctrineSelector" class="form-label"
-                >Selected Doctrine:</label
-              >
-              <select
-                class="form-select"
-                id="doctrineSelector"
-                aria-label="Select Doctrine"
-              >
+              <label for="doctrineSelector" class="form-label">Selected Doctrine:</label>
+              <select class="form-select" id="doctrineSelector" aria-label="Select Doctrine">
                 <option selected value="">-- Select Doctrine --</option>
               </select>
             </div>
             <hr />
             <div id="stratagemDisplayArea">
-              <p class="text-muted">
-                Select a doctrine to view its Stratagems.
-              </p>
+              <p class="text-muted">Select a doctrine to view its Stratagems.</p>
             </div>
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -399,12 +331,7 @@
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <template id="toastTemplate">
-        <div
-          class="toast"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <strong class="me-auto toast-title">Notification</strong>
             <small class="text-muted toast-timestamp">Just now</small>
@@ -415,9 +342,7 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="toast-body" style="white-space: pre-wrap">
-            Toast message goes here.
-          </div>
+          <div class="toast-body" style="white-space: pre-wrap">Toast message goes here.</div>
         </div>
       </template>
       <template id="interactiveToastTemplate">
@@ -437,12 +362,8 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="toast-body" style="white-space: pre-wrap">
-            Interactive message goes here.
-          </div>
-          <div
-            class="mt-2 pt-2 border-top toast-buttons-container p-2 text-end"
-          ></div>
+          <div class="toast-body" style="white-space: pre-wrap">Interactive message goes here.</div>
+          <div class="mt-2 pt-2 border-top toast-buttons-container p-2 text-end"></div>
         </div>
       </template>
       <div
@@ -489,12 +410,7 @@
       >
         <i class="bi bi-list-ul"></i> Units
       </button>
-      <button
-        class="btn btn-secondary btn-sm"
-        type="button"
-        id="backToTopBtn"
-        title="Back to Top"
-      >
+      <button class="btn btn-secondary btn-sm" type="button" id="backToTopBtn" title="Back to Top">
         <i class="bi bi-arrow-up"></i> Top
       </button>
     </div>

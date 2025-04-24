@@ -13,9 +13,7 @@ export function findTargetModelForWound(baseUnit, heroUnit = null) {
   if (!baseUnit || !baseUnit.models) return null;
 
   // Combine models from base unit and hero (if present)
-  const combinedModels = heroUnit
-    ? [...baseUnit.models, ...heroUnit.models]
-    : [...baseUnit.models];
+  const combinedModels = heroUnit ? [...baseUnit.models, ...heroUnit.models] : [...baseUnit.models];
   const activeModels = combinedModels.filter((m) => m.currentHp > 0);
 
   if (activeModels.length === 0) return null; // No models left to wound

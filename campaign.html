@@ -18,9 +18,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="bg-body text-body">
-    <nav
-      class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm"
-    >
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm">
       <div class="container-fluid">
         <a class="navbar-brand" href="index.html">OPR Tracker</a>
         <button
@@ -43,10 +41,7 @@
               <a class="nav-link" href="army.html">View Armies</a>
             </li>
             <li class="nav-item">
-              <a
-                class="nav-link active"
-                aria-current="page"
-                href="campaign.html"
+              <a class="nav-link active" aria-current="page" href="campaign.html"
                 >Campaign Status</a
               >
             </li>
@@ -64,10 +59,7 @@
             >
               <i class="bi bi-circle-half theme-icon-active"></i> Theme
             </button>
-            <ul
-              class="dropdown-menu dropdown-menu-end"
-              aria-labelledby="themeDropdown"
-            >
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
               <li>
                 <button
                   class="dropdown-item d-flex align-items-center"
@@ -164,9 +156,7 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="battleReportModalLabel">
-                Battle Report
-              </h5>
+              <h5 class="modal-title" id="battleReportModalLabel">Battle Report</h5>
               <button
                 type="button"
                 class="btn-close btn-close-white"
@@ -174,17 +164,9 @@
                 aria-label="Close"
               ></button>
             </div>
-            <div class="modal-body" id="battleReportModalBody">
-              Loading report...
-            </div>
+            <div class="modal-body" id="battleReportModalBody">Loading report...</div>
             <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
@@ -197,12 +179,7 @@
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <template id="toastTemplate">
-        <div
-          class="toast"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <strong class="me-auto toast-title">Notification</strong>
             <small class="text-muted toast-timestamp">Just now</small>
@@ -213,18 +190,10 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="toast-body" style="white-space: pre-wrap">
-            Toast message goes here.
-          </div>
+          <div class="toast-body" style="white-space: pre-wrap">Toast message goes here.</div>
         </div>
       </template>
-      <div
-        id="themeToast"
-        class="toast"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
+      <div id="themeToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
           <strong class="me-auto">Theme Change</strong>
           <small>Just now</small>

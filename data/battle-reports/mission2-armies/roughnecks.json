@@ -365,9 +365,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "gN1LAzCn",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }],
                 "label": "Plasma Rifle (24\", A1, AP(4))",
                 "count": 1,
                 "dependencies": []
@@ -405,9 +403,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "C9Hnetww",
-                "specialRules": [
-                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-                ],
+                "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
                 "label": "Grenade Launcher (24\", A1, Blast(3))",
                 "dependencies": []
               }
@@ -530,9 +526,7 @@
           "range": 24,
           "attacks": 1,
           "weaponId": "C9Hnetww",
-          "specialRules": [
-            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-          ],
+          "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
           "label": "Grenade Launcher (24\", A1, Blast(3))",
           "dependencies": []
         }
@@ -712,9 +706,7 @@
                 "range": 30,
                 "attacks": 6,
                 "weaponId": "QpV-1C1l",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Rapid Heavy Machinegun (30\", A6, AP(1))",
                 "count": 1,
                 "dependencies": []
@@ -1171,9 +1163,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "C9Hnetww",
-                "specialRules": [
-                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-                ],
+                "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
                 "label": "Grenade Launcher (24\", A1, Blast(3))",
                 "count": 1,
                 "dependencies": []
@@ -1250,9 +1240,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "gN1LAzCn",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }],
                 "label": "Plasma Rifle (24\", A1, AP(4))",
                 "count": 1,
                 "dependencies": []
@@ -1310,9 +1298,7 @@
           "range": 24,
           "attacks": 1,
           "weaponId": "C9Hnetww",
-          "specialRules": [
-            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-          ],
+          "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
           "label": "Grenade Launcher (24\", A1, Blast(3))",
           "count": 1,
           "dependencies": []
@@ -1482,9 +1468,7 @@
                 "range": 30,
                 "attacks": 3,
                 "weaponId": "_OuuPXyd",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Heavy Machinegun (30\", A3, AP(1))",
                 "dependencies": []
               }
@@ -1518,9 +1502,7 @@
                 "range": 30,
                 "attacks": 3,
                 "weaponId": "_OuuPXyd",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Heavy Machinegun (30\", A3, AP(1))",
                 "count": 1,
                 "dependencies": []
@@ -1813,9 +1795,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "gN1LAzCn",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 4 }],
                 "label": "Plasma Rifle (24\", A1, AP(4))",
                 "count": 1,
                 "dependencies": []
@@ -1894,9 +1874,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "C9Hnetww",
-                "specialRules": [
-                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-                ],
+                "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
                 "label": "Grenade Launcher (24\", A1, Blast(3))",
                 "dependencies": []
               }
@@ -1993,9 +1971,7 @@
           "range": 24,
           "attacks": 1,
           "weaponId": "C9Hnetww",
-          "specialRules": [
-            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-          ],
+          "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
           "label": "Grenade Launcher (24\", A1, Blast(3))",
           "dependencies": []
         }
@@ -2374,9 +2350,7 @@
                 "range": 30,
                 "attacks": 3,
                 "weaponId": "_OuuPXyd",
-                "specialRules": [
-                  { "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }
-                ],
+                "specialRules": [{ "id": "17crjK7P6_w6", "name": "AP", "rating": 1 }],
                 "label": "Heavy Machinegun (30\", A3, AP(1))",
                 "count": 1,
                 "dependencies": []

@@ -32,9 +32,7 @@ const renderHTML = (content) => {
  */
 function initializeUIReferences() {
   missionSnapshotElement = document.getElementById("dashboard-current-mission");
-  leaderboardSnapshotElement = document.getElementById(
-    "dashboard-leaderboard-snapshot"
-  );
+  leaderboardSnapshotElement = document.getElementById("dashboard-leaderboard-snapshot");
 }
 
 // --- Data Loading ---
@@ -63,24 +61,20 @@ async function loadDashboardData() {
 function displayMissionSnapshot(missionsData) {
   if (!missionSnapshotElement) return;
 
-  const currentMission = missionsData?.missions?.find(
-    (m) => m.status === "current"
-  );
+  const currentMission = missionsData?.missions?.find((m) => m.status === "current");
 
   if (currentMission) {
     // Now calls the globally accessible renderHTML helper
     missionSnapshotElement.innerHTML = `
-            <h6 class="card-subtitle mb-2 text-muted">Mission ${
-              currentMission.number || "?"
-            } - ${renderHTML(currentMission.month) || "TBD"}</h6>
+            <h6 class="card-subtitle mb-2 text-muted">Mission ${currentMission.number || "?"} - ${
+      renderHTML(currentMission.month) || "TBD"
+    }</h6>
             <p class="card-text"><strong>${
               renderHTML(currentMission.title) || "Title Missing"
             }</strong></p>
             ${
               currentMission.overview
-                ? `<p class="small">${renderHTML(
-                    currentMission.overview.substring(0, 150)
-                  )}...</p>`
+                ? `<p class="small">${renderHTML(currentMission.overview.substring(0, 150))}...</p>`
                 : ""
             }
             ${
@@ -103,11 +97,7 @@ function displayMissionSnapshot(missionsData) {
 function displayLeaderboardSnapshot(campaignData) {
   if (!leaderboardSnapshotElement) return;
 
-  if (
-    !campaignData ||
-    !campaignData.armies ||
-    campaignData.armies.length === 0
-  ) {
+  if (!campaignData || !campaignData.armies || campaignData.armies.length === 0) {
     leaderboardSnapshotElement.innerHTML = `<p class="text-muted p-3">No campaign data available for leaderboard.</p>`; // Added padding
     return;
   }
@@ -136,8 +126,7 @@ function displayLeaderboardSnapshot(campaignData) {
 
   // Sort
   leaderboardData.sort((a, b) => {
-    if (b.positionScore !== a.positionScore)
-      return b.positionScore - a.positionScore;
+    if (b.positionScore !== a.positionScore) return b.positionScore - a.positionScore;
     if (b.vp !== a.vp) return b.vp - a.vp;
     return b.wins - a.wins;
   });
@@ -168,14 +157,10 @@ function displayLeaderboardSnapshot(campaignData) {
     // Iterate over leaderboardData
     tableHTML += `
             <tr>
-                <td><span class="badge bg-secondary rounded-pill">${
-                  index + 1
-                }</span></td>
+                <td><span class="badge bg-secondary rounded-pill">${index + 1}</span></td>
                 <td>${renderHTML(player.player)}</td>
                 <td>${renderHTML(player.armyName)}</td>
-                <td><span class="badge bg-primary rounded-pill">${
-                  player.vp
-                }</span></td>
+                <td><span class="badge bg-primary rounded-pill">${player.vp}</span></td>
             </tr>
         `;
   });

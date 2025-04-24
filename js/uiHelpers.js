@@ -91,20 +91,15 @@ export function displayArmySelection(armies, container) {
         "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
       link.innerHTML = `
                 <span>
-                    <strong class="me-2">${
-                      army.armyName || "Unnamed Army"
-                    }</strong>
-                    <small class="text-muted">(${
-                      army.player || "Unknown Player"
-                    })</small>
+                    <strong class="me-2">${army.armyName || "Unnamed Army"}</strong>
+                    <small class="text-muted">(${army.player || "Unknown Player"})</small>
                 </span>
                 ${UI_ICONS.selectItem}
             `;
       listGroup.appendChild(link);
     });
   } else {
-    listGroup.innerHTML =
-      '<p class="text-center text-muted">No armies found in campaign data.</p>';
+    listGroup.innerHTML = '<p class="text-center text-muted">No armies found in campaign data.</p>';
   }
 
   listContainer.appendChild(listGroup);
@@ -125,14 +120,11 @@ export function populateArmyInfoModal(armyInfo) {
   const backstory = document.getElementById("armyInfoBackstory");
   const infoButton = document.getElementById("army-info-button"); // Button to enable
 
-  if (modalLabel)
-    modalLabel.textContent = armyInfo.armyName || "Army Information";
+  if (modalLabel) modalLabel.textContent = armyInfo.armyName || "Army Information";
   if (tagline) tagline.textContent = armyInfo.tagline || "";
   if (summary) summary.textContent = armyInfo.summary || "";
   // Use innerHTML for backstory as it contains HTML tags from campaign.json
-  if (backstory)
-    backstory.innerHTML =
-      armyInfo.backstory || "<p>No backstory available.</p>";
+  if (backstory) backstory.innerHTML = armyInfo.backstory || "<p>No backstory available.</p>";
 
   if (img) {
     if (armyInfo.image) {
@@ -170,21 +162,17 @@ export function showToast(message, title = "Update", delay = 5000) {
   }
 
   // Clone the template
-  const newToastElement =
-    toastTemplate.content.firstElementChild.cloneNode(true);
+  const newToastElement = toastTemplate.content.firstElementChild.cloneNode(true);
 
   // Generate a unique ID (optional, but good practice)
-  const toastId = `toast-${Date.now()}-${Math.random()
-    .toString(36)
-    .substring(2, 7)}`;
+  const toastId = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   newToastElement.id = toastId;
 
   // Populate the new toast
   const toastTitleElement = newToastElement.querySelector(".toast-title");
   const toastBodyElement = newToastElement.querySelector(".toast-body");
   // Optional: Update timestamp if needed, otherwise 'Just now' is fine
-  const toastTimestampElement =
-    newToastElement.querySelector(".toast-timestamp");
+  const toastTimestampElement = newToastElement.querySelector(".toast-timestamp");
 
   if (toastTitleElement) toastTitleElement.textContent = title;
   if (toastBodyElement) toastBodyElement.textContent = message;
@@ -237,11 +225,7 @@ export function showToast(message, title = "Update", delay = 5000) {
  * @param {Array<object>} buttons - Array of button objects, e.g., [{text: 'Yes', value: 'yes', style: 'primary'}, {text: 'No', value: 'no', style: 'secondary'}]
  * @returns {Promise<string|null>} A promise that resolves with the 'value' of the clicked button, or null if dismissed via the close button.
  */
-export function showInteractiveToast(
-  message,
-  title = "Confirmation",
-  buttons = []
-) {
+export function showInteractiveToast(message, title = "Confirmation", buttons = []) {
   return new Promise((resolve) => {
     const toastContainer = document.querySelector(".toast-container");
     const toastTemplate = document.getElementById("interactiveToastTemplate");
@@ -260,26 +244,19 @@ export function showInteractiveToast(
     );
 
     // Clone the template
-    const newToastElement =
-      toastTemplate.content.firstElementChild.cloneNode(true);
-    const toastId = `interactive-toast-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 7)}`;
+    const newToastElement = toastTemplate.content.firstElementChild.cloneNode(true);
+    const toastId = `interactive-toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     newToastElement.id = toastId;
 
     // Populate the new toast
     const toastTitleElement = newToastElement.querySelector(".toast-title");
     const toastBodyElement = newToastElement.querySelector(".toast-body");
-    const buttonsContainer = newToastElement.querySelector(
-      ".toast-buttons-container"
-    );
+    const buttonsContainer = newToastElement.querySelector(".toast-buttons-container");
 
     if (toastTitleElement) toastTitleElement.textContent = title;
     if (toastBodyElement) toastBodyElement.textContent = message;
     if (!buttonsContainer) {
-      console.error(
-        "Buttons container not found in interactive toast template."
-      );
+      console.error("Buttons container not found in interactive toast template.");
       resolve(null);
       return;
     }
@@ -288,9 +265,7 @@ export function showInteractiveToast(
     buttons.forEach((buttonConfig) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = `btn btn-sm btn-${
-        buttonConfig.style || "secondary"
-      } ms-1`; // Add margin between buttons
+      button.className = `btn btn-sm btn-${buttonConfig.style || "secondary"} ms-1`; // Add margin between buttons
       button.textContent = buttonConfig.text;
       button.dataset.value = buttonConfig.value; // Store the value to resolve with
       button.addEventListener("click", () => {
@@ -344,9 +319,7 @@ export function showInteractiveToast(
         resolve(null);
       }
     } else {
-      console.warn(
-        "Bootstrap Toast component not found. Cannot display interactive toast."
-      );
+      console.warn("Bootstrap Toast component not found. Cannot display interactive toast.");
       newToastElement.remove(); // Clean up
       handleFocusReturn(); // Attempt focus return
       resolve(null);
@@ -361,11 +334,7 @@ export function showInteractiveToast(
  * @param {Array | null} spellList - The list of spell objects from the army book, or null.
  * @param {number} currentTokens - The caster's current token count.
  */
-export function populateAndShowSpellModal(
-  casterUnit,
-  spellList,
-  currentTokens
-) {
+export function populateAndShowSpellModal(casterUnit, spellList, currentTokens) {
   const modalElement = document.getElementById("viewSpellsModal");
   if (!modalElement) {
     console.error("Spell modal element #viewSpellsModal not found!");
@@ -392,9 +361,7 @@ export function populateAndShowSpellModal(
 
   // Update modal title and token count
   if (modalTitle)
-    modalTitle.textContent = `Spells for ${
-      casterUnit.customName || casterUnit.originalName
-    }`;
+    modalTitle.textContent = `Spells for ${casterUnit.customName || casterUnit.originalName}`;
   if (tokenDisplay) {
     tokenDisplay.innerHTML = `${UI_ICONS.spellTokens} Tokens: <span class="fw-bold">${currentTokens} / ${config.MAX_SPELL_TOKENS}</span>`;
   }
@@ -473,16 +440,13 @@ export function displayStratagems(armyId, selectedDoctrineId) {
   if (!displayArea || !doctrinesData || !doctrinesData.doctrines) {
     console.error("Stratagem display area or doctrines data not found.");
     if (displayArea)
-      displayArea.innerHTML =
-        '<p class="text-danger">Error loading stratagem data.</p>';
+      displayArea.innerHTML = '<p class="text-danger">Error loading stratagem data.</p>';
     return;
   }
 
   displayArea.innerHTML = ""; // Clear previous content
 
-  const universalDoctrine = doctrinesData.doctrines.find(
-    (d) => d.id === "universal"
-  );
+  const universalDoctrine = doctrinesData.doctrines.find((d) => d.id === "universal");
   const selectedDoctrine = selectedDoctrineId
     ? doctrinesData.doctrines.find((d) => d.id === selectedDoctrineId)
     : null;
@@ -518,9 +482,7 @@ export function displayStratagems(armyId, selectedDoctrineId) {
                                 class="btn btn-sm btn-success activate-stratagem-btn"
                                 title="Activate ${stratName}"
                                 data-stratagem-id="${stratDataId}"
-                                data-stratagem-name="${encodeURIComponent(
-                                  stratName
-                                )}"
+                                data-stratagem-name="${encodeURIComponent(stratName)}"
                                 data-stratagem-cost="${cost}"
                                 data-army-id="${armyId || ""}"
                                 ${!canAfford ? "disabled" : ""}>
@@ -537,13 +499,9 @@ export function displayStratagems(armyId, selectedDoctrineId) {
 
   // Display Universal Stratagems
   if (universalDoctrine) {
-    displayArea.innerHTML += createStratagemListHTML(
-      universalDoctrine,
-      "Universal Stratagems"
-    );
+    displayArea.innerHTML += createStratagemListHTML(universalDoctrine, "Universal Stratagems");
   } else {
-    displayArea.innerHTML +=
-      '<p class="text-warning">Universal stratagems not found.</p>';
+    displayArea.innerHTML += '<p class="text-warning">Universal stratagems not found.</p>';
   }
 
   // Display Selected Doctrine Stratagems
@@ -585,16 +543,11 @@ export function updateRoundUI(roundNumber) {
         cpDisplay.parentNode.insertBefore(roundDisplayElement, cpDisplay);
       } else {
         // Fallback: insert after H1 if CP display isn't there yet
-        titleH1.parentNode.insertBefore(
-          roundDisplayElement,
-          titleH1.nextSibling
-        );
+        titleH1.parentNode.insertBefore(roundDisplayElement, titleH1.nextSibling);
       }
       console.log("Created #round-display element.");
     } else {
-      console.error(
-        "Cannot create round display: #army-title-h1 or its parent not found."
-      );
+      console.error("Cannot create round display: #army-title-h1 or its parent not found.");
       return; // Exit if we can't create it
     }
   }
@@ -628,9 +581,7 @@ export function updateCommandPointsDisplay(armyId, currentPoints, maxPoints) {
   // Update main header display
   const cpValueElement = document.getElementById("command-points-value");
   const cpMaxElement = document.getElementById("command-points-max");
-  const cpIconPlaceholder = document.querySelector(
-    "#command-points-display .cp-icon-placeholder"
-  ); // Use placeholder class
+  const cpIconPlaceholder = document.querySelector("#command-points-display .cp-icon-placeholder"); // Use placeholder class
 
   if (cpValueElement) cpValueElement.textContent = currentPoints;
   if (cpMaxElement) cpMaxElement.textContent = maxPoints;
@@ -638,8 +589,7 @@ export function updateCommandPointsDisplay(armyId, currentPoints, maxPoints) {
   // Update icon and color based on points
   if (cpIconPlaceholder) {
     // Set the icon HTML from config
-    cpIconPlaceholder.innerHTML =
-      UI_ICONS.commandPoints || '<i class="bi bi-question-circle"></i>'; // Fallback icon
+    cpIconPlaceholder.innerHTML = UI_ICONS.commandPoints || '<i class="bi bi-question-circle"></i>'; // Fallback icon
 
     // Add/remove class for color styling based on points
     if (currentPoints <= 0) {
@@ -650,9 +600,7 @@ export function updateCommandPointsDisplay(armyId, currentPoints, maxPoints) {
   }
 
   // Update modal header display
-  const modalCpValueElement = document.getElementById(
-    "modal-command-points-value"
-  );
+  const modalCpValueElement = document.getElementById("modal-command-points-value");
   const modalCpMaxElement = document.getElementById("modal-command-points-max");
   const modalCpIconPlaceholder = document.querySelector(
     "#modal-command-points-display .cp-icon-placeholder"
@@ -693,39 +641,27 @@ export function updateCommandPointsDisplay(armyId, currentPoints, maxPoints) {
  */
 export function updateUnderdogPointsDisplay(armyId, currentPoints, maxPoints) {
   const upValueElement = document.getElementById("underdog-points-value");
-  const upIconPlaceholder = document.querySelector(
-    "#underdog-points-display .up-icon-placeholder"
-  );
+  const upIconPlaceholder = document.querySelector("#underdog-points-display .up-icon-placeholder");
   const removeUpButton = document.getElementById("manual-up-remove");
   const addUpButton = document.getElementById("manual-up-add");
 
   const isCalculating = typeof currentPoints === "string";
 
   if (upValueElement) {
-    upValueElement.textContent = isCalculating
-      ? currentPoints
-      : `${currentPoints} / ${maxPoints}`;
+    upValueElement.textContent = isCalculating ? currentPoints : `${currentPoints} / ${maxPoints}`;
   }
 
   if (upIconPlaceholder) {
     upIconPlaceholder.innerHTML =
       UI_ICONS.underdogPoints || '<i class="bi bi-question-circle"></i>'; // Fallback icon
     // Optionally change icon color based on points/state
-    upIconPlaceholder.classList.toggle(
-      "text-secondary",
-      !isCalculating && currentPoints <= 0
-    );
-    upIconPlaceholder.classList.toggle(
-      "text-info",
-      !isCalculating && currentPoints > 0
-    ); // Use info color for UP
+    upIconPlaceholder.classList.toggle("text-secondary", !isCalculating && currentPoints <= 0);
+    upIconPlaceholder.classList.toggle("text-info", !isCalculating && currentPoints > 0); // Use info color for UP
   }
 
   // Enable/disable manual adjust buttons
-  if (removeUpButton)
-    removeUpButton.disabled = isCalculating || currentPoints <= 0;
-  if (addUpButton)
-    addUpButton.disabled = isCalculating || currentPoints >= maxPoints;
+  if (removeUpButton) removeUpButton.disabled = isCalculating || currentPoints <= 0;
+  if (addUpButton) addUpButton.disabled = isCalculating || currentPoints >= maxPoints;
 }
 
 /**
@@ -739,14 +675,12 @@ export function populateDoctrineSelector(armyId) {
 
   if (!selector || !doctrines) {
     console.error("Doctrine selector or doctrines data not found.");
-    if (selector)
-      selector.innerHTML = '<option value="">Error loading doctrines</option>';
+    if (selector) selector.innerHTML = '<option value="">Error loading doctrines</option>';
     return;
   }
 
   // Clear existing options (except the default placeholder)
-  selector.innerHTML =
-    '<option selected value="">-- Select Doctrine --</option>';
+  selector.innerHTML = '<option selected value="">-- Select Doctrine --</option>';
 
   // Add options for each doctrine (excluding 'universal')
   doctrines.forEach((doctrine) => {
@@ -773,13 +707,9 @@ export function populateDoctrineSelector(armyId) {
  * @param {string} unitId - The selectionId of the unit to update.
  */
 export function updateOffcanvasUnitStatus(armyId, unitId) {
-  const listItem = document.querySelector(
-    `#offcanvas-unit-list li[data-unit-id="${unitId}"]`
-  );
+  const listItem = document.querySelector(`#offcanvas-unit-list li[data-unit-id="${unitId}"]`);
   if (!listItem) {
-    console.warn(
-      `Offcanvas list item not found for unit ${unitId}. Cannot update status.`
-    );
+    console.warn(`Offcanvas list item not found for unit ${unitId}. Cannot update status.`);
     return;
   }
 

@@ -1314,9 +1314,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "Byi27DL3",
-                "specialRules": [
-                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-                ],
+                "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
                 "label": "Spitter Gun (24\", A1, Blast(3))",
                 "count": 1,
                 "dependencies": []
@@ -1356,9 +1354,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "Byi27DL3",
-                "specialRules": [
-                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-                ],
+                "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
                 "label": "Spitter Gun (24\", A1, Blast(3))",
                 "count": 1,
                 "dependencies": []
@@ -1398,9 +1394,7 @@
                 "range": 24,
                 "attacks": 1,
                 "weaponId": "Byi27DL3",
-                "specialRules": [
-                  { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-                ],
+                "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
                 "label": "Spitter Gun (24\", A1, Blast(3))",
                 "count": 1,
                 "dependencies": []
@@ -1490,9 +1484,7 @@
           "range": 24,
           "attacks": 1,
           "weaponId": "Byi27DL3",
-          "specialRules": [
-            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-          ],
+          "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
           "label": "Spitter Gun (24\", A1, Blast(3))",
           "count": 1,
           "dependencies": []
@@ -1504,9 +1496,7 @@
           "range": 24,
           "attacks": 1,
           "weaponId": "Byi27DL3",
-          "specialRules": [
-            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-          ],
+          "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
           "label": "Spitter Gun (24\", A1, Blast(3))",
           "count": 1,
           "dependencies": []
@@ -1518,9 +1508,7 @@
           "range": 24,
           "attacks": 1,
           "weaponId": "Byi27DL3",
-          "specialRules": [
-            { "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }
-          ],
+          "specialRules": [{ "id": "w_vX0mi58KKt", "name": "Blast", "rating": 3 }],
           "label": "Spitter Gun (24\", A1, Blast(3))",
           "count": 1,
           "dependencies": []

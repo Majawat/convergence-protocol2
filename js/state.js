@@ -1,12 +1,7 @@
 /**
  * @fileoverview Manages application state, interacting with per-army and global storage.
  */
-import {
-  loadArmyState,
-  saveArmyState,
-  loadGameState,
-  saveGameState,
-} from "./storage.js";
+import { loadArmyState, saveArmyState, loadGameState, saveGameState } from "./storage.js";
 import { config } from "./config.js"; // Import config for defaults
 
 // --- Global Non-Persistent State ---
@@ -45,9 +40,7 @@ export function getDefinitions() {
       if (parsed && typeof parsed === "object") {
         return parsed;
       } else {
-        console.warn(
-          "Invalid definitions data found in sessionStorage. Returning empty."
-        );
+        console.warn("Invalid definitions data found in sessionStorage. Returning empty.");
         sessionStorage.removeItem(config.DEFINITIONS_CACHE_KEY); // Clear invalid data
         return {};
       }
@@ -274,11 +267,7 @@ export function setDefinitions(data) {
   }
   try {
     sessionStorage.setItem(config.DEFINITIONS_CACHE_KEY, JSON.stringify(data));
-    console.log(
-      `Definitions state updated in sessionStorage (${
-        Object.keys(data).length
-      } terms).`
-    );
+    console.log(`Definitions state updated in sessionStorage (${Object.keys(data).length} terms).`);
   } catch (e) {
     console.error("Error saving definitions to sessionStorage:", e);
     if (e.name === "QuotaExceededError") {
@@ -324,8 +313,7 @@ export function setLoadedArmyData(armyId, processedData) {
 
     let currentState = loadArmyState(armyId);
     const initialCommandPoints =
-      Math.floor(processedData.meta.listPoints / 1000) *
-      config.COMMAND_POINTS_PER_1000;
+      Math.floor(processedData.meta.listPoints / 1000) * config.COMMAND_POINTS_PER_1000;
 
     const defaultState = {
       listPoints: processedData.meta.listPoints || 0,
@@ -341,23 +329,19 @@ export function setLoadedArmyData(armyId, processedData) {
       currentState = defaultState;
       console.log(`Initializing new state for army ${armyId} in localStorage.`);
     } else {
-      currentState.listPoints =
-        processedData.meta.listPoints || currentState.listPoints || 0;
+      currentState.listPoints = processedData.meta.listPoints || currentState.listPoints || 0;
       if (!currentState.units) currentState.units = {};
       if (currentState.commandPoints === undefined)
         currentState.commandPoints = initialCommandPoints;
-      if (currentState.selectedDoctrine === undefined)
-        currentState.selectedDoctrine = null;
+      if (currentState.selectedDoctrine === undefined) currentState.selectedDoctrine = null;
       if (currentState.maxCommandPoints !== initialCommandPoints) {
         currentState.maxCommandPoints = initialCommandPoints;
         if (currentState.commandPoints > currentState.maxCommandPoints) {
           currentState.commandPoints = currentState.maxCommandPoints;
         }
       }
-      if (currentState.underdogPoints === undefined)
-        currentState.underdogPoints = 0;
-      if (currentState.maxUnderdogPoints === undefined)
-        currentState.maxUnderdogPoints = 0;
+      if (currentState.underdogPoints === undefined) currentState.underdogPoints = 0;
+      if (currentState.maxUnderdogPoints === undefined) currentState.maxUnderdogPoints = 0;
 
       console.log(`Loaded existing state for army ${armyId}.`);
     }
@@ -435,9 +419,7 @@ export function updateModelStateValue(armyId, unitId, modelId, key, value) {
   }
   if (!currentState.units[unitId].models[modelId]) {
     currentState.units[unitId].models[modelId] = { currentHp: 1, name: null };
-    console.warn(
-      `Initialized missing model state for ${modelId} in unit ${unitId} during update.`
-    );
+    console.warn(`Initialized missing model state for ${modelId} in unit ${unitId} during update.`);
     const modelData = getLoadedArmyData()?.unitMap?.[unitId]?.models?.find(
       (m) => m.modelId === modelId
     );
@@ -569,6 +551,24 @@ export function getUnitData(unitId) {
   return currentId ? loadedArmiesData[currentId]?.unitMap?.[unitId] : null;
 }
 
+/**
+ * Gets the display name for a given army ID by looking it up in the loaded data.
+ * @param {string} armyId The ID of the army.
+ * @returns {string} The army name found in the meta data, or a fallback string like "Army (ID)" if not found.
+ */
+export function getArmyNameById(armyId) {
+  if (!armyId) return "Unknown Army";
+
+  // Access the module-level variable holding all loaded army data
+  const armyData = loadedArmiesData[armyId];
+
+  // Safely access the name using optional chaining
+  const armyName = armyData?.meta?.name;
+
+  // Return the name or a fallback if not found
+  return armyName || `Army (${armyId})`;
+}
+
 /** Gets a specific hero unit's processed data if joined to the given base unit in the currently loaded army */
 export function getJoinedHeroData(baseUnitId) {
   const currentId = getCurrentArmyId();
@@ -592,17 +592,8 @@ export function getJoinedHeroData(baseUnitId) {
  * @param {object} victimDetails - Object containing { victimUnitId, victimUnitName, victimArmyId, victimIsHero, round }.
  * @returns {boolean} True if successful, false otherwise.
  */
-export function addRecordedKill(
-  attackingArmyId,
-  attackerUnitId,
-  victimDetails
-) {
-  if (
-    !attackingArmyId ||
-    !attackerUnitId ||
-    !victimDetails ||
-    !victimDetails.victimUnitId
-  ) {
+export function addRecordedKill(attackingArmyId, attackerUnitId, victimDetails) {
+  if (!attackingArmyId || !attackerUnitId || !victimDetails || !victimDetails.victimUnitId) {
     console.error("addRecordedKill: Missing required parameters.", {
       attackingArmyId,
       attackerUnitId,
@@ -632,10 +623,7 @@ export function addRecordedKill(
     );
     return true;
   } catch (error) {
-    console.error(
-      `Error in addRecordedKill for attacker ${attackerUnitId}:`,
-      error
-    );
+    console.error(`Error in addRecordedKill for attacker ${attackerUnitId}:`, error);
     return false;
   }
 }
@@ -658,10 +646,7 @@ export function setKilledByStatus(victimArmyId, victimUnitId, attackerDetails) {
     return false;
   }
   // Allow null to clear the status
-  if (
-    attackerDetails &&
-    (!attackerDetails.attackerUnitId || !attackerDetails.attackerArmyId)
-  ) {
+  if (attackerDetails && (!attackerDetails.attackerUnitId || !attackerDetails.attackerArmyId)) {
     console.error("setKilledByStatus: Invalid attackerDetails provided.", {
       attackerDetails,
     });
@@ -685,16 +670,11 @@ export function setKilledByStatus(victimArmyId, victimUnitId, attackerDetails) {
         `KilledBy status set for ${victimUnitId} (Army: ${victimArmyId}) <- Attacker: ${attackerDetails.attackerUnitId}`
       );
     } else {
-      console.log(
-        `KilledBy status cleared for ${victimUnitId} (Army: ${victimArmyId})`
-      );
+      console.log(`KilledBy status cleared for ${victimUnitId} (Army: ${victimArmyId})`);
     }
     return true;
   } catch (error) {
-    console.error(
-      `Error in setKilledByStatus for victim ${victimUnitId}:`,
-      error
-    );
+    console.error(`Error in setKilledByStatus for victim ${victimUnitId}:`, error);
     return false;
   }
 }
@@ -708,11 +688,7 @@ export function setKilledByStatus(victimArmyId, victimUnitId, attackerDetails) {
  * @param {string} victimUnitIdToRemove - The ID of the victim unit whose kill record should be removed.
  * @returns {boolean} True if successful, false otherwise.
  */
-export function removeRecordedKill(
-  attackingArmyId,
-  attackerUnitId,
-  victimUnitIdToRemove
-) {
+export function removeRecordedKill(attackingArmyId, attackerUnitId, victimUnitIdToRemove) {
   if (!attackingArmyId || !attackerUnitId || !victimUnitIdToRemove) {
     console.error("removeRecordedKill: Missing required parameters.", {
       attackingArmyId,
@@ -735,14 +711,11 @@ export function removeRecordedKill(
       return false; // Nothing to remove
     }
 
-    const initialKillCount =
-      attackerArmyState.units[attackerUnitId].killsRecorded.length;
-    attackerArmyState.units[attackerUnitId].killsRecorded =
-      attackerArmyState.units[attackerUnitId].killsRecorded.filter(
-        (kill) => kill.victimUnitId !== victimUnitIdToRemove
-      );
-    const finalKillCount =
-      attackerArmyState.units[attackerUnitId].killsRecorded.length;
+    const initialKillCount = attackerArmyState.units[attackerUnitId].killsRecorded.length;
+    attackerArmyState.units[attackerUnitId].killsRecorded = attackerArmyState.units[
+      attackerUnitId
+    ].killsRecorded.filter((kill) => kill.victimUnitId !== victimUnitIdToRemove);
+    const finalKillCount = attackerArmyState.units[attackerUnitId].killsRecorded.length;
 
     if (initialKillCount > finalKillCount) {
       saveArmyState(attackingArmyId, attackerArmyState);
@@ -757,10 +730,7 @@ export function removeRecordedKill(
       return false; // Indicate nothing was removed
     }
   } catch (error) {
-    console.error(
-      `Error in removeRecordedKill for attacker ${attackerUnitId}:`,
-      error
-    );
+    console.error(`Error in removeRecordedKill for attacker ${attackerUnitId}:`, error);
     return false;
   }
 }

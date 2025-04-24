@@ -718,9 +718,7 @@
           "range": 0,
           "attacks": 1,
           "weaponId": "9C1TviOG",
-          "specialRules": [
-            { "id": "cavWDboL4ubs", "name": "Rending", "type": "ArmyBookRule" }
-          ],
+          "specialRules": [{ "id": "cavWDboL4ubs", "name": "Rending", "type": "ArmyBookRule" }],
           "label": "Branch Claws (A1, Rending)",
           "dependencies": []
         }
@@ -1044,9 +1042,7 @@
           "range": 18,
           "attacks": 1,
           "weaponId": "ZYlgt4Ph",
-          "specialRules": [
-            { "id": "cavWDboL4ubs", "name": "Rending", "type": "ArmyBookRule" }
-          ],
+          "specialRules": [{ "id": "cavWDboL4ubs", "name": "Rending", "type": "ArmyBookRule" }],
           "label": "Spite Shortbow (18\", A1, Rending)",
           "dependencies": []
         },

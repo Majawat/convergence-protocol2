@@ -49,17 +49,11 @@ function saveArmyState(armyId, armyState) {
     localStorage.setItem(key, JSON.stringify(armyState));
     // console.log(`Saved state for army ${armyId}.`);
   } catch (error) {
-    console.error(
-      `Error saving state for army ${armyId} to localStorage:`,
-      error
-    );
+    console.error(`Error saving state for army ${armyId} to localStorage:`, error);
     // Consider potential quota exceeded errors
     if (error.name === "QuotaExceededError") {
       // *** CHANGE: Use showToast instead of alert ***
-      showToast(
-        "Error: Local storage quota exceeded. Cannot save army state.",
-        "Save Error"
-      );
+      showToast("Error: Local storage quota exceeded. Cannot save army state.", "Save Error");
       // *** END CHANGE ***
     }
   }
@@ -103,10 +97,7 @@ function loadArmyState(armyId) {
     // console.log(`No state found in storage for army ${armyId}.`);
     return null; // No state found for this army
   } catch (error) {
-    console.error(
-      `Error loading or parsing state for army ${armyId} from localStorage:`,
-      error
-    );
+    console.error(`Error loading or parsing state for army ${armyId} from localStorage:`, error);
     // Attempt to remove potentially corrupted data
     try {
       localStorage.removeItem(key);
@@ -129,10 +120,7 @@ function resetArmyState(armyId) {
     localStorage.removeItem(key);
     console.log(`Saved state reset for army ${armyId}.`);
   } catch (error) {
-    console.error(
-      `Error resetting state for army ${armyId} in localStorage:`,
-      error
-    );
+    console.error(`Error resetting state for army ${armyId} in localStorage:`, error);
   }
 }
 
@@ -155,9 +143,7 @@ function loadGameState() {
       ) {
         return parsedState;
       } else {
-        console.warn(
-          "Invalid global game state data found. Resetting to default."
-        );
+        console.warn("Invalid global game state data found. Resetting to default.");
         localStorage.removeItem(config.GAME_STATE_KEY);
         return { currentRound: 0 }; // Default state
       }
@@ -174,11 +160,7 @@ function loadGameState() {
  * @param {object} gameState - The game state object (e.g., { currentRound: number }).
  */
 function saveGameState(gameState) {
-  if (
-    !gameState ||
-    typeof gameState !== "object" ||
-    typeof gameState.currentRound !== "number"
-  ) {
+  if (!gameState || typeof gameState !== "object" || typeof gameState.currentRound !== "number") {
     console.error("Attempted to save invalid global game state:", gameState);
     return;
   }

@@ -28,12 +28,9 @@ export const config = {
   CAMPAIGN_DATA_URL: "./data/campaign.json",
   DOCTRINES_DATA_URL: "./data/rules/doctrines.json",
   CUSTOM_DEFINITIONS_URL: "./data/rules/custom-definitions.json",
-  ARMYFORGE_LIST_API_URL_BASE:
-    "https://army-forge.onepagerules.com/api/tts?id=",
-  ARMYFORGE_BOOK_API_URL_BASE:
-    "https://army-forge.onepagerules.com/api/army-books/", // {factionId}?gameSystem={gameSystemId}
-  ARMYFORGE_COMMON_RULES_API_URL_BASE:
-    "https://army-forge.onepagerules.com/api/rules/common/",
+  ARMYFORGE_LIST_API_URL_BASE: "https://army-forge.onepagerules.com/api/tts?id=",
+  ARMYFORGE_BOOK_API_URL_BASE: "https://army-forge.onepagerules.com/api/army-books/", // {factionId}?gameSystem={gameSystemId}
+  ARMYFORGE_COMMON_RULES_API_URL_BASE: "https://army-forge.onepagerules.com/api/rules/common/",
 };
 
 // Icons

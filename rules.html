@@ -18,9 +18,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="bg-body text-body">
-    <nav
-      class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm"
-    >
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm">
       <div class="container-fluid">
         <a class="navbar-brand" href="index.html">OPR Tracker</a>
         <button
@@ -46,9 +44,7 @@
               <a class="nav-link" href="campaign.html">Campaign Status</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="rules.html"
-                >Rules Reference</a
-              >
+              <a class="nav-link active" aria-current="page" href="rules.html">Rules Reference</a>
             </li>
           </ul>
           <div class="dropdown">
@@ -61,10 +57,7 @@
             >
               <i class="bi bi-circle-half theme-icon-active"></i> Theme
             </button>
-            <ul
-              class="dropdown-menu dropdown-menu-end"
-              aria-labelledby="themeDropdown"
-            >
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
               <li>
                 <button
                   class="dropdown-item d-flex align-items-center"
@@ -102,31 +95,22 @@
       <h1 class="mb-4">Rules Reference</h1>
 
       <section id="core-rules" class="mb-4">
-        <h2>
-          <i class="bi bi-book-half me-2"></i>Core Rules Summary (GF v3.4.1)
-        </h2>
+        <h2><i class="bi bi-book-half me-2"></i>Core Rules Summary (GF v3.4.1)</h2>
         <div class="rule-subsection">
           <h5>Game Structure</h5>
           <p class="allow-definitions">
-            Games consist of <strong>Rounds</strong> (usually 4). Each round
-            consists of alternating player <strong>Turns</strong>. Each turn
-            consists of one unit <strong>Activation</strong>.
+            Games consist of <strong>Rounds</strong> (usually 4). Each round consists of alternating
+            player <strong>Turns</strong>. Each turn consists of one unit
+            <strong>Activation</strong>.
           </p>
           <ul class="allow-definitions">
-            <li>
-              Player who finished activating first last round goes first in the
-              next round.
-            </li>
-            <li>
-              After 4 rounds, check mission objectives to determine the winner.
-            </li>
+            <li>Player who finished activating first last round goes first in the next round.</li>
+            <li>After 4 rounds, check mission objectives to determine the winner.</li>
           </ul>
         </div>
         <div class="rule-subsection">
           <h5>Activation Actions</h5>
-          <p class="allow-definitions">
-            Activate one unit per turn. Choose one action:
-          </p>
+          <p class="allow-definitions">Activate one unit per turn. Choose one action:</p>
           <div class="table-responsive">
             <table class="table table-sm table-striped table-bordered">
               <thead class="table-dark">
@@ -165,57 +149,47 @@
           <h5>Shooting Sequence</h5>
           <ol class="allow-definitions">
             <li>
-              <strong>Determine Attacks:</strong> Sum Attack values of shooting
-              models in range & LoS.
+              <strong>Determine Attacks:</strong> Sum Attack values of shooting models in range &
+              LoS.
             </li>
             <li>
-              <strong>Roll to Hit:</strong> Roll Quality tests for each attack.
-              Success = Hit.
+              <strong>Roll to Hit:</strong> Roll Quality tests for each attack. Success = Hit.
             </li>
             <li>
-              <strong>Roll to Block:</strong> Target rolls Defense tests for
-              each hit. Success = Block. Fail = Wound.
+              <strong>Roll to Block:</strong> Target rolls Defense tests for each hit. Success =
+              Block. Fail = Wound.
             </li>
-            <li>
-              <strong>Remove Casualties:</strong> Remove one model per Wound
-              taken.
-            </li>
+            <li><strong>Remove Casualties:</strong> Remove one model per Wound taken.</li>
           </ol>
         </div>
         <div class="rule-subsection">
           <h5>Melee Sequence</h5>
           <ul class="allow-definitions">
             <li>
-              <strong>Charge Moves:</strong> Move up to 12" to base contact (or
-              as close as possible). Target models move up to 3" into base
-              contact.
+              <strong>Charge Moves:</strong> Move up to 12" to base contact (or as close as
+              possible). Target models move up to 3" into base contact.
             </li>
             <li>
-              <strong>Who Can Strike:</strong> Models within 2" horizontally AND
-              4" vertically of an enemy model.
+              <strong>Who Can Strike:</strong> Models within 2" horizontally AND 4" vertically of an
+              enemy model.
             </li>
             <li>
               <strong>Melee Sequence (Attacker & Defender):</strong>
               <ol>
-                <li>
-                  Determine Attacks: Sum Attack values of striking models.
-                </li>
+                <li>Determine Attacks: Sum Attack values of striking models.</li>
                 <li>Roll to Hit: Roll Quality tests. Success = Hit.</li>
-                <li>
-                  Roll to Block: Target rolls Defense tests. Success = Block.
-                  Fail = Wound.
-                </li>
+                <li>Roll to Block: Target rolls Defense tests. Success = Block. Fail = Wound.</li>
                 <li>Remove Casualties: Remove one model per Wound taken.</li>
               </ol>
             </li>
             <li>
-              <strong>Return Strikes:</strong> Defender may choose to strike
-              back after the attacker finishes.
+              <strong>Return Strikes:</strong> Defender may choose to strike back after the attacker
+              finishes.
             </li>
             <li>
-              <strong>Fatigue:</strong> After attacking in melee (charging or
-              striking back) for the *first time* in a round, the unit only hits
-              on unmodified 6s in melee for the rest of that round.
+              <strong>Fatigue:</strong> After attacking in melee (charging or striking back) for the
+              *first time* in a round, the unit only hits on unmodified 6s in melee for the rest of
+              that round.
             </li>
           </ul>
         </div>
@@ -223,24 +197,15 @@
           <h5>Melee Resolution</h5>
           <ul class="allow-definitions">
             <li>
-              <strong>Determine Winner:</strong> Compare total wounds caused by
-              each unit. Unit that caused more wounds wins. Tie if wounds are
-              equal or zero.
+              <strong>Determine Winner:</strong> Compare total wounds caused by each unit. Unit that
+              caused more wounds wins. Tie if wounds are equal or zero.
             </li>
-            <li>
-              <strong>Morale Test:</strong> Only the LOSER of the melee takes a
-              morale test.
-            </li>
+            <li><strong>Morale Test:</strong> Only the LOSER of the melee takes a morale test.</li>
             <li>
               <strong>Consolidation Moves:</strong>
               <ul>
-                <li>
-                  If one unit was destroyed/routed: Winner moves up to 3".
-                </li>
-                <li>
-                  If neither unit destroyed/routed: Charger moves back 1" (if
-                  possible).
-                </li>
+                <li>If one unit was destroyed/routed: Winner moves up to 3".</li>
+                <li>If neither unit destroyed/routed: Charger moves back 1" (if possible).</li>
               </ul>
             </li>
           </ul>
@@ -252,16 +217,13 @@
               <strong>When to Test:</strong>
               <ul>
                 <li>
-                  End of activation if unit took wounds AND is now at half
-                  starting size/toughness or less.
+                  End of activation if unit took wounds AND is now at half starting size/toughness
+                  or less.
                 </li>
                 <li>After losing a melee.</li>
               </ul>
             </li>
-            <li>
-              <strong>Test:</strong> Roll one die, succeed on unit's Quality
-              value or higher.
-            </li>
+            <li><strong>Test:</strong> Roll one die, succeed on unit's Quality value or higher.</li>
             <li>
               <strong>Outcomes (Activations where Wounds are taken):</strong>
               <ul>
@@ -278,39 +240,30 @@
               </ul>
             </li>
             <li>
-              <strong>Shaken Effects:</strong> Must Hold action to recover.
-              Counts as Fatigued. Auto-fails morale tests. Cannot contest/seize
-              objectives.
+              <strong>Shaken Effects:</strong> Must Hold action to recover. Counts as Fatigued.
+              Auto-fails morale tests. Cannot contest/seize objectives.
             </li>
-            <li>
-              <strong>Routed Effects:</strong> Unit is removed from play as
-              casualty.
-            </li>
+            <li><strong>Routed Effects:</strong> Unit is removed from play as casualty.</li>
           </ul>
         </div>
         <div class="rule-subsection">
           <h5>Basic Terrain Effects</h5>
           <ul class="allow-definitions">
             <li>
-              <strong>Cover:</strong> +1 Defense vs Shooting if majority of unit
-              models are inside/behind.
+              <strong>Cover:</strong> +1 Defense vs Shooting if majority of unit models are
+              inside/behind.
             </li>
+            <li><strong>Difficult:</strong> Max 6" move if any model moves through it.</li>
             <li>
-              <strong>Difficult:</strong> Max 6" move if any model moves through
-              it.
-            </li>
-            <li>
-              <strong>Dangerous:</strong> Roll 1 die per model (or Tough value)
-              moving through/activating in it. On a 1, unit takes 1 wound.
+              <strong>Dangerous:</strong> Roll 1 die per model (or Tough value) moving
+              through/activating in it. On a 1, unit takes 1 wound.
             </li>
           </ul>
         </div>
       </section>
 
       <section id="campaign-rules" class="mb-4">
-        <h2>
-          <i class="bi bi-map-fill me-2"></i>Campaign Rules Summary (v3.4.0)
-        </h2>
+        <h2><i class="bi bi-map-fill me-2"></i>Campaign Rules Summary (v3.4.0)</h2>
         <div class="rule-subsection">
           <h5>Campaign Flow (Checklist)</h5>
           <ol>
@@ -326,15 +279,11 @@
           <h5>Pre-Mission Setup</h5>
           <div class="allow-definitions">
             <h6>Army Size Limit</h6>
-            <p>
-              No army may have > 250pts more than the lowest point value army in
-              the match.
-            </p>
+            <p>No army may have > 250pts more than the lowest point value army in the match.</p>
             <h6>Underdog Bonus</h6>
             <p>
-              Get 1 Underdog Point (UP) for every 50pts difference below the
-              highest point value army. Spend 1 UP to modify any single roll
-              (friendly or enemy) by +/- 1.
+              Get 1 Underdog Point (UP) for every 50pts difference below the highest point value
+              army. Spend 1 UP to modify any single roll (friendly or enemy) by +/- 1.
             </p>
             <h6>Special Objectives</h6>
             <p>Roll D6 for a bonus objective (worth 75pts if completed):</p>
@@ -512,9 +461,7 @@
                 </tr>
               </tbody>
             </table>
-            <p class="small text-muted allow-definitions">
-              Re-roll if trait already gained.
-            </p>
+            <p class="small text-muted allow-definitions">Re-roll if trait already gained.</p>
           </div>
           <div class="allow-definitions">
             <h6>XP Earning</h6>
@@ -526,8 +473,8 @@
             </ul>
             <h6>Leveling Up (at 5 XP)</h6>
             <p>
-              Unit becomes more expensive and gains a Trait (Regular Unit) or
-              Skill Set/Trait (Hero Unit).
+              Unit becomes more expensive and gains a Trait (Regular Unit) or Skill Set/Trait (Hero
+              Unit).
             </p>
           </div>
           <div class="table-responsive mt-2 mb-2">
@@ -607,10 +554,9 @@
             </table>
           </div>
           <p class="allow-definitions">
-            Each time the Hero levels up (including the first), roll D6 for a
-            Skill Trait from their chosen set(s). Re-roll if trait already
-            gained. If all 3 traits from the first set are gained, roll for a
-            second set.
+            Each time the Hero levels up (including the first), roll D6 for a Skill Trait from their
+            chosen set(s). Re-roll if trait already gained. If all 3 traits from the first set are
+            gained, roll for a second set.
           </p>
           <div class="row row-cols-1 row-cols-md-2 g-3 mt-1">
             <div class="col">
@@ -631,16 +577,12 @@
                   </tr>
                   <tr>
                     <td class="d6-roll-column">3-4</td>
-                    <td>
-                      Instigator: Friendly units activating within 6" get +1 to
-                      hit in melee.
-                    </td>
+                    <td>Instigator: Friendly units activating within 6" get +1 to hit in melee.</td>
                   </tr>
                   <tr>
                     <td class="d6-roll-column">5-6</td>
                     <td>
-                      Tactician: Friendly units activating within 6" get +1 to
-                      hit when shooting.
+                      Tactician: Friendly units activating within 6" get +1 to hit when shooting.
                     </td>
                   </tr>
                 </tbody>
@@ -660,16 +602,12 @@
                 <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
-                    <td>
-                      Vanguard: Friendly units activating within 6" move +4" on
-                      Charge.
-                    </td>
+                    <td>Vanguard: Friendly units activating within 6" move +4" on Charge.</td>
                   </tr>
                   <tr>
                     <td class="d6-roll-column">3-4</td>
                     <td>
-                      Scavenger: Friendly units activating within 6" get +6"
-                      range when shooting.
+                      Scavenger: Friendly units activating within 6" get +6" range when shooting.
                     </td>
                   </tr>
                   <tr>
@@ -693,9 +631,7 @@
                 <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
-                    <td>
-                      Duellist: Enemy units get -1 to hit in melee vs hero.
-                    </td>
+                    <td>Duellist: Enemy units get -1 to hit in melee vs hero.</td>
                   </tr>
                   <tr>
                     <td class="d6-roll-column">3-4</td>
@@ -703,10 +639,7 @@
                   </tr>
                   <tr>
                     <td class="d6-roll-column">5-6</td>
-                    <td>
-                      Berserker: Enemies get -1 to morale tests in melee vs
-                      hero.
-                    </td>
+                    <td>Berserker: Enemies get -1 to morale tests in melee vs hero.</td>
                   </tr>
                 </tbody>
               </table>
@@ -734,8 +667,7 @@
                   <tr>
                     <td class="d6-roll-column">5-6</td>
                     <td>
-                      Suppressor: Enemies shot by hero get -1 to hit shooting
-                      until end of round.
+                      Suppressor: Enemies shot by hero get -1 to hit shooting until end of round.
                     </td>
                   </tr>
                 </tbody>
@@ -759,9 +691,7 @@
                   </tr>
                   <tr>
                     <td class="d6-roll-column">3-4</td>
-                    <td>
-                      Prowler: Enemies >12" get -1 to hit shooting vs hero.
-                    </td>
+                    <td>Prowler: Enemies >12" get -1 to hit shooting vs hero.</td>
                   </tr>
                   <tr>
                     <td class="d6-roll-column">5-6</td>
@@ -784,22 +714,15 @@
                 <tbody class="allow-definitions">
                   <tr>
                     <td class="d6-roll-column">1-2</td>
-                    <td>
-                      Chemist: Friendly units within 6" get +1 morale in melee.
-                    </td>
+                    <td>Chemist: Friendly units within 6" get +1 morale in melee.</td>
                   </tr>
                   <tr>
                     <td class="d6-roll-column">3-4</td>
-                    <td>
-                      Herbalist: Friendly units within 6" ignore wounds on 6+.
-                    </td>
+                    <td>Herbalist: Friendly units within 6" ignore wounds on 6+.</td>
                   </tr>
                   <tr>
                     <td class="d6-roll-column">5-6</td>
-                    <td>
-                      Warden: Friendly units within 6" stop being Shaken on hero
-                      activation.
-                    </td>
+                    <td>Warden: Friendly units within 6" stop being Shaken on hero activation.</td>
                   </tr>
                 </tbody>
               </table>
@@ -807,45 +730,37 @@
           </div>
           <h6 class="allow-definitions">Upgrading & Recruiting</h6>
           <p class="allow-definitions">
-            Spend earned points on unit upgrades or new units. Upgrades can be
-            sold for half price (round down to nearest 5). Recruit up to 1 new
-            Hero per mission (max 3 total). Recruit regular units freely (one
-            can start with 5XP for +50pts). Units/armies can be disbanded.
+            Spend earned points on unit upgrades or new units. Upgrades can be sold for half price
+            (round down to nearest 5). Recruit up to 1 new Hero per mission (max 3 total). Recruit
+            regular units freely (one can start with 5XP for +50pts). Units/armies can be disbanded.
           </p>
         </div>
       </section>
 
       <section id="command-points-section" class="mb-4">
-        <h2>
-          <i class="bi bi-binoculars-fill me-2"></i>Command Points & Stratagems
-        </h2>
+        <h2><i class="bi bi-binoculars-fill me-2"></i>Command Points & Stratagems</h2>
         <div class="rule-subsection mb-3">
           <h5>Command Point Generation (Fixed)</h5>
           <p class="allow-definitions">
-            Players get <strong>4 Command Points (CP)</strong> per 1000pts in
-            their army list at the start of the game.
+            Players get <strong>4 Command Points (CP)</strong> per 1000pts in their army list at the
+            start of the game.
           </p>
         </div>
         <div class="rule-subsection mb-3">
           <h5>Using Stratagems</h5>
           <p class="allow-definitions">
-            At any point during the game (friendly or enemy activation), players
-            may spend CP to activate Stratagems. Each specific Stratagem can
-            only be used once per unit activation.
+            At any point during the game (friendly or enemy activation), players may spend CP to
+            activate Stratagems. Each specific Stratagem can only be used once per unit activation.
           </p>
           <p class="allow-definitions">
             Players always have access to the
-            <strong>Universal Doctrine</strong> Stratagems below, plus the
-            Stratagems from <strong>one</strong> other Doctrine chosen before
-            the game begins (see options below).
+            <strong>Universal Doctrine</strong> Stratagems below, plus the Stratagems from
+            <strong>one</strong> other Doctrine chosen before the game begins (see options below).
           </p>
         </div>
         <div id="doctrines-display">
           <div class="text-center p-3">
-            <div
-              class="spinner-border spinner-border-sm text-warning"
-              role="status"
-            >
+            <div class="spinner-border spinner-border-sm text-warning" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
             <span class="ms-2">Loading Doctrines & Stratagems...</span>
@@ -881,11 +796,7 @@
               />
             </div>
 
-            <div
-              id="glossary-no-results"
-              class="alert alert-warning d-none"
-              role="alert"
-            >
+            <div id="glossary-no-results" class="alert alert-warning d-none" role="alert">
               No matching terms found.
             </div>
 
@@ -953,8 +864,8 @@
         </h2>
         <div class="collapse show" id="collapseRandomEvents">
           <p class="text-muted small mb-3 allow-definitions">
-            At the start of each round, roll D6. On a 5+, roll 2D6 (reading them
-            like D66, e.g., a 2 and a 5 is 25) and consult the events below.
+            At the start of each round, roll D6. On a 5+, roll 2D6 (reading them like D66, e.g., a 2
+            and a 5 is 25) and consult the events below.
           </p>
           <div id="random-events-display">
             <div class="text-center p-3">
@@ -1013,12 +924,7 @@
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <template id="toastTemplate">
-        <div
-          class="toast"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <strong class="me-auto toast-title">Notification</strong>
             <small class="text-muted toast-timestamp">Just now</small>
@@ -1029,9 +935,7 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="toast-body" style="white-space: pre-wrap">
-            Toast message goes here.
-          </div>
+          <div class="toast-body" style="white-space: pre-wrap">Toast message goes here.</div>
         </div>
       </template>
       <template id="interactiveToastTemplate">
@@ -1051,21 +955,11 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="toast-body" style="white-space: pre-wrap">
-            Interactive message goes here.
-          </div>
-          <div
-            class="mt-2 pt-2 border-top toast-buttons-container p-2 text-end"
-          ></div>
+          <div class="toast-body" style="white-space: pre-wrap">Interactive message goes here.</div>
+          <div class="mt-2 pt-2 border-top toast-buttons-container p-2 text-end"></div>
         </div>
       </template>
-      <div
-        id="themeToast"
-        class="toast"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
+      <div id="themeToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
           <strong class="me-auto">Theme Change</strong>
           <small>Just now</small>

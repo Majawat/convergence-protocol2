@@ -14,11 +14,9 @@
     />
     <script type="module" src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
-    </head>
+  </head>
   <body class="bg-body text-body">
-    <nav
-      class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm"
-    >
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm">
       <div class="container-fluid">
         <a class="navbar-brand" href="index.html">Convergence Protocol</a>
         <button
@@ -57,10 +55,7 @@
             >
               <i class="bi bi-circle-half theme-icon-active"></i> Theme
             </button>
-            <ul
-              class="dropdown-menu dropdown-menu-end"
-              aria-labelledby="themeDropdown"
-            >
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
               <li>
                 <button
                   class="dropdown-item d-flex align-items-center"
@@ -110,10 +105,7 @@
           ></path>
         </g>
       </svg>
-      <div
-        class="alert alert-danger mx-auto col-md-8 col-lg-6"
-        role="alert"
-      >
+      <div class="alert alert-danger mx-auto col-md-8 col-lg-6" role="alert">
         <h1><span class="error-text"></span> - PAGE NOT FOUND</h1>
         <hr />
         <h5 class="text-balance">
@@ -126,30 +118,46 @@
         </p>
       </div>
 
-      <a href="index.html" class="button btn btn-primary mt-3"
-        >Return to Protocol Hub</a
-      >
+      <a href="index.html" class="button btn btn-primary mt-3">Return to Protocol Hub</a>
     </main>
 
     <footer class="container mt-5 py-3 border-top">
       <p class="text-center text-muted">&copy; 2025 Convergence Protocol Tracker</p>
-      </footer>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       // Simple random error code generator (optional)
       function generateRandomCode() {
-        const prefixes = ["OMEGA", "EXCOMMUNICATUS", "INQUISITORIAL", "LEGION", "PRIMARIS", "REDEMPTION", "ADEPTO"];
-        const middles = ["REX", "THETA", "AUXILIA", "HERETICUS", "CRUSADE", "ASTARTES", "MECHANICUS"];
+        const prefixes = [
+          "OMEGA",
+          "EXCOMMUNICATUS",
+          "INQUISITORIAL",
+          "LEGION",
+          "PRIMARIS",
+          "REDEMPTION",
+          "ADEPTO",
+        ];
+        const middles = [
+          "REX",
+          "THETA",
+          "AUXILIA",
+          "HERETICUS",
+          "CRUSADE",
+          "ASTARTES",
+          "MECHANICUS",
+        ];
         const suffixes = ["404", "00M42", "XVIII", "M31", "M41", "XVI", "1011", "VOID"];
-        return `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${middles[Math.floor(Math.random() * middles.length)]}-${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+        return `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${
+          middles[Math.floor(Math.random() * middles.length)]
+        }-${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
       }
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener("DOMContentLoaded", () => {
         const errorCodeElement = document.getElementById("error-code");
         if (errorCodeElement) {
           errorCodeElement.textContent = generateRandomCode();
         }
       });
     </script>
-    </body>
+  </body>
 </html>
