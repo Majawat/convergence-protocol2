@@ -221,9 +221,10 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
         "Unit Destroyed"
       );
       _clearTargetHighlight(cardUnitId); // Clear highlight on destruction
-      console.log(`Triggering 'Set Killed By' modal for destroyed unit ${cardUnitId}`);
-      createOpponentSelectionModal(cardUnitId, armyId, 'setKilledBy');
-
+      console.log(
+        `Triggering 'Set Killed By' modal for destroyed unit ${cardUnitId}`
+      );
+      createOpponentSelectionModal(cardUnitId, armyId, "setKilledBy");
     } else {
       // Highlight the next model to be wounded if the unit is not destroyed
       const nextAutoTarget = findTargetModelForWound(
@@ -935,9 +936,10 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
           "Melee Outcome"
         );
 
-        console.log(`Triggering 'Set Killed By' modal for routed unit ${cardUnitId}`);
-        createOpponentSelectionModal(cardUnitId, armyId, 'setKilledBy');
-
+        console.log(
+          `Triggering 'Set Killed By' modal for routed unit ${cardUnitId}`
+        );
+        createOpponentSelectionModal(cardUnitId, armyId, "setKilledBy");
       } else {
         console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
         updateUnitStateValue(armyId, cardUnitId, "shaken", true);
@@ -1238,7 +1240,7 @@ function _handleUnderdogPointAdjustClick(adjustment) {
  * @param {Event} event - The click event object.
  */
 async function _handleMarkRemovedClick(event) {
-  const button = event.target.closest('.btn-mark-removed');
+  const button = event.target.closest(".btn-mark-removed");
   if (!button) return;
 
   const { armyId, unitId } = button.dataset;
@@ -1249,35 +1251,42 @@ async function _handleMarkRemovedClick(event) {
 
   // 1. Ask user for status
   const chosenStatus = await showInteractiveToast(
-      `Mark "${unitName}" as Destroyed or Routed?`,
-      "Confirm Unit Removal",
-      [
-          { text: "Destroyed", value: "destroyed", style: "danger" },
-          { text: "Routed", value: "routed", style: "warning" },
-          { text: "Cancel", value: "cancel", style: "secondary" },
-      ]
+    `Mark "${unitName}" as Destroyed or Routed?`,
+    "Confirm Unit Removal",
+    [
+      { text: "Destroyed", value: "destroyed", style: "danger" },
+      { text: "Routed", value: "routed", style: "warning" },
+      { text: "Cancel", value: "cancel", style: "secondary" },
+    ]
   );
 
-  if (chosenStatus === 'destroyed' || chosenStatus === 'routed') {
-      console.log(`Manually marking unit ${unitId} as ${chosenStatus}`);
-      const heroData = getJoinedHeroData(unitId);
+  if (chosenStatus === "destroyed" || chosenStatus === "routed") {
+    console.log(`Manually marking unit ${unitId} as ${chosenStatus}`);
+    const heroData = getJoinedHeroData(unitId);
 
-      // 2. Update State
-      updateUnitStateValue(armyId, unitId, "status", chosenStatus);
-      if (heroData) updateUnitStateValue(armyId, heroData.selectionId, "status", chosenStatus);
+    // 2. Update State
+    updateUnitStateValue(armyId, unitId, "status", chosenStatus);
+    if (heroData)
+      updateUnitStateValue(
+        armyId,
+        heroData.selectionId,
+        "status",
+        chosenStatus
+      );
 
-      // 3. Update UI
-      if (chosenStatus === 'destroyed') collapseDestroyedCard(unitId);
-      else collapseRoutedCard(unitId);
-      updateOffcanvasUnitStatus(armyId, unitId);
-      showToast(`${unitName} marked as ${chosenStatus}.`, "Unit Status Updated");
+    // 3. Update UI
+    if (chosenStatus === "destroyed") collapseDestroyedCard(unitId);
+    else collapseRoutedCard(unitId);
+    updateOffcanvasUnitStatus(armyId, unitId);
+    showToast(`${unitName} marked as ${chosenStatus}.`, "Unit Status Updated");
 
-      // 4. Trigger 'Set Killed By' Modal
-      console.log(`Triggering 'Set Killed By' modal for manually removed unit ${unitId}`);
-      createOpponentSelectionModal(unitId, armyId, 'setKilledBy');
-
+    // 4. Trigger 'Set Killed By' Modal
+    console.log(
+      `Triggering 'Set Killed By' modal for manually removed unit ${unitId}`
+    );
+    createOpponentSelectionModal(unitId, armyId, "setKilledBy");
   } else {
-      console.log("Manual unit removal cancelled.");
+    console.log("Manual unit removal cancelled.");
   }
 }
 
@@ -1347,6 +1356,7 @@ function handleInteractionClick(event) {
     const resolveMeleeButton = event.target.closest(".resolve-melee-btn");
     const moraleWoundsButton = event.target.closest(".morale-wounds-btn");
     const recordKillButton = event.target.closest(".btn-record-kill");
+    const markRemovedButton = event.target.closest(".btn-mark-removed");
 
     // Only allow reset button on inactive cards
     if (isInactive) {
@@ -1376,6 +1386,8 @@ function handleInteractionClick(event) {
       _handleMoraleWoundsClick(moraleWoundsButton, armyId, cardUnitId);
     else if (recordKillButton) {
       _handleRecordKillClick(event);
+    } else if (markRemovedButton) {
+      _handleMarkRemovedClick(event);
     }
 
     return; // Stop processing after handling card interaction
@@ -1403,7 +1415,7 @@ function handleInteractionClick(event) {
     } else if (addCpButton) {
       _handleManualCpAdjustClick(1);
     }
-    return; 
+    return;
   }
 
   // --- Opponent Selection Modal Interactions ---
@@ -1412,9 +1424,9 @@ function handleInteractionClick(event) {
       "#confirm-opponent-selection-btn"
     );
     if (confirmOpponentButton) {
-      console.log("DEBUG: Click detected on confirm button via delegation."); 
+      console.log("DEBUG: Click detected on confirm button via delegation.");
       _handleConfirmOpponentSelection(event);
-      return; 
+      return;
     }
   }
 }
@@ -1503,6 +1515,9 @@ function _handleConfirmOpponentSelection(event) {
     "#modal-opponent-army-select"
   )?.value;
   const victimUnitId = form.querySelector("#modal-victim-unit-select")?.value; // For recordKill, this is the victim
+  const selectedOpponentUnitId = form.querySelector(
+    "#modal-opponent-unit-select"
+  )?.value; // Renamed element ID in ui.js
 
   // Basic validation
   if (
@@ -1520,11 +1535,37 @@ function _handleConfirmOpponentSelection(event) {
   }
 
   const currentRound = getCurrentRound();
+  const allArmies = getAllLoadedArmyData();
+
+  let killRecorded = false;
+  let killedBySet = false;
+  let interactionProcessed = false;
+
+  const getUnitDetails = (lookupArmyId, lookupUnitId) => {
+    const unitData = allArmies?.[lookupArmyId]?.unitMap?.[lookupUnitId];
+    if (!unitData) return null;
+    return {
+      id: lookupUnitId,
+      name: unitData.customName || unitData.originalName,
+      armyId: lookupArmyId,
+      isHero: unitData.isHero || false,
+      joinedPartnerId: null, // Will be populated if needed
+    };
+  };
+  const getPartnerId = (armyId, unitId) => {
+    const heroData = getJoinedHeroData(unitId); // Is unitId a base unit with a hero?
+    if (heroData) return heroData.selectionId;
+    const unitData = getUnitData(unitId); // Is unitId a hero joined to a base?
+    if (unitData?.joinToUnitId) return unitData.joinToUnitId;
+    return null;
+  };
 
   // --- Logic for 'recordKill' action ---
   if (actionType === "recordKill") {
     const attackerArmyId = triggeringArmyId;
     const attackerUnitId = triggeringUnitId;
+    const victimArmyId = opponentArmyId;
+    const victimUnitId = selectedOpponentUnitId;
 
     // Get necessary details for state functions
     const allArmies = getAllLoadedArmyData();
@@ -1579,10 +1620,77 @@ function _handleConfirmOpponentSelection(event) {
       // Optional: Add logic to revert partial state changes if one failed
     }
   } else if (actionType === "setKilledBy") {
-    // TODO: Implement logic for 'setKilledBy' in Step 4
-    console.log("Set Killed By action confirmation needs implementation.");
+    // Victim is the triggering unit, Attacker is selected in modal
+    const victimArmyId = triggeringArmyId;
+    const victimUnitId = triggeringUnitId;
+    const attackerArmyId = opponentArmyId;
+    const attackerUnitId = selectedOpponentUnitId;
+
+    const victimBaseDetails = getUnitDetails(victimArmyId, victimUnitId);
+    const attackerBaseDetails = getUnitDetails(attackerArmyId, attackerUnitId);
+
+    if (!victimBaseDetails || !attackerBaseDetails) {
+      /* ... error handling ... */ return;
+    }
+
+    // Prepare details objects
+    const victimRecord = {
+      victimUnitId,
+      victimUnitName: victimBaseDetails.name,
+      victimArmyId,
+      victimIsHero: victimBaseDetails.isHero,
+      round: currentRound,
+    };
+    const attackerRecord = {
+      attackerUnitId,
+      attackerUnitName: attackerBaseDetails.name,
+      attackerArmyId,
+      round: currentRound,
+    };
+
+    // -- Perform Updates --
+    // 1. Victim is killed by (base + potentially joined hero)
+    const victimHeroId = getPartnerId(victimArmyId, victimUnitId);
+    killedBySet = setKilledByStatus(victimArmyId, victimUnitId, attackerRecord);
+    if (victimHeroId) {
+      setKilledByStatus(victimArmyId, victimHeroId, attackerRecord);
+    }
+
+    // 2. Attacker records kill (base + potentially joined hero)
+    const attackerHeroId = getPartnerId(attackerArmyId, attackerUnitId);
+    killRecorded = addRecordedKill(
+      attackerArmyId,
+      attackerUnitId,
+      victimRecord
+    );
+    if (attackerHeroId) {
+      addRecordedKill(attackerArmyId, attackerHeroId, victimRecord);
+    }
+
+    interactionProcessed = true;
+
+    // Update UI
+    if (killedBySet) updateKilledByStatusDisplay(victimArmyId, victimUnitId);
+    if (victimHeroId && killedBySet)
+      updateKilledByStatusDisplay(victimArmyId, victimHeroId);
+    if (killRecorded) updateKillCountDisplay(attackerArmyId, attackerUnitId);
+    if (attackerHeroId && killRecorded)
+      updateKillCountDisplay(attackerArmyId, attackerHeroId);
   } else {
     console.error("Unknown action type in modal confirmation:", actionType);
+  }
+
+  // --- Final Steps ---
+  if (interactionProcessed) {
+    showToast(
+      `${
+        actionType === "recordKill" ? "Kill" : "Killer"
+      } recorded successfully!`,
+      "Success"
+    );
+  } else {
+    showToast("Failed to update state completely.", "Error");
+    // Optional: Add logic to revert partial state changes if needed
   }
 
   // Close the modal
