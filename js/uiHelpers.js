@@ -9,13 +9,14 @@ import { config, UI_ICONS } from "./config.js";
 import {
   getCurrentArmyId,
   getDoctrinesData,
+  getArmyNameById,
   getSelectedDoctrine,
   getCommandPoints,
   getMaxCommandPoints,
   getUnderdogPoints,
   getMaxUnderdogPoints,
-  getUnitStateValue, // <-- Added for offcanvas update
-  getCurrentArmyHeroTargets, // <-- Added for offcanvas update
+  getUnitStateValue,
+  getCurrentArmyHeroTargets,
 } from "./state.js";
 
 // --- Focus Management State ---
@@ -144,6 +145,186 @@ export function populateArmyInfoModal(armyInfo) {
   }
   // Enable the info button now that data is ready
   if (infoButton) infoButton.disabled = false;
+}
+
+/**
+ * Generates and displays the End Game Results modal.
+ * @param {object} xpResultsData - The object returned by calculateArmyXP, keyed by unitId.
+ * Example entry: { id: 'unitId', name: 'Unit Name', finalStatus: 'active', survived: true,
+ * killsRecorded: [{...}, ...], killedBy: { attackerUnitName: 'X', attackerArmyName: 'Y' } | null,
+ * casualtyOutcome: 'Recovered (2-5)' | null, xpBreakdown: { survived: 1, standardKills: 1, heroKills: 0 },
+ * totalXpEarned: 2 }
+ * @param {string} armyId - The ID of the army whose results are being shown (needed for casualty dropdown).
+ */
+export function showResultsModal(xpResultsData, armyId) {
+  const modalContainer = document.getElementById("game-results-modal-container");
+  if (!modalContainer) {
+    console.error("Modal container #game-results-modal-container not found.");
+    showToast("Error: Cannot display results modal container.", "UI Error");
+    return;
+  }
+  if (!xpResultsData || Object.keys(xpResultsData).length === 0) {
+    showToast("No XP results data to display.", "Info");
+    return;
+  }
+
+  const armyName = getArmyNameById(armyId);
+  const modalId = "gameResultsModal";
+
+  let tableRowsHTML = "";
+  Object.values(xpResultsData)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach((result) => {
+      // Determine Status Display
+      let statusDisplay = `<span class="text-success">${result.finalStatus}</span>`; // Default active styling
+      if (result.finalStatus === "destroyed" || result.finalStatus === "routed") {
+        statusDisplay = `<span class="text-danger text-decoration-line-through"
+          >${result.finalStatus}</span
+        >`;
+        if (result.killedBy) {
+          statusDisplay += `<br /><small class="text-muted fst-italic"
+              >(by ${result.killedBy.attackerUnitName} - ${result.killedBy.attackerArmyName})</small
+            >`;
+        } else {
+          statusDisplay += `<br /><small class="text-muted fst-italic"
+              >(Killed by unknown)</small
+            >`; // Fallback
+        }
+      }
+
+      // Format Kills
+      const totalKills = result.xpBreakdown.standardKills + result.xpBreakdown.heroKills;
+      let killsDisplay = `${totalKills} Kill${totalKills !== 1 ? "s" : ""}`;
+      if (result.xpBreakdown.heroKills > 0) {
+        killsDisplay += ` (${result.xpBreakdown.heroKills} Hero${
+          result.xpBreakdown.heroKills !== 1 ? "es" : ""
+        })`;
+      }
+
+      // Optional: List names killed
+      let killsDisplayList = result.killsRecorded.map((k) => k.victimUnitName).join(", ");
+      killsDisplay = killsDisplayList || "None";
+
+      // Format XP Breakdown
+      const breakdownParts = [];
+      if (result.xpBreakdown.survived > 0)
+        breakdownParts.push(`Survived: +${result.xpBreakdown.survived}`);
+      if (result.xpBreakdown.standardKills > 0)
+        breakdownParts.push(`Kills: +${result.xpBreakdown.standardKills}`);
+      if (result.xpBreakdown.heroKills > 0)
+        breakdownParts.push(`Hero Kills: +${result.xpBreakdown.heroKills}`);
+      const breakdownDisplay = breakdownParts.join(", ") || "None";
+
+      // Casualty Outcome Dropdown
+      let casualtyDropdownHTML = "";
+      if (result.finalStatus === "destroyed" || result.finalStatus === "routed") {
+        const outcomes = [
+          { value: "", text: "Record D6 Roll..." },
+          { value: "Dead (1)", text: "1: Dead (Remove)" },
+          { value: "Recovered (2-5)", text: "2-5: Recovered" },
+          { value: "Talent (6)", text: "6: Talent (+1 XP)" },
+        ];
+        let optionsHTML = outcomes
+          .map(
+            (opt) =>
+              `<option
+                value="${opt.value}"
+                ${result.casualtyOutcome === opt.value ? "selected" : ""}>
+                ${opt.text}
+              </option>`
+          )
+          .join("");
+
+        casualtyDropdownHTML = ` <select
+          class="form-select form-select-sm casualty-outcome-select"
+          data-army-id="${armyId}"
+          data-unit-id="${result.id}"
+          aria-label="Select Casualty Outcome">
+          ${optionsHTML}
+        </select>`;
+      }
+
+      // Build Table Row
+      tableRowsHTML += `
+        <tr>
+          <td>${result.name}</td>
+          <td>${statusDisplay}</td>
+          <td class="text-center">${killsDisplay}</td>
+          <td>${breakdownDisplay}</td>
+          <td class="text-center fw-bold">${result.totalXpEarned}</td>
+          <td>${casualtyDropdownHTML}</td>
+        </tr>
+      `;
+    });
+
+  // Full Modal HTML
+  const modalHTML = `
+    <div
+      class="modal fade"
+      id="${modalId}"
+      tabindex="-1"
+      aria-labelledby="${modalId}Label"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        {/* Use modal-xl for more space */}
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="${modalId}Label">End Game Results: ${armyName}</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted small">
+              Review XP earned and record casualty roll outcomes below. Changes to casualty outcomes
+              are saved automatically.
+            </p>
+            <div class="table-responsive">
+              <table class="table table-sm table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Unit</th>
+                    <th>Final Status</th>
+                    <th class="text-center">Kills Made</th>
+                    <th>XP Breakdown</th>
+                    <th class="text-center">Total XP Earned</th>
+                    <th>Casualty Roll (D6)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tableRowsHTML}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Inject and Show
+  modalContainer.innerHTML = modalHTML;
+  const modalElement = document.getElementById(modalId);
+  if (modalElement) {
+    const modalInstance = new bootstrap.Modal(modalElement);
+    // Cleanup modal from DOM when hidden
+    modalElement.addEventListener(
+      "hidden.bs.modal",
+      () => {
+        modalContainer.innerHTML = "";
+      },
+      { once: true }
+    );
+    modalInstance.show();
+  } else {
+    console.error("Failed to find results modal element after creation.");
+    showToast("Error displaying results modal.", "UI Error");
+  }
 }
 
 /**

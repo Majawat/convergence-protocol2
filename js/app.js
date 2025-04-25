@@ -60,7 +60,7 @@ import {
   showToast,
   handleFocusReturn,
 } from "./uiHelpers.js";
-import { setupEventListeners } from "./eventHandlers.js";
+import { setupEventListeners, updateGameControlButtons } from "./eventHandlers.js";
 import { findTargetModelForWound } from "./gameLogic.js";
 import { initializeDefinitionsSystem } from "./definitions.js";
 
@@ -631,6 +631,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Set the *currently viewed* processed data in memory
     setLoadedArmyData(armyIdToLoad, processedArmy);
+    setCurrentArmyId(armyIdToLoad); // Set explicit ID
 
     // Step 6: Sync HP for the current army's in-memory data
     _loadStateAndSyncHp(armyIdToLoad, processedArmy);
@@ -639,14 +640,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     calculateAndSetUP(armyIdToLoad, campaignArmies); // Reads listPoints from updated localStorage
 
     // Step 7: Update UI
-    mainListContainer.innerHTML = ""; // Clear spinner now that all data is ready
-    document.title = `${armyInfo.armyName} - OPR Army Tracker`;
     titleH1.textContent = armyInfo.armyName;
     populateArmyInfoModal(armyInfo);
-    console.log("DEBUG: Displaying army units...");
-    displayArmyUnits(processedArmy, mainListContainer);
-    _initializeWoundHighlights(armyIdToLoad);
-    console.log("DEBUG: Units displayed.");
+    displayArmyUnits(processedArmy, mainListContainer); // Render units
+    _initializeWoundHighlights(armyIdToLoad); // Highlight first wound target
+    populateUnitOffcanvas(processedArmy); // Populate offcanvas
+    setupBackToTopButton(); // Setup back-to-top
+    initializeDefinitionsSystem(); // Setup popovers
+    updateCommandPointsDisplay(
+      armyIdToLoad,
+      getCommandPoints(armyIdToLoad),
+      getMaxCommandPoints(armyIdToLoad)
+    ); // Update CP Display
 
     // Step 9.5: Populate Offcanvas, Setup Back-to-Top, Init Popovers
     populateUnitOffcanvas(processedArmy);
@@ -666,6 +671,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("DEBUG: Setting up event listeners...");
     setupEventListeners(armyIdToLoad);
     console.log("DEBUG: Event listeners set up.");
+    // Set initial state of control buttons AFTER listeners are set up
+    updateGameControlButtons();
+    console.log("DEBUG: Game control buttons updated.");
 
     // Enable Start Round button
     const startRoundButton = document.getElementById("start-round-button");
@@ -675,21 +683,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       console.warn("DEBUG: Start Round button not found after main load!");
     }
-
     console.log("DEBUG: Application initialization complete.");
+
   } catch (error) {
-    // Catch errors during the main initialization sequence
+    // Catch errors during the main initialization sequencef
     console.error(
       `DEBUG: An error occurred during initialization for army ${armyIdToLoad}:`,
       error
     );
-    mainListContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger m-4" role="alert">An error occurred while loading the army (${
-      armyInfo?.armyName || armyIdToLoad
-    }). Check console. Error: ${error.message}</div></div>`;
+    mainListContainer.innerHTML = `<div class="col-12">
+      <div class="alert alert-danger m-4" role="alert">
+        An error occurred while loading the army (${armyInfo?.armyName || armyIdToLoad}). Check
+        console. Error: ${error.message}
+      </div>
+    </div>`;
     titleH1.textContent = "Error Loading Army";
     // Ensure buttons that might rely on successful load are disabled
     const startRoundButton = document.getElementById("start-round-button");
     if (startRoundButton) startRoundButton.disabled = true;
+    const endGameButton = document.getElementById("end-game-button");
+    if (endGameButton) endGameButton.disabled = true;
     const stratButton = document.getElementById("stratagems-button");
     if (stratButton) stratButton.disabled = true;
   }

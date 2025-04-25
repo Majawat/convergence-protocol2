@@ -80,7 +80,7 @@ export function setCurrentArmyId(armyId) {
  * @param {string} [armyId] - The ID of the army. Defaults to current army.
  * @returns {object} The army's state object (never null, provides default).
  */
-function getArmyState(armyId) {
+export function getArmyState(armyId) {
   if (!armyId) armyId = getCurrentArmyId();
   if (!armyId)
     return {
@@ -138,20 +138,37 @@ export function getMaxUnderdogPoints(armyId) {
  */
 export function getUnitState(armyId, unitId) {
   const armyState = getArmyState(armyId);
-  return (
-    armyState.units?.[unitId] || {
-      status: "active",
-      shaken: false,
-      fatigued: false,
-      attackedInMeleeThisRound: false,
-      action: null,
-      limitedWeaponUsed: false,
-      tokens: 0,
-      models: {},
-      killsRecorded: [],
-      killedBy: null,
-    }
-  );
+
+  // Define the default structure for a unit's state if it doesn't exist yet
+  const defaultUnitState = {
+    status: "active",
+    shaken: false,
+    fatigued: false,
+    attackedInMeleeThisRound: false,
+    action: null,
+    limitedWeaponUsed: false,
+    tokens: 0,
+    models: {},
+    killsRecorded: [],
+    killedBy: null,
+    casualtyOutcome: null,
+  };
+
+  // Return existing state or the default structure
+  // Also ensure existing states get the new property if they don't have it
+  const unitState = armyState.units?.[unitId] || defaultUnitState;
+  if (unitState.casualtyOutcome === undefined) {
+    unitState.casualtyOutcome = null; // Add if missing from loaded state
+  }
+  if (unitState.killsRecorded === undefined) {
+    // Add previous ones just in case
+    unitState.killsRecorded = [];
+  }
+  if (unitState.killedBy === undefined) {
+    unitState.killedBy = null;
+  }
+
+  return unitState;
 }
 
 /**
@@ -215,12 +232,43 @@ export function getSelectedDoctrine(armyId) {
   return state.selectedDoctrine;
 }
 
+/**
+ * Updates the recorded casualty outcome for a specific unit and saves.
+ * @param {string} armyId - The ID of the army.
+ * @param {string} unitId - The ID of the unit.
+ * @param {string | null} outcome - The selected outcome ('Dead (1)', 'Recovered (2-5)', 'Talent (6)', or null/empty string to clear).
+ */
+export function setCasualtyOutcome(armyId, unitId, outcome) {
+  if (!armyId) armyId = getCurrentArmyId(); // Use current if needed
+  if (!armyId || !unitId) {
+    console.error("setCasualtyOutcome: Missing armyId or unitId");
+    return;
+  }
+
+  const currentState = getArmyState(armyId);
+
+  // Ensure unit state exists (getUnitState initializes if needed)
+  const unitState = getUnitState(armyId, unitId);
+  if (!currentState.units[unitId]) {
+    currentState.units[unitId] = unitState;
+  }
+
+  // Use null if outcome is empty string, otherwise use the outcome
+  const finalOutcome = outcome || null;
+
+  if (currentState.units[unitId].casualtyOutcome !== finalOutcome) {
+    currentState.units[unitId].casualtyOutcome = finalOutcome;
+    saveArmyState(armyId, currentState);
+    console.log(`Set casualty outcome for ${unitId} to: ${finalOutcome}`);
+  }
+}
+
 // --- Global Game State Getters/Setters ---
 
 /** Gets the current round number from global game state. */
 export function getCurrentRound() {
   const gameState = loadGameState();
-  return gameState.currentRound;
+  return gameState.currentRound || 0; // Default to 0 if not found
 }
 
 /** Sets the current round number in global game state. */
@@ -239,6 +287,15 @@ export function incrementCurrentRound() {
   const currentRound = getCurrentRound();
   setCurrentRound(currentRound + 1);
   return currentRound + 1;
+}
+
+/**
+ * Gets the game finished status from the global game state.
+ * @returns {boolean} True if the game is marked as finished, false otherwise.
+ */
+export function getIsGameFinished() {
+  const gameState = loadGameState();
+  return gameState.isGameFinished || false; // Default to false if not set
 }
 
 // --- Setters ---
@@ -275,6 +332,17 @@ export function setDefinitions(data) {
       // Optionally show a user-facing error toast here
     }
   }
+}
+
+/**
+ * Sets the game finished status in the global game state.
+ * @param {boolean} isFinished - True if the game is finished, false otherwise.
+ */
+export function setIsGameFinished(isFinished) {
+  const gameState = loadGameState(); // Load current state
+  gameState.isGameFinished = !!isFinished; // Coerce to boolean
+  saveGameState(gameState); // Save updated state
+  console.log(`Game finished status set to: ${gameState.isGameFinished}`);
 }
 
 /**
