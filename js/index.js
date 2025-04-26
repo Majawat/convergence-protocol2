@@ -151,8 +151,7 @@ function displayLeaderboardSnapshot(campaignData) {
           <th>VP</th>
         </tr>
       </thead>
-      <tbody></tbody>
-    </table>
+      <tbody>
   `;
   leaderboardData.forEach((player, index) => {
     // Iterate over leaderboardData
