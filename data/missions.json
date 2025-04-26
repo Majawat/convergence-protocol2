@@ -159,9 +159,9 @@
           "5 bonus points for controlling 3+ chambers at the end of any round"
         ]
       },
-      "battleReportFile": null,
-      "winner": null,
-      "winningArmy": null
+            "battleReportFile": "data/battle-reports/mission3.json",
+      "winner": "Alex",
+      "winningArmy": "van Louen's Roughnecks"
     },
     {
       "number": 4,
