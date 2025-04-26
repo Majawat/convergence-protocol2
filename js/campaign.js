@@ -318,9 +318,7 @@ function displayLeaderboard(campaignData) {
           <th>Spec. Obj</th>
           <th>Max Pts</th>
         </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+      </thead><tbody>
   `;
   leaderboardData.forEach((army, index) => {
     tableHTML += `
