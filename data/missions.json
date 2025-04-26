@@ -108,7 +108,7 @@
       "points": 1400,
       "datetime": "2025-04-27T10:00:00-05:00",
       "month": "April",
-      "status": "current",
+      "status": "completed",
       "overview": "Analysis of the recovered Axiom components reveals a startling truth: the garbled transmissions are fragments of a conscious entity deliberately fragmented and stored within the Axiom Network. Four resonance chambers have been discovered on this planet, each containing a critical aspect of this entity's consciousness: Knowledge (memory), Emotion (feeling), Logic (reasoning), and Will (purpose). Each faction realizes that whoever shapes this emerging intelligence could harness unimaginable power.",
       "objective": {
         "primary": "Control the resonance chambers to gain tactical advantages and shape the entity's development. Interface with chambers to gain deeper influence over specific aspects of the entity's consciousness.",
@@ -169,7 +169,7 @@
       "points": 1600,
       "datetime": null,
       "month": "May",
-      "status": "upcoming",
+      "status": "current",
       "overview": "A subterranean chamber opens, revealing stasis pods containing ancient warriors—some are waking up.",
       "objective": {
         "primary": "",
