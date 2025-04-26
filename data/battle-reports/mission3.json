@@ -1,0 +1,65 @@
+{
+  "missionId": 3,
+  "title": "The Mind Behind the Signal",
+  "participants": [
+    {
+      "player": "Alex",
+      "army": "van Louen's Roughnecks",
+      "result": "winner"
+    },
+    {
+      "player": "Cody",
+      "army": "The Ashen Pact",
+      "result": "participant"
+    },
+    {
+      "player": "Claire",
+      "army": "Hive Fleet Tarvos",
+      "result": "participant"
+    },
+    {
+        "player": "Victoria",
+        "army": "Galdoo'o naahlk wildigitkw",
+        "result": "participant"
+    }
+  ],
+  "rounds": [
+    {
+      "number": 1,
+      "title": "Opening Moves and Chamber Contests",
+      "description": "The battle began with forces converging on the critical resonance chambers. Cody directed forces towards the Logic chamber, while Alex's Command Squad opened fire, targeting Victoria's formidable dragon rider, aygat nox. Victoria maneuvered aygat nox onto the Will chamber as Claire's Mindworm unsuccessfully attempted to cast Animate Flora.\n\nThe struggle for control intensified. Cody's Dustborn Marauders surged into the emotion zone, quickly followed by Claire's Emerald Tide aiming to contest it. Alex pushed his Emperor's Delivery Service APC towards the Will chamber. Victoria sent her Eternal Hunters to challenge Cody for the Logic chamber.\n\nCombat erupted as Cody's Dawnbringers targeted Victoria's wahlin luulak' majagalee, destroying two Revenants. Alex secured the Will chamber with his deployed infantry. Victoria's dragon rider, aygat nox, retaliated against Alex's APC, shaking the vehicle with a powerful blast. Claire maneuvered her swarm forward.\n\nCody's Hallowed Breakers focused fire on the Tarvos swarm, eliminating two constructs and leaving the unit Shaken. Alex's Infantry Squad managed to land a wound on aygat nox. Cody's Nightfang Sentinels sniped Claire's Splintermaw, scoring two hits, while Alex's Command Squad mortars glanced harmlessly off aygat nox's carapace.\n\nIn a fiery assault, Cody's Radiant Guard emerged to burninante the Emerald Tide remnants, killing five with flamers but missing with pistol shots. Alex's Longshanks walker added to the pressure on Victoria's dragon, inflicting three significant wounds. Victoria's treeman elder, didilsimgan, focused on bolstering her forces, successfully casting Regeneration on multiple units before repositioning other treemen units."
+    },
+    {
+      "number": 2,
+      "title": "Ambush and Decisive Engagements",
+      "description": "Before the second round commenced, a random event occurred: Victoria's forces became Combat Fatigued, suffering -1 to morale. The battlefield then shifted dramatically with ambushes. Claire deployed a pulsating Invasion Spore centrally, followed by her Mossbacks. Cody cleverly used Zerek Thal's Beacon to deploy the Ironclaw Vanguard near Claire's forces. Alex brought in RT Acreage. Cody continued, placing his Dawnbringers and Seraphine Calder in the center, before Claire finally revealed her trap: the imposing Bracken Lord.\n\nThe Bracken Lord immediately charged Cody's units, annihilating the Dawnbringers ('thunder klaws'). Cody's remaining forces fired back, managing only minor damage against the beast. Alex interacted with a chamber, securing a Military directive for the emerging Nexus consciousness. Victoria countered by activating the Logic chamber.\n\nClaire's Mindworm successfully cast a spell and activated the Knowledge chamber. Cody's units fired upon the Emerald Tide again, leaving few remaining. Alex advanced his large 1st Infantry Squad onto a key objective. Claire's newly spawned spore units engaged Alex's squad in melee; the initial clash was ineffective, but the spores detonated upon dying, causing significant casualties.\n\nCody seized the initiative! Zerek Thal and the Ironclaw Vanguard unleashed shotgun blasts, nearly wiping out the Emerald Tide. Seraphine Calder then used a spell to eliminate the final Emerald Tide warrior."
+    }
+  ],
+  "keyMoments": [
+    {
+        "title": "Chamber Control",
+        "description": "Multiple factions vied for control of the resonance chambers early, with Alex securing Will, Victoria securing Logic, and Claire securing Knowledge."
+    },
+    {
+        "title": "Dragon Shakes APC",
+        "description": "Victoria's dragon rider, aygat nox, successfully damaged and Shook Alex's Emperor's Delivery Service APC."
+    },
+    {
+        "title": "Radiant Guard Burninante",
+        "description": "Cody's Radiant Guard unleashed flamers to 'burninante' Claire's Emerald Tide, scoring significant kills."
+    },
+    {
+        "title": "Bracken Lord Ambush",
+        "description": "Claire's Bracken Lord emerged from ambush and immediately destroyed Cody's Dawnbringers unit."
+    },
+    {
+        "title": "Spore Explosion",
+        "description": "Claire's spawned spore units exploded after melee combat, inflicting casualties on Alex's 1st Infantry Squad."
+    },
+    {
+        "title": "Initiative Seized",
+        "description": "Cody seized initiative late in Round 2, allowing Seraphine Calder to finish off the last Emerald Tide model."
+    }
+  ],
+  "conclusion": "The battle concluded prematurely due to time constraints after the second round. Intense fighting occurred around the resonance chambers, with significant ambushes altering the tactical situation. Alex was conceded the victory. The emerging Nexus consciousness was influenced with two Military directives, one Benevolent directive, and one Containment directive."
+}
