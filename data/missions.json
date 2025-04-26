@@ -138,7 +138,7 @@
         },
         {
           "name": "Directive Influence",
-          "description": "The entity develops based on which directive tokens are placed:<ul><li>Benevolent Directive: All units gain the Regeneration special rule</li><li>Military Directive: All ranged attacks gain +3\" to their range</li><li>Scientific Directive: All spells and abilities cast on a 4+ instead of their normal value</li><li>Containment Directive: All terrain provides enhanced cover (+1 to defense rolls)</li></ul>"
+          "description": "The entity develops based on which directive tokens are placed:<ul><li>Benevolent Directive: All units gain the Regeneration special rule</li><li>Military Directive: All ranged attacks gain +3\" to their range</li><li>Scientific Directive: All spells and abilities cast on a 3+ instead of their normal value</li><li>Containment Directive: All terrain provides enhanced cover (+1 to defense rolls)</li></ul>"
         }
       ],
       "victoryConditions": {
