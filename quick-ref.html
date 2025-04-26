@@ -6,8 +6,7 @@
     <title>The Convergence Protocol - Quick Reference</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+      rel="stylesheet" />
     <style>
       body {
         font-size: 18px;
@@ -31,6 +30,13 @@
         font-weight: bold;
         margin-bottom: 0.25rem;
         color: #0dcaf0;
+      }
+      h6 {
+        font-size: 0.95rem;
+        font-weight: bold;
+        margin-top: 0.4rem;
+        margin-bottom: 0.1rem;
+        color: #66d9ff; /* Slightly different color for sub-headings */
       }
       .reference-container {
         height: calc(100vh - 60px);
@@ -98,6 +104,13 @@
         padding: 0.5rem;
         font-size: 0.85rem;
       }
+      .current-mission ul {
+        padding-left: 1.2rem; /* Adjust list indentation */
+        margin-bottom: 0.3rem;
+      }
+      .current-mission li {
+        margin-bottom: 0.15rem;
+      }
       /* High contrast for TV viewing */
       strong,
       th {
@@ -127,6 +140,17 @@
         padding: 0.2rem 0.4rem;
         font-size: 0.8rem;
       }
+      .leaderboard-table th,
+      .leaderboard-table td {
+        font-size: 0.8rem; /* Smaller font for leaderboard */
+        text-align: center;
+      }
+      .leaderboard-table th:first-child, /* Player */
+      .leaderboard-table td:first-child {
+        /* Player */
+        text-align: left;
+        font-weight: 500;
+      }
     </style>
   </head>
   <body>
@@ -141,7 +165,6 @@
 
     <div class="container-fluid main-container">
       <div class="row reference-container">
-        <!-- RULES COLUMN -->
         <div class="col-4 p-2 overflow-hidden">
           <div class="card h-100">
             <div class="card-header">
@@ -149,7 +172,6 @@
             </div>
             <div class="card-body p-2 overflow-hidden">
               <div class="row g-1">
-                <!-- Activation -->
                 <div class="col-12 rule-section">
                   <h5>Activation</h5>
                   <table class="table table-sm table-dark">
@@ -185,7 +207,6 @@
                   </table>
                 </div>
 
-                <!-- Melee -->
                 <div class="col-12 rule-section">
                   <h5>Melee</h5>
                   <p>
@@ -199,7 +220,6 @@
                   </p>
                 </div>
 
-                <!-- Morale -->
                 <div class="col-12 rule-section">
                   <h5>Morale</h5>
                   <p>
@@ -218,7 +238,6 @@
                   </p>
                 </div>
 
-                <!-- Terrain -->
                 <div class="col-12 rule-section">
                   <h5>Terrain</h5>
                   <p>
@@ -236,33 +255,52 @@
                   </p>
                 </div>
 
-                <!-- Universal Doctrine -->
-                <div class="col-12 mb-2">
-                  <h5>Universal Doctrine</h5>
-                  <div class="row g-0 rule-section">
-                    <div class="col-6 p-1">
-                      <span class="doctrine-cost">1 CP</span>
-                      <strong>High Command:</strong> +1 to any single die
+                <h5 class="mt-1">Campaign Rules</h5>
+                <div class="row g-1">
+                  <div class="col-6 rule-section">
+                    <div class="campaign-rule">
+                      <strong>Random Events:</strong> Roll D6 at start of each round, on 5+ a random
+                      event occurs.
                     </div>
-                    <div class="col-6 p-1">
-                      <span class="doctrine-cost">2 CP</span>
-                      <strong>Supreme Command:</strong> +1 to all dice in roll
+
+                    <div class="campaign-rule">
+                      <strong>Mission Goals:</strong> Winner gets 2 VP and 150pts. Losers get
+                      300pts.
                     </div>
-                    <div class="col-6 p-1">
-                      <span class="doctrine-cost">2 CP</span>
-                      <strong>Seize Initiative:</strong> Activate instead of enemy
+                  </div>
+                  <div class="col-6 rule-section">
+                    <div class="campaign-rule">
+                      <strong>Casualties:</strong> Units fully destroyed/routed are casualties. Roll
+                      D6 for each:
+                      <ul class="ps-3 mb-0 small">
+                        <li><strong>1:</strong> Dead - Remove from army</li>
+                        <li><strong>2-5:</strong> Recovered - No penalties</li>
+                        <li><strong>6:</strong> Natural Talent - +1 XP</li>
+                      </ul>
                     </div>
-                    <div class="col-6 p-1">
-                      <span class="doctrine-cost">2 CP</span>
-                      <strong>Waive Initiative:</strong> Force opponent to activate
+                  </div>
+                </div>
+
+                <div class="row g-1">
+                  <div class="col-6">
+                    <div class="rule-section campaign-rule">
+                      <strong>XP Earned:</strong>
+                      <ul class="ps-3 mb-0 small">
+                        <li>+1 XP: Not a casualty</li>
+                        <li>+1 XP: Killed a unit</li>
+                        <li>+2 XP: Killed a hero unit</li>
+                        <li>+3 XP: Killed a hero and its unit</li>
+                      </ul>
                     </div>
-                    <div class="col-6 p-1">
-                      <span class="doctrine-cost">2 CP</span>
-                      <strong>Delayed Deployment:</strong> Pass deployment turn
+                  </div>
+                  <div class="col-6">
+                    <div class="rule-section campaign-rule">
+                      <strong>Unit Leveling:</strong> At 5 XP, unit costs +25pts and gains a trait
+                      (roll D6).
                     </div>
-                    <div class="col-6 p-1">
-                      <span class="doctrine-cost">3 CP</span>
-                      <strong>Hidden Deployment:</strong> Redeploy up to 3 units
+                    <div class="rule-section campaign-rule">
+                      <strong>Hero Leveling:</strong> At 5 XP, hero costs +55pts and gains a skill
+                      set, then roll for trait.
                     </div>
                   </div>
                 </div>
@@ -271,7 +309,6 @@
           </div>
         </div>
 
-        <!-- SPECIAL RULES COLUMN -->
         <div class="col-4 p-2 overflow-hidden">
           <div class="card h-100">
             <div class="card-header">
@@ -411,7 +448,6 @@
           </div>
         </div>
 
-        <!-- MISSION & CAMPAIGN COLUMN -->
         <div class="col-4 p-2 overflow-hidden">
           <div class="card h-100">
             <div class="card-header">
@@ -419,51 +455,56 @@
             </div>
             <div class="card-body p-1">
               <div class="current-mission mb-2">
-                <h5>Mission 2: Signal in the Storm</h5>
+                <h5>Mission 3: The Mind Behind the Signal</h5>
                 <p>
-                  <strong>Overview:</strong> Forces must navigate electrical storms that disable
-                  technology while racing to extract a component from a deteriorating facility.
+                  <strong>Overview:</strong> Analysis of the recovered Axiom components reveals a
+                  startling truth: the garbled transmissions are fragments of a conscious entity
+                  deliberately fragmented and stored within the Axiom Network. Four resonance
+                  chambers have been discovered on this planet, each containing a critical aspect of
+                  this entity's consciousness: Knowledge (memory), Emotion (feeling), Logic
+                  (reasoning), and Will (purpose). Each faction realizes that whoever shapes this
+                  emerging intelligence could harness unimaginable power.
                 </p>
-
                 <p>
-                  <strong>Primary Objective:</strong> Component Extraction - Gather access codes
-                  from at least two security terminals before entering the chamber, then extract the
-                  component.
+                  <strong>Primary Objective:</strong> Control the resonance chambers to gain
+                  tactical advantages and shape the entity's development. Interface with chambers to
+                  gain deeper influence over specific aspects of the entity's consciousness.
                 </p>
-
                 <h6 class="mb-1">Special Rules:</h6>
                 <ul class="mb-1 ps-3">
                   <li>
-                    <strong>Terminals (9 markers):</strong> Roll D3 when reached:
-                    <ul class="ps-3 mb-0">
-                      <li><strong>1:</strong> Storm Control - Shield terrain, grant cover.</li>
-                      <li><strong>2:</strong> Data Terminal - Gain 1 XP.</li>
-                      <li>
-                        <strong>3:</strong> Security Terminal - Get coded data. Two pieces unlock
-                        chamber.
-                      </li>
-                    </ul>
+                    <strong>Chamber Effects:</strong> Each chamber provides unique benefits when
+                    controlled: Knowledge (Blue): Once per round, see opponent's next activation
+                    before deciding yours; Emotion (Red): Units within 12" may re-roll failed morale
+                    tests; Logic (Green): Once per round, select one unit to shoot/fight with +1 to
+                    hit; Will (Yellow): Units within 12" gain +1 to charge distance
                   </li>
                   <li>
-                    <strong>Electrical Storm:</strong> Roll D6 each round. On 4+, storm active:
-                    <ul class="ps-3 mb-0">
-                      <li>Mechanical/Robot units: -1 to hit</li>
-                      <li>Energy weapons: range halved</li>
-                      <li>Sheltered units ignore penalty</li>
-                      <li>Jump/Flyer/Fast units: dangerous terrain tests</li>
-                    </ul>
+                    <strong>Resonance Shift:</strong> At the beginning of round 3, roll a D6 for
+                    each chamber: 1-2: Psychic backlash! All units within 3" take D3 hits; 3-4: The
+                    chamber's effect is doubled for the controlling player until the end of the
+                    round; 5-6: The chamber teleports to a new location (randomly determined)
+                  </li>
+                  <li>
+                    <strong>Directive Influence:</strong> The entity develops based on which
+                    directive tokens are placed: Benevolent Directive: All units gain the
+                    Regeneration special rule; Military Directive: All ranged attacks gain +3" to
+                    their range; Scientific Directive: All spells and abilities cast on a 4+ instead
+                    of their normal value; Containment Directive: All terrain provides enhanced
+                    cover (+1 to defense rolls)
                   </li>
                 </ul>
-
-                <p><strong>Victory:</strong> Secure component and extract it off the board.</p>
+                <p>
+                  <strong>Victory:</strong> The player with the highest total score after 4 rounds
+                  is the winner. In case of a tie, the player who controlled the most chambers at
+                  the end of the final round wins.
+                </p>
               </div>
-
               <div class="row mb-2">
                 <div class="col-6">
                   <h5>Special Objectives (75pts bonus)</h5>
                   <table
-                    class="table table-sm table-dark table-striped table-hover mb-0 objectives-table"
-                  >
+                    class="table table-sm table-dark table-striped table-hover mb-0 objectives-table">
                     <thead>
                       <tr>
                         <th>D6</th>
@@ -508,99 +549,38 @@
                 <div class="col-6">
                   <h5>Leaderboard</h5>
                   <div class="table-responsive">
-                    <table class="table table-sm table-dark table-striped table-hover mb-0">
+                    <table
+                      class="table table-sm table-dark table-striped table-hover mb-0 leaderboard-table">
                       <thead>
                         <tr>
                           <th>Player</th>
                           <th>W-L</th>
                           <th>VP</th>
-                          <th>UP</th>
-                          <th>CP</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
                           <td>Alex</td>
-                          <td>1-0</td>
+                          <td>1-1</td>
                           <td>2</td>
-                          <td>3</td>
-                          <td>4</td>
-                        </tr>
-                        <tr>
-                          <td>Cody</td>
-                          <td>0-1</td>
-                          <td>0</td>
-                          <td>0</td>
-                          <td>4</td>
-                        </tr>
-                        <tr>
-                          <td>Claire</td>
-                          <td>0-1</td>
-                          <td>0</td>
-                          <td>0</td>
-                          <td>4</td>
                         </tr>
                         <tr>
                           <td>Victoria</td>
-                          <td>0-0</td>
+                          <td>1-1</td>
+                          <td>2</td>
+                        </tr>
+                        <tr>
+                          <td>Cody</td>
+                          <td>0-2</td>
                           <td>0</td>
-                          <td>6</td>
-                          <td>4</td>
+                        </tr>
+                        <tr>
+                          <td>Claire</td>
+                          <td>0-2</td>
+                          <td>0</td>
                         </tr>
                       </tbody>
                     </table>
-                  </div>
-                </div>
-              </div>
-
-              <h5 class="mt-1">Campaign Rules</h5>
-              <div class="row g-1">
-                <div class="col-6 rule-section">
-                  <div class="campaign-rule">
-                    <strong>Random Events:</strong> Roll D6 at start of each round, on 5+ a random
-                    event occurs.
-                  </div>
-                  <div class="campaign-rule">
-                    <strong>Mission Length:</strong> If no winner after round 4, play continues
-                    until there is a winner.
-                  </div>
-                  <div class="campaign-rule">
-                    <strong>Mission Goals:</strong> Winner gets 2 VP and 150pts. Losers get 300pts.
-                  </div>
-                </div>
-                <div class="col-6 rule-section">
-                  <div class="campaign-rule">
-                    <strong>Casualties:</strong> Units fully destroyed/routed are casualties. Roll
-                    D6 for each:
-                    <ul class="ps-3 mb-0 small">
-                      <li><strong>1:</strong> Dead - Remove from army</li>
-                      <li><strong>2-5:</strong> Recovered - No penalties</li>
-                      <li><strong>6:</strong> Natural Talent - +1 XP</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row g-1">
-                <div class="col-6">
-                  <div class="rule-section campaign-rule">
-                    <strong>XP Earned:</strong>
-                    <ul class="ps-3 mb-0 small">
-                      <li>+1 XP: Not a casualty</li>
-                      <li>+1 XP: Killed a unit</li>
-                      <li>+2 XP: Killed a hero unit</li>
-                      <li>+3 XP: Killed a hero and its unit</li>
-                    </ul>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="rule-section campaign-rule">
-                    <strong>Unit Leveling:</strong> At 5 XP, unit costs +25pts and gains a trait
-                    (roll D6).
-                  </div>
-                  <div class="rule-section campaign-rule">
-                    <strong>Hero Leveling:</strong> At 5 XP, hero costs +55pts and gains a skill
-                    set, then roll for trait.
                   </div>
                 </div>
               </div>
