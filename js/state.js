@@ -948,16 +948,3 @@ export function removeRecordedKill(attackingArmyId, attackerUnitId, victimUnitId
 export function clearKilledByStatus(victimArmyId, victimUnitId) {
   return setKilledByStatus(victimArmyId, victimUnitId, null);
 }
-
-// FOR DEBUGGING/TESTING IN CONSOLE ONLY - REMOVE BEFORE COMMIT/PRODUCTION
-window.debugState = {
-  GAME_PHASES,
-  get gameState() {
-    return gameState;
-  }, // Use a getter to get the current value
-  updateGameState,
-  resetGameState,
-  getGameState,
-  setCurrentPhase,
-  addPlayer,
-};
