@@ -12,6 +12,48 @@ let doctrinesData = null;
 let loadedArmiesData = {};
 let getCurrentArmyID = null;
 
+export const GAME_PHASES = {
+  INITIALIZING: "Initializing", // App is loading initial data
+  SETUP: "Setup", // Players are setting up the game, choosing armies, etc.
+  DEPLOYMENT: "DeploymentPhase", // New: Players are deploying their units
+  ROUND_START: "RoundStart", // Beginning of a new round
+  PLAYER_TURN: "PlayerTurn", // A player is taking their turn
+  UNIT_ACTIVATION: "UnitActivation", // A specific unit is being activated
+  COMBAT_RESOLUTION: "CombatResolution", // Combat is being resolved
+  MORALE_CHECK: "MoraleCheck", // Morale checks are being made
+  ROUND_END: "RoundEnd", // End of the current round
+  POST_GAME: "PostGame", // Game has finished, displaying results
+  GAME_OVER: "GameOver", // Game has definitively ended
+};
+
+// Initial Game State: Defines the starting state of the game.
+// This structure supports a dynamic number of players/armies.
+export let gameState = {
+  currentPhase: GAME_PHASES.INITIALIZING, // Will transition to SETUP or DEPLOYMENT after setup/loading
+  currentRound: 0,
+  activePlayerId: null, // ID of the player whose turn it is (e.g., 'player1', 'player2', etc.)
+  players: [], // Array of player objects, e.g., [{ id: 'player1', name: 'Player 1', army: { units: [], ... } }, ...]
+  selectedUnitId: null, // ID of the currently selected unit for actions
+  selectedTargetId: null, // ID of the unit targeted by an action
+  gameMode: "standard", // e.g., 'standard', 'campaign', 'tutorial'
+  mission: null, // Stores details of the current mission
+  gameLog: [], // Array of log entries
+  uiState: {
+    // State related to UI elements, like open modals, selections
+    isUnitOffcanvasOpen: false,
+    // ... other UI flags
+  },
+  settings: {
+    // Game settings, e.g., loaded from config or user preferences
+    theme: "default",
+    soundEnabled: true,
+    // ... other settings
+  },
+  campaignState: null, // To be populated if in campaign mode
+  battleReport: null, // To store details for post-game review
+  // Add other global game state properties as needed
+};
+
 // --- Getters ---
 
 export function getCampaignData() {
@@ -298,6 +340,34 @@ export function getIsGameFinished() {
   return gameState.isGameFinished || false; // Default to false if not set
 }
 
+/**
+ * Central function to update the in-memory gameState.
+ * After updating, it's recommended to call saveGameState (from storage.js)
+ * if the changes need to be persisted.
+ * @param {object} newStateProperties - An object containing the properties of gameState to update.
+ */
+export function updateGameState(newStateProperties) {
+  // A simple merge. For deep merges of nested objects, a more robust utility might be needed.
+  gameState = {
+    ...gameState,
+    ...newStateProperties,
+  };
+  // console.log('In-memory gameState updated:', gameState); // Optional: for debugging
+}
+
+// Function to get a specific part of the game state or the whole state.
+export function getGameState(property = null) {
+  if (property) {
+    if (typeof property === "string" && property.includes(".")) {
+      return property
+        .split(".")
+        .reduce((obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined), gameState);
+    }
+    return gameState[property];
+  }
+  return gameState;
+}
+
 // --- Setters ---
 
 export function setCampaignData(data) {
@@ -416,6 +486,70 @@ export function setLoadedArmyData(armyId, processedData) {
     saveArmyState(armyId, currentState);
   } else {
     console.warn("Attempted to set loaded army data with invalid ID or data.");
+  }
+}
+
+// Function to reset the game state to its initial values for a new game.
+export function resetGameState() {
+  // Retain existing settings, or reload them if necessary
+  const preservedSettings = gameState.settings;
+
+  gameState = {
+    currentPhase: GAME_PHASES.SETUP, // Start in SETUP phase for a new game
+    currentRound: 0,
+    activePlayerId: null,
+    players: [], // Initialize with an empty array; armies will be added during setup
+    selectedUnitId: null,
+    selectedTargetId: null,
+    gameMode: "standard", // Or load from config/user choice
+    mission: null,
+    gameLog: [],
+    uiState: {
+      isUnitOffcanvasOpen: false,
+    },
+    settings: preservedSettings,
+    campaignState: null,
+    battleReport: null,
+  };
+  console.log('Game state reset for a new game. Current phase: SETUP.');
+  // Players will now configure their game (mission, armies).
+  // After configuration, an action (e.g., button click) will transition to DEPLOYMENT.
+}
+
+/**
+ * Initializes or changes the current game phase.
+ * @param {string} phase - The GAME_PHASES key (e.g., 'DEPLOYMENT') or value (e.g., 'DeploymentPhase') to set as the current phase.
+ */
+export function setCurrentPhase(phase) {
+  let targetPhaseValue = null;
+  // Check if phase is a key in GAME_PHASES (e.g., "SETUP")
+  if (GAME_PHASES[phase.toUpperCase()]) {
+    targetPhaseValue = GAME_PHASES[phase.toUpperCase()];
+  }
+  // Check if phase is a value in GAME_PHASES (e.g., "Setup")
+  else if (Object.values(GAME_PHASES).includes(phase)) {
+    targetPhaseValue = phase;
+  }
+
+  if (targetPhaseValue) {
+    updateGameState({ currentPhase: targetPhaseValue });
+    console.log(`Game phase changed to: ${targetPhaseValue}`);
+  } else {
+    console.error(`Invalid phase provided to setCurrentPhase: ${phase}`);
+  }
+}
+
+// Example of how players might be added during a setup phase:
+export function addPlayer(playerData) {
+  // playerData should be an object like:
+  // { id: 'player1', name: 'Player 1 Name', army: { units: [...], faction: '...' } }
+  const existingPlayer = gameState.players.find((p) => p.id === playerData.id);
+  if (!existingPlayer) {
+    const newPlayers = [...gameState.players, playerData];
+    updateGameState({ players: newPlayers });
+  } else {
+    console.warn(`Player with id ${playerData.id} already exists.`);
+    // Optionally, update existing player data here
   }
 }
 
@@ -814,3 +948,16 @@ export function removeRecordedKill(attackingArmyId, attackerUnitId, victimUnitId
 export function clearKilledByStatus(victimArmyId, victimUnitId) {
   return setKilledByStatus(victimArmyId, victimUnitId, null);
 }
+
+// FOR DEBUGGING/TESTING IN CONSOLE ONLY - REMOVE BEFORE COMMIT/PRODUCTION
+window.debugState = {
+  GAME_PHASES,
+  get gameState() {
+    return gameState;
+  }, // Use a getter to get the current value
+  updateGameState,
+  resetGameState,
+  getGameState,
+  setCurrentPhase,
+  addPlayer,
+};
