@@ -596,6 +596,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             models: {},
             killsRecorded: [],
             killedBy: null,
+            deploymentStatus: 'Undeployed',
           };
           unit.models.forEach((model) => {
             existingState.units[unitId].models[model.modelId] = {

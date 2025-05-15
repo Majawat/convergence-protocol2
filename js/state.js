@@ -194,6 +194,7 @@ export function getUnitState(armyId, unitId) {
     killsRecorded: [],
     killedBy: null,
     casualtyOutcome: null,
+    deploymentStatus: 'Undeployed',
   };
 
   // Return existing state or the default structure

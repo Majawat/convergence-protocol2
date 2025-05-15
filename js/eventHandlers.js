@@ -260,6 +260,7 @@ function handleStartRoundClick(armyId) {
         models: {},
         killsRecorded: [],
         killedBy: null,
+        deploymentStatus: 'Undeployed',
       };
       stateChanged = true;
     }

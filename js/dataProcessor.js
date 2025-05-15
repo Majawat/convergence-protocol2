@@ -48,8 +48,10 @@ function _initializeProcessedUnit(rawUnit) {
     canJoinUnitId: null, // Set later if applicable
     isCombined: rawUnit.combined || false,
     joinToUnitId: rawUnit.joinToUnit || null,
+    deploymentStatus: 'Undeployed',
     toughnessUpgrades: [], // Stores upgrades granting Toughness { optionUid, count, toughValue }
     casterLevel: 0, // Initialize caster level
+    // Internal processing flags/values
     _initialBaseDefense: initialBaseDefense, // Store for reference during upgrade processing
     _baseToughValue: baseToughValue, // Store for reference
   };
