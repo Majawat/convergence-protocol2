@@ -172,7 +172,7 @@
       "status": "current",
       "overview": "Following the events of 'The Mind Behind the Signal', the newly influenced AI, currently exhibiting dominant Military directives due to van Louen's Roughnecks previous actions, has initiated 'Axiom Protocol Calibration.' The AI seeks to refine its combat subroutines and assess the capabilities of both the intruding factions and its own reactivated ancient warrior assets. This test will unfold around a critical Axiom Confluence point, drawing factions into a focused engagement while the AI gathers performance data.",
       "objective": {
-        "primary": "The player whose faction has sole control of the central 'Axiom Confluence' objective marker at the end of Round 4 wins the mission. If contested, the player with the most remaining Health (combined Toughness minus Wounds) of all models within 3\" wins. If still tied, the mission is a draw.",
+        "primary": "The player whose faction has sole control of the central 'Axiom Confluence' objective marker at the end of Round 4 wins the mission. If contested, the player with the most remaining Health (combined Toughness minus Wounds) of all models within 3\" wins. If still tied, the mission is a draw between contesting players.",
         "secondary": []
       },
       "deployment": "Players deploy their forces within their chosen table quarter, at least 9\" away from the center of the table.",
