@@ -159,26 +159,55 @@
           "5 bonus points for controlling 3+ chambers at the end of any round"
         ]
       },
-            "battleReportFile": "data/battle-reports/mission3.json",
+      "battleReportFile": "data/battle-reports/mission3.json",
       "winner": "Alex",
       "winningArmy": "van Louen's Roughnecks"
     },
     {
       "number": 4,
-      "title": "Vault of the Lost",
+      "title": "Axiom Protocol Calibration",
       "points": 1600,
-      "datetime": null,
+      "datetime": "2025-05-25T10:00:00-05:00",
       "month": "May",
       "status": "current",
-      "overview": "A subterranean chamber opens, revealing stasis pods containing ancient warriors—some are waking up.",
+      "overview": "Following the events of 'The Mind Behind the Signal', the newly influenced AI, currently exhibiting dominant Military directives due to van Louen's Roughnecks previous actions, has initiated 'Axiom Protocol Calibration.' The AI seeks to refine its combat subroutines and assess the capabilities of both the intruding factions and its own reactivated ancient warrior assets. This test will unfold around a critical Axiom Confluence point, drawing factions into a focused engagement while the AI gathers performance data.",
       "objective": {
-        "primary": "",
+        "primary": "The player whose faction has sole control of the central 'Axiom Confluence' objective marker at the end of Round 4 wins the mission. If contested, the player with the most remaining Health (combined Toughness minus Wounds) of all models within 3\" wins. If still tied, the mission is a draw.",
         "secondary": []
       },
-      "specialRules": [],
+      "deployment": "Players deploy their forces within their chosen table quarter, at least 9\" away from the center of the table.",
+      "terrainSuggestions": [
+        {
+          "name": "Axiom Confluence",
+          "description": "A central objective marker representing the focal point of the AI's calibration tests."
+        },
+        {
+          "name": "Stasis Pods (x4)",
+          "description": "Four distinct terrain pieces, each placed approximately 10\" from the Axiom Confluence in each table quadrant. These serve as deployment points for Ancient Warrior assets. Mark them Pod 1, Pod 2, Pod 3, and Pod 4 in a clockwise order."
+        }
+      ],
+      "specialRules": [
+        {
+          "name": "Axiom Confluence Event",
+          "description": "At the start of each game round (Rounds 1, 2, 3, and 4), after determining initiative but before the first player's turn, an event occurs. The player controlling the Axiom Confluence (or the first player if uncontrolled/contested) rolls a D6:<ul><li><strong>1 (Energy Spike):</strong> The unit controlling the Axiom Confluence (or one random unit within 3\" if contested/uncontrolled) suffers D3 hits (AP0), defendable as normal.</li><li><strong>2-3 (System Nominal):</strong> No immediate effect.</li><li><strong>4-6 (Warrior Asset Deployed):</strong> An Ancient Warrior unit is deployed. The player who rolled for the event then rolls a D6 to determine warrior type based on AI Directives:<ul><li><strong>1-3 (Military Protocol):</strong> Deploy one 'Elite Ancient Warrior' (Stats: Q4+ D4+, Tough(3), Relentless, Melee: A3, AP(1)).</li><li><strong>4 (Benevolent Protocol):</strong> Deploy one 'Damaged Ancient Sentry' (Stats: Q5+ D5+, Tough(1), Slow, Melee: A1, AP(0), all attacks at -1 to hit).</li><li><strong>5-6 (Containment Protocol):</strong> Deploy one 'Guardian Drone' (Stats: Q5+ D4+, Tough(1), Fast, Ranged (12\", A2, AP(0))).</li></ul>The deployed warrior is placed within 1\" of the next available Stasis Pod in sequential order (Pod 1 then 2, etc.). Each pod deploys once. If all pods are used, no more warriors deploy. The warrior activates immediately, controlled by the player to the left of the one who rolled the event. It is Hostile to the unit on the Axiom Confluence (or closest if contested/uncontrolled). After its first activation, it becomes a neutral unit hostile to all, activating at the end of each subsequent round (attacks nearest).</li></ul>"
+        },
+        {
+          "name": "XP Reward",
+          "description": "At the end of each round (Rounds 1, 2, and 3 only), if a player's unit has control of the Axiom Confluence objective gains +D3 XP."
+        }
+      ],
       "victoryConditions": {
-        "primary": "",
-        "rewards": []
+        "primary": "The player whose faction has sole control of the Axiom Confluence at the end of Round 4 is the winner. If contested, the player with the most remaining Health (combined Toughness minus Wounds) of all models within 3\" wins. If still tied, the game is a draw.",
+        "rewards": [
+          {
+            "condition": "Victory",
+            "description": "The winning faction's actions during this 'calibration' will heavily influence the AI's next set of operational parameters and potentially unlock new tactical data or even sway the AI's primary allegiance/focus for future missions. The specific Ancient Warrior types encountered (and defeated or observed) might also yield specific research benefits."
+          },
+          {
+            "condition": "XP Reward (In-Game)",
+            "description": "Units controlling the Axiom Confluence at the end of rounds 1, 2, or 3 (and surviving the Confluence Event) gain +D3 XP, as detailed in Special Rules."
+          }
+        ]
       },
       "battleReportFile": null,
       "winner": null,
