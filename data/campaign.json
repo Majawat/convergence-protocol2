@@ -21,9 +21,9 @@
       "imagePosition": "center 25%",
       "armyURL": "the-ashen-pact",
       "armyForgeID": "vMzljLVC6ZGv",
-      "wins": 0,
+      "wins": 1,
       "losses": 3,
-      "objectives": 1,
+      "objectives": 2,
       "earnedVP": 0,
       "earnedPts": 0
     },
@@ -48,7 +48,7 @@
       "armyURL": "roughnecks",
       "armyForgeID": "Xo19MAwQPGbs",
       "wins": 2,
-      "losses": 1,
+      "losses": 2,
       "objectives": 2,
       "earnedVP": 0,
       "earnedPts": 0
@@ -73,8 +73,8 @@
       "armyURL": "tarvos",
       "armyForgeID": "Un3_pRTu2xBO",
       "wins": 0,
-      "losses": 3,
-      "objectives": 1,
+      "losses": 4,
+      "objectives": 2,
       "earnedVP": 0,
       "earnedPts": 0
     },
@@ -91,7 +91,7 @@
       "armyURL": "galdoo",
       "armyForgeID": "OKOrilTDQs6P",
       "wins": 1,
-      "losses": 2,
+      "losses": 3,
       "objectives": 1,
       "earnedVP": 0,
       "earnedPts": 0
