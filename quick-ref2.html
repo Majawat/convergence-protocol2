@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Convergence Protocol - Quick Reference</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicons/favicon.ico" />
+    <link rel="icon" type="image/png" href="assets/img/favicons/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicons/favicon.svg" />
+    <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="OPR" />
+    <link rel="manifest" href="assets/img/favicons/site.webmanifest" />
+    <style>
+      body {
+        font-size: 14px; /* Base size for TV - further condensed */
+        overflow: hidden;
+        height: 100vh;
+        background-color: #212529;
+        color: #f8f9fa;
+      }
+      .main-container {
+        height: 100vh;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .navbar {
+        padding: 0.1rem 0.8rem;
+        background-color: #343a40 !important;
+        flex-shrink: 0;
+      }
+      .navbar-brand {
+        font-size: 1rem;
+      }
+      .navbar-brand img {
+        height: 20px;
+      }
+      .reference-content-row {
+        flex-grow: 1;
+        overflow: hidden;
+      }
+      .reference-column {
+        height: calc(100vh - 38px); /* Approx Navbar height */
+        overflow-y: auto;
+        padding: 0.3rem;
+      }
+      .reference-column::-webkit-scrollbar {
+        width: 6px;
+      }
+      .reference-column::-webkit-scrollbar-track {
+        background: #2c3034;
+      }
+      .reference-column::-webkit-scrollbar-thumb {
+        background-color: #495057;
+        border-radius: 3px;
+        border: 1px solid #2c3034;
+      }
+      .card {
+        background-color: #2c3034;
+        border: 1px solid #495057;
+        margin-bottom: 0.4rem;
+      }
+      .card-header {
+        background-color: #343a40;
+        border-bottom: 1px solid #495057;
+        padding: 0.25rem 0.4rem;
+      }
+      .card-body {
+        padding: 0.4rem;
+      }
+      h4.card-title-custom {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #17a2b8;
+        border-bottom: 1px solid #343a40;
+        padding-bottom: 0.15rem;
+        margin-bottom: 0.25rem;
+      }
+      h5 {
+        /* For rule-section titles */
+        font-size: 0.85rem;
+        font-weight: bold;
+        margin-bottom: 0.1rem;
+        color: #0dcaf0;
+      }
+      h6 {
+        /* For mission sub-headings */
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-top: 0.2rem;
+        margin-bottom: 0.05rem;
+        color: #66d9ff;
+      }
+      .rule-section {
+        /* For core rules text blocks */
+        font-size: 0.75rem;
+        border-left: 2px solid #0d6efd;
+        padding-left: 5px;
+        margin-bottom: 0.2rem;
+      }
+      .table {
+        font-size: 0.7rem;
+        margin-bottom: 0.2rem;
+      }
+      .table th,
+      .table td {
+        padding: 0.1rem 0.2rem;
+      }
+      .mission-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        padding-top: 0.25rem;
+        margin-top: 0.25rem;
+      }
+      .current-mission-card .card-body {
+        font-size: 0.75rem;
+      }
+      .current-mission-card ul {
+        padding-left: 0.7rem;
+        margin-bottom: 0.15rem;
+      }
+      .current-mission-card li {
+        margin-bottom: 0.05rem;
+        line-height: 1.25;
+      }
+      strong,
+      th {
+        color: #e9ecef;
+      }
+      p {
+        margin-bottom: 0.2rem;
+        color: #ced4da;
+        line-height: 1.25;
+      }
+      .small-text,
+      .current-mission-card .small-text ul li {
+        font-size: 0.65rem;
+        color: #adb5bd;
+        line-height: 1.2;
+      }
+      .objectives-table td,
+      .objectives-table th {
+        padding: 0.05rem 0.2rem;
+        font-size: 0.65rem;
+      }
+      ul li ul li {
+        font-size: 0.9em;
+        line-height: 1.2;
+      }
+      .campaign-rules-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.3rem;
+      }
+      .campaign-rules-grid .rule-section {
+        margin-bottom: 0;
+      }
+
+      /* Warrior Unit Card Styles (adapted from example) */
+      .warrior-unit-card {
+        font-size: 0.7rem; /* Further Compact font for warrior cards */
+        border-width: 1px;
+        margin-bottom: 0.3rem; /* Reduced margin between cards in the row */
+        display: flex; /* Added for flex children */
+        flex-direction: column; /* Stack header and body */
+        height: 100%; /* Make cards in a row same height */
+      }
+      .warrior-unit-card .card-header {
+        padding: 0.2rem 0.3rem;
+        flex-shrink: 0;
+      }
+      .warrior-unit-card .card-title {
+        font-size: 0.8rem;
+        margin-bottom: 0.02rem;
+      }
+      .warrior-unit-card .text-muted {
+        font-size: 0.6rem;
+      }
+      .warrior-unit-card .header-meta-info .info-item {
+        font-size: 0.6rem;
+        margin-right: 2px;
+      }
+      .warrior-unit-card .header-meta-info .info-separator {
+        display: none;
+      }
+
+      .warrior-unit-card .card-body {
+        padding: 0.3rem;
+        flex-grow: 1; /* Allow body to take available space */
+        display: flex;
+        flex-direction: column;
+      }
+      .warrior-unit-card .effective-stats {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 0.2rem;
+        padding: 0.2rem;
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 0.2rem;
+      }
+      .warrior-unit-card .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        font-size: 0.65rem;
+      }
+      .warrior-unit-card .stat-item span {
+        font-weight: bold;
+        font-size: 0.8rem;
+      }
+      .warrior-unit-card .stat-icon {
+        font-size: 0.9rem;
+        margin-bottom: 0.05rem;
+      }
+
+      .warrior-unit-card .details-section {
+        padding-top: 0.15rem;
+        flex-grow: 1; /* Allow details to take space */
+      }
+      .warrior-unit-card .details-section strong.d-block {
+        font-size: 0.7rem;
+        margin-bottom: 0.05rem;
+      }
+      .warrior-unit-card .rules-list-item {
+        display: inline-block;
+        padding: 0.05em 0.25em;
+        margin: 0.05em;
+        background-color: #343a40;
+        border-radius: 0.15rem;
+        font-size: 0.6rem;
+      }
+      .warrior-unit-card .weapon-table th,
+      .warrior-unit-card .weapon-table td {
+        padding: 0.05rem 0.15rem;
+        font-size: 0.6rem;
+      }
+      .warrior-unit-card hr.my-1 {
+        margin-top: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
+      }
+      .spawned-warriors-row .col-md-4 {
+        padding-left: 0.15rem;
+        padding-right: 0.15rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">
+            <img src="assets/img/logo.webp" height="50" alt="Logo" class="me-2" />
+            The Convergence Protocol - Quick Ref
+          </a>
+        </div>
+      </nav>
+
+      <div class="container-fluid reference-content-row">
+        <div class="row h-100 gx-2">
+          <div class="col-lg-5 col-md-6 p-2 reference-column">
+            <div class="card">
+              <div class="card-header">
+                <h4 class="mb-0 card-title-custom">Core Rules (GF v3.4.1 Summary)</h4>
+              </div>
+              <div class="card-body">
+                <div class="rule-section">
+                  <h5>Activation & Movement</h5>
+                  <table class="table table-sm table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>Action</th>
+                        <th>Move</th>
+                        <th>Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Hold</td>
+                        <td>0"</td>
+                        <td>Can shoot</td>
+                      </tr>
+                      <tr>
+                        <td>Advance</td>
+                        <td>6"</td>
+                        <td>Can shoot after move</td>
+                      </tr>
+                      <tr>
+                        <td>Rush</td>
+                        <td>12"</td>
+                        <td>Can't shoot</td>
+                      </tr>
+                      <tr>
+                        <td>Charge</td>
+                        <td>12"</td>
+                        <td>To melee, ignore 1" rule</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p class="small-text">
+                    No 1" proximity (unless charging). No moving through units.
+                  </p>
+                </div>
+                <div class="rule-section">
+                  <h5>Shooting</h5>
+                  <p>
+                    Pick 1 target (or 2 if multi-weapon). Models with LoS & range fire. Sum Attacks.
+                    Quality tests for hits. Target Defense tests to block. Remove casualties.
+                  </p>
+                </div>
+                <div class="rule-section">
+                  <h5>Melee</h5>
+                  <p>
+                    Chargers to base contact. Defenders move 3" to engage. Models in 2" horiz / 4"
+                    vert strike. Defenders strike back. <br /><strong>Fatigue:</strong> After 1st
+                    attack (charge/strike back), hits on 6s in melee this round.
+                  </p>
+                </div>
+                <div class="rule-section">
+                  <h5>Morale</h5>
+                  <p>
+                    If unit &lt;= half models/Tough OR loses melee: Quality test. Fail = Shaken.<br /><strong
+                      >Shaken:</strong
+                    >
+                    Idle, Fatigued, auto-fail Morale, no objectives. Idle to recover.<br /><strong
+                      >Routed (Melee Loss at &lt;= Half Str):</strong
+                    >
+                    Unit removed.
+                  </p>
+                </div>
+                <div class="rule-section">
+                  <h5>Terrain</h5>
+                  <p>
+                    <strong>Cover:</strong> +1 Def vs Shoot. <strong>Difficult:</strong> Max move
+                    6". <strong>Dangerous:</strong> Test on entry/activation; '1' = 1 wound.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-2">
+              <div class="card-header">
+                <h4 class="mb-0 card-title-custom">Campaign Rules Summary (v3.4.0)</h4>
+              </div>
+              <div class="card-body campaign-rules-grid p-2">
+                <div class="rule-section"><strong>Events:</strong> Start of round, D6: 5+</div>
+                <div class="rule-section">
+                  <strong>Goals:</strong> Win: 2VP, 150pts. Lose: 300pts.
+                </div>
+                <div class="rule-section">
+                  <strong>Spec. Obj.:</strong> +75pts.
+                  <ol
+                    class="small-text ps-3 mb-0"
+                    style="list-style-type: decimal; margin-left: -5px">
+                    <li>Mastery</li>
+                    <li>Honor</li>
+                    <li>Casting</li>
+                    <li>Recovery</li>
+                    <li>Rage</li>
+                    <li>Destruction</li>
+                  </ol>
+                </div>
+                <div class="rule-section">
+                  <strong>Casualties:</strong> D6: 1=Dead (H:-5pts,Injury), 2-5=OK, 6=+1XP
+                  (H:+5pts,Talent)
+                </div>
+                <div class="rule-section">
+                  <p><strong>XP:</strong> +1 OK; +1 Kill Unit; +2 Kill Hero; +3 Kill Hero+Unit.</p>
+                </div>
+                <div class="rule-section">
+                  <strong>Level Up (5XP):</strong> Reg +25pts, Hero +55pts. Traits.
+                </div>
+                <div class="rule-section"><strong>Cmd Pts:</strong> D3+3 start.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7 col-md-6 p-2 reference-column">
+            <div class="card current-mission-card">
+              <div class="card-header">
+                <h4 class="mb-0 card-title-custom">
+                  Current Mission: Axiom Protocol Calibration (M4)
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="mission-section pt-0 mt-0">
+                  <h6>Primary Objective:</h6>
+                  <p>
+                    Sole control of central <strong>"Axiom Confluence"</strong> at end of Round 4
+                    wins. Contested: most models win. Tie: draw.
+                  </p>
+                </div>
+                <div class="mission-section">
+                  <h6>Deployment & XP:</h6>
+                  <p><strong>Deployment:</strong>Chosen quarter as ususal, >= 9" from center.</p>
+                  <p>
+                    <strong>XP:</strong> End Rounds 1-3, unit with sole control of Axiom (survived
+                    Event) gets +D3 XP.
+                  </p>
+                </div>
+                <div class="mission-section">
+                  <h6>Special Rule: Axiom Confluence Event</h6>
+                  <p class="small-text mb-1">
+                    Start of Rounds 1-4 (after init, before 1st turn). Controller (or 1st player if
+                    none/contested) rolls D6 for what warrior is deployed
+                  </p>
+                  <ul class="small-text">
+                    <li>
+                      <strong>(Warrior Deployed):</strong> Ancient Warrior unit spawns (see stats in
+                      'Spawned Warrior Units' card below). Roller picks type (D6):
+                      <ul class="ps-3">
+                        <li><strong>1-3:</strong> Elite Construct-Sorcerer</li>
+                        <li><strong>4:</strong> Unstable Automaton</li>
+                        <li><strong>5:</strong> Containment Wardens (x3)</li>
+                        <li><strong>6 (Wild Surge):</strong> Unit takes D3 hits (AP0)</li>
+                      </ul>
+                    </li>
+                    <li class="mt-1">
+                      <strong>Spawn:</strong> Within 1" of next Stasis Pod (1-4, once per pod). If
+                      all used, no more warriors.
+                    </li>
+                    <li>
+                      <strong>Control:</strong> Activates immediately (by player to left of event
+                      roller). Hostile to Axiom controller (or closest). Then neutral, attacks
+                      nearest end of rounds.
+                    </li>
+                  </ul>
+                </div>
+                <div class="mission-section">
+                  <h6>Victory:</h6>
+                  <p class="small-text">Sole control of Axiom Confluence (end of Round 4) wins.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-2">
+              <div class="card-header">
+                <h4 class="mb-0 card-title-custom">Spawned Warrior Units</h4>
+              </div>
+              <div class="card-body p-1">
+                <div class="row gx-1 gy-1 spawned-warriors-row">
+                  <div class="col-md-4">
+                    <div class="card warrior-unit-card shadow-sm border-danger-subtle">
+                      <div class="card-header bg-danger-subtle text-dark">
+                        <div class="unit-card-header-content">
+                          <h5 class="mb-0 card-title-custom">Elite Sorcerer-Construct</h5>
+                          <small class="text-muted d-block"
+                            >Military Protocol Asset - 1 Model</small
+                          >
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <div class="effective-stats">
+                          <div class="stat-item" title="Quality">
+                            <svg
+                              class="stat-icon lg-stat-icon"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 16 16"
+                              fill="currentColor">
+                              <title>Quality</title>
+                              <path
+                                style="fill: #ad3e25"
+                                d="m8 0 1.669.864 1.858.282.842 1.68 1.337 1.32L13.4 6l.306 1.854-1.337 1.32-.842 1.68-1.858.282L8 12l-1.669-.864-1.858-.282-.842-1.68-1.337-1.32L2.6 6l-.306-1.854 1.337-1.32.842-1.68L6.331.864z" />
+                              <path
+                                style="fill: #f9ddb7"
+                                d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
+                            </svg>
+                            <span>3+</span>
+                          </div>
+                          <div class="stat-item" title="Defense">
+                            <i class="bi bi-shield-fill stat-icon" style="color: #005f83"></i
+                            ><span>3+</span>
+                          </div>
+                          <div class="stat-item" title="Toughness">
+                            <i class="bi bi-heart-fill stat-icon" style="color: #c82333"></i
+                            ><span>Tough 3</span>
+                          </div>
+                        </div>
+                        <hr class="my-1" />
+                        <div class="details-section">
+                          <div class="mb-1">
+                            <strong class="d-block">Rules:</strong>
+                            <span class="rules-list-item">Relentless</span>
+                          </div>
+                          <div>
+                            <strong class="d-block">Weapons:</strong>
+                            <table
+                              class="table table-sm table-borderless table-striped mb-0 weapon-table">
+                              <thead>
+                                <tr>
+                                  <th>Weapon</th>
+                                  <th class="text-center">Range</th>
+                                  <th class="text-center">Attacks</th>
+                                  <th class="text-center">AP</th>
+                                  <th class="text-center">Special</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Force Staff</td>
+                                  <td class="text-center">-</td>
+                                  <td class="text-center">A3</td>
+                                  <td class="text-center">2</td>
+                                  <td>-</td>
+                                </tr>
+                                <tr>
+                                  <td>Bolt Pistol</td>
+                                  <td class="text-center">12"</td>
+                                  <td class="text-center">A1</td>
+                                  <td class="text-center">1</td>
+                                  <td>-</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card warrior-unit-card shadow-sm border-warning-subtle">
+                      <div class="card-header bg-warning-subtle text-dark">
+                        <div class="unit-card-header-content">
+                          <h5 class="mb-0 card-title-custom">Unstable Automaton</h5>
+                          <small class="text-muted d-block"
+                            >Benevolent Protocol Asset - 1 Model</small
+                          >
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <div class="effective-stats">
+                          <div class="stat-item" title="Quality">
+                            <svg
+                              class="stat-icon lg-stat-icon"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 16 16"
+                              fill="currentColor">
+                              <title>Quality</title>
+                              <path
+                                style="fill: #ad3e25"
+                                d="m8 0 1.669.864 1.858.282.842 1.68 1.337 1.32L13.4 6l.306 1.854-1.337 1.32-.842 1.68-1.858.282L8 12l-1.669-.864-1.858-.282-.842-1.68-1.337-1.32L2.6 6l-.306-1.854 1.337-1.32.842-1.68L6.331.864z" />
+                              <path
+                                style="fill: #f9ddb7"
+                                d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
+                            </svg>
+                            <span>5+</span>
+                          </div>
+                          <div class="stat-item" title="Defense">
+                            <i class="bi bi-shield-fill stat-icon" style="color: #005f83"></i
+                            ><span>5+</span>
+                          </div>
+                          <div class="stat-item" title="Toughness">
+                            <i class="bi bi-heart-fill stat-icon" style="color: #c82333"></i
+                            ><span>Tough 3</span>
+                          </div>
+                        </div>
+                        <hr class="my-1" />
+                        <div class="details-section">
+                          <div class="mb-1">
+                            <strong class="d-block">Rules:</strong>
+                            <span class="rules-list-item">Slow</span>
+                          </div>
+                          <div>
+                            <strong class="d-block">Weapons:</strong>
+                            <table
+                              class="table table-sm table-borderless table-striped mb-0 weapon-table">
+                              <thead>
+                                <tr>
+                                  <th>Weapon</th>
+                                  <th class="text-center">Range</th>
+                                  <th class="text-center">Attacks</th>
+                                  <th class="text-center">AP</th>
+                                  <th class="text-center">Special</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Claws & Fangs</td>
+                                  <td class="text-center">-</td>
+                                  <td class="text-center">A(D3+2)</td>
+                                  <td class="text-center">1</td>
+                                  <td>-</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card warrior-unit-card shadow-sm border-info-subtle">
+                      <div class="card-header bg-info-subtle text-dark">
+                        <div class="unit-card-header-content">
+                          <h5 class="mb-0 card-title-custom">Containment Wardens</h5>
+                          <small class="text-muted d-block"
+                            >Containment Protocol Asset - 3 Models</small
+                          >
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <div class="effective-stats">
+                          <div class="stat-item" title="Quality">
+                            <svg
+                              class="stat-icon lg-stat-icon"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 16 16"
+                              fill="currentColor">
+                              <title>Quality</title>
+                              <path
+                                style="fill: #ad3e25"
+                                d="m8 0 1.669.864 1.858.282.842 1.68 1.337 1.32L13.4 6l.306 1.854-1.337 1.32-.842 1.68-1.858.282L8 12l-1.669-.864-1.858-.282-.842-1.68-1.337-1.32L2.6 6l-.306-1.854 1.337-1.32.842-1.68L6.331.864z" />
+                              <path
+                                style="fill: #f9ddb7"
+                                d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
+                            </svg>
+                            <span>4+</span>
+                          </div>
+                          <div class="stat-item" title="Defense">
+                            <i class="bi bi-shield-fill stat-icon" style="color: #005f83"></i
+                            ><span>4+</span>
+                          </div>
+                          <div class="stat-item" title="Toughness">
+                            <i class="bi bi-heart-fill stat-icon" style="color: #c82333"></i
+                            ><span>3x Tough 1</span>
+                          </div>
+                        </div>
+                        <hr class="my-1" />
+                        <div class="details-section">
+                          <div class="mb-1">
+                            <strong class="d-block">Rules:</strong>
+                            <span class="rules-list-item">Fast</span>
+                          </div>
+                          <div>
+                            <strong class="d-block">Weapons:</strong>
+                            <table
+                              class="table table-sm table-borderless table-striped mb-0 weapon-table">
+                              <thead>
+                                <tr>
+                                  <th>Weapon</th>
+                                  <th class="text-center">Range</th>
+                                  <th class="text-center">Attacks</th>
+                                  <th class="text-center">AP</th>
+                                  <th class="text-center">Special</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>3x Guardian Carbine</td>
+                                  <td class="text-center">18"</td>
+                                  <td class="text-center">A1</td>
+                                  <td class="text-center">-</td>
+                                  <td>-</td>
+                                </tr>
+                                <tr>
+                                  <td>CCW</td>
+                                  <td class="text-center">-</td>
+                                  <td class="text-center">A1</td>
+                                  <td class="text-center">-</td>
+                                  <td>-</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
