@@ -146,7 +146,7 @@ foreach ($army in $CampaignData.armies) {
             # Use Invoke-RestMethod as it handles JSON directly and often works better with APIs
             $jsonData = Invoke-RestMethod -Uri $downloadUrl -Method Get -ErrorAction Stop
             # Convert the resulting object back to formatted JSON for saving
-            $jsonOutput = $jsonData | ConvertTo-Json -Depth 10 # Use sufficient depth for nested objects
+            $jsonOutput = $jsonData | ConvertTo-Json -Depth 99 # Depth 99 for nested objects
             # Save the formatted JSON content with UTF8 encoding
             Set-Content -Path $outputFilePath -Value $jsonOutput -Encoding UTF8 -ErrorAction Stop
             Write-Host "  Successfully downloaded and saved to '$outputFilePath'." -ForegroundColor Green
