@@ -209,7 +209,7 @@
           }
         ]
       },
-      "battleReportFile": null,
+      "battleReportFile": "data/battle-reports/mission4.json",
       "winner": "Cody",
       "winningArmy": "The Ashen Pact"
     },
@@ -218,7 +218,7 @@
       "title": "The Rift Unleashed",
       "points": 1800,
       "datetime": null,
-      "month": "June",
+      "month": "July",
       "status": "current",
       "overview": "The Nexus' unstable energy fractures reality, opening dimensional rifts that pour forth unknown horrors.",
       "objective": {
@@ -239,7 +239,7 @@
       "title": "The Siege of the Mechanist Core",
       "points": 2000,
       "datetime": null,
-      "month": "July",
+      "month": "August",
       "status": "upcoming",
       "overview": "One faction makes a bold play to seize the Nexus' heart, forcing others into a desperate defense or counterattack.",
       "objective": {
@@ -260,7 +260,7 @@
       "title": "Echoes of the Machine God",
       "points": 2200,
       "datetime": null,
-      "month": "August",
+      "month": "September",
       "status": "upcoming",
       "overview": "An ancient AI, once thought erased, begins whispering to those who listen, offering knowledge—or control.",
       "objective": {
@@ -281,7 +281,7 @@
       "title": "Twilight of the Jackals",
       "points": 2400,
       "datetime": null,
-      "month": "September",
+      "month": "October",
       "status": "upcoming",
       "overview": "The Jackals make their move, claiming key Nexus components for themselves. But their true motives remain uncertain.",
       "objective": {
@@ -302,30 +302,9 @@
       "title": "The Breaking of the Nexus",
       "points": 2600,
       "datetime": null,
-      "month": "October",
-      "status": "upcoming",
-      "overview": "The Nexus reaches a critical threshold. It will either transcend its purpose—or implode catastrophically.",
-      "objective": {
-        "primary": "",
-        "secondary": []
-      },
-      "specialRules": [],
-      "victoryConditions": {
-        "primary": "",
-        "rewards": []
-      },
-      "battleReportFile": null,
-      "winner": null,
-      "winningArmy": null
-    },
-    {
-      "number": 10,
-      "title": "Final Reckoning",
-      "points": 3000,
-      "datetime": null,
       "month": "November",
       "status": "upcoming",
-      "overview": "The war is over, but the victors will shape what remains. Who will hold dominion over the shattered Nexus?",
+      "overview": "The Nexus reaches a critical threshold. It will either transcend its purpose—or implode catastrophically.",
       "objective": {
         "primary": "",
         "secondary": []

@@ -1,0 +1,84 @@
+{
+  "missionId": 4,
+  "title": "Axiom Protocol Calibration",
+  "participants": [
+    {
+      "player": "Cody",
+      "army": "The Ashen Pact",
+      "result": "winner"
+    },
+    {
+      "player": "Alex",
+      "army": "Van Louen's Roughnecks",
+      "result": "participant"
+    },
+    {
+      "player": "Victoria",
+      "army": "Galdoo'o naahlk wildigitkw",
+      "result": "participant"
+    },
+    {
+      "player": "Claire",
+      "army": "Hive Fleet Tarvos",
+      "result": "participant"
+    }
+  ],
+  "rounds": [
+    {
+      "number": 1,
+      "title": "Initial Engagements, AI's First Stirrings, and a Pact Forged",
+      "description": "The battle commenced with an immediate Axiom Confluence Event: a nearby Stasis Pod (Pod 1) violently exploded, though miraculously, no units were caught in the blast. The first Random Event of the game was \"No Mercy,\" granting bonus XP for finishing off Shaken units.\n\nAlex's Roughnecks drew first blood, with the \"One Way Ticket\" transport's gunners expertly sniping and eliminating a Sanctus sniper from an opposing force. Victoria pushed her champion, Alerial, aggressively towards the center. Claire's Hive Fleet Tarvos responded, her Rockgrinder advancing and chipping away at Alerial's health. Cody, ever the diplomat, successfully negotiated a game-long non-hostility pact with both Alex and Victoria. This alliance, remarkably, held firm throughout the entire engagement, proving fruitful for Cody by securing two flanks. However, this immediately put Claire's Hive Fleet Tarvos in a precarious position, effectively facing a three-front war with limited opportunities for Alex and Victoria to directly engage each other. Cody then maneuvered his Stormfang Riders towards the contested Axiom Confluence.\n\nThe round continued with cautious advances. Alex's Command Squad issued boons, while Victoria's Mounted Weavers surged forward with incredible speed. Claire's monstrous Splintermaw and Cody's Dustborn Marauders also moved to secure forward positions, the latter positioning menacingly near Alerial. Alex's second Mechanized Squad took a shot at the Splintermaw but failed to connect.\n\nAs the turn order cycled, Alex's heavy tank, \"Diplomacy,\" unleashed a devastating volley at Claire's Brackenlord, inflicting five significant wounds. Victoria continued her advance, rushing her Eternal Elder and Hunters. Claire's Mindworm attempted to weave psychic energies, while Cody’s Great Beast lumbered onto a hill, buddying up with Alex's \"One Way Ticket.\"\n\nThe latter half of the round saw more tactical repositioning. Alex's APC sought cover. Claire, in a bold move, disembarked her Kellermorph and Neomorphs from a transport near the front lines. Cody's Radiant Guard, emerging from the \"Embers of Judgement\" APC, immediately targeted the Neomorphs with a torrent of flamer fire, incinerating all but the resilient Kellermorph. The round closed with a tense standoff as Cody's Hallowed Breakers unleashed a high-powered fusillade at the lone Kellermorph; despite the overwhelming firepower (4x AP4, Blast 3 shots!), Claire masterfully used three Command Points, and with Victoria declining to use an Underdog Point to aid Cody, the Kellermorph miraculously survived the onslaught. Victoria's War Dancers, empowered by arcane wings, charged Claire's Emerald Tide, slaying three before being wiped out in the brutal counter-attack. Alex's Longshanks walker then avenged the Kellermorph's earlier survival, picking it off at long range. Victoria's Tree Giant further whittled down the Emerald Tide with magic and root whips, and her Giant Beetle added another kill."
+    },
+    {
+      "number": 2,
+      "title": "Ambush and Escalation",
+      "description": "The Axiom Confluence Event at the start of Round 2 saw the AI's Military Protocol assert itself: an Elite Sorcerer-Construct emerged from Stasis Pod 2, its baleful gaze fixing on Cody's Zerek Thal who was attempting to hold the center. The construct unleashed a psychic volley, inflicting 3 AP(2) hits on Zerek Thal. The Random Event was \"Countdown,\" promising bonus XP to any faction that could secure victory by the end of this round.\n\nAmbush Phase: Claire's Invasion Carrier Spore materialized between Alex's and Cody's forces. Alex countered by deploying RT Acreage to reinforce his APC line. Cody, utilizing Zerek Thal's beacon, brought his hero directly onto the Axiom Confluence. Victoria held her forces in reserve. In the second phase of ambushes, Cody brought Seraphine Calder into the central fray.\n\nAlex seized the initiative. His newly arrived RT Acreage hero, RT10, successfully cast Tactical Strike on Claire's Spore Transport. Despite Claire's attempt to use a stratagem to ensure the spell's failure, Alex countered with an Underdog Point, and the spell went off. RT10 then opened fire, destroying the transport. Two Spore units erupted from the wreckage, one model perishing in the crash. Claire's Rockgrinder (\"truck\") then thundered into the center, slamming into Zerek Thal with seven impact hits, inflicting three wounds and forcing the Ashen Pact hero to rout from the objective. Alex's Command Squad swiftly eliminated the newly spawned Spores. Cody's Hallowed Breakers retaliated, landing two wounds on one of Alex's tanks.\n\nThe fighting intensified. Claire's Splintermaw charged Alex's \"Diplomacy\" tank, dealing three damage. Diplomacy returned fire, and after a flurry of Underdog Points from both sides, left the Splintermaw heavily wounded. Cody’s Great Beast then charged and finished off the crippled Splintermaw. Victoria’s forces received a boon as she cast Harmony, granting Flying to her Mounted Reavers and Treemen. Claire’s Brackenlord sought revenge, wounding the Great Beast, which passed its morale check thanks to a Command Point. Cody’s Seraphine and her retinue engaged the newly arrived Elite Sorcerer-Construct in melee. Claire's Mindworm attempted to support her forces with Regeneration spells and took a shot at Cody's Hallowed Breakers, but missed. Cody's Stormfang Riders then charged and destroyed Claire's Rockgrinder. Victoria moved her Mounted Reavers onto the Axiom Confluence, contesting it."
+    },
+    {
+      "number": 3,
+      "title": "Shifting Tides and Contested Ground",
+      "description": "No Random Event occurred. The Axiom Confluence Event saw the AI's Containment Protocol activate: a unit of three Containment Wardens emerged from Stasis Pod 3 and immediately engaged Cody's Dustborn Marauders in melee.\n\nAmbush Phase: Claire's Mossbacks appear on a table edge, while Victoria's Forest Watch materialized in a glade. Cody finally deployed his snipers, taking up an overwatch position on the second floor of the objective building.\n\nClaire's Mindworm continued its psychic assault, damaging Cody's Stormfang Riders and finishing one off with Overwhelm. Cody's Dustborn Marauders turned to face the newly arrived Containment Wardens, gunning down two of the constructs. Claire's Brackenlord once again savaged Cody's Great Beast, bringing it to half health, but the beast held its ground. Alex's Mechanized Squad managed to destroy the last Containment Warden. Cody's Nightfang Sentinels (the snipers) opened fire on Claire's Mossbacks, wounding two. In swift retaliation, the Mossbacks returned fire, wiping out the Nightfang Sentinels.\n\nIn a surprising tactical shift, Victoria moved her Mounted Weavers off the objective, seemingly ceding control to Cody. Alex's \"Diplomacy\" tank then obliterated the exposed Weavers. Claire's Spores advanced on Cody's Thunder Klaws and detonated, but only managed to inflict a single wound. Cody's \"Embers of Judgement\" APC fired on the Brackenlord, reducing it to just two health, but the resilient monster passed its morale check. The round concluded with Claire's Emerald Tide making a desperate rush, charging and destroying Cody's Hallowed Breakers, thereby contesting the Axiom Confluence once more."
+    },
+    {
+      "number": 4,
+      "title": "Premature Conclusion",
+      "description": "The battle was raging intensely, with the Axiom Confluence heavily contested. Unfortunately, due to time constraints, the game had to be called at the beginning of Round 4."
+    }
+  ],
+  "keyMoments": [
+    {
+      "title": "The Triumvirate Pact",
+      "description": "Cody successfully negotiated a game-long non-hostility pact with Alex and Victoria early in Round 1, which held firm and significantly shaped the battle dynamics, isolating Claire."
+    },
+    {
+      "title": "Stasis Pod Malfunction (Explosion)",
+      "description": "The first Axiom Confluence event resulted in a Stasis Pod exploding, though no units were damaged."
+    },
+    {
+      "title": "Kellermorph's Miraculous Survival",
+      "description": "Claire's Kellermorph survived a massive attack from Cody's Hallowed Breakers due to multiple Command Point uses."
+    },
+    {
+      "title": "Spore Transport Ambush & Destruction",
+      "description": "Claire's Invasion Carrier Spore ambushed, only to be immediately destroyed by Alex's RT10, spawning two Spore units."
+    },
+    {
+      "title": "Zerek Thal Routed from Objective",
+      "description": "Cody's Zerek Thal, holding the Axiom Confluence, was charged and routed by Claire's Rockgrinder."
+    },
+    {
+      "title": "Monster Duels",
+      "description": "Multiple engagements occurred between large monstrous creatures, such as Claire's Splintermaw and Brackenlord against Alex's 'Diplomacy' and Cody's Great Beast."
+    },
+    {
+      "title": "Containment Wardens Deployed",
+      "description": "The AI deployed Containment Wardens directly into melee with Cody's Dustborn Marauders."
+    },
+    {
+      "title": "Late Game Objective Contest",
+      "description": "Claire's Emerald Tide made a final charge to destroy Cody's Hallowed Breakers and contest the Axiom Confluence before the game was called."
+    }
+  ],
+  "conclusion": "With the game ending prematurely at the start of Round 4 due to time constraints, and considering the board state where Cody (The Ashen Pact) had a strong presence on and around the Axiom Confluence, Cody was conceded the victory.",
+  "narrativeImpact": "Cody's victory, though decided by time, means The Ashen Pact's actions and data were prioritized by the AI during this calibration phase. The successful and honored non-aggression pact between Cody, Alex, and Victoria demonstrated a capacity for complex multi-faction dynamics, which the AI undoubtedly logged. This will likely influence the AI's development towards more flexible and perhaps even ruthless tactical approaches, reflecting the Pact's diverse nature, and may also make it consider diplomatic variables in its future operations. The AI also gathered significant data on the effectiveness of its Military and Containment warrior assets, particularly in a multi-front engagement scenario for one faction (Claire's Tarvos)."
+}
