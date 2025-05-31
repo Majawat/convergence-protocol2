@@ -1453,12 +1453,12 @@ function _handleOpponentArmyChange(event) {
  * NOTE: Uses .onclick assignment which replaces previous handlers.
  */
 export function updateGameControlButtons() {
-  // Export if called from app.js
   const startRoundBtn = document.getElementById("start-round-button");
   const endGameBtn = document.getElementById("end-game-button");
+  const showResultsBtnContainer = document.getElementById("show-results-button-container");
 
-  if (!startRoundBtn || !endGameBtn) {
-    console.warn("Control buttons not found for update.");
+  if (!startRoundBtn || !endGameBtn || !showResultsBtnContainer) {
+    console.warn("Control buttons or show results container not found for update.");
     return;
   }
 
@@ -1466,38 +1466,59 @@ export function updateGameControlButtons() {
   const round = getCurrentRound();
   const armyId = getCurrentArmyId(); // Get current army ID for context
 
-  if (isFinished) {
-    // --- Game Finished State ---
-    startRoundBtn.innerHTML = `<i class="bi bi-clipboard-data-fill"></i> Show Results`;
-    startRoundBtn.classList.remove("btn-success");
-    startRoundBtn.classList.add("btn-info");
-    startRoundBtn.disabled = !armyId; // Enable if an army is loaded
-    startRoundBtn.onclick = armyId ? _handleShowResultsClick : null; // Attach Show Results handler
+  // Clear previous listeners to avoid stacking
+  startRoundBtn.onclick = null;
+  endGameBtn.onclick = null;
 
-    endGameBtn.classList.add("d-none"); // Hide End Game button
+  // Clear and hide the dedicated show results button initially
+  showResultsBtnContainer.innerHTML = ""; // Clear any existing button
+  showResultsBtnContainer.classList.add("d-none");
+
+  if (isFinished) {
+    console.log("DEBUG: Game is finished. Setting up 'Show Results' button.");
+    // Hide Start/Next Round and End Game buttons
+    startRoundBtn.classList.add("d-none");
+    startRoundBtn.disabled = true;
+    endGameBtn.classList.add("d-none");
     endGameBtn.disabled = true;
-    endGameBtn.onclick = null;
+
+    // Create and show the dedicated "Show Results" button
+    const showResultsButton = document.createElement("button");
+    showResultsButton.id = "show-game-results-button"; // Give it an ID
+    showResultsButton.type = "button";
+    showResultsButton.className = "btn btn-sm btn-info";
+    showResultsButton.innerHTML = `<i class="bi bi-clipboard-data-fill"></i> Show Final Results`;
+    showResultsButton.disabled = !armyId;
+    showResultsButton.title = "View the final game results again";
+    if (armyId) {
+      showResultsButton.onclick = _handleShowResultsClick;
+    }
+
+    showResultsBtnContainer.appendChild(showResultsButton);
+    showResultsBtnContainer.classList.remove("d-none"); // Make the container visible
   } else {
-    // --- Game In Progress State ---
+    console.log("DEBUG: Game is in progress. Setting up Start/End game buttons.");
+    // Game in progress or not started
+    startRoundBtn.classList.remove("d-none");
+    endGameBtn.classList.remove("d-none"); // Might be hidden again below if round 0
+
     startRoundBtn.classList.remove("btn-info");
     startRoundBtn.classList.add("btn-success");
-    startRoundBtn.onclick = armyId ? () => handleStartRoundClick(armyId) : null; // Attach Start/Next Round handler
+    startRoundBtn.onclick = armyId ? () => handleStartRoundClick(armyId) : null;
 
     if (round === 0) {
       startRoundBtn.innerHTML = `<i class="bi bi-play-fill"></i> Start Game`;
-      startRoundBtn.disabled = !armyId; // Disable if no army loaded
-      endGameBtn.classList.add("d-none"); // Hide End Game button
+      startRoundBtn.disabled = !armyId;
+      endGameBtn.classList.add("d-none");
       endGameBtn.disabled = true;
-      endGameBtn.onclick = null;
     } else {
       startRoundBtn.innerHTML = `<i class="bi bi-arrow-repeat"></i> Next Round`;
       startRoundBtn.disabled = !armyId;
-      endGameBtn.classList.remove("d-none"); // Show End Game button
+      endGameBtn.classList.remove("d-none");
       endGameBtn.disabled = !armyId;
-      endGameBtn.onclick = armyId ? _handleEndGameClick : null; // Attach End Game handler
+      endGameBtn.onclick = armyId ? _handleEndGameClick : null;
     }
   }
-  // Update Round display (might be slightly redundant with handleStartRoundClick, but ensures consistency)
   updateRoundUI(round);
   console.log(`DEBUG: Control buttons updated. isFinished=${isFinished}, round=${round}`);
 }

@@ -266,7 +266,6 @@ export function showResultsModal(xpResultsData, armyId) {
       aria-labelledby="${modalId}Label"
       aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        {/* Use modal-xl for more space */}
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="${modalId}Label">End Game Results: ${armyName}</h5>
@@ -657,8 +656,8 @@ export function displayStratagems(armyId, selectedDoctrineId) {
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-warning text-dark rounded-pill stratagem-cost-badge" title="Command Point Cost">${cost} pt${
-        cost !== 1 ? "s" : ""
-      }</span>
+                          cost !== 1 ? "s" : ""
+                        }</span>
                         <button type="button"
                                 class="btn btn-sm btn-success activate-stratagem-btn"
                                 title="Activate ${stratName}"
