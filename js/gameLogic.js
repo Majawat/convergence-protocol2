@@ -79,6 +79,8 @@ export function calculateMovement(unitData, actionType) {
   // Check for Fast/Slow rules
   const hasFast = unitData.rules?.some((rule) => rule.name === "Fast");
   const hasSlow = unitData.rules?.some((rule) => rule.name === "Slow");
+  const hasMusician = unitData.rules?.some((rule) => rule.name === "Musician");
+  const hasAgile = unitData.traits?.some((trait) => trait.name === "Agile");
 
   if (hasFast) {
     return baseMovement === 6 ? baseMovement + 2 : baseMovement + 4; // Advance +2", Rush/Charge +4"
@@ -87,6 +89,7 @@ export function calculateMovement(unitData, actionType) {
   } else {
     return baseMovement;
   }
+
 }
 
 /**
