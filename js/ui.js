@@ -209,7 +209,7 @@ function updateKillCountBadge(armyId, unitId) {
  * @param {string} unitId - The ID of the unit.
  */
 function updateKilledByStatusDisplay(armyId, unitId) {
-  console.log(`DEBUG: updateKilledByStatusDisplay for ${armyId}/${unitId}`);
+  console.debug(`DEBUG: updateKilledByStatusDisplay for ${armyId}/${unitId}`);
   const cardElement = document.getElementById(`unit-card-${unitId}`);
   if (!cardElement) return;
 
@@ -219,7 +219,7 @@ function updateKilledByStatusDisplay(armyId, unitId) {
   if (!statusOverlay) {
     // Optional: You could add logic here to ensure the killedBy state is null
     // if the unit isn't actually destroyed/routed, but for now, just exit.
-    console.log(
+    console.debug(
       `DEBUG: No .status-text-overlay found for ${unitId}, skipping killedBy display update.`
     );
     return;
@@ -237,7 +237,7 @@ function updateKilledByStatusDisplay(armyId, unitId) {
 
     if (!statusDisplayElement) {
       // Element doesn't exist *inside the overlay*, create and append it there
-      console.log(`DEBUG: Creating ${displayClass} element inside overlay for ${unitId}`);
+      console.debug(`DEBUG: Creating ${displayClass} element inside overlay for ${unitId}`);
       statusDisplayElement = document.createElement("div");
       // Add appropriate classes - smaller text, maybe margin top
       statusDisplayElement.className = `${displayClass} text-muted small mt-1`;
@@ -256,7 +256,7 @@ function updateKilledByStatusDisplay(armyId, unitId) {
   } else {
     // No data exists, ensure the element inside the overlay is removed
     if (statusDisplayElement) {
-      console.log(`DEBUG: Removing ${displayClass} element from overlay for ${unitId}`);
+      console.debug(`DEBUG: Removing ${displayClass} element from overlay for ${unitId}`);
       statusDisplayElement.remove(); // Remove the element entirely if it exists but shouldn't
     }
   }

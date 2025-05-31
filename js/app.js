@@ -73,7 +73,7 @@ import { initializeDefinitionsSystem } from "./definitions.js";
 function _initializeWoundHighlights(armyId) {
   const processedArmy = getLoadedArmyData();
   if (!processedArmy || !processedArmy.units) return;
-  console.log(`DEBUG: Initializing wound highlights for army ${armyId}...`);
+  console.debug(`DEBUG: Initializing wound highlights for army ${armyId}...`);
   processedArmy.units
     .filter((u) => !(u.isHero && processedArmy.heroJoinTargets?.[u.selectionId]))
     .forEach((baseUnit) => {
@@ -111,7 +111,7 @@ function _initializeWoundHighlights(armyId) {
  * @param {object} processedArmy - The freshly processed data for the army being loaded.
  */
 function _loadStateAndSyncHp(armyId, processedArmy) {
-  console.log(`DEBUG: Loading state and syncing HP for army ${armyId}...`);
+  console.debug(`DEBUG: Loading state and syncing HP for army ${armyId}...`);
   let armyState = loadArmyState(armyId); // Load existing state
 
   // Calculate CP based on the *currently viewed* processed list
@@ -173,7 +173,7 @@ function _loadStateAndSyncHp(armyId, processedArmy) {
     }
     if (stateNeedsSave) {
       saveArmyState(armyId, armyState);
-      console.log(`DEBUG: Synced CP/MaxCP/ListPoints in state for ${armyId}.`);
+      console.debug(`DEBUG: Synced CP/MaxCP/ListPoints in state for ${armyId}.`);
     }
   }
 
@@ -189,7 +189,7 @@ function _loadStateAndSyncHp(armyId, processedArmy) {
           : model.maxHp;
     });
   });
-  console.log(`DEBUG: Finished loading state and syncing HP for ${armyId}.`);
+  console.debug(`DEBUG: Finished loading state and syncing HP for ${armyId}.`);
 }
 
 // --- Synchronous UP Calculation Function ---
@@ -201,14 +201,14 @@ function _loadStateAndSyncHp(armyId, processedArmy) {
  * @param {Array} campaignArmies - Array of army info from campaign data.
  */
 function calculateAndSetUP(armyIdToLoad, campaignArmies) {
-  console.log(`DEBUG: Calculating UP for ${armyIdToLoad}...`);
+  console.debug(`DEBUG: Calculating UP for ${armyIdToLoad}...`);
   try {
     const allArmyIds = campaignArmies.map((a) => a.armyForgeID).filter(Boolean);
     const armyPointsData = [];
     let dataLoadErrors = 0;
 
     // Load points from each army's localStorage state
-    console.log("DEBUG: Loading points from localStorage for UP calc...");
+    console.debug("DEBUG: Loading points from localStorage for UP calc...");
     allArmyIds.forEach((id) => {
       const state = loadArmyState(id);
       // Check if state and listPoints exist and are valid numbers
@@ -232,7 +232,7 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
     }
 
     if (armyPointsData.length <= 1) {
-      console.log("DEBUG: Not enough valid army point totals found to calculate Underdog Points.");
+      console.debug("DEBUG: Not enough valid army point totals found to calculate Underdog Points.");
       setUnderdogPoints(armyIdToLoad, 0);
       setMaxUnderdogPoints(armyIdToLoad, 0);
       updateUnderdogPointsDisplay(armyIdToLoad, 0, 0);
@@ -253,7 +253,7 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
       calculatedUP = Math.floor(difference / config.UNDERDOG_POINTS_PER_DELTA);
     }
 
-    console.log(
+    console.debug(
       `DEBUG: UP Calculation: Max Points = ${maxPoints}, Current Army Points = ${currentArmyPoints}, Calculated UP = ${calculatedUP}`
     );
 
@@ -262,7 +262,7 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
     setUnderdogPoints(armyIdToLoad, calculatedUP); // Start with max UP
 
     // Update the UI display
-    console.log("DEBUG: Updating UP display with calculated value.");
+    console.debug("DEBUG: Updating UP display with calculated value.");
     updateUnderdogPointsDisplay(armyIdToLoad, calculatedUP, calculatedUP);
   } catch (error) {
     console.error("DEBUG: Error during UP calculation:", error);
@@ -406,7 +406,7 @@ function setupBackToTopButton() {
 
 // --- Main Application Logic ---
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("DEBUG: DOM fully loaded and parsed");
+  console.debug("DEBUG: DOM fully loaded and parsed");
 
   const mainListContainer = document.getElementById("army-units-container");
   const titleH1 = document.getElementById("army-title-h1");
@@ -429,18 +429,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     /* Error handling... */ return;
   }
   const campaignArmies = getCampaignData()?.armies || [];
-  console.log("DEBUG: Campaign data loaded.");
+  console.debug("DEBUG: Campaign data loaded.");
 
   // Step 2: Determine Army to Load
   const urlParams = new URLSearchParams(window.location.search);
   const armyIdToLoad = urlParams.get("armyId");
   setCurrentArmyId(armyIdToLoad); // Set the current army ID in state
   const armyInfo = armyIdToLoad ? campaignArmies.find((a) => a.armyForgeID === armyIdToLoad) : null;
-  console.log(`DEBUG: Army ID to load: ${armyIdToLoad}`);
+  console.debug(`DEBUG: Army ID to load: ${armyIdToLoad}`);
 
   // Step 3: Display Selection or Proceed
   if (!armyIdToLoad || !armyInfo) {
-    console.log("DEBUG: No valid army ID provided, displaying selection.");
+    console.debug("DEBUG: No valid army ID provided, displaying selection.");
     displayArmySelection(campaignArmies, mainListContainer);
     document.title = "Select Army - OPR Army Tracker";
     titleH1.textContent = "Select Army";
@@ -456,7 +456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // --- Code below only runs if a valid armyId IS found ---
-  console.log(`DEBUG: Proceeding to load army: ${armyInfo.armyName} (${armyIdToLoad})`);
+  console.debug(`DEBUG: Proceeding to load army: ${armyInfo.armyName} (${armyIdToLoad})`);
   mainListContainer.innerHTML = `<div class="col-12">
     <div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;">
       <div class="spinner-border text-success" role="status">
@@ -468,15 +468,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     // Step 4: Load Static Game Data
-    console.log("DEBUG: Loading game data (books, rules, doctrines)...");
+    console.debug("DEBUG: Loading game data (books, rules, doctrines)...");
     const gameData = await loadGameData(getCampaignData());
     setArmyBooksData(gameData.armyBooks);
     setCommonRulesData(gameData.commonRules);
     setDoctrinesData(gameData.doctrines);
-    console.log("DEBUG: Game data loaded.");
+    console.debug("DEBUG: Game data loaded.");
 
     // --- Step 5: Fetch and Process ALL Army Lists (Upfront) ---
-    console.log("DEBUG: Fetching and processing ALL campaign armies...");
+    console.debug("DEBUG: Fetching and processing ALL campaign armies...");
     const allArmyIds = campaignArmies.map((a) => a.armyForgeID).filter(Boolean);
     const armyDataPromises = allArmyIds.map((id) => fetchArmyData(id));
     const allRawDataResults = await Promise.allSettled(armyDataPromises);
@@ -491,7 +491,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const processed = processArmyData(result.value);
         if (processed) {
           allProcessedArmies[armyId] = processed;
-          console.log(
+          console.debug(
             `DEBUG: Successfully processed army ${armyId} (Points: ${processed.meta.listPoints})`
           );
         } else {
@@ -503,7 +503,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         fetchProcessErrors++;
       }
     }
-    console.log(
+    console.debug(
       `DEBUG: Finished processing all armies. Success: ${
         Object.keys(allProcessedArmies).length
       }, Errors: ${fetchProcessErrors}`
@@ -528,7 +528,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- END Step 5 ---
 
     // --- Step 5.5: Initialize/Update ALL Army States in localStorage ---
-    console.log("DEBUG: Initializing/Updating states for all processed armies in localStorage...");
+    console.debug("DEBUG: Initializing/Updating states for all processed armies in localStorage...");
     for (const armyId in allProcessedArmies) {
       const processed = allProcessedArmies[armyId];
       const listPoints = processed.meta.listPoints || 0;
@@ -623,10 +623,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (stateChanged) {
         saveArmyState(armyId, existingState);
-        console.log(`DEBUG: Saved initial/updated state for ${armyId}.`);
+        console.debug(`DEBUG: Saved initial/updated state for ${armyId}.`);
       }
     }
-    console.log("DEBUG: Finished initializing/updating all army states.");
+    console.debug("DEBUG: Finished initializing/updating all army states.");
     // --- END Step 5.5 ---
 
     // Set the *currently viewed* processed data in memory
@@ -659,7 +659,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initializeDefinitionsSystem(); // Initialize popovers AFTER units are on page
 
     // Update Round, CP, UP displays
-    console.log("DEBUG: Updating Round, CP, and UP displays...");
+    console.debug("DEBUG: Updating Round, CP, and UP displays...");
     updateRoundUI(getCurrentRound());
     updateCommandPointsDisplay(
       armyIdToLoad,
@@ -668,22 +668,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     // Step 8: Setup Event Listeners
-    console.log("DEBUG: Setting up event listeners...");
+    console.debug("DEBUG: Setting up event listeners...");
     setupEventListeners(armyIdToLoad);
-    console.log("DEBUG: Event listeners set up.");
+    console.debug("DEBUG: Event listeners set up.");
     // Set initial state of control buttons AFTER listeners are set up
     updateGameControlButtons();
-    console.log("DEBUG: Game control buttons updated.");
+    console.debug("DEBUG: Game control buttons updated.");
 
     // Enable Start Round button
     const startRoundButton = document.getElementById("start-round-button");
     if (startRoundButton) {
       startRoundButton.disabled = false;
-      console.log("DEBUG: Start Round button enabled.");
+      console.debug("DEBUG: Start Round button enabled.");
     } else {
       console.warn("DEBUG: Start Round button not found after main load!");
     }
-    console.log("DEBUG: Application initialization complete.");
+    console.debug("DEBUG: Application initialization complete.");
 
   } catch (error) {
     // Catch errors during the main initialization sequencef

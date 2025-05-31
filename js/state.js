@@ -68,7 +68,7 @@ export function getCurrentArmyId() {
  * @param {string | null} armyId The ID of the army being viewed, or null if none.
  */
 export function setCurrentArmyId(armyId) {
-  console.log(`DEBUG: Setting currently viewed army ID to: ${armyId}`);
+  console.debug(`DEBUG: Setting currently viewed army ID to: ${armyId}`);
   getCurrentArmyID = armyId;
 }
 
@@ -366,7 +366,7 @@ export function storeAllProcessedArmies(allProcessedData) {
     loadedArmiesData = {}; // Reset if invalid data given
     return;
   }
-  console.log(
+  console.debug(
     `DEBUG: Storing processed data for ${
       Object.keys(allProcessedData).length
     } armies in runtime state.`

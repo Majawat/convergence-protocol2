@@ -1273,7 +1273,7 @@ function handleInteractionClick(event) {
   const target = event.target;
   // --- Ignore Clicks on Main Control Buttons (handled by direct listeners now) ---
   if (target.closest("#start-round-button") || target.closest("#end-game-button")) {
-    console.log("DEBUG: Click on main control button ignored by delegation.");
+    console.debug("DEBUG: Click on main control button ignored by delegation.");
     return;
   }
   const unitCard = event.target.closest(".unit-card");
@@ -1387,7 +1387,7 @@ function handleInteractionClick(event) {
   if (opponentModal) {
     const confirmOpponentButton = event.target.closest("#confirm-opponent-selection-btn");
     if (confirmOpponentButton) {
-      console.log("DEBUG: Click detected on confirm button via delegation.");
+      console.debug("DEBUG: Click detected on confirm button via delegation.");
       _handleConfirmOpponentSelection(event);
       return;
     }
@@ -1475,7 +1475,7 @@ export function updateGameControlButtons() {
   showResultsBtnContainer.classList.add("d-none");
 
   if (isFinished) {
-    console.log("DEBUG: Game is finished. Setting up 'Show Results' button.");
+    console.debug("DEBUG: Game is finished. Setting up 'Show Results' button.");
     // Hide Start/Next Round and End Game buttons
     startRoundBtn.classList.add("d-none");
     startRoundBtn.disabled = true;
@@ -1497,7 +1497,7 @@ export function updateGameControlButtons() {
     showResultsBtnContainer.appendChild(showResultsButton);
     showResultsBtnContainer.classList.remove("d-none"); // Make the container visible
   } else {
-    console.log("DEBUG: Game is in progress. Setting up Start/End game buttons.");
+    console.debug("DEBUG: Game is in progress. Setting up Start/End game buttons.");
     // Game in progress or not started
     startRoundBtn.classList.remove("d-none");
     endGameBtn.classList.remove("d-none"); // Might be hidden again below if round 0
@@ -1520,7 +1520,7 @@ export function updateGameControlButtons() {
     }
   }
   updateRoundUI(round);
-  console.log(`DEBUG: Control buttons updated. isFinished=${isFinished}, round=${round}`);
+  console.debug(`DEBUG: Control buttons updated. isFinished=${isFinished}, round=${round}`);
 }
 
 /**
@@ -1639,7 +1639,7 @@ function _handleConfirmOpponentSelection(event) {
 
     const victimBaseDetails = getUnitDetails(victimArmyId, victimUnitId);
     const attackerBaseDetails = getUnitDetails(attackerArmyId, attackerUnitId);
-    console.log(
+    console.debug(
       "DEBUG: Victim and attacker details:",
       {
         victimBaseDetails,

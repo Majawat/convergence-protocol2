@@ -97,7 +97,7 @@ export function calculateMovement(unitData, actionType) {
  * casualty outcome, and killedBy info. Returns null if data is missing.
  */
 export function calculateArmyXP(armyId) {
-  console.log(`DEBUG: Calculating XP for army ${armyId}`);
+  console.debug(`DEBUG: Calculating XP for army ${armyId}`);
   const armyState = getArmyState(armyId); // Gets the final state from localStorage
   const allProcessedArmies = getAllLoadedArmyData();
   const processedArmyData = allProcessedArmies ? allProcessedArmies[armyId] : null;
@@ -168,7 +168,7 @@ export function calculateArmyXP(armyId) {
     };
   });
 
-  console.log(`DEBUG: XP Calculation Results for ${armyId}:`, xpResults);
+  console.debug(`DEBUG: XP Calculation Results for ${armyId}:`, xpResults);
   return xpResults;
 }
 
