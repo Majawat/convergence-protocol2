@@ -3,8 +3,6 @@
  * @fileoverview Contains game rule specific logic functions.
  */
 
-// --- IMPORTS ---
-
 import { getArmyState, getUnitState, getAllLoadedArmyData, getArmyNameById } from "./state.js"; // Adjust path if needed
 
 /**
@@ -82,14 +80,29 @@ export function calculateMovement(unitData, actionType) {
   const hasMusician = unitData.rules?.some((rule) => rule.name === "Musician");
   const hasAgile = unitData.traits?.some((trait) => trait.name === "Agile");
 
-  if (hasFast) {
-    return baseMovement === 6 ? baseMovement + 2 : baseMovement + 4; // Advance +2", Rush/Charge +4"
-  } else if (hasSlow) {
-    return baseMovement === 6 ? baseMovement - 2 : baseMovement - 4; // Advance -2", Rush/Charge -4"
-  } else {
-    return baseMovement;
+  if (hasFast || hasAgile) {
+    // Fast/Agile units increase movement
+    console.debug(
+      `DEBUG: Fast/Agile unit detected, increasing movement by 2"/4" for action ${actionType} from ${baseMovement}"`
+    );
+    baseMovement = baseMovement === 6 ? baseMovement + 2 : baseMovement + 4;
+  }
+  if (hasSlow) {
+    // Slow units decrease movement
+    console.debug(
+      `DEBUG: Slow unit detected, decreasing movement by 2"/4" for action ${actionType} from ${baseMovement}"`
+    );
+    baseMovement = baseMovement === 6 ? baseMovement - 2 : baseMovement - 4;
+  }
+  if (hasMusician) {
+    // Musician units add +1" to all movement types
+    console.debug(
+      `DEBUG: Musician rule detected, increasing movement by 1" for action ${actionType} from ${baseMovement}"`
+    );
+    baseMovement = baseMovement + 1;
   }
 
+  return baseMovement;
 }
 
 /**
