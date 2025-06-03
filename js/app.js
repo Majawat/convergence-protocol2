@@ -299,14 +299,14 @@ function populateUnitOffcanvas(processedArmy) {
     .sort((a, b) => (a.customName || a.originalName).localeCompare(b.customName || b.originalName))
     .forEach((unit) => {
       const listItem = document.createElement("li");
-      listItem.dataset.unitId = unit.selectionId; // *** ADDED THIS LINE ***
+      listItem.dataset.unitId = unit.selectionId;
 
       // Get unit state for icons
       const status = getUnitStateValue(armyId, unit.selectionId, "status", "active");
       const isShaken = getUnitStateValue(armyId, unit.selectionId, "shaken", false);
       const isFatigued = getUnitStateValue(armyId, unit.selectionId, "fatigued", false);
       const action = getUnitStateValue(armyId, unit.selectionId, "action", null);
-      const isActivated = action !== null && !isShaken; // Adjusted logic
+      const isActivated = action !== null && !isShaken;
 
       let iconHTML = "";
       let itemClass = "list-group-item list-group-item-action"; // Base class

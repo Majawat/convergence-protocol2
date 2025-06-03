@@ -52,9 +52,7 @@ function saveArmyState(armyId, armyState) {
     console.error(`Error saving state for army ${armyId} to localStorage:`, error);
     // Consider potential quota exceeded errors
     if (error.name === "QuotaExceededError") {
-      // *** CHANGE: Use showToast instead of alert ***
       showToast("Error: Local storage quota exceeded. Cannot save army state.", "Save Error");
-      // *** END CHANGE ***
     }
   }
 }
