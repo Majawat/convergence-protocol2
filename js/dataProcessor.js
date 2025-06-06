@@ -116,7 +116,6 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
         if (!statProcessedRuleInstances.has(instanceKey)) {
           const ratingValue = parseInt(rule.rating, 10);
 
-          // ****** START MODIFIED SECTION ******
           if (rule.name === "Caster" && !isNaN(ratingValue)) {
             // Explicitly handle Caster rule from upgrades
             // This will overwrite the base caster level if an upgrade provides it.
@@ -124,9 +123,7 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
             processedUnit.casterLevel = ratingValue;
             statProcessedRuleInstances.add(instanceKey); // Mark as processed
             console.log(`Applied Caster(${ratingValue}) upgrade to ${processedUnit.selectionId}`);
-          }
-          // ****** END MODIFIED SECTION ******
-          else if (rule.name === "Tough" && !isNaN(ratingValue)) {
+          } else if (rule.name === "Tough" && !isNaN(ratingValue)) {
             optionGrantsTough = true;
             optionToughValue = ratingValue;
             statProcessedRuleInstances.add(instanceKey);

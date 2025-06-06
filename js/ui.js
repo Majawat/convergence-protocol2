@@ -110,7 +110,7 @@ function _createCasterControlsHTML(casterLevel, initialTokens) {
 /**
  * @param {object} baseUnit - Processed unit data for the base unit.
  * @param {object | null} hero - Processed unit data for the joined hero, if any.
- * @param {string} armyId - The ID of the army this unit belongs to. // <-- Add armyId parameter
+ * @param {string} armyId - The ID of the army this unit belongs to.
  * @returns {string} HTML string for the card header.
  * @private
  */
@@ -337,8 +337,8 @@ function createModelsDisplay(unit, hero = null) {
     else modelBaseName = `Model ${modelCounter++}`;
     modelsHtml += `<div
       class="model-display clickable-model ${isRemoved ? "model-removed" : ""} ${
-      isHeroModel ? "hero-model" : ""
-    }"
+        isHeroModel ? "hero-model" : ""
+      }"
       data-model-id="${model.modelId}"
       title="Click to apply wound. ${modelBaseName} - HP: ${model.currentHp}/${model.maxHp}">
       <div class="model-icon ${heroColorClass}">${modelIcon}</div>
@@ -798,6 +798,9 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .filter(Boolean)
         .sort()
         .join(", ");
+      const heroTraits = hero.traits
+        .sort()
+        .join(", ");
       cardBodyContentHTML += `<div class="sub-section"><h6>${
         hero.customName || hero.originalName
       }</h6><div class="sub-stats-row"><div class="stat-item">${UI_ICONS.quality} <span>${
@@ -822,6 +825,9 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
           : ""
       }<div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary allow-definitions">${
         heroRules || "None"
+      }</span></div>
+      <div class="mt-2"><strong class="d-block">Traits:</strong> <span class="text-body-secondary allow-definitions">${
+        heroTraits || "None"
       }</span></div><div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
         hero.loadout,
         _formatRule
@@ -830,6 +836,9 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
       const unitRules = baseUnit.rules
         .map((rule) => _formatRule(rule, false))
         .filter(Boolean)
+        .sort()
+        .join(", ");
+      const unitTraits = baseUnit.traits
         .sort()
         .join(", ");
       cardBodyContentHTML += `<div class="sub-section">
@@ -860,6 +869,10 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
           <strong class="d-block">Rules:</strong>
           <span class="text-body-secondary allow-definitions">${unitRules || "None"}</span>
         </div>
+        <div class="mt-2">
+          <strong class="d-block">Traits:</strong>
+          <span class="text-body-secondary allow-definitions">${unitTraits || "None"}</span>
+        </div>
         <div class="mt-2 flex-grow-1">
           <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
             baseUnit.loadout,
@@ -874,10 +887,20 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .filter(Boolean)
         .sort()
         .join(", ");
+      console.debug(
+        `DEBUG: unitTraits ${baseUnit.traits} for selectionId: ${baseUnit.selectionId} - ${baseUnit.customName || baseUnit.originalName}.`
+      );
+      const unitTraits = baseUnit.traits
+        .sort()
+        .join(", ");
+      console.debug(`Debug: unitTraits after formatting: ${unitTraits}`);
       cardBodyContentHTML += `<div class="normal-unit-details">${
         unitIsCaster ? _createCasterControlsHTML(casterLevel, initialTokens) : ""
       }<div class="mb-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary allow-definitions">${
         unitRules || "None"
+      }</span></div>
+      <div class="mb-2"><strong class="d-block">Traits:</strong> <span class="text-body-secondary allow-definitions">${
+        unitTraits || "None"
       }</span></div><div class="mb-0 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
         baseUnit.loadout,
         _formatRule

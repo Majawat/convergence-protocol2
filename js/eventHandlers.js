@@ -478,7 +478,7 @@ async function _handleResetUnitClick(targetElement, armyId, cardUnitId) {
       "Unit Reset"
     );
     // Update the offcanvas after saving the reset state
-    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+    updateOffcanvasUnitStatus(armyId, cardUnitId);
   }
 
   // Reset the card's overall UI appearance
@@ -742,7 +742,7 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
       updateUnitStateValue(armyId, cardUnitId, "shaken", false);
       updateUnitStateValue(armyId, cardUnitId, "action", null); // Deactivate after recovery
       updateShakenStatusUI(cardUnitId, false); // Update card indicator & buttons
-      updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+      updateOffcanvasUnitStatus(armyId, cardUnitId);
       showToast(`${unitData?.customName || cardUnitId} recovered from Shaken.`, "Recovery");
     } else {
       // Prevent other actions if shaken
@@ -759,14 +759,14 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
     console.log(`Unit ${cardUnitId} deactivated.`);
     updateUnitStateValue(armyId, cardUnitId, "action", newAction);
     updateActionButtonsUI(cardUnitId, newAction, false); // Update card buttons
-    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+    updateOffcanvasUnitStatus(armyId, cardUnitId);
   } else {
     // Activate with the new action
     newAction = actionType;
     console.log(`Unit ${cardUnitId} activated with action: ${newAction}`);
     updateUnitStateValue(armyId, cardUnitId, "action", newAction);
     updateActionButtonsUI(cardUnitId, newAction, false); // Update card buttons
-    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+    updateOffcanvasUnitStatus(armyId, cardUnitId);
 
     // --- Specific Logic for Charge Action ---
     if (newAction === "Charge") {
@@ -781,7 +781,7 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
         updateUnitStateValue(armyId, cardUnitId, "fatigued", true);
         updateUnitStateValue(armyId, cardUnitId, "attackedInMeleeThisRound", true);
         updateFatiguedStatusUI(cardUnitId, true); // Update card indicator
-        updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+        updateOffcanvasUnitStatus(armyId, cardUnitId);
         console.log(`Unit ${cardUnitId} is now Fatigued from charging.`);
       }
 
@@ -825,13 +825,13 @@ async function _handleActionButtonClick(targetElement, armyId, cardUnitId) {
             // Update hero status if joined
             if (heroData) updateUnitStateValue(armyId, heroData.selectionId, "status", "routed");
             collapseRoutedCard(cardUnitId); // Update card UI
-            updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+            updateOffcanvasUnitStatus(armyId, cardUnitId);
             showToast(`${unitData.customName || cardUnitId} Routed!`, "Melee Outcome");
           } else {
             console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
             updateUnitStateValue(armyId, cardUnitId, "shaken", true);
             updateShakenStatusUI(cardUnitId, true); // Update card UI
-            updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+            updateOffcanvasUnitStatus(armyId, cardUnitId);
             showToast(`${unitData.customName || cardUnitId} became Shaken!`, "Melee Outcome");
           }
         } else if (moraleResult === "Pass") {
@@ -888,7 +888,7 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
       updateUnitStateValue(armyId, cardUnitId, "fatigued", true);
       updateUnitStateValue(armyId, cardUnitId, "attackedInMeleeThisRound", true);
       updateFatiguedStatusUI(cardUnitId, true); // Update card indicator
-      updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+      updateOffcanvasUnitStatus(armyId, cardUnitId);
       console.log(`Unit ${cardUnitId} is now Fatigued from striking back.`);
     }
   } else if (didStrikeBack === null) {
@@ -928,7 +928,7 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
         updateUnitStateValue(armyId, cardUnitId, "status", "routed");
         if (heroData) updateUnitStateValue(armyId, heroData.selectionId, "status", "routed"); // Update hero status
         collapseRoutedCard(cardUnitId); // Update card UI
-        updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+        updateOffcanvasUnitStatus(armyId, cardUnitId);
         showToast(`${unitData.customName || cardUnitId} Routed!`, "Melee Outcome");
 
         console.log(`Triggering 'Set Killed By' modal for routed unit ${cardUnitId}`);
@@ -937,7 +937,7 @@ async function _handleResolveMeleeClick(targetElement, armyId, cardUnitId) {
         console.log(`Unit ${cardUnitId} fails morale -> SHAKEN!`);
         updateUnitStateValue(armyId, cardUnitId, "shaken", true);
         updateShakenStatusUI(cardUnitId, true); // Update card UI
-        updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+        updateOffcanvasUnitStatus(armyId, cardUnitId);
         showToast(`${unitData.customName || cardUnitId} became Shaken!`, "Melee Outcome");
       }
     } else if (moraleResult === "Pass") {
@@ -997,7 +997,7 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
     console.log(`Unit ${cardUnitId} fails morale from wounds -> SHAKEN!`);
     updateUnitStateValue(armyId, cardUnitId, "shaken", true);
     updateShakenStatusUI(cardUnitId, true); // Update card UI
-    updateOffcanvasUnitStatus(armyId, cardUnitId); // *** UPDATE OFFCANVAS ***
+    updateOffcanvasUnitStatus(armyId, cardUnitId);
     showToast(`${unitData.customName || cardUnitId} became Shaken!`, "Morale Check");
   } else if (moraleResult === "Pass") {
     console.log(`Unit ${cardUnitId} passed wounds morale test.`);

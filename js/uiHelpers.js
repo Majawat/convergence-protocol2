@@ -881,7 +881,6 @@ export function populateDoctrineSelector(armyId) {
 }
 
 /**
- * *** NEW FUNCTION ***
  * Updates the status icon and styling for a specific unit in the off-canvas list.
  * @param {string} armyId - The ID of the current army.
  * @param {string} unitId - The selectionId of the unit to update.
