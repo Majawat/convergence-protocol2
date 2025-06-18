@@ -84,21 +84,23 @@ export function displayArmySelection(armies, container) {
   listGroup.className = "list-group";
 
   if (armies && armies.length > 0) {
-    armies.forEach((army) => {
-      if (!army.armyForgeID) return; // Skip if armyForgeID is missing
-      const link = document.createElement("a");
-      link.href = `army.html?armyId=${army.armyForgeID}`; // Link to same page with parameter
-      link.className =
-        "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
-      link.innerHTML = `
+    armies
+      .filter((army) => !army.hidden)
+      .forEach((army) => {
+        if (!army.armyForgeID) return; // Skip if armyForgeID is missing
+        const link = document.createElement("a");
+        link.href = `army.html?armyId=${army.armyForgeID}`; // Link to same page with parameter
+        link.className =
+          "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+        link.innerHTML = `
                 <span>
                     <strong class="me-2">${army.armyName || "Unnamed Army"}</strong>
                     <small class="text-muted">(${army.player || "Unknown Player"})</small>
                 </span>
                 ${UI_ICONS.selectItem}
             `;
-      listGroup.appendChild(link);
-    });
+        listGroup.appendChild(link);
+      });
   } else {
     listGroup.innerHTML = '<p class="text-center text-muted">No armies found in campaign data.</p>';
   }

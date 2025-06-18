@@ -124,15 +124,21 @@ function _createUnitCardHeaderHTML(baseUnit, hero, armyId) {
   const totalModels = baseUnit.size + (hero ? hero.size : 0);
   const totalPoints = baseUnit.cost + (hero ? hero.cost : 0);
 
-  let metaHtml = `<span class="info-item">${totalModels} Models</span><span class="info-separator">|</span><span class="info-item">${totalPoints} pts</span>`;
+  let metaHtml = `<span class="info-item">${totalModels} Models</span
+    ><span class="info-separator">|</span><span class="info-item">${totalPoints} pts</span>`;
   if (!hero) {
     const unitBase = baseUnit.bases?.round || baseUnit.bases?.square;
-    metaHtml += `<span class="info-separator">|</span><span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
-      baseUnit.xp || 0
-    }</span></span>`;
-    metaHtml += `<span class="info-separator">|</span><span class="info-item base-info">${
-      UI_ICONS.base
-    } ${unitBase && unitBase.toLowerCase() !== "none" ? unitBase + "mm" : "N/A"}</span>`;
+    metaHtml += `<span class="info-separator">|</span
+      ><span class="info-item xp-badge"
+        ><span class="badge bg-secondary text-dark-emphasis rounded-pill"
+          >XP: ${baseUnit.xp || 0}</span
+        ></span
+      >`;
+    metaHtml += `<span class="info-separator">|</span
+      ><span class="info-item base-info"
+        >${UI_ICONS.base}
+        ${unitBase && unitBase.toLowerCase() !== "none" ? unitBase + "mm" : "N/A"}</span
+      >`;
   }
   const statusIndicatorHTML = `<span
     class="header-status-indicators ms-2 small"
@@ -799,57 +805,68 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .sort()
         .join(", ");
       const heroTraits = hero.traits.sort().join(", ");
-      const heroSkillSets = hero.skillSets.sort().join(", ");
-      const heroSkillTraits = hero.skillTraits.sort().join(", ");
+      const heroSkills = hero.skills.sort().join(", ");
       const heroInjuries = hero.injuries.sort().join(", ");
       const heroTalents = hero.talents.sort().join(", ");
-      cardBodyContentHTML += `<div class="sub-section"><h6>${
-        hero.customName || hero.originalName
-      }</h6><div class="sub-stats-row"><div class="stat-item">${UI_ICONS.quality} <span>${
-        hero.quality
-      }+</span></div><div class="stat-item">${UI_ICONS.defense} <span>${
-        hero.defense
-      }+</span></div>${
-        hero.rules.find((r) => r.name === "Tough")
-          ? `<div class="stat-item">${UI_ICONS.tough} <span>${
-              hero.rules.find((r) => r.name === "Tough")?.rating ?? "?"
-            }</span></div>`
-          : ""
-      }</div><div class="info-line small text-muted"><span class="info-item">${
-        hero.cost
-      } pts</span><span class="info-item xp-badge"><span class="badge bg-secondary text-dark-emphasis rounded-pill">XP: ${
-        hero.xp || 0
-      }</span></span><span class="info-item base-info">${UI_ICONS.base} ${
-        heroBase ? heroBase + "mm" : "N/A"
-      }</span></div>${
-        unitIsCaster && actualCasterUnitId === hero.selectionId
-          ? _createCasterControlsHTML(casterLevel, initialTokens)
-          : ""
-      }<div class="mt-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary allow-definitions">${
-        heroRules || "None"
-      }</span></div>
-      <div class="mt-2"><strong class="d-block">Traits:</strong> <span class="text-body-secondary allow-definitions">${
-        heroTraits || "None"
-      }</span></div>${
-        heroSkillSets
-          ? `<div class="mt-2"><strong class="d-block">Skill Sets:</strong> <span class="text-body-secondary allow-definitions">${heroSkillSets}</span></div>`
-          : ""
-      }${
-        heroSkillTraits
-          ? `<div class="mt-2"><strong class="d-block">Skill Traits:</strong> <span class="text-body-secondary allow-definitions">${heroSkillTraits}</span></div>`
-          : ""
-      }${
-        heroInjuries
-          ? `<div class="mt-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${heroInjuries}</span></div>`
-          : ""
-      }${
-        heroTalents
-          ? `<div class="mt-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${heroTalents}</span></div>`
-          : ""
-      }<div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
-        hero.loadout,
-        _formatRule
-      )}</div></div>`;
+      cardBodyContentHTML += `<div class="sub-section">
+        <h6>${hero.customName || hero.originalName}</h6>
+        <div class="sub-stats-row">
+          <div class="stat-item">${UI_ICONS.quality} <span>${hero.quality}+</span></div>
+          <div class="stat-item">${UI_ICONS.defense} <span>${hero.defense}+</span></div>
+          ${
+            hero.rules.find((r) => r.name === "Tough")
+              ? `<div class="stat-item">${UI_ICONS.tough} <span>${
+                  hero.rules.find((r) => r.name === "Tough")?.rating ?? "?"
+                }</span></div>`
+              : ""
+          }
+        </div>
+        <div class="info-line small text-muted">
+          <span class="info-item">${hero.cost} pts</span
+          ><span class="info-item xp-badge"
+            ><span class="badge bg-secondary text-dark-emphasis rounded-pill"
+              >XP: ${hero.xp || 0}</span
+            ></span
+          ><span class="info-item base-info"
+            >${UI_ICONS.base} ${heroBase ? heroBase + "mm" : "N/A"}</span
+          >
+        </div>
+        ${
+          unitIsCaster && actualCasterUnitId === hero.selectionId
+            ? _createCasterControlsHTML(casterLevel, initialTokens)
+            : ""
+        }
+        <div class="mt-2">
+          <strong class="d-block">Rules:</strong>
+          <span class="text-body-secondary allow-definitions">${heroRules || "None"}</span>
+        </div>
+        ${
+          heroTraits
+            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${heroTraits}</span></div>`
+            : ""
+        }
+        ${
+          heroSkills
+            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${heroSkills}</span></div>`
+            : ""
+        }
+        ${
+          heroInjuries
+            ? `<div class="mt-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${heroInjuries}</span></div>`
+            : ""
+        }
+        ${
+          heroTalents
+            ? `<div class="mt-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${heroTalents}</span></div>`
+            : ""
+        }
+        <div class="mt-2 flex-grow-1">
+          <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
+            hero.loadout,
+            _formatRule
+          )}
+        </div>
+      </div>`;
       const unitBase = baseUnit.bases?.round || baseUnit.bases?.square;
       const unitRules = baseUnit.rules
         .map((rule) => _formatRule(rule, false))
@@ -857,8 +874,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .sort()
         .join(", ");
       const unitTraits = baseUnit.traits.sort().join(", ");
-      const unitSkillSets = baseUnit.skillSets.sort().join(", ");
-      const unitSkillTraits = baseUnit.skillTraits.sort().join(", ");
+      const unitSkills = baseUnit.skills.sort().join(", ");
       const unitInjuries = baseUnit.injuries.sort().join(", ");
       const unitTalents = baseUnit.talents.sort().join(", ");
       cardBodyContentHTML += `<div class="sub-section">
@@ -889,22 +905,22 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
           <strong class="d-block">Rules:</strong>
           <span class="text-body-secondary allow-definitions">${unitRules || "None"}</span>
         </div>
-        <div class="mt-2">
-          <strong class="d-block">Traits:</strong>
-          <span class="text-body-secondary allow-definitions">${unitTraits || "None"}</span>
-        </div>${
-          unitSkillSets
-            ? `<div class="mt-2"><strong class="d-block">Skill Sets:</strong> <span class="text-body-secondary allow-definitions">${unitSkillSets}</span></div>`
+        ${
+          unitTraits
+            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${unitTraits}</span></div>`
             : ""
-        }${
-          unitSkillTraits
-            ? `<div class="mt-2"><strong class="d-block">Skill Traits:</strong> <span class="text-body-secondary allow-definitions">${unitSkillTraits}</span></div>`
+        }
+        ${
+          unitSkills
+            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${unitSkills}</span></div>`
             : ""
-        }${
+        }
+        ${
           unitInjuries
             ? `<div class="mt-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${unitInjuries}</span></div>`
             : ""
-        }${
+        }
+        ${
           unitTalents
             ? `<div class="mt-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${unitTalents}</span></div>`
             : ""
@@ -924,41 +940,46 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .sort()
         .join(", ");
       const unitTraits = baseUnit.traits.sort().join(", ");
-      const unitSkillSets = baseUnit.skillSets.sort().join(", ");
-      const unitSkillTraits = baseUnit.skillTraits.sort().join(", ");
+      const unitSkills = baseUnit.skills.sort().join(", ");
       const unitInjuries = baseUnit.injuries.sort().join(", ");
       const unitTalents = baseUnit.talents.sort().join(", ");
       console.debug(
         `DEBUG: unitTraits ${baseUnit.traits} for selectionId: ${baseUnit.selectionId} - ${baseUnit.customName || baseUnit.originalName}.`
       );
       console.debug(`Debug: unitTraits after formatting: ${unitTraits}`);
-      cardBodyContentHTML += `<div class="normal-unit-details">${
-        unitIsCaster ? _createCasterControlsHTML(casterLevel, initialTokens) : ""
-      }<div class="mb-2"><strong class="d-block">Rules:</strong> <span class="text-body-secondary allow-definitions">${
-        unitRules || "None"
-      }</span></div>
-      <div class="mb-2"><strong class="d-block">Traits:</strong> <span class="text-body-secondary allow-definitions">${
-        unitTraits || "None"
-      }</span></div>${
-        unitSkillSets
-          ? `<div class="mb-2"><strong class="d-block">Skill Sets:</strong> <span class="text-body-secondary allow-definitions">${unitSkillSets}</span></div>`
-          : ""
-      }${
-        unitSkillTraits
-          ? `<div class="mb-2"><strong class="d-block">Skill Traits:</strong> <span class="text-body-secondary allow-definitions">${unitSkillTraits}</span></div>`
-          : ""
-      }${
-        unitInjuries
-          ? `<div class="mb-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${unitInjuries}</span></div>`
-          : ""
-      }${
-        unitTalents
-          ? `<div class="mb-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${unitTalents}</span></div>`
-          : ""
-      }<div class="mb-0 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
-        baseUnit.loadout,
-        _formatRule
-      )}</div></div>`;
+      cardBodyContentHTML += `<div class="normal-unit-details">
+        ${unitIsCaster ? _createCasterControlsHTML(casterLevel, initialTokens) : ""}
+        <div class="mb-2">
+          <strong class="d-block">Rules:</strong>
+          <span class="text-body-secondary allow-definitions">${unitRules || "None"}</span>
+        </div>
+        ${
+          unitTraits
+            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${unitTraits}</span></div>`
+            : ""
+        }
+        ${
+          unitSkills
+            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${unitSkills}</span></div>`
+            : ""
+        }
+        ${
+          unitInjuries
+            ? `<div class="mt-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${unitInjuries}</span></div>`
+            : ""
+        }
+        ${
+          unitTalents
+            ? `<div class="mt-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${unitTalents}</span></div>`
+            : ""
+        }
+        <div class="mb-0 flex-grow-1">
+          <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
+            baseUnit.loadout,
+            _formatRule
+          )}
+        </div>
+      </div>`;
     }
     cardBodyContentHTML += `</div>`;
     const cardBody = document.createElement("div");

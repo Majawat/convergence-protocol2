@@ -95,6 +95,27 @@
       "objectives": 1,
       "earnedVP": 0,
       "earnedPts": 0
+    },
+    {
+      "player": "Dev Testerson",
+      "armyName": "BattleApp Test Army",
+      "armyForgeID": "qggNHSCfmijV",
+      "faction": [
+        { "id": "BKi_hJaJflN8ZorH", "gameSystem": "2", "name": "Jackals" },
+        {
+          "id": "7oi8zeiqfamiur21",
+          "gameSystem": "2",
+          "name": "Blessed Sisters"
+        },
+        {
+          "id": "z65fgu0l29i4lnlu",
+          "gameSystem": "2",
+          "name": "Human Defense Force",
+          "alias": "832nd Mechanized Bullshit Regiment"
+        },
+        { "id": "qtuyeoRfXKlNflK0", "gameSystem": "4", "name": "Wood Elves" }
+      ],
+      "hidden": true
     }
   ]
 }

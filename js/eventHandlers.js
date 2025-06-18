@@ -1395,22 +1395,6 @@ function handleInteractionClick(event) {
 }
 
 /**
- * Updates the screen diagnostic display element with current window dimensions and theme.
- */
-function updateScreenDiagnostics() {
-  const widthDisplay = document.getElementById("screenWidthDisplay");
-  const heightDisplay = document.getElementById("screenHeightDisplay");
-  const themeDisplay = document.getElementById("screenThemeDisplay");
-
-  if (widthDisplay) widthDisplay.textContent = `Width: ${window.innerWidth}px`;
-  if (heightDisplay) heightDisplay.textContent = `Height: ${window.innerHeight}px`;
-  if (themeDisplay) {
-    const currentTheme = document.documentElement.getAttribute("data-bs-theme") || "auto";
-    themeDisplay.textContent = `Theme: ${currentTheme}`;
-  }
-}
-
-/**
  * Handles clicks on the "Record Kill" button on a unit card.
  * @param {Event} event - The click event object.
  */

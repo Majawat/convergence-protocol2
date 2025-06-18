@@ -80,24 +80,31 @@ export function calculateMovement(unitData, actionType) {
   const hasMusician = unitData.rules?.some((rule) => rule.name === "Musician");
   const hasAgile = unitData.traits?.some((trait) => trait.name === "Agile");
 
-  if (hasFast || hasAgile) {
-    // Fast/Agile units increase movement
+  if (hasFast) {
+    // Fast units: +2" Advance / +4" Rush/Charge
     console.debug(
-      `DEBUG: Fast/Agile unit detected, increasing movement by 2"/4" for action ${actionType} from ${baseMovement}"`
+      `DEBUG: Fast unit detected, increasing movement by 2"/4" for action ${actionType}`
     );
     baseMovement = baseMovement === 6 ? baseMovement + 2 : baseMovement + 4;
+  }
+  if (hasAgile) {
+    // Agile units: +1" Advance / +2" Rush/Charge
+    console.debug(
+      `DEBUG: Agile unit detected, increasing movement by 1"/2" for action ${actionType}`
+    );
+    baseMovement = baseMovement === 6 ? baseMovement + 1 : baseMovement + 2;
   }
   if (hasSlow) {
     // Slow units decrease movement
     console.debug(
-      `DEBUG: Slow unit detected, decreasing movement by 2"/4" for action ${actionType} from ${baseMovement}"`
+      `DEBUG: Slow unit detected, decreasing movement by 2"/4" for action ${actionType}`
     );
     baseMovement = baseMovement === 6 ? baseMovement - 2 : baseMovement - 4;
   }
   if (hasMusician) {
     // Musician units add +1" to all movement types
     console.debug(
-      `DEBUG: Musician rule detected, increasing movement by 1" for action ${actionType} from ${baseMovement}"`
+      `DEBUG: Musician rule detected, increasing movement by 1" for action ${actionType}`
     );
     baseMovement = baseMovement + 1;
   }
@@ -202,4 +209,85 @@ export function checkHalfStrength(unitData) {
   const currentModels = unitData.models.filter((m) => m.currentHp > 0).length;
   // TODO: Handle Tough(X) models correctly if needed for single-model units
   return currentModels * 2 <= startingSize;
+}
+
+/**
+ * Calculates combat bonuses from traits, skills, injuries, and talents
+ * @param {object} unitData - The unit data
+ * @param {string} bonusType - 'defense', 'meleeHit', 'shootingHit', 'morale'
+ * @returns {number} Total bonus modifier
+ */
+export function calculateCombatBonus(unitData, bonusType) {
+  if (!unitData) return 0;
+
+  let bonus = 0;
+  const traits = unitData.traits || [];
+  const skills = unitData.skills || [];
+  const injuries = unitData.injuries || [];
+  const talents = unitData.talents || [];
+
+  // Trait bonuses
+  traits.forEach((trait) => {
+    switch (trait.name) {
+      case "Resilient":
+        if (bonusType === "defense") bonus += 1;
+        break;
+      case "Specialist":
+        // Note: Specialist specifies melee OR shooting, would need to track which
+        if (bonusType === "meleeHit" || bonusType === "shootingHit") bonus += 1;
+        break;
+      case "Headstrong":
+        if (bonusType === "morale") bonus += 1;
+        break;
+    }
+  });
+
+  // Skill bonuses (for heroes)
+  skills.forEach((skill) => {
+    switch (skill.name) {
+      case "Leader":
+        if (bonusType === "morale") bonus += 1; // Affects friendly units within 6"
+        break;
+      case "Instigator":
+        if (bonusType === "meleeHit") bonus += 1; // Affects friendly units within 6"
+        break;
+      case "Tactician":
+        if (bonusType === "shootingHit") bonus += 1; // Affects friendly units within 6"
+        break;
+    }
+  });
+
+  // Add injury/talent logic as needed
+
+  return bonus;
+}
+
+/**
+ * Calculates total Impact value including upgrades
+ * @param {object} unitData - The unit data
+ * @returns {number} Total Impact value
+ */
+export function calculateTotalImpact(unitData) {
+  if (!unitData) return 0;
+
+  let totalImpact = 0;
+
+  // Check for base Impact rule
+  const impactRule = unitData.rules?.find((rule) => rule.name === "Impact");
+  if (impactRule && impactRule.rating) {
+    totalImpact += impactRule.rating;
+  }
+
+  // Check for Impact from upgrades/weapons
+  if (unitData.loadout) {
+    unitData.loadout.forEach((weapon) => {
+      weapon.rules?.forEach((rule) => {
+        if (rule.name === "Impact" && rule.rating) {
+          totalImpact += rule.rating;
+        }
+      });
+    });
+  }
+
+  return totalImpact;
 }
