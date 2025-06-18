@@ -1023,9 +1023,9 @@ async function _handleResetArmyDataClick() {
 
   // Confirmation Dialog using interactive toast
   const confirmed = await showInteractiveToast(
-    `WARNING! This will permanently delete all saved progress (HP, status, CP, UP, doctrine
-    selection) for "${armyName}" and reload its data from scratch. Are you absolutely sure you want
-    to proceed?`,
+    `WARNING!
+    This will permanently delete all saved progress (HP, status, CP, UP, doctrine selection) for ${armyName} and reload its data from scratch.
+    Are you absolutely sure you want to proceed?`,
     "Confirm Current Army Reset",
     [
       { text: "Reset Current Army", value: "reset", style: "danger" },
@@ -1065,9 +1065,11 @@ async function _handleResetAllDataClick() {
 
   // Confirmation Dialog using interactive toast
   const confirmed = await showInteractiveToast(
-    `EXTREME WARNING! This will permanently delete ALL saved progress for ALL armies, campaign
-    data, cached rules, theme settings, etc. Everything will be wiped from browser storage. This
-    action cannot be undone. Are you absolutely, positively sure?`,
+    `EXTREME WARNING!
+    This will permanently delete ALL saved progress for ALL armies, campaign data, cached rules, theme settings, etc. Everything will be wiped from browser storage.
+    This action cannot be undone.
+    
+    Are you absolutely, positively sure?`,
     "Confirm FULL Data Reset",
     [
       { text: "DELETE EVERYTHING", value: "reset_all", style: "danger" },
@@ -1269,7 +1271,7 @@ async function _handleMarkRemovedClick(event) {
  * Delegates actions based on the clicked element's closest relevant parent or class.
  * @param {Event} event - The click event object.
  */
-function handleInteractionClick(event) {
+export function handleInteractionClick(event) {
   const target = event.target;
   // --- Ignore Clicks on Main Control Buttons (handled by direct listeners now) ---
   if (target.closest("#start-round-button") || target.closest("#end-game-button")) {

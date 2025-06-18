@@ -60,7 +60,7 @@ import {
   showToast,
   handleFocusReturn,
 } from "./uiHelpers.js";
-import { setupEventListeners, updateGameControlButtons } from "./eventHandlers.js";
+import { setupEventListeners, updateGameControlButtons, handleInteractionClick } from "./eventHandlers.js";
 import { findTargetModelForWound } from "./gameLogic.js";
 import { initializeDefinitionsSystem } from "./definitions.js";
 
@@ -416,8 +416,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const mainListContainer = document.getElementById("army-units-container");
   const titleH1 = document.getElementById("army-title-h1");
   if (!mainListContainer || !titleH1) {
-    /* Error handling... */ return;
+    return;
   }
+
+  // Ensure reset buttons always work, even if army loading fails
+  document.body.addEventListener("click", handleInteractionClick);
 
   mainListContainer.innerHTML = `<div class="col-12">
     <div class="d-flex justify-content-center align-items-center mt-5" style="min-height: 200px;">
@@ -431,7 +434,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const campaignDataResult = await loadCampaignData();
   setCampaignData(campaignDataResult);
   if (!getCampaignData()) {
-    /* Error handling... */ return;
+    return;
   }
   const campaignArmies = getCampaignData()?.armies || [];
   console.debug("DEBUG: Campaign data loaded.");
@@ -482,7 +485,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- Step 5: Fetch and Process ALL Army Lists (Upfront) ---
     console.debug("DEBUG: Fetching and processing ALL campaign armies...");
-    const allArmyIds = campaignArmies.filter(army => !army.hidden).map((a) => a.armyForgeID).filter(Boolean);
+    const allArmyIds = campaignArmies
+      .filter((army) => !army.hidden)
+      .map((a) => a.armyForgeID)
+      .filter(Boolean);
     const armyDataPromises = allArmyIds.map((id) => fetchArmyData(id));
     const allRawDataResults = await Promise.allSettled(armyDataPromises);
 
