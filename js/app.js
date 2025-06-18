@@ -203,7 +203,10 @@ function _loadStateAndSyncHp(armyId, processedArmy) {
 function calculateAndSetUP(armyIdToLoad, campaignArmies) {
   console.debug(`DEBUG: Calculating UP for ${armyIdToLoad}...`);
   try {
-    const allArmyIds = campaignArmies.map((a) => a.armyForgeID).filter(Boolean);
+    const allArmyIds = campaignArmies
+      .filter((army) => !army.hidden)
+      .map((a) => a.armyForgeID)
+      .filter(Boolean);
     const armyPointsData = [];
     let dataLoadErrors = 0;
 
@@ -232,7 +235,9 @@ function calculateAndSetUP(armyIdToLoad, campaignArmies) {
     }
 
     if (armyPointsData.length <= 1) {
-      console.debug("DEBUG: Not enough valid army point totals found to calculate Underdog Points.");
+      console.debug(
+        "DEBUG: Not enough valid army point totals found to calculate Underdog Points."
+      );
       setUnderdogPoints(armyIdToLoad, 0);
       setMaxUnderdogPoints(armyIdToLoad, 0);
       updateUnderdogPointsDisplay(armyIdToLoad, 0, 0);
@@ -477,7 +482,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- Step 5: Fetch and Process ALL Army Lists (Upfront) ---
     console.debug("DEBUG: Fetching and processing ALL campaign armies...");
-    const allArmyIds = campaignArmies.map((a) => a.armyForgeID).filter(Boolean);
+    const allArmyIds = campaignArmies.filter(army => !army.hidden).map((a) => a.armyForgeID).filter(Boolean);
     const armyDataPromises = allArmyIds.map((id) => fetchArmyData(id));
     const allRawDataResults = await Promise.allSettled(armyDataPromises);
 
@@ -528,7 +533,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- END Step 5 ---
 
     // --- Step 5.5: Initialize/Update ALL Army States in localStorage ---
-    console.debug("DEBUG: Initializing/Updating states for all processed armies in localStorage...");
+    console.debug(
+      "DEBUG: Initializing/Updating states for all processed armies in localStorage..."
+    );
     for (const armyId in allProcessedArmies) {
       const processed = allProcessedArmies[armyId];
       const listPoints = processed.meta.listPoints || 0;
@@ -684,7 +691,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.warn("DEBUG: Start Round button not found after main load!");
     }
     console.debug("DEBUG: Application initialization complete.");
-
   } catch (error) {
     // Catch errors during the main initialization sequencef
     console.error(

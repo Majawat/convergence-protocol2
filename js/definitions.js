@@ -42,7 +42,7 @@ export function initializeDefinitionsSystem() {
 
   // Initialize Bootstrap Popovers on the newly added spans
   initializeBootstrapPopovers();
-  console.log("Definitions system initialization complete.");
+  console.debug("Definitions system initialization complete.");
 }
 
 /**

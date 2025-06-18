@@ -129,7 +129,7 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
             // Assumes only one Caster upgrade applies; adjust if stacking is possible.
             processedUnit.casterLevel = ratingValue;
             statProcessedRuleInstances.add(instanceKey); // Mark as processed
-            console.log(`Applied Caster(${ratingValue}) upgrade to ${processedUnit.selectionId}`);
+            console.debug(`Applied Caster(${ratingValue}) upgrade to ${processedUnit.selectionId}`);
           } else if (rule.name === "Tough" && !isNaN(ratingValue)) {
             optionGrantsTough = true;
             optionToughValue = ratingValue;
@@ -213,7 +213,9 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
   processedUnit.defense = finalDefense;
 
   // Final check: Log the caster level after upgrades are applied
-  console.log(`Final Caster Level for ${processedUnit.selectionId}: ${processedUnit.casterLevel}`);
+  console.debug(
+    `Final Caster Level for ${processedUnit.selectionId}: ${processedUnit.casterLevel}`
+  );
 }
 
 /**
