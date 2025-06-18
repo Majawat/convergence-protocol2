@@ -798,9 +798,11 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .filter(Boolean)
         .sort()
         .join(", ");
-      const heroTraits = hero.traits
-        .sort()
-        .join(", ");
+      const heroTraits = hero.traits.sort().join(", ");
+      const heroSkillSets = hero.skillSets.sort().join(", ");
+      const heroSkillTraits = hero.skillTraits.sort().join(", ");
+      const heroInjuries = hero.injuries.sort().join(", ");
+      const heroTalents = hero.talents.sort().join(", ");
       cardBodyContentHTML += `<div class="sub-section"><h6>${
         hero.customName || hero.originalName
       }</h6><div class="sub-stats-row"><div class="stat-item">${UI_ICONS.quality} <span>${
@@ -828,7 +830,23 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
       }</span></div>
       <div class="mt-2"><strong class="d-block">Traits:</strong> <span class="text-body-secondary allow-definitions">${
         heroTraits || "None"
-      }</span></div><div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
+      }</span></div>${
+        heroSkillSets
+          ? `<div class="mt-2"><strong class="d-block">Skill Sets:</strong> <span class="text-body-secondary allow-definitions">${heroSkillSets}</span></div>`
+          : ""
+      }${
+        heroSkillTraits
+          ? `<div class="mt-2"><strong class="d-block">Skill Traits:</strong> <span class="text-body-secondary allow-definitions">${heroSkillTraits}</span></div>`
+          : ""
+      }${
+        heroInjuries
+          ? `<div class="mt-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${heroInjuries}</span></div>`
+          : ""
+      }${
+        heroTalents
+          ? `<div class="mt-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${heroTalents}</span></div>`
+          : ""
+      }<div class="mt-2 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
         hero.loadout,
         _formatRule
       )}</div></div>`;
@@ -838,9 +856,11 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .filter(Boolean)
         .sort()
         .join(", ");
-      const unitTraits = baseUnit.traits
-        .sort()
-        .join(", ");
+      const unitTraits = baseUnit.traits.sort().join(", ");
+      const unitSkillSets = baseUnit.skillSets.sort().join(", ");
+      const unitSkillTraits = baseUnit.skillTraits.sort().join(", ");
+      const unitInjuries = baseUnit.injuries.sort().join(", ");
+      const unitTalents = baseUnit.talents.sort().join(", ");
       cardBodyContentHTML += `<div class="sub-section">
         <h6>${baseUnit.customName || baseUnit.originalName}</h6>
         <div class="sub-stats-row">
@@ -872,7 +892,23 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         <div class="mt-2">
           <strong class="d-block">Traits:</strong>
           <span class="text-body-secondary allow-definitions">${unitTraits || "None"}</span>
-        </div>
+        </div>${
+          unitSkillSets
+            ? `<div class="mt-2"><strong class="d-block">Skill Sets:</strong> <span class="text-body-secondary allow-definitions">${unitSkillSets}</span></div>`
+            : ""
+        }${
+          unitSkillTraits
+            ? `<div class="mt-2"><strong class="d-block">Skill Traits:</strong> <span class="text-body-secondary allow-definitions">${unitSkillTraits}</span></div>`
+            : ""
+        }${
+          unitInjuries
+            ? `<div class="mt-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${unitInjuries}</span></div>`
+            : ""
+        }${
+          unitTalents
+            ? `<div class="mt-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${unitTalents}</span></div>`
+            : ""
+        }
         <div class="mt-2 flex-grow-1">
           <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
             baseUnit.loadout,
@@ -887,12 +923,14 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         .filter(Boolean)
         .sort()
         .join(", ");
+      const unitTraits = baseUnit.traits.sort().join(", ");
+      const unitSkillSets = baseUnit.skillSets.sort().join(", ");
+      const unitSkillTraits = baseUnit.skillTraits.sort().join(", ");
+      const unitInjuries = baseUnit.injuries.sort().join(", ");
+      const unitTalents = baseUnit.talents.sort().join(", ");
       console.debug(
         `DEBUG: unitTraits ${baseUnit.traits} for selectionId: ${baseUnit.selectionId} - ${baseUnit.customName || baseUnit.originalName}.`
       );
-      const unitTraits = baseUnit.traits
-        .sort()
-        .join(", ");
       console.debug(`Debug: unitTraits after formatting: ${unitTraits}`);
       cardBodyContentHTML += `<div class="normal-unit-details">${
         unitIsCaster ? _createCasterControlsHTML(casterLevel, initialTokens) : ""
@@ -901,7 +939,23 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
       }</span></div>
       <div class="mb-2"><strong class="d-block">Traits:</strong> <span class="text-body-secondary allow-definitions">${
         unitTraits || "None"
-      }</span></div><div class="mb-0 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
+      }</span></div>${
+        unitSkillSets
+          ? `<div class="mb-2"><strong class="d-block">Skill Sets:</strong> <span class="text-body-secondary allow-definitions">${unitSkillSets}</span></div>`
+          : ""
+      }${
+        unitSkillTraits
+          ? `<div class="mb-2"><strong class="d-block">Skill Traits:</strong> <span class="text-body-secondary allow-definitions">${unitSkillTraits}</span></div>`
+          : ""
+      }${
+        unitInjuries
+          ? `<div class="mb-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${unitInjuries}</span></div>`
+          : ""
+      }${
+        unitTalents
+          ? `<div class="mb-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${unitTalents}</span></div>`
+          : ""
+      }<div class="mb-0 flex-grow-1"><strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
         baseUnit.loadout,
         _formatRule
       )}</div></div>`;

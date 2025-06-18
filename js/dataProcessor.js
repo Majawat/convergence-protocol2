@@ -41,6 +41,10 @@ function _initializeProcessedUnit(rawUnit) {
     xp: rawUnit.xp || 0,
     notes: rawUnit.notes || null,
     traits: rawUnit.traits || [],
+    skillSets: rawUnit.skillSets || [],
+    skillTraits: rawUnit.skillTraits || [],
+    injuries: rawUnit.injuries || [],
+    talents: rawUnit.talents || [],
     loadout: [], // Will be populated by _processUnitLoadout
     models: [], // Will be populated by _createModelsForUnit
     // Flags & Relations
@@ -356,6 +360,10 @@ function _mergeCombinedUnits(unitA, unitB) {
   mergedUnit.xp += unitA.xp;
   mergedUnit.notes = [unitB.notes, unitA.notes].filter(Boolean).join("; ");
   mergedUnit.traits = [...new Set([...unitB.traits, ...unitA.traits])];
+  mergedUnit.skillSets = [...new Set([...unitB.skillSets, ...unitA.skillSets])];
+  mergedUnit.skillTraits = [...new Set([...unitB.skillTraits, ...unitA.skillTraits])];
+  mergedUnit.injuries = [...new Set([...unitB.injuries, ...unitA.injuries])];
+  mergedUnit.talents = [...new Set([...unitB.talents, ...unitA.talents])];
 
   // Use base unit's base size (arbitrary choice, usually consistent)
   mergedUnit.bases = unitB.bases ? { ...unitB.bases } : null;
