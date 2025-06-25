@@ -241,7 +241,7 @@ function displayLeaderboard(campaignData) {
     return;
   }
   const basePoints = campaignData.basePoints || 0;
-  const armies = campaignData.armies;
+  const armies = campaignData.armies.filter(army => !army.hidden);
   const leaderboardData = armies.map((army) => {
     const wins = army.wins || 0;
     const losses = army.losses || 0;

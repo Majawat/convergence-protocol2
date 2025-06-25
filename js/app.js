@@ -486,7 +486,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- Step 5: Fetch and Process ALL Army Lists (Upfront) ---
     console.debug("DEBUG: Fetching and processing ALL campaign armies...");
     const allArmyIds = campaignArmies
-      .filter((army) => !army.hidden)
       .map((a) => a.armyForgeID)
       .filter(Boolean);
     const armyDataPromises = allArmyIds.map((id) => fetchArmyData(id));
@@ -531,6 +530,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Check if the currently viewed army failed to load/process
     const processedArmy = allProcessedArmies[armyIdToLoad];
+    console.log(`DEBUG: Processed data for ${armyIdToLoad}:`, processedArmy);
     if (!processedArmy) {
       throw new Error(
         `Failed to load or process required army data for ${armyInfo.armyName} (${armyIdToLoad}). Cannot proceed.`

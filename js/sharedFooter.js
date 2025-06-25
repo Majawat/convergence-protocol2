@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span id="screenWidthDisplay"></span>|
         <span id="screenHeightDisplay"></span>|
         <span id="screenThemeDisplay"></span>|
-        <a href="army.html?armyId=qggNHSCfmijV">Dev Testerson</a>
+        <a href="army.html?armyId=IJ1JM_m-jmka">Dev Testerson</a>
       </div>
     `;
 
