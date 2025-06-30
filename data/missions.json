@@ -217,7 +217,7 @@
       "number": 5,
       "title": "The Rift Unleashed",
       "points": 1800,
-      "datetime": null,
+      "datetime": "2025-07-19T10:00:00-05:00",
       "month": "July",
       "status": "current",
       "overview": "The Nexus' unstable energy fractures reality, opening dimensional rifts that pour forth unknown horrors.",
@@ -236,7 +236,7 @@
     },
     {
       "number": 6,
-      "title": "The Siege of the Mechanist Core",
+      "title": "The Siege of the Core",
       "points": 2000,
       "datetime": null,
       "month": "August",
