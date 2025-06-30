@@ -60,7 +60,11 @@ import {
   showToast,
   handleFocusReturn,
 } from "./uiHelpers.js";
-import { setupEventListeners, updateGameControlButtons, handleInteractionClick } from "./eventHandlers.js";
+import {
+  setupEventListeners,
+  updateGameControlButtons,
+  handleInteractionClick,
+} from "./eventHandlers.js";
 import { findTargetModelForWound } from "./gameLogic.js";
 import { initializeDefinitionsSystem } from "./definitions.js";
 
@@ -483,20 +487,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     setDoctrinesData(gameData.doctrines);
     console.debug("DEBUG: Game data loaded.");
 
-    // --- Step 5: Fetch and Process ALL Army Lists (Upfront) ---
-    console.debug("DEBUG: Fetching and processing ALL campaign armies...");
-    const allArmyIds = campaignArmies
+    // --- Step 5: Fetch and Process Army Lists (Exclude Hidden, Include Current) ---
+    console.debug("DEBUG: Fetching and processing campaign armies...");
+
+    // Get non-hidden armies for UP calculation
+    const nonHiddenArmyIds = campaignArmies
+      .filter((army) => !army.hidden)
       .map((a) => a.armyForgeID)
       .filter(Boolean);
-    const armyDataPromises = allArmyIds.map((id) => fetchArmyData(id));
+
+    // Ensure the currently requested army is included even if hidden
+    const allArmyIds = new Set([...nonHiddenArmyIds, armyIdToLoad]);
+    const armyIdsArray = Array.from(allArmyIds);
+
+    const armyDataPromises = armyIdsArray.map((id) => fetchArmyData(id));
     const allRawDataResults = await Promise.allSettled(armyDataPromises);
 
-    const allProcessedArmies = {}; // Store successfully processed armies { armyId: processedData }
+    const allProcessedArmies = {}; // Store successfully processed armies
     let fetchProcessErrors = 0;
 
     for (let i = 0; i < allRawDataResults.length; i++) {
       const result = allRawDataResults[i];
-      const armyId = allArmyIds[i];
+      const armyId = armyIdsArray[i];
+
       if (result.status === "fulfilled" && result.value) {
         const processed = processArmyData(result.value);
         if (processed) {

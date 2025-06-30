@@ -32,6 +32,7 @@ import {
   incrementCurrentRound,
   addRecordedKill,
   setIsGameFinished,
+  setCurrentArmyId,
   setCasualtyOutcome,
   setCommandPoints,
   setSelectedDoctrine,
@@ -1009,7 +1010,7 @@ async function _handleMoraleWoundsClick(targetElement, armyId, cardUnitId) {
 
 /**
  * Handles click on the "Reset Current Army Data" button.
- * Confirms with the user, clears storage for the CURRENT army, and reloads the page.
+ * Confirms with the user, clears ALL data for the CURRENT army, and reloads the page.
  * @private
  */
 async function _handleResetArmyDataClick() {
@@ -1018,15 +1019,19 @@ async function _handleResetArmyDataClick() {
     showToast("Cannot reset: No army is currently loaded.", "Error");
     return;
   }
-  const armyData = getLoadedArmyData(); // Get data for the name
+  const armyData = getLoadedArmyData();
   const armyName = armyData?.meta?.name || `Army (${armyId})`;
 
-  // Confirmation Dialog using interactive toast
+  // Confirmation Dialog
   const confirmed = await showInteractiveToast(
     `WARNING!
-    This will permanently delete all saved progress (HP, status, CP, UP, doctrine selection) for ${armyName} and reload its data from scratch.
-    Are you absolutely sure you want to proceed?`,
-    "Confirm Current Army Reset",
+    This will permanently delete ALL data for ${armyName}:
+    - HP, status, CP, UP, doctrine selection
+    - In-memory processed data
+    - All cached information
+    
+    The army will reload from scratch. Are you absolutely sure?`,
+    "Confirm Complete Army Reset",
     [
       { text: "Reset Current Army", value: "reset", style: "danger" },
       { text: "Cancel", value: "cancel", style: "secondary" },
@@ -1034,22 +1039,48 @@ async function _handleResetArmyDataClick() {
   );
 
   if (confirmed === "reset") {
-    console.log(`Resetting data for army ${armyId}...`);
+    console.log(`Completely resetting ALL data for army ${armyId}...`);
 
-    // 1. Clear Persistent State for this army
-    resetArmyState(armyId); // Clears localStorage item
+    // 1. Clear localStorage state for this army
+    resetArmyState(armyId);
 
-    // 2. Clear Session Caches (Optional but recommended)
-    // Clear points cache to force recalculation if user navigates back/forth
+    // 2. Clear in-memory processed army data
+    const allLoadedData = getAllLoadedArmyData();
+    if (allLoadedData[armyId]) {
+      delete allLoadedData[armyId];
+      console.log(`Cleared in-memory processed data for army ${armyId}`);
+    }
+
+    // 3. Clear current army ID if it matches
+    if (getCurrentArmyId() === armyId) {
+      setCurrentArmyId(null);
+      console.log(`Cleared current army ID reference`);
+    }
+
+    // 4. Clear any army-specific session storage
+    // Check for any session keys that might contain this army ID
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const key = sessionStorage.key(i);
+      if (key && key.includes(armyId)) {
+        sessionStorage.removeItem(key);
+        console.log(`Cleared session storage key: ${key}`);
+      }
+    }
+
+    // 5. Clear general session caches that might affect this army
     sessionStorage.removeItem(config.CAMPAIGN_POINTS_CACHE_KEY);
-    console.log("Cleared relevant session storage caches.");
+    console.log("Cleared campaign points cache.");
 
-    // 3. Show feedback and reload
-    showToast(`Resetting data for ${armyName}... Page will reload.`, "Resetting", 3000);
-    // Use setTimeout to allow toast to show before reload potentially interrupts it
+    // 6. Show feedback and reload
+    showToast(
+      `Completely reset all data for ${armyName}... Page will reload.`,
+      "Full Army Reset",
+      3000
+    );
+
     setTimeout(() => {
       window.location.reload();
-    }, 500); // Short delay
+    }, 500);
   } else {
     console.log("Army data reset cancelled by user.");
   }
