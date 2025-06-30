@@ -453,18 +453,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Step 3: Display Selection or Proceed
   if (!armyIdToLoad || !armyInfo) {
     console.debug("DEBUG: No valid army ID provided, displaying selection.");
+
+    // Hide army-specific UI elements
+    const elementsToHide = [
+      "round-display",
+      "command-points-display",
+      "underdog-points-display",
+      "army-info-button",
+      "stratagems-button",
+      "start-round-button",
+      "end-game-button",
+      "show-results-button-container",
+      "reset-army-data-button",
+    ];
+
+    elementsToHide.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) element.style.display = "none";
+    });
+
     displayArmySelection(campaignArmies, mainListContainer);
     document.title = "Select Army - OPR Army Tracker";
     titleH1.textContent = "Select Army";
-    // Disable buttons
-    const infoButton = document.getElementById("army-info-button");
-    if (infoButton) infoButton.disabled = true;
-    const stratButton = document.getElementById("stratagems-button");
-    if (stratButton) stratButton.disabled = true;
-    const startRoundButton = document.getElementById("start-round-button");
-    if (startRoundButton) startRoundButton.disabled = true;
 
-    return; // Stop execution
+    return;
   }
 
   // --- Code below only runs if a valid armyId IS found ---

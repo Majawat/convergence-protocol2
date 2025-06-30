@@ -75,7 +75,9 @@ export function displayArmySelection(armies, container) {
 
   const prompt = document.createElement("div");
   prompt.className = "col-12 text-center mb-4";
-  prompt.innerHTML = `<h2>Select an Army</h2><p>No specific army was requested via URL. Please choose an army below to view its details.</p>`;
+  prompt.innerHTML = `<p>
+    No specific army was requested via URL. Please choose an army below to view its details.
+  </p>`;
   container.appendChild(prompt);
 
   const listContainer = document.createElement("div");
