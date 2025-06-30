@@ -627,14 +627,20 @@ export function getUnitData(unitId) {
 export function getArmyNameById(armyId) {
   if (!armyId) return "Unknown Army";
 
-  // Access the module-level variable holding all loaded army data
+  // Check campaign data first
+  const campaignData = getCampaignData();
+  const armyInfo = campaignData?.armies?.find((a) => a.armyForgeID === armyId);
+  if (armyInfo?.armyName?.trim()) {
+    return armyInfo.armyName.trim();
+  }
+
+  // Fallback to processed army data
   const armyData = loadedArmiesData[armyId];
+  if (armyData?.meta?.name?.trim()) {
+    return armyData.meta.name.trim();
+  }
 
-  // Safely access the name using optional chaining
-  const armyName = armyData?.meta?.name;
-
-  // Return the name or a fallback if not found
-  return armyName || `Army (${armyId})`;
+  return "Unnamed Army";
 }
 
 /** Gets a specific hero unit's processed data if joined to the given base unit in the currently loaded army */

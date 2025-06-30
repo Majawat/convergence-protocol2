@@ -17,6 +17,7 @@ import {
   getMaxUnderdogPoints,
   getUnitStateValue,
   getCurrentArmyHeroTargets,
+  getLoadedArmyData,
 } from "./state.js";
 
 // --- Focus Management State ---
@@ -93,12 +94,12 @@ export function displayArmySelection(armies, container) {
         link.className =
           "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
         link.innerHTML = `
-                <span>
-                    <strong class="me-2">${army.armyName || "Unnamed Army"}</strong>
-                    <small class="text-muted">(${army.player || "Unknown Player"})</small>
-                </span>
-                ${UI_ICONS.selectItem}
-            `;
+          <span>
+            <strong class="me-2">${army.armyName?.trim() || "Unnamed Army"}</strong>
+            <small class="text-muted">(${army.player || "Unknown Player"})</small>
+          </span>
+          ${UI_ICONS.selectItem}
+        `;
         listGroup.appendChild(link);
       });
   } else {
@@ -121,31 +122,36 @@ export function populateArmyInfoModal(armyInfo) {
   const tagline = document.getElementById("armyInfoTagline");
   const summary = document.getElementById("armyInfoSummary");
   const backstory = document.getElementById("armyInfoBackstory");
-  const infoButton = document.getElementById("army-info-button"); // Button to enable
+  const infoButton = document.getElementById("army-info-button");
 
-  if (modalLabel) modalLabel.textContent = armyInfo.armyName || "Army Information";
-  if (tagline) tagline.textContent = armyInfo.tagline || "";
+  // Name priority: campaign -> army-forge -> fallback
+  const displayName =
+    armyInfo?.armyName?.trim() || getLoadedArmyData()?.meta?.name?.trim() || "Army Information";
+
+  // Description priority: campaign tagline -> army-forge description -> empty
+  const displayDesc =
+    armyInfo?.tagline?.trim() || getLoadedArmyData()?.meta?.description?.trim() || "";
+
+  if (modalLabel) modalLabel.textContent = displayName;
+  if (tagline) tagline.textContent = displayDesc;
   if (summary) summary.textContent = armyInfo.summary || "";
-  // Use innerHTML for backstory as it contains HTML tags from campaign.json
   if (backstory) backstory.innerHTML = armyInfo.backstory || "<p>No backstory available.</p>";
 
   if (img) {
     if (armyInfo.image) {
       img.src = armyInfo.image;
-      img.alt = armyInfo.armyName || "Army Image";
-      img.style.display = "block"; // Ensure it's visible
-      // Apply image positioning if specified
-      img.style.objectPosition = armyInfo.imagePosition || "center center"; // Default
-      // Add error handling
+      img.alt = displayName;
+      img.style.display = "block";
+      img.style.objectPosition = armyInfo.imagePosition || "center center";
       img.onerror = () => {
         console.warn(`Failed to load image: ${armyInfo.image}`);
-        img.style.display = "none"; // Hide if image fails
+        img.style.display = "none";
       };
     } else {
-      img.style.display = "none"; // Hide if no image URL
+      img.style.display = "none";
     }
   }
-  // Enable the info button now that data is ready
+
   if (infoButton) infoButton.disabled = false;
 }
 

@@ -476,7 +476,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
     </div>
   </div>`; // Updated spinner text
-  titleH1.textContent = `Loading ${armyInfo.armyName}...`;
+  const loadingName = armyInfo?.armyName?.trim() || "Selected Army";
+  titleH1.textContent = `Loading ${loadingName}...`;
 
   try {
     // Step 4: Load Static Game Data
@@ -666,7 +667,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     calculateAndSetUP(armyIdToLoad, campaignArmies); // Reads listPoints from updated localStorage
 
     // Step 7: Update UI
-    titleH1.textContent = armyInfo.armyName;
+    const displayName =
+      armyInfo?.armyName?.trim() || processedArmy?.meta?.name?.trim() || "Unnamed Army";
+    titleH1.textContent = displayName;
     populateArmyInfoModal(armyInfo);
     displayArmyUnits(processedArmy, mainListContainer); // Render units
     _initializeWoundHighlights(armyIdToLoad); // Highlight first wound target

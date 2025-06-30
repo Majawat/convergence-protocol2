@@ -98,7 +98,6 @@
     },
     {
       "player": "Dev Testerson",
-      "armyName": "BattleApp Test Army",
       "armyForgeID": "IJ1JM_m-jmka",
       "faction": [
         { "id": "BKi_hJaJflN8ZorH", "gameSystem": "2", "name": "Jackals" },
