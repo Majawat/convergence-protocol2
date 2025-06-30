@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-bs-theme="dark">
   <head>
     <meta charset="UTF-8" />
@@ -23,75 +23,12 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="bg-body text-body">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="index.html">OPR Tracker</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link" href="index.html">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="army.html">View Armies</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="campaign.html"
-                >Campaign Status</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="rules.html">Rules Reference</a>
-            </li>
-          </ul>
-          <div class="dropdown">
-            <button
-              class="btn btn-sm btn-secondary dropdown-toggle"
-              type="button"
-              id="themeDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false">
-              <i class="bi bi-circle-half theme-icon-active"></i> Theme
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
-              <li>
-                <button
-                  class="dropdown-item d-flex align-items-center"
-                  type="button"
-                  data-bs-theme-value="light">
-                  <i class="bi bi-sun-fill me-2"></i> Light
-                </button>
-              </li>
-              <li>
-                <button
-                  class="dropdown-item d-flex align-items-center"
-                  type="button"
-                  data-bs-theme-value="dark">
-                  <i class="bi bi-moon-stars-fill me-2"></i> Dark
-                </button>
-              </li>
-              <li>
-                <button
-                  class="dropdown-item d-flex align-items-center"
-                  type="button"
-                  data-bs-theme-value="auto">
-                  <i class="bi bi-circle-half me-2"></i> Auto
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <nav
+      id="main-navbar"
+      class="navbar navbar-expand-lg bg-body-tertiary border-bottom fixed-top shadow-sm"></nav>
+    <script>
+      window.currentPage = "campaign";
+    </script>
 
     <main class="container mt-4">
       <h1 id="campaign-title" class="mb-4">Loading Campaign...</h1>
@@ -208,5 +145,6 @@
       crossorigin="anonymous"></script>
     <script type="module" src="js/campaign.js"></script>
     <script src="js/sharedFooter.js"></script>
+    <script src="js/sharedNavbar.js"></script>
   </body>
 </html>
