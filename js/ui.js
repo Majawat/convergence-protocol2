@@ -950,29 +950,30 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
       cardBodyContentHTML += `<div class="normal-unit-details">
         ${unitIsCaster ? _createCasterControlsHTML(casterLevel, initialTokens) : ""}
         <div class="mb-2">
-          <strong class="d-block">Rules:</strong>
+          <strong class="d-block mb-0">Rules:</strong>
           <span class="text-body-secondary allow-definitions">${unitRules || "None"}</span>
+
+          ${
+            unitTraits
+              ? `<div class="mb-1"><strong class="d-block">Traits:</strong> <span class="text-body-secondary allow-definitions">${unitTraits}</span></div>`
+              : ""
+          }
+          ${
+            unitSkills
+              ? `<div class="mb-1"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${unitSkills}</span></div>`
+              : ""
+          }
+          ${
+            unitInjuries
+              ? `<div class="mb-1"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${unitInjuries}</span></div>`
+              : ""
+          }
+          ${
+            unitTalents
+              ? `<div class="mb-1"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${unitTalents}</span></div>`
+              : ""
+          }
         </div>
-        ${
-          unitTraits
-            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${unitTraits}</span></div>`
-            : ""
-        }
-        ${
-          unitSkills
-            ? `<div class="mt-2"><strong class="d-block">Skills:</strong> <span class="text-body-secondary allow-definitions">${unitSkills}</span></div>`
-            : ""
-        }
-        ${
-          unitInjuries
-            ? `<div class="mt-2"><strong class="d-block">Injuries:</strong> <span class="text-body-secondary allow-definitions">${unitInjuries}</span></div>`
-            : ""
-        }
-        ${
-          unitTalents
-            ? `<div class="mt-2"><strong class="d-block">Talents:</strong> <span class="text-body-secondary allow-definitions">${unitTalents}</span></div>`
-            : ""
-        }
         <div class="mb-0 flex-grow-1">
           <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
             baseUnit.loadout,

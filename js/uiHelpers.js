@@ -74,7 +74,7 @@ export function displayArmySelection(armies, container) {
   container.innerHTML = ""; // Clear previous content (like spinner)
 
   const prompt = document.createElement("div");
-  prompt.className = "col-12 text-center mb-4";
+  prompt.className = "col-12 text-center mb-2";
   prompt.innerHTML = `<p>
     No specific army was requested via URL. Please choose an army below to view its details.
   </p>`;
