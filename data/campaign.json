@@ -66,6 +66,12 @@
           "gameSystem": "2",
           "name": "Alien Hives",
           "alias": "Tyranids"
+        },
+        {
+          "id": "zz3kp5ry7ks6mxcx",
+          "gameSystem": "2",
+          "name": "Soul-Snatcher Cults",
+          "alias": "Genestealer Cults"
         }
       ],
       "image": "assets/img/armies/hive-fleet-tarvos.jpg",
