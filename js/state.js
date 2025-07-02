@@ -27,6 +27,136 @@ export function getDoctrinesData() {
   return doctrinesData;
 }
 
+export function getDeploymentStatus(armyId, unitId) {
+  return getUnitStateValue(armyId, unitId, "deploymentStatus", "undeployed");
+}
+
+export function setDeploymentStatus(armyId, unitId, status) {
+  updateUnitStateValue(armyId, unitId, "deploymentStatus", status);
+  if (status !== "undeployed") {
+    updateUnitStateValue(armyId, unitId, "deployedInRound", getCurrentRound());
+  }
+}
+
+export function isDeploymentComplete(armyId) {
+  const loadedArmyData = getLoadedArmyData();
+  if (!loadedArmyData?.units) return true;
+
+  for (const unit of loadedArmyData.units) {
+    if (getDeploymentStatus(armyId, unit.selectionId) === "undeployed") {
+      console.debug(
+        `DEBUG: Deployment incomplete for unit ${unit.selectionId} (${unit.name}) in army ${armyId}.`
+      );
+      return false;
+    }
+  }
+  return true;
+}
+
+export function unitHasScout(unitId) {
+  const unitData = getUnitData(unitId);
+  if (!unitData) return false;
+
+  return (
+    unitData.rules?.some(
+      (rule) =>
+        rule.name?.toLowerCase().includes("scout") ||
+        rule.aliasedRuleId?.toLowerCase().includes("scout")
+    ) || false
+  );
+}
+
+export function unitHasAmbush(unitId) {
+  const unitData = getUnitData(unitId);
+  if (!unitData) {
+    console.log(`No unit data for ${unitId}`);
+    return false;
+  }
+
+  console.log(`Checking ambush for ${unitId} (${unitData.customName || unitData.name})`);
+
+  // Check base unit rules
+  const hasRuleAmbush =
+    unitData.rules?.some((rule) => {
+      const match =
+        rule.name?.toLowerCase() === "ambush" ||
+        rule.aliasedRuleId?.toLowerCase() === "ambush" ||
+        rule.description?.toLowerCase().includes("ambush") ||
+        rule.name?.toLowerCase() === "hidden route";
+      if (match) console.log(`Found ambush in rules: ${rule.name}`);
+      return match;
+    }) || false;
+
+  // Check loadout item rules (from upgrades/equipment)
+  const hasLoadoutAmbush =
+    unitData.loadout?.some((item) => {
+      const match = item.content?.some((rule) => {
+        const ruleMatch =
+          rule.name?.toLowerCase() === "ambush" || rule.name?.toLowerCase() === "hidden route";
+        if (ruleMatch) console.log(`Found ambush in loadout: ${rule.name}`);
+        return ruleMatch;
+      });
+      return match;
+    }) || false;
+
+  console.log(`${unitId} rules ambush: ${hasRuleAmbush}, loadout ambush: ${hasLoadoutAmbush}`);
+  return hasRuleAmbush || hasLoadoutAmbush;
+}
+
+function getJoinedGroup(unitId) {
+  const unitData = getUnitData(unitId);
+  if (!unitData) return [unitId];
+
+  const currentId = getCurrentArmyId();
+  const allUnits = loadedArmiesData[currentId]?.units || [];
+
+  const group = new Set([unitId]);
+
+  // Add unit this one is joined to
+  if (unitData.joinToUnitId) {
+    const joinedToUnit = allUnits.find((u) => u.selectionId === unitData.joinToUnitId);
+    if (joinedToUnit) {
+      group.add(joinedToUnit.selectionId); // <- Changed from .id to .selectionId
+    }
+  }
+
+  // Add units joined to this one
+  allUnits.forEach((unit) => {
+    if (unit.joinToUnitId === unitData.selectionId) {
+      group.add(unit.selectionId); // <- Changed from .id to .selectionId
+    }
+  });
+
+  return Array.from(group);
+}
+
+function groupHasAmbush(unitId) {
+  console.log(`=== Checking group ambush for ${unitId} ===`);
+  const joinedGroup = getJoinedGroup(unitId);
+  const result = joinedGroup.some((id) => {
+    const hasAmbush = unitHasAmbush(id);
+    console.log(`Unit ${id} has ambush: ${hasAmbush}`);
+    return hasAmbush;
+  });
+  console.log(`Group has ambush: ${result}`);
+  return result;
+}
+
+export function getUnitDeploymentOptions(unitId) {
+  const options = ["deployed"];
+  options.push("embarked"); // Always allow embarked deployment
+
+  if (unitHasScout(unitId)) {
+    options.push("scout");
+  }
+
+  if (groupHasAmbush(unitId)) {
+    options.push("ambush");
+  }
+
+  return options;
+}
+
 /**
  * Retrieves the consolidated definitions object from sessionStorage.
  * @returns {object} The definitions object, or an empty object if not found/invalid.
@@ -152,6 +282,8 @@ export function getUnitState(armyId, unitId) {
     killsRecorded: [],
     killedBy: null,
     casualtyOutcome: null,
+    deploymentStatus: "undeployed",
+    deployedInRound: null,
   };
 
   // Return existing state or the default structure
@@ -166,6 +298,12 @@ export function getUnitState(armyId, unitId) {
   }
   if (unitState.killedBy === undefined) {
     unitState.killedBy = null;
+  }
+  if (unitState.deploymentStatus === undefined) {
+    unitState.deploymentStatus = "undeployed";
+  }
+  if (unitState.deployedInRound === undefined) {
+    unitState.deployedInRound = null;
   }
 
   return unitState;
@@ -271,6 +409,26 @@ export function getCurrentRound() {
   return gameState.currentRound || 0; // Default to 0 if not found
 }
 
+export function getCurrentPhase() {
+  const gameState = loadGameState();
+  if (!gameState || !gameState.currentPhase) {
+    console.debug("getCurrentPhase: No current phase set in game state, defaulting to 'pregame'.");
+    setCurrentPhase("pregame"); // Initialize if not set
+    return "pregame"; // Default to "pregame" if not found
+  }
+  return gameState.currentPhase || "pregame"; // Default to "deployment" if not found
+}
+
+export function setCurrentPhase(phase) {
+  if (typeof phase !== "string") {
+    console.error("Invalid phase provided to setCurrentPhase.");
+    return;
+  }
+  const gameState = loadGameState();
+  gameState.currentPhase = phase;
+  saveGameState(gameState);
+}
+
 /** Sets the current round number in global game state. */
 export function setCurrentRound(roundNumber) {
   if (typeof roundNumber !== "number" || roundNumber < 0) {
@@ -294,8 +452,11 @@ export function incrementCurrentRound() {
  * @returns {boolean} True if the game is marked as finished, false otherwise.
  */
 export function getIsGameFinished() {
-  const gameState = loadGameState();
-  return gameState.isGameFinished || false; // Default to false if not set
+  const currentPhase = getCurrentPhase();
+  if (currentPhase === "postgame") {
+    return true; // Default to false if not set
+  }
+  return false;
 }
 
 // --- Setters ---
@@ -332,17 +493,6 @@ export function setDefinitions(data) {
       // Optionally show a user-facing error toast here
     }
   }
-}
-
-/**
- * Sets the game finished status in the global game state.
- * @param {boolean} isFinished - True if the game is finished, false otherwise.
- */
-export function setIsGameFinished(isFinished) {
-  const gameState = loadGameState(); // Load current state
-  gameState.isGameFinished = !!isFinished; // Coerce to boolean
-  saveGameState(gameState); // Save updated state
-  console.log(`Game finished status set to: ${gameState.isGameFinished}`);
 }
 
 /**
@@ -434,6 +584,7 @@ export function updateUnitStateValue(armyId, unitId, key, value) {
 
   const currentState = getArmyState(armyId);
 
+  console.debug(`Updating unit state for ${unitId}: ${key} = ${value}`);
   if (!currentState.units[unitId]) {
     currentState.units[unitId] = {
       status: "active",
@@ -446,6 +597,8 @@ export function updateUnitStateValue(armyId, unitId, key, value) {
       models: {},
       killsRecorded: [],
       killedBy: null,
+      deploymentStatus: "undeployed",
+      deployedInRound: null,
     };
     console.warn(`Initialized missing unit state for ${unitId} during update.`);
   }
@@ -480,6 +633,8 @@ export function updateModelStateValue(armyId, unitId, modelId, key, value) {
       models: {},
       killsRecorded: [],
       killedBy: null,
+      deploymentStatus: "undeployed",
+      deployedInRound: null,
     };
   }
   if (!currentState.units[unitId].models) {

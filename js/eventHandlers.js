@@ -5,7 +5,7 @@
  */
 
 // Imports from other modules
-import { config, UI_ICONS } from "./config.js";
+import { config, UI_ICONS, DEPLOYMENT_BUTTON_CONFIG } from "./config.js";
 import {
   // State Getters
   getLoadedArmyData,
@@ -25,17 +25,21 @@ import {
   getDoctrinesData,
   getUnderdogPoints,
   getMaxUnderdogPoints,
-  getIsGameFinished,
+  getDeploymentStatus,
+  getCurrentPhase,
+  isDeploymentComplete,
   // State Updaters
   updateModelStateValue,
   updateUnitStateValue,
   incrementCurrentRound,
   addRecordedKill,
-  setIsGameFinished,
   setCurrentArmyId,
   setCasualtyOutcome,
   setCommandPoints,
   setSelectedDoctrine,
+  setDeploymentStatus,
+  setCurrentRound,
+  setCurrentPhase,
   setUnderdogPoints,
 } from "./state.js";
 import { loadArmyState, saveArmyState, resetArmyState } from "./storage.js";
@@ -53,7 +57,9 @@ import {
   createOpponentSelectionModal,
   populateOpponentUnitDropdown,
   updateKillCountBadge,
+  updateDeploymentButtonsUI,
   updateKilledByStatusDisplay,
+  updateAllUnitsForPhase,
 } from "./ui.js";
 import {
   showToast,
@@ -221,6 +227,40 @@ function applyWound(armyId, cardUnitId, specificModelId = null) {
  * @param {string} armyId - The ID of the current army.
  */
 function handleStartRoundClick(armyId) {
+  const currentRound = getCurrentRound();
+  const currentPhase = getCurrentPhase();
+
+  if (currentPhase === "deployment") {
+    const deploymentComplete = isDeploymentComplete(armyId);
+
+    if (!deploymentComplete) {
+      if (!localStorage.getItem(config.GAME_STATE_KEY)) {
+        setCurrentRound(0);
+      }
+      updateAllUnitsForPhase(armyId);
+      updateGameControlButtons();
+      return;
+    } else {
+      // If deployment is complete, proceed to first phase
+      console.log(`Deployment complete for army ${armyId}. Proceeding to next phase.`);
+      setCurrentPhase("active");
+      if (currentRound === 0) {
+        setCurrentRound(1); // Start at round 1 after deployment
+        updateRoundUI(1);
+        updateAllUnitsForPhase(armyId);
+      } else {
+        updateRoundUI(currentRound);
+      }
+      updateGameControlButtons();
+      return;
+    }
+  } else if (currentPhase === "pregame") {
+    setCurrentPhase("deployment");
+    updateAllUnitsForPhase(armyId);
+    updateGameControlButtons();
+    return;
+  }
+
   console.log(`--- Starting New Round for Army ${armyId} ---`);
   const newRound = incrementCurrentRound();
   console.log(`Round incremented to ${newRound}`);
@@ -248,22 +288,7 @@ function handleStartRoundClick(armyId) {
 
   currentArmyProcessedData.units.forEach((unit) => {
     const unitId = unit.selectionId;
-    if (!armyState.units[unitId]) {
-      // Initialize state if missing (shouldn't happen often after app.js init)
-      armyState.units[unitId] = {
-        status: "active",
-        shaken: false,
-        fatigued: false,
-        attackedInMeleeThisRound: false,
-        action: null,
-        limitedWeaponUsed: false,
-        tokens: 0,
-        models: {},
-        killsRecorded: [],
-        killedBy: null,
-      };
-      stateChanged = true;
-    }
+
     const unitState = armyState.units[unitId];
     // Skip updates for units already removed from play
     if (unitState.status === "destroyed" || unitState.status === "routed") {
@@ -358,6 +383,31 @@ function _handleModelWoundClick(targetElement, armyId, cardUnitId) {
   } else {
     console.warn("Clicked model element missing data-model-id attribute.");
   }
+}
+
+function _handleDeploymentButtonClick(targetElement, armyId, cardUnitId) {
+  const deploymentType = targetElement.dataset.deployment;
+  if (!deploymentType) return;
+
+  const currentDeploymentStatus = getDeploymentStatus(armyId, cardUnitId);
+
+  const newStatus = currentDeploymentStatus === deploymentType ? "undeployed" : deploymentType;
+
+  // Update the main unit
+  setDeploymentStatus(armyId, cardUnitId, newStatus);
+
+  // Also update joined hero if one exists
+  const joinedHero = getJoinedHeroData(cardUnitId);
+  if (joinedHero) {
+    setDeploymentStatus(armyId, joinedHero.selectionId, newStatus);
+  }
+
+  updateDeploymentButtonsUI(cardUnitId, newStatus);
+  updateGameControlButtons();
+
+  const unitData = getUnitData(cardUnitId);
+  const unitName = unitData?.customName || unitData?.originalName || cardUnitId;
+  const config = DEPLOYMENT_BUTTON_CONFIG[deploymentType];
 }
 
 /**
@@ -532,11 +582,11 @@ async function _handleEndGameClick() {
     return;
   }
 
-  // Show Results Modal (Make sure showResultsModal is imported correctly)
+  // Show Results Modal
   showResultsModal(xpResults, armyId);
 
   // Mark Game as Finished in State
-  setIsGameFinished(true);
+  setCurrentPhase("postgame"); // Set phase to postgame
 
   // Update Control Buttons UI to reflect finished state
   updateGameControlButtons();
@@ -1306,7 +1356,6 @@ export function handleInteractionClick(event) {
   const target = event.target;
   // --- Ignore Clicks on Main Control Buttons (handled by direct listeners now) ---
   if (target.closest("#start-round-button") || target.closest("#end-game-button")) {
-    console.debug("DEBUG: Click on main control button ignored by delegation.");
     return;
   }
   const unitCard = event.target.closest(".unit-card");
@@ -1363,6 +1412,7 @@ export function handleInteractionClick(event) {
     const moraleWoundsButton = event.target.closest(".morale-wounds-btn");
     const recordKillButton = event.target.closest(".btn-record-kill");
     const markRemovedButton = event.target.closest(".btn-mark-removed");
+    const deploymentButton = event.target.closest(".deployment-btn");
 
     // Only allow reset button on inactive cards
     if (isInactive) {
@@ -1386,6 +1436,10 @@ export function handleInteractionClick(event) {
       _handleRecordKillClick(event);
     } else if (markRemovedButton) {
       _handleMarkRemovedClick(event);
+    }
+    if (deploymentButton) {
+      _handleDeploymentButtonClick(deploymentButton, armyId, cardUnitId);
+      return;
     }
 
     return; // Stop processing after handling card interaction
@@ -1478,9 +1532,8 @@ export function updateGameControlButtons() {
     console.warn("Control buttons or show results container not found for update.");
     return;
   }
-
-  const isFinished = getIsGameFinished();
   const round = getCurrentRound();
+  const phase = getCurrentPhase();
   const armyId = getCurrentArmyId(); // Get current army ID for context
 
   // Clear previous listeners to avoid stacking
@@ -1491,53 +1544,72 @@ export function updateGameControlButtons() {
   showResultsBtnContainer.innerHTML = ""; // Clear any existing button
   showResultsBtnContainer.classList.add("d-none");
 
-  if (isFinished) {
-    console.debug("DEBUG: Game is finished. Setting up 'Show Results' button.");
-    // Hide Start/Next Round and End Game buttons
-    startRoundBtn.classList.add("d-none");
-    startRoundBtn.disabled = true;
-    endGameBtn.classList.add("d-none");
-    endGameBtn.disabled = true;
+  // Common setup
+  startRoundBtn.classList.remove("d-none", "btn-info");
+  startRoundBtn.classList.add("btn-success");
 
-    // Create and show the dedicated "Show Results" button
-    const showResultsButton = document.createElement("button");
-    showResultsButton.id = "show-game-results-button"; // Give it an ID
-    showResultsButton.type = "button";
-    showResultsButton.className = "btn btn-sm btn-info";
-    showResultsButton.innerHTML = `<i class="bi bi-clipboard-data-fill"></i> Show Final Results`;
-    showResultsButton.disabled = !armyId;
-    showResultsButton.title = "View the final game results again";
-    if (armyId) {
-      showResultsButton.onclick = _handleShowResultsClick;
-    }
-
-    showResultsBtnContainer.appendChild(showResultsButton);
-    showResultsBtnContainer.classList.remove("d-none"); // Make the container visible
-  } else {
-    console.debug("DEBUG: Game is in progress. Setting up Start/End game buttons.");
-    // Game in progress or not started
-    startRoundBtn.classList.remove("d-none");
-    endGameBtn.classList.remove("d-none"); // Might be hidden again below if round 0
-
-    startRoundBtn.classList.remove("btn-info");
-    startRoundBtn.classList.add("btn-success");
-    startRoundBtn.onclick = armyId ? () => handleStartRoundClick(armyId) : null;
-
-    if (round === 0) {
-      startRoundBtn.innerHTML = `<i class="bi bi-play-fill"></i> Start Game`;
-      startRoundBtn.disabled = !armyId;
+  switch (phase) {
+    case "postgame":
+      startRoundBtn.classList.add("d-none");
+      startRoundBtn.disabled = true;
       endGameBtn.classList.add("d-none");
       endGameBtn.disabled = true;
-    } else {
+
+      const showResultsButton = document.createElement("button");
+      showResultsButton.id = "show-game-results-button";
+      showResultsButton.type = "button";
+      showResultsButton.className = "btn btn-sm btn-info";
+      showResultsButton.innerHTML = `<i class="bi bi-clipboard-data-fill"></i> Show Final Results`;
+      showResultsButton.disabled = !armyId;
+      if (armyId) showResultsButton.onclick = _handleShowResultsClick;
+
+      showResultsBtnContainer.appendChild(showResultsButton);
+      showResultsBtnContainer.classList.remove("d-none");
+      break;
+
+    case "pregame":
+      startRoundBtn.innerHTML = `<i class="bi bi-play-fill"></i> Start Deployment`;
+      startRoundBtn.disabled = !armyId;
+      startRoundBtn.onclick = armyId ? () => handleStartRoundClick(armyId) : null;
+      endGameBtn.classList.add("d-none");
+      endGameBtn.disabled = true;
+      break;
+
+    case "deployment":
+      const deploymentComplete = armyId ? isDeploymentComplete(armyId) : false;
+
+      if (deploymentComplete) {
+        startRoundBtn.innerHTML = `<i class="bi bi-arrow-right-circle-fill"></i> Begin Round 1`;
+        startRoundBtn.disabled = false;
+        startRoundBtn.classList.remove("disabled");
+        startRoundBtn.onclick = () => handleStartRoundClick(armyId);
+      } else {
+        startRoundBtn.innerHTML = `<i class="bi bi-hourglass"></i> Deploy Units`;
+        startRoundBtn.disabled = true;
+        startRoundBtn.classList.add("disabled");
+        startRoundBtn.onclick = null;
+      }
+      endGameBtn.classList.add("d-none");
+      endGameBtn.disabled = true;
+      break;
+
+    case "active":
       startRoundBtn.innerHTML = `<i class="bi bi-arrow-repeat"></i> Next Round`;
       startRoundBtn.disabled = !armyId;
+      startRoundBtn.onclick = armyId ? () => handleStartRoundClick(armyId) : null;
       endGameBtn.classList.remove("d-none");
       endGameBtn.disabled = !armyId;
       endGameBtn.onclick = armyId ? _handleEndGameClick : null;
-    }
+      break;
+
+    default:
+      console.warn(`Unknown phase: ${phase}`);
+      startRoundBtn.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Error`;
+      startRoundBtn.disabled = true;
+      endGameBtn.classList.add("d-none");
+      endGameBtn.disabled = true;
   }
-  updateRoundUI(round);
-  console.debug(`DEBUG: Control buttons updated. isFinished=${isFinished}, round=${round}`);
+  console.debug(`DEBUG: Control buttons updated. phase=${phase}, round=${round}`);
 }
 
 /**

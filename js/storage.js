@@ -143,13 +143,13 @@ function loadGameState() {
       } else {
         console.warn("Invalid global game state data found. Resetting to default.");
         localStorage.removeItem(config.GAME_STATE_KEY);
-        return { currentRound: 0 }; // Default state
+        return { currentRound: 0, currentPhase: "pregame"  }; // Default state
       }
     }
-    return { currentRound: 0 }; // Default state if nothing stored
+    return { currentRound: 0, currentPhase: "pregame" }; // Default state if nothing stored
   } catch (error) {
     console.error("Error loading global game state:", error);
-    return { currentRound: 0 }; // Default on error
+    return { currentRound: 0, currentPhase: "pregame"  }; // Default on error
   }
 }
 

@@ -34,6 +34,8 @@ import {
   getSelectedDoctrine,
   getCurrentRound,
   setCurrentRound,
+  getCurrentPhase,
+  setCurrentPhase,
   incrementCurrentRound,
   getUnitStateValue,
   updateUnitStateValue,
@@ -50,7 +52,7 @@ import {
   getJoinedHeroData,
 } from "./state.js";
 import { loadArmyState, saveArmyState } from "./storage.js";
-import { displayArmyUnits } from "./ui.js";
+import { displayArmyUnits, updateAllUnitsForPhase } from "./ui.js";
 import {
   displayArmySelection,
   populateArmyInfoModal,
@@ -684,6 +686,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     titleH1.textContent = displayName;
     populateArmyInfoModal(armyInfo);
     displayArmyUnits(processedArmy, mainListContainer); // Render units
+
+    if (getCurrentRound() === 0) {
+      updateAllUnitsForPhase(armyIdToLoad);
+    }
+
     _initializeWoundHighlights(armyIdToLoad); // Highlight first wound target
     populateUnitOffcanvas(processedArmy); // Populate offcanvas
     setupBackToTopButton(); // Setup back-to-top
@@ -726,7 +733,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     console.debug("DEBUG: Application initialization complete.");
   } catch (error) {
-    // Catch errors during the main initialization sequencef
+    // Catch errors during the main initialization sequence
     console.error(
       `DEBUG: An error occurred during initialization for army ${armyIdToLoad}:`,
       error

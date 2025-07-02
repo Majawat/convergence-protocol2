@@ -16,6 +16,7 @@ import {
   getUnderdogPoints,
   getMaxUnderdogPoints,
   getUnitStateValue,
+  getCurrentPhase,
   getCurrentArmyHeroTargets,
   getLoadedArmyData,
 } from "./state.js";
@@ -717,6 +718,7 @@ export function displayStratagems(armyId, selectedDoctrineId) {
  */
 export function updateRoundUI(roundNumber) {
   const startRoundButton = document.getElementById("start-round-button");
+  const currentPhase = getCurrentPhase();
   let roundDisplayElement = document.getElementById("round-display"); // Try to find existing
 
   // Create round display element if it doesn't exist
@@ -745,19 +747,10 @@ export function updateRoundUI(roundNumber) {
   // Update Round Display Text
   if (roundNumber >= 1) {
     roundDisplayElement.textContent = `Round ${roundNumber}`;
+  } else if (currentPhase === "deployment") {
+    roundDisplayElement.textContent = "Deployment Phase"; // Show deployment phase for round 0
   } else {
-    roundDisplayElement.textContent = ""; // Clear display for round 0 or pre-game
-  }
-
-  // Update Start/Next Button Text/HTML
-  if (startRoundButton) {
-    if (roundNumber >= 1) {
-      startRoundButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Next Round`;
-    } else {
-      startRoundButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Start Game`;
-    }
-  } else {
-    console.warn("Start/Next Round button not found for UI update.");
+    roundDisplayElement.textContent = ""; // Clear display for or pre-game
   }
 }
 

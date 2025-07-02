@@ -372,9 +372,7 @@ function _mergeCombinedUnits(unitA, unitB) {
   const mergedUnit = unitB;
 
   // Combine names
-  mergedUnit.customName = mergedUnit.customName
-    ? `${mergedUnit.customName} & ${unitA.customName || unitA.originalName}`
-    : `${mergedUnit.originalName} & ${unitA.customName || unitA.originalName}`;
+  //mergedUnit.customName = mergedUnit.customName? `${mergedUnit.customName} & ${unitA.customName || unitA.originalName}` : `${mergedUnit.originalName} & ${unitA.customName || unitA.originalName}`;
 
   // Combine basic stats
   mergedUnit.size += unitA.size;

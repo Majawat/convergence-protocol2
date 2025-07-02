@@ -2,7 +2,7 @@
  * @fileoverview Handles displaying army data and UI elements for interaction.
  */
 
-import { config, UI_ICONS, ACTION_BUTTON_CONFIG } from "./config.js"; // Configuration constants
+import { config, UI_ICONS, ACTION_BUTTON_CONFIG, DEPLOYMENT_BUTTON_CONFIG } from "./config.js"; // Configuration constants
 import { calculateMovement } from "./gameLogic.js";
 import {
   getUnitStateValue,
@@ -10,6 +10,10 @@ import {
   getUnitState,
   getAllLoadedArmyData,
   getUnitData,
+  getUnitDeploymentOptions,
+  getCurrentRound,
+  getCurrentPhase,
+  getDeploymentStatus,
   getArmyNameById,
 } from "./state.js";
 // --- Helper Functions ---
@@ -118,6 +122,7 @@ function _createUnitCardHeaderHTML(baseUnit, hero, armyId) {
   const title = hero
     ? `${hero.customName || hero.originalName} w/ ${baseUnit.customName || baseUnit.originalName}`
     : baseUnit.customName || baseUnit.originalName;
+  console.debug(`DEBUG: Creating header for unit - ${title}`);
   const subtitle = hero
     ? `${hero.originalName} and ${baseUnit.originalName}`
     : baseUnit.originalName;
@@ -449,6 +454,125 @@ function updateActionButtonsUI(unitId, activeAction, isShaken = false) {
       recoverButton.disabled = true;
     }
   }
+}
+
+function _createDeploymentControlsHTML(unitId, armyId) {
+  const deploymentStatus = getDeploymentStatus(armyId, unitId);
+  const availableOptions = getUnitDeploymentOptions(unitId);
+
+  let buttonsHTML = "";
+
+  availableOptions.forEach((option) => {
+    const config = DEPLOYMENT_BUTTON_CONFIG[option];
+    if (!config) return;
+
+    const isSelected = deploymentStatus === option;
+    const buttonClass = isSelected
+      ? `btn-${config.colorTheme}`
+      : `btn-outline-${config.colorTheme}`;
+
+    buttonsHTML += `<button
+      type="button"
+      class="btn ${buttonClass} deployment-btn"
+      data-deployment="${option}"
+      data-unit-id="${unitId}"
+      data-army-id="${armyId}"
+      title="${config.description}">
+      ${config.icon}<span class="deployment-text">${config.text}</span>
+    </button>`;
+  });
+
+  return `<div class="deployment-controls">
+    <div class="btn-group w-100" role="group" aria-label="Deployment Options">${buttonsHTML}</div>
+  </div>`;
+}
+
+export function updateDeploymentButtonsUI(unitId, deploymentStatus) {
+  const cardElement = document.getElementById(`unit-card-${unitId}`);
+  if (!cardElement) return;
+
+  const deploymentButtons = cardElement.querySelectorAll(".deployment-btn");
+
+  deploymentButtons.forEach((button) => {
+    const buttonDeployment = button.dataset.deployment;
+    const config = DEPLOYMENT_BUTTON_CONFIG[buttonDeployment];
+    if (!config) return;
+
+    button.classList.remove(
+      "btn-success",
+      "btn-info",
+      "btn-warning",
+      "btn-secondary",
+      "btn-outline-success",
+      "btn-outline-info",
+      "btn-outline-warning",
+      "btn-outline-secondary"
+    );
+
+    if (deploymentStatus === buttonDeployment) {
+      button.classList.add(`btn-${config.colorTheme}`);
+    } else {
+      button.classList.add(`btn-outline-${config.colorTheme}`);
+    }
+  });
+}
+
+export function updateUnitControlsForPhase(unitId, armyId) {
+  const currentRound = getCurrentRound();
+  const currentPhase = getCurrentPhase();
+  const cardElement = document.getElementById(`unit-card-${unitId}`);
+  if (!cardElement) return;
+
+  const actionControls = cardElement.querySelector(".action-controls");
+  const deploymentControls = cardElement.querySelector(".deployment-controls");
+  const manualControls = cardElement.querySelector(".manual-triggers");
+
+  console.debug(
+    `Deployment: currentRound=${currentRound}, currentPhase:${currentPhase}, unitId=${unitId}, armyId=${armyId}`
+  );
+  if (currentPhase === "pregame") {
+    if (actionControls) actionControls.style.display = "none";
+    if (deploymentControls) deploymentControls.style.display = "none";
+    if (manualControls) manualControls.style.display = "none";
+
+    // Reset all action buttons to default state
+    resetAllActionButtonsUI();
+  } else if (currentPhase === "deployment") {
+    if (actionControls) actionControls.style.display = "none";
+    if (manualControls) manualControls.style.display = "none";
+
+    if (!deploymentControls && currentPhase === "deployment") {
+      const deploymentHTML = _createDeploymentControlsHTML(unitId, armyId);
+      if (actionControls) {
+        actionControls.insertAdjacentHTML("afterend", deploymentHTML);
+      } else {
+        const cardBody = cardElement.querySelector(".card-body");
+        if (cardBody) {
+          cardBody.insertAdjacentHTML("beforeend", deploymentHTML);
+        }
+      }
+    } else {
+      deploymentControls.style.display = "block";
+    }
+
+    const deploymentStatus = getDeploymentStatus(armyId, unitId);
+    updateDeploymentButtonsUI(unitId, deploymentStatus);
+  } else {
+    if (deploymentControls) deploymentControls.style.display = "none";
+    if (actionControls) actionControls.style.display = "block";
+    if (manualControls) manualControls.style.display = "block";
+  }
+}
+
+export function updateAllUnitsForPhase(armyId) {
+  const allCards = document.querySelectorAll(".unit-card");
+
+  allCards.forEach((card) => {
+    const unitId = card.dataset.unitId;
+    if (unitId && !card.classList.contains("unit-is-inactive")) {
+      updateUnitControlsForPhase(unitId, armyId);
+    }
+  });
 }
 
 function resetAllActionButtonsUI() {

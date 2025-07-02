@@ -87,3 +87,30 @@ export const ACTION_BUTTON_CONFIG = {
     baseText: " Chg",
   },
 };
+
+export const DEPLOYMENT_BUTTON_CONFIG = {
+  deployed: {
+    colorTheme: "success",
+    icon: `<i class="bi bi-geo-alt-fill" aria-label="Deploy normally"></i>`,
+    text: "Deploy",
+    description: "Deploy normally to the battlefield",
+  },
+  scout: {
+    colorTheme: "info",
+    icon: `<i class="bi bi-binoculars-fill" aria-label="Scout deployment"></i>`,
+    text: "Scout",
+    description: 'Set aside for later deployment',
+  },
+  ambush: {
+    colorTheme: "warning",
+    icon: `<i class="bi bi-eye-slash-fill" aria-label="Ambush deployment"></i>`,
+    text: "Ambush",
+    description: 'Set aside for deployment in subsequent rounds',
+  },
+  embarked: {
+    colorTheme: "secondary",
+    icon: `<i class="bi bi-truck" aria-label="Embark in transport"></i>`,
+    text: "Embark",
+    description: "Deploy inside a transport vehicle",
+  },
+};
