@@ -29,70 +29,94 @@
     </script>
 
     <main class="container mt-4">
-      <div class="d-flex align-items-center justify-content-between gap-3 mb-2 flex-wrap">
-        <h1 id="army-title-h1" class="flex-grow-1 mb-0 me-3">Loading Army...</h1>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <h3 id="round-display" class="mb-0 order-1 order-md-0"></h3>
-          <div id="command-points-display" class="point-display mb-0 order-2 order-md-1">
-            <span class="cp-icon-placeholder"></span> <span>Command: </span>
-            <span id="command-points-value">--</span>
-            <span> / </span>
-            <span id="command-points-max">--</span>
-          </div>
-          <div id="underdog-points-display" class="point-display mb-0 order-3 order-md-2">
-            <span class="up-icon-placeholder"></span> <span>Underdog: </span>
-            <span id="underdog-points-value">--</span>
-            <div
-              class="btn-group btn-group-sm ms-2"
-              role="group"
-              aria-label="Manual Underdog Point Adjust">
-              <button
-                type="button"
-                id="manual-up-remove"
-                class="btn btn-outline-secondary btn-sm"
-                title="Decrease Underdog Points"
-                disabled>
-                -
-              </button>
-              <button
-                type="button"
-                id="manual-up-add"
-                class="btn btn-outline-secondary btn-sm"
-                title="Increase Underdog Points"
-                disabled>
-                +
-              </button>
+      <div class="mb-3">
+        <!-- Title Row -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h1 id="army-title-h1" class="mb-0">Loading Army...</h1>
+          <h3 id="round-display" class="mb-0 text-muted"></h3>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+          <!-- Points Section -->
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div id="command-points-display" class="d-flex align-items-center gap-1">
+              <span class="cp-icon-placeholder"></span>
+              <span class="fw-medium">Cmd Pts:</span>
+              <span class="badge bg-primary" id="command-points-value">--</span>
+              <span class="text-muted">/</span>
+              <span class="text-muted" id="command-points-max">--</span>
+            </div>
+
+            <div id="underdog-points-display" class="d-flex align-items-center gap-1">
+              <span class="up-icon-placeholder"></span>
+              <span class="fw-medium">UD Pts:</span>
+              <span class="badge bg-secondary" id="underdog-points-value">--</span>
+              <div
+                class="btn-group btn-group-sm ms-1"
+                role="group"
+                aria-label="Manual Underdog Point Adjust">
+                <button
+                  type="button"
+                  id="manual-up-remove"
+                  class="btn btn-outline-secondary"
+                  title="Decrease UD Pts"
+                  disabled>
+                  <i class="bi bi-dash-lg"></i>
+                </button>
+                <button
+                  type="button"
+                  id="manual-up-add"
+                  class="btn btn-outline-secondary"
+                  title="Increase UD Pts"
+                  disabled>
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
             </div>
           </div>
-          <div class="d-flex gap-2 order-0 order-md-3">
-            <button
-              id="army-info-button"
-              type="button"
-              class="btn btn-sm btn-outline-info"
-              data-bs-toggle="modal"
-              data-bs-target="#armyInfoModal"
-              disabled>
-              <i class="bi bi-info-circle"></i> Info
-            </button>
-            <button
-              id="stratagems-button"
-              type="button"
-              class="btn btn-sm btn-outline-warning"
-              data-bs-toggle="modal"
-              data-bs-target="#stratagemModal"
-              disabled>
-              <i class="bi bi-journal-bookmark-fill"></i> Stratagems
-            </button>
-            <button id="start-round-button" type="button" class="btn btn-sm btn-success" disabled>
-              <i class="bi bi-arrow-repeat"></i> Loading
-            </button>
-            <button
-              id="end-game-button"
-              type="button"
-              class="btn btn-sm btn-warning d-none"
-              title="Calculate XP and view game results">
-              <i class="bi bi-check2-square"></i> End Game
-            </button>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 flex-wrap">
+            <div class="btn-group btn-group-sm" role="group">
+              <button
+                id="army-info-button"
+                type="button"
+                class="btn btn-outline-info"
+                data-bs-toggle="modal"
+                data-bs-target="#armyInfoModal"
+                disabled>
+                <i class="bi bi-info-circle"></i>
+                <span class="d-none d-sm-inline"> Info</span>
+              </button>
+              <button
+                id="stratagems-button"
+                type="button"
+                class="btn btn-outline-warning"
+                data-bs-toggle="modal"
+                data-bs-target="#stratagemModal"
+                disabled>
+                <i class="bi bi-journal-bookmark-fill"></i>
+                <span class="d-none d-sm-inline"> Stratagems</span>
+              </button>
+            </div>
+
+            <div class="btn-group btn-group-sm" role="group">
+              <button id="start-round-button" type="button" class="btn btn-success" disabled>
+                <i class="bi bi-arrow-repeat"></i>
+                <span class="d-none d-sm-inline"> Start Game</span>
+              </button>
+              <button
+                id="end-game-button"
+                type="button"
+                class="btn btn-warning"
+                title="Calculate XP and view game results"
+                disabled>
+                <i class="bi bi-check2-square"></i>
+                <span class="d-none d-sm-inline"> End Game</span>
+              </button>
+            </div>
+
             <div id="show-results-button-container" class="d-none"></div>
           </div>
         </div>
@@ -215,7 +239,7 @@
               <div
                 id="modal-command-points-display"
                 class="fw-bold fs-5 d-flex align-items-center gap-1">
-                <span class="cp-icon-placeholder"></span> <span>Points: </span>
+                <span class="cp-icon-placeholder"></span> <span>Cmd Pts: </span>
                 <span id="modal-command-points-value">--</span>
                 <span> / </span>
                 <span id="modal-command-points-max">--</span>

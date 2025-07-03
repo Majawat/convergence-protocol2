@@ -831,18 +831,17 @@ export function updateUnderdogPointsDisplay(armyId, currentPoints, maxPoints) {
   const isCalculating = typeof currentPoints === "string";
 
   if (upValueElement) {
-    upValueElement.textContent = isCalculating ? currentPoints : `${currentPoints} / ${maxPoints}`;
+    // Change from "X / Y" format to just "X" since it's now a badge
+    upValueElement.textContent = isCalculating ? currentPoints : currentPoints;
   }
 
   if (upIconPlaceholder) {
     upIconPlaceholder.innerHTML =
-      UI_ICONS.underdogPoints || '<i class="bi bi-question-circle"></i>'; // Fallback icon
-    // Optionally change icon color based on points/state
+      UI_ICONS.underdogPoints || '<i class="bi bi-question-circle"></i>';
     upIconPlaceholder.classList.toggle("text-secondary", !isCalculating && currentPoints <= 0);
-    upIconPlaceholder.classList.toggle("text-info", !isCalculating && currentPoints > 0); // Use info color for UP
+    upIconPlaceholder.classList.toggle("text-info", !isCalculating && currentPoints > 0);
   }
 
-  // Enable/disable manual adjust buttons
   if (removeUpButton) removeUpButton.disabled = isCalculating || currentPoints <= 0;
   if (addUpButton) addUpButton.disabled = isCalculating || currentPoints >= maxPoints;
 }

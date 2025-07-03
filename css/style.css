@@ -48,7 +48,9 @@ body {
   flex-direction: column;
   height: 100%;
   overflow: hidden; /* Prevent content overflow issues */
-  transition: opacity 0.3s ease, filter 0.3s ease; /* Added for destroyed/routed */
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease; /* Added for destroyed/routed */
 }
 
 .unit-card .card-body {
@@ -193,7 +195,9 @@ body {
 
 .model-hp-bar {
   height: 100%;
-  transition: width 0.3s ease, background-color 0.3s ease;
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease;
 }
 
 .model-hp-text {
@@ -549,19 +553,6 @@ body {
   z-index: 1100; /* Ensure toasts appear above modals if necessary */
 }
 
-/* Command Points Display */
-#command-points-display {
-  font-size: 1.1rem;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  padding: 0.2em 0.5em;
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-tertiary-bg);
-  border: 1px solid var(--bs-border-color);
-}
-
 #command-points-value {
   font-weight: bold;
 }
@@ -574,19 +565,6 @@ body {
 
 .cp-icon-placeholder.text-secondary .bi {
   color: var(--bs-secondary); /* Color when points are zero */
-}
-
-/* Underdog Points Display */
-#underdog-points-display {
-  font-size: 1rem; /* Slightly smaller than CP */
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  padding: 0.2em 0.5em;
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-tertiary-bg);
-  border: 1px solid var(--bs-border-color);
 }
 
 #underdog-points-value {
