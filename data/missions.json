@@ -214,26 +214,59 @@
       "winningArmy": "The Ashen Pact"
     },
     {
-      "number": 5,
-      "title": "The Rift Unleashed",
-      "points": 1800,
-      "datetime": "2025-07-19T10:00:00-05:00",
-      "month": "July",
-      "status": "current",
-      "overview": "The Nexus' unstable energy fractures reality, opening dimensional rifts that pour forth unknown horrors.",
-      "objective": {
-        "primary": "",
-        "secondary": []
-      },
-      "specialRules": [],
-      "victoryConditions": {
-        "primary": "",
-        "rewards": []
-      },
-      "battleReportFile": null,
-      "winner": null,
-      "winningArmy": null
+  "number": 5,
+  "title": "The Rift Unleashed",
+  "points": 1800,
+  "datetime": "2025-05-25T10:00:00-05:00",
+  "month": "July",
+  "status": "current",
+  "overview": "The AI's reality experiments have torn open a dimensional rift. Hostile entities pour through, threatening to destroy the very intelligence all factions seek to control. Protect the AI while fighting for dominance—if it falls, everyone loses.",
+  "objective": {
+    "primary": "Control the AI Objective at game end to win. If the AI Objective is destroyed, all players lose.",
+    "secondary": []
+  },
+  "deployment": "Players deploy their forces within their chosen table quarter, at least 9\" away from the center of the table.",
+  "terrainSuggestions": [
+    {
+      "name": "AI Objective",
+      "description": "A central objective marker representing the AI core. Stats: Defense 2, Tough(12). Can be controlled like a normal objective but also takes damage like a unit."
     },
+    {
+      "name": "Dimensional Portal",
+      "description": "Placed in the corner opposite the AI Objective. Cannot be attacked, controlled, or moved. Source of all NPC spawns."
+    }
+  ],
+  "specialRules": [
+    {
+      "name": "NPC Spawning",
+      "description": "At the start of each round, spawn NPCs at the Portal:<ul><li><strong>Round 1:</strong> 1 Rift Spawn</li><li><strong>Round 2:</strong> 2 Rift Spawns</li><li><strong>Round 3:</strong> 2 Rift Spawns + 1 Rift Horror</li><li><strong>Round 4+:</strong> 3 Rift Spawns + 1 Rift Horror</li></ul><strong>Rift Spawn:</strong> Q4+ D4+ Tough(1), A2<br><strong>Rift Horror:</strong> Q3+ D3+ Tough(3), A3, AP(1)"
+    },
+    {
+      "name": "NPC Behavior",
+      "description": "NPCs activate at the end of every player turn (not just rounds):<ul><li><strong>Movement:</strong> Move toward AI Objective by shortest route</li><li><strong>Target Priority:</strong> If in contact with AI, attack it. Otherwise, attack the reachable player unit with the least remaining wounds</li><li><strong>Special:</strong> NPCs ignore morale and special rules</li></ul>"
+    },
+    {
+      "name": "Collective Failure",
+      "description": "If the AI Objective is destroyed, all players immediately lose regardless of board position or score."
+    }
+  ],
+  "victoryConditions": {
+    "primary": "The player who controls the AI Objective at game end wins. If the AI Objective is destroyed, all players lose.",
+    "rewards": [
+      {
+        "condition": "Victory",
+        "description": "The winning faction gains primary influence over the AI's development and access to the fourth piece of the Axiom data. Their actions in defending or exploiting the rift crisis will shape the AI's next evolutionary phase."
+      },
+      {
+        "condition": "Collective Failure",
+        "description": "If the AI is destroyed, the dimensional rift becomes uncontrolled, dramatically altering the campaign's direction and giving all factions a major setback in their goals."
+      }
+    ]
+  },
+  "battleReportFile": null,
+  "winner": null,
+  "winningArmy": null
+}
     {
       "number": 6,
       "title": "The Siege of the Core",
