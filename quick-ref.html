@@ -386,63 +386,52 @@
             <div class="card current-mission-card">
               <div class="card-header">
                 <h4 class="mb-0 card-title-custom">
-                  Current Mission: Axiom Protocol Calibration (M4)
+                  Current Mission: The Rift Unleashed (M5)
                 </h4>
               </div>
               <div class="card-body">
                 <div class="mission-section pt-0 mt-0">
                   <h6>Primary Objective:</h6>
                   <p>
-                    Sole control of central <strong>"Axiom Confluence"</strong> at end of Round 4
-                    wins. Contested: most models win. Tie: draw.
+                    Control the <strong>"AI Objective"</strong> at game end to win. If AI Objective
+                    is destroyed, <strong>ALL PLAYERS LOSE</strong>.
                   </p>
                 </div>
                 <div class="mission-section">
-                  <h6>Deployment & XP:</h6>
-                  <p><strong>Deployment:</strong>Chosen quarter as ususal, >= 9" from center.</p>
-                  <p>
-                    <strong>XP:</strong> End Rounds 1-3, unit with sole control of Axiom (survived
-                    Event) gets +D3 XP.
-                  </p>
+                  <h6>Deployment:</h6>
+                  <p><strong>Deployment:</strong> Chosen quarter as usual, >= 9" from center.</p>
                 </div>
                 <div class="mission-section">
-                  <h6>Special Rule: Axiom Confluence Event</h6>
+                  <h6>Special Rule: NPC Spawning</h6>
                   <p class="small-text mb-1">
-                    Start of Rounds 1-4 (after init, before 1st turn). Controller (or 1st player if
-                    none/contested) rolls D6 for what warrior is deployed
+                    Start of each round, spawn NPCs at Dimensional Portal:
                   </p>
                   <ul class="small-text">
-                    <li>
-                      <strong>(Warrior Deployed):</strong> Ancient Warrior unit spawns (see stats in
-                      'Spawned Warrior Units' card below). Roller picks type (D6):
-                      <ul class="ps-3">
-                        <li><strong>1-3:</strong> Elite Construct-Sorcerer</li>
-                        <li><strong>4:</strong> Unstable Automaton</li>
-                        <li><strong>5:</strong> Containment Wardens (x3)</li>
-                        <li><strong>6 (Wild Surge):</strong> Unit takes D3 hits (AP0)</li>
-                      </ul>
-                    </li>
-                    <li class="mt-1">
-                      <strong>Spawn:</strong> Within 1" of next Stasis Pod (1-4, once per pod). If
-                      all used, no more warriors.
-                    </li>
-                    <li>
-                      <strong>Control:</strong> Activates immediately (by player to left of event
-                      roller). Hostile to Axiom controller (or closest). Then neutral, attacks
-                      nearest end of rounds.
-                    </li>
+                    <li><strong>Round 1:</strong> 1 Rift Spawn, 1 Rift Horror</li>
+                    <li><strong>Round 2:</strong> 2 Rift Spawns, 1 Rift Horror</li>
+                    <li><strong>Round 3:</strong> 2 Rift Spawns, 1 Rift Horror, 1 Rift Monstrosity</li>
+                    <li><strong>Round 4+:</strong> <em>ALL Hell Breaks Loose</em></li>
                   </ul>
                 </div>
                 <div class="mission-section">
+                  <h6>NPC Behavior:</h6>
+                  <p class="small-text">
+                    NPCs activate at end of every player turn. Move toward AI Objective. If in
+                    contact with AI, attack it. Otherwise, attack player unit with least wounds.
+                  </p>
+                </div>
+                <div class="mission-section">
                   <h6>Victory:</h6>
-                  <p class="small-text">Sole control of Axiom Confluence (end of Round 4) wins.</p>
+                  <p class="small-text">
+                    Control AI Objective at game end wins. If AI destroyed, everyone loses.
+                  </p>
                 </div>
               </div>
             </div>
 
             <div class="card mt-2">
               <div class="card-header">
-                <h4 class="mb-0 card-title-custom">Spawned Warrior Units</h4>
+                <h4 class="mb-0 card-title-custom">NPC Units</h4>
               </div>
               <div class="card-body p-1">
                 <div class="row gx-1 gy-1 spawned-warriors-row">
@@ -450,9 +439,80 @@
                     <div class="card warrior-unit-card shadow-sm border-danger-subtle">
                       <div class="card-header bg-danger-subtle text-dark">
                         <div class="unit-card-header-content">
-                          <h5 class="mb-0 card-title-custom">Elite Sorcerer-Construct</h5>
+                          <h5 class="mb-0 card-title-custom">Rift Spawn</h5>
                           <small class="text-muted d-block"
-                            >Military Protocol Asset - 1 Model</small
+                            >Dimensional Invader - 1 Model</small
+                          >
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <div class="effective-stats">
+                          <div class="stat-item" title="Quality">
+                            <svg
+                              class="stat-icon lg-stat-icon"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 16 16"
+                              fill="currentColor">
+                              <title>Quality</title>
+                              <path
+                                style="fill: #ad3e25"
+                                d="m8 0 1.669.864 1.858.282.842 1.68 1.337 1.32L13.4 6l.306 1.854-1.337 1.32-.842 1.68-1.858.282L8 12l-1.669-.864-1.858-.282-.842-1.68-1.337-1.32L2.6 6l-.306-1.854 1.337-1.32.842-1.68L6.331.864z" />
+                              <path
+                                style="fill: #f9ddb7"
+                                d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
+                            </svg>
+                            <span>4+</span>
+                          </div>
+                          <div class="stat-item" title="Defense">
+                            <i class="bi bi-shield-fill stat-icon" style="color: #005f83"></i
+                            ><span>4+</span>
+                          </div>
+                          <div class="stat-item" title="Toughness">
+                            <i class="bi bi-heart-fill stat-icon" style="color: #c82333"></i
+                            ><span>Tough 1</span>
+                          </div>
+                        </div>
+                        <hr class="my-1" />
+                        <div class="details-section">
+                          <div class="mb-1">
+                            <strong class="d-block">Rules:</strong>
+                            <span class="rules-list-item">-</span>
+                          </div>
+                          <div>
+                            <strong class="d-block">Weapons:</strong>
+                            <table
+                              class="table table-sm table-borderless table-striped mb-0 weapon-table">
+                              <thead>
+                                <tr>
+                                  <th>Weapon</th>
+                                  <th class="text-center">Range</th>
+                                  <th class="text-center">Attacks</th>
+                                  <th class="text-center">AP</th>
+                                  <th class="text-center">Special</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Claws</td>
+                                  <td class="text-center">-</td>
+                                  <td class="text-center">A2</td>
+                                  <td class="text-center">-</td>
+                                  <td>-</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card warrior-unit-card shadow-sm border-warning-subtle">
+                      <div class="card-header bg-warning-subtle text-dark">
+                        <div class="unit-card-header-content">
+                          <h5 class="mb-0 card-title-custom">Rift Horror</h5>
+                          <small class="text-muted d-block"
+                            >Dimensional Invader - 1 Model</small
                           >
                         </div>
                       </div>
@@ -487,7 +547,7 @@
                         <div class="details-section">
                           <div class="mb-1">
                             <strong class="d-block">Rules:</strong>
-                            <span class="rules-list-item">Relentless</span>
+                            <span class="rules-list-item">-</span>
                           </div>
                           <div>
                             <strong class="d-block">Weapons:</strong>
@@ -504,87 +564,9 @@
                               </thead>
                               <tbody>
                                 <tr>
-                                  <td>Force Staff</td>
+                                  <td>Horror Claws</td>
                                   <td class="text-center">-</td>
                                   <td class="text-center">A3</td>
-                                  <td class="text-center">2</td>
-                                  <td>-</td>
-                                </tr>
-                                <tr>
-                                  <td>Bolt Pistol</td>
-                                  <td class="text-center">12"</td>
-                                  <td class="text-center">A1</td>
-                                  <td class="text-center">1</td>
-                                  <td>-</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="card warrior-unit-card shadow-sm border-warning-subtle">
-                      <div class="card-header bg-warning-subtle text-dark">
-                        <div class="unit-card-header-content">
-                          <h5 class="mb-0 card-title-custom">Unstable Automaton</h5>
-                          <small class="text-muted d-block"
-                            >Benevolent Protocol Asset - 1 Model</small
-                          >
-                        </div>
-                      </div>
-                      <div class="card-body">
-                        <div class="effective-stats">
-                          <div class="stat-item" title="Quality">
-                            <svg
-                              class="stat-icon lg-stat-icon"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 16 16"
-                              fill="currentColor">
-                              <title>Quality</title>
-                              <path
-                                style="fill: #ad3e25"
-                                d="m8 0 1.669.864 1.858.282.842 1.68 1.337 1.32L13.4 6l.306 1.854-1.337 1.32-.842 1.68-1.858.282L8 12l-1.669-.864-1.858-.282-.842-1.68-1.337-1.32L2.6 6l-.306-1.854 1.337-1.32.842-1.68L6.331.864z" />
-                              <path
-                                style="fill: #f9ddb7"
-                                d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
-                            </svg>
-                            <span>5+</span>
-                          </div>
-                          <div class="stat-item" title="Defense">
-                            <i class="bi bi-shield-fill stat-icon" style="color: #005f83"></i
-                            ><span>5+</span>
-                          </div>
-                          <div class="stat-item" title="Toughness">
-                            <i class="bi bi-heart-fill stat-icon" style="color: #c82333"></i
-                            ><span>Tough 3</span>
-                          </div>
-                        </div>
-                        <hr class="my-1" />
-                        <div class="details-section">
-                          <div class="mb-1">
-                            <strong class="d-block">Rules:</strong>
-                            <span class="rules-list-item">Slow</span>
-                          </div>
-                          <div>
-                            <strong class="d-block">Weapons:</strong>
-                            <table
-                              class="table table-sm table-borderless table-striped mb-0 weapon-table">
-                              <thead>
-                                <tr>
-                                  <th>Weapon</th>
-                                  <th class="text-center">Range</th>
-                                  <th class="text-center">Attacks</th>
-                                  <th class="text-center">AP</th>
-                                  <th class="text-center">Special</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr>
-                                  <td>Claws & Fangs</td>
-                                  <td class="text-center">-</td>
-                                  <td class="text-center">A(D3+2)</td>
                                   <td class="text-center">1</td>
                                   <td>-</td>
                                 </tr>
@@ -599,9 +581,9 @@
                     <div class="card warrior-unit-card shadow-sm border-info-subtle">
                       <div class="card-header bg-info-subtle text-dark">
                         <div class="unit-card-header-content">
-                          <h5 class="mb-0 card-title-custom">Containment Wardens</h5>
+                          <h5 class="mb-0 card-title-custom">Rift Monstrosity</h5>
                           <small class="text-muted d-block"
-                            >Containment Protocol Asset - 3 Models</small
+                            >Dimensional Invader - 1 Model</small
                           >
                         </div>
                       </div>
@@ -621,22 +603,22 @@
                                 style="fill: #f9ddb7"
                                 d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
                             </svg>
-                            <span>4+</span>
+                            <span>3+</span>
                           </div>
                           <div class="stat-item" title="Defense">
                             <i class="bi bi-shield-fill stat-icon" style="color: #005f83"></i
-                            ><span>4+</span>
+                            ><span>2+</span>
                           </div>
                           <div class="stat-item" title="Toughness">
                             <i class="bi bi-heart-fill stat-icon" style="color: #c82333"></i
-                            ><span>3x Tough 1</span>
+                            ><span>Tough 12</span>
                           </div>
                         </div>
                         <hr class="my-1" />
                         <div class="details-section">
                           <div class="mb-1">
                             <strong class="d-block">Rules:</strong>
-                            <span class="rules-list-item">Fast</span>
+                            <span class="rules-list-item">-</span>
                           </div>
                           <div>
                             <strong class="d-block">Weapons:</strong>
@@ -653,17 +635,17 @@
                               </thead>
                               <tbody>
                                 <tr>
-                                  <td>3x Guardian Carbine</td>
-                                  <td class="text-center">18"</td>
-                                  <td class="text-center">A1</td>
+                                  <td>Ranged</td>
                                   <td class="text-center">-</td>
-                                  <td>-</td>
+                                  <td class="text-center">A2</td>
+                                  <td class="text-center">1</td>
+                                  <td>Blast(6)</td>
                                 </tr>
                                 <tr>
-                                  <td>CCW</td>
+                                  <td>Melee</td>
                                   <td class="text-center">-</td>
-                                  <td class="text-center">A1</td>
-                                  <td class="text-center">-</td>
+                                  <td class="text-center">A8</td>
+                                  <td class="text-center">2</td>
                                   <td>-</td>
                                 </tr>
                               </tbody>
