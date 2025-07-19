@@ -101,6 +101,7 @@ function _initializeProcessedUnit(rawUnit) {
     canJoinUnitId: null,
     casterLevel: 0,
     xp: rawUnit.xp || 0,
+    notes: rawUnit.notes || null,
     toughnessUpgrades: [],
     _baseToughValue: (rawUnit.rules || []).find((rule) => rule.name === "Tough")?.rating
       ? parseInt((rawUnit.rules || []).find((rule) => rule.name === "Tough").rating, 10) || 0

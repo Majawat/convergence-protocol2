@@ -990,6 +990,11 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
             _formatRule
           )}
         </div>
+        ${
+          hero.notes
+            ? `<div class="mt-2"><strong class="d-block">Notes:</strong> <span class="text-body-secondary">${hero.notes}</span></div>`
+            : ""
+        }
       </div>`;
       const unitBase = baseUnit.bases?.round || baseUnit.bases?.square;
       const unitRules = baseUnit.rules
@@ -1055,6 +1060,11 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
             _formatRule
           )}
         </div>
+        ${
+          baseUnit.notes
+            ? `<div class="mt-2"><strong class="d-block">Notes:</strong> <span class="text-body-secondary">${baseUnit.notes}</span></div>`
+            : ""
+        }
       </div>`;
     } else {
       // Normal unit display logic...
@@ -1104,6 +1114,11 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
             _formatRule
           )}
         </div>
+        ${
+          baseUnit.notes
+            ? `<div class="mt-2"><strong class="d-block">Notes:</strong> <span class="text-body-secondary">${baseUnit.notes}</span></div>`
+            : ""
+        }
       </div>`;
     }
     cardBodyContentHTML += `</div>`;
