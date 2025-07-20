@@ -41,9 +41,11 @@ function updateScreenDiagnostics() {
   const themeDisplay = document.getElementById("screenThemeDisplay");
 
   if (widthDisplay) widthDisplay.textContent = `Width: ${window.innerWidth}px`;
-  if (heightDisplay) heightDisplay.textContent = `Height: ${window.innerHeight}px`;
+  if (heightDisplay)
+    heightDisplay.textContent = `Height: ${window.innerHeight}px`;
   if (themeDisplay) {
-    const currentTheme = document.documentElement.getAttribute("data-bs-theme") || "auto";
+    const currentTheme =
+      document.documentElement.getAttribute("data-bs-theme") || "auto";
     themeDisplay.textContent = `Theme: ${currentTheme}`;
   }
 }

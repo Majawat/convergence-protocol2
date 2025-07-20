@@ -20,7 +20,8 @@ import { config } from "./config.js";
    * Stores the theme preference in localStorage.
    * @param {string} theme - The theme to store ('light', 'dark').
    */
-  const setStoredTheme = (theme) => localStorage.setItem(config.THEME_STORAGE_KEY, theme);
+  const setStoredTheme = (theme) =>
+    localStorage.setItem(config.THEME_STORAGE_KEY, theme);
 
   /**
    * Determines the preferred theme based on storage or OS preference.
@@ -33,7 +34,9 @@ import { config } from "./config.js";
       return storedTheme;
     }
     // Default to dark if no preference or storage found
-    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    return window.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
   };
 
   /**
@@ -44,7 +47,8 @@ import { config } from "./config.js";
   const setTheme = (theme, triggeredByClick = false) => {
     let effectiveTheme = theme;
     if (theme === "auto") {
-      effectiveTheme = window.matchMedia("(prefers-color-scheme: light)").matches
+      effectiveTheme = window.matchMedia("(prefers-color-scheme: light)")
+        .matches
         ? "light"
         : "dark";
     }
@@ -77,9 +81,11 @@ import { config } from "./config.js";
 
     // Set the message based on the theme
     if (theme === "light") {
-      toastBody.textContent = "Heretic! Your allegiance to the light mode shall not go unpunished!";
+      toastBody.textContent =
+        "Heretic! Your allegiance to the light mode shall not go unpunished!";
     } else if (theme === "dark") {
-      toastBody.textContent = "Welcome to the dark mode, servant of the Emperor!";
+      toastBody.textContent =
+        "Welcome to the dark mode, servant of the Emperor!";
     } else {
       return; // Don't show toast for 'auto' or other values
     }
@@ -93,7 +99,9 @@ import { config } from "./config.js";
         console.error("Error showing Bootstrap toast:", error);
       }
     } else {
-      console.warn("Bootstrap Toast component not found. Cannot display theme toast.");
+      console.warn(
+        "Bootstrap Toast component not found. Cannot display theme toast.",
+      );
     }
   };
 
@@ -126,12 +134,14 @@ import { config } from "./config.js";
     });
 
     // Add listener for OS preference changes
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-      const storedTheme = getStoredTheme();
-      // Only update if no theme is explicitly stored (i.e., user wants 'auto')
-      if (!storedTheme) {
-        setTheme("auto", false); // OS change doesn't trigger toast
-      }
-    });
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", () => {
+        const storedTheme = getStoredTheme();
+        // Only update if no theme is explicitly stored (i.e., user wants 'auto')
+        if (!storedTheme) {
+          setTheme("auto", false); // OS change doesn't trigger toast
+        }
+      });
   });
 })(); // Immediately Invoked Function Expression (IIFE)

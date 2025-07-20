@@ -35,55 +35,92 @@ async function fetchArmyData(armyId) {
   const cachedTimestamp = sessionStorage.getItem(timestampKey);
 
   if (cachedDataJSON && cachedTimestamp) {
-    console.log(`[Cache] Found cached data and timestamp for ${logIdentifier}. Validating...`);
+    console.log(
+      `[Cache] Found cached data and timestamp for ${logIdentifier}. Validating...`,
+    );
     try {
       // 2. Make HEAD request for validation
       const headResponse = await fetch(apiUrl, { method: "HEAD" });
 
       if (!headResponse.ok) {
         console.warn(
-          `[Cache] Validation HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Fetching fresh data.`
+          `[Cache] Validation HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Fetching fresh data.`,
         );
-        return await _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+        return await _fetchFreshListDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          logIdentifier,
+        );
       }
 
       const serverLastModified = headResponse.headers.get("Last-Modified");
 
       // 3. Compare Last-Modified timestamps
       if (serverLastModified && serverLastModified === cachedTimestamp) {
-        console.log(`[Cache] Cache is valid for ${logIdentifier}. Returning cached data.`);
+        console.log(
+          `[Cache] Cache is valid for ${logIdentifier}. Returning cached data.`,
+        );
         try {
           return JSON.parse(cachedDataJSON);
         } catch (parseError) {
-          console.error(`[Cache] Error parsing cached JSON for ${logIdentifier}:`, parseError);
+          console.error(
+            `[Cache] Error parsing cached JSON for ${logIdentifier}:`,
+            parseError,
+          );
           sessionStorage.removeItem(cacheKey);
           sessionStorage.removeItem(timestampKey);
           return await _fetchFreshListDataWithHeadGet(
             apiUrl,
             cacheKey,
             timestampKey,
-            logIdentifier
+            logIdentifier,
           );
         }
       } else if (!serverLastModified) {
         console.warn(
-          `[Cache] No Last-Modified header found during validation HEAD for ${logIdentifier}. Fetching fresh data.`
+          `[Cache] No Last-Modified header found during validation HEAD for ${logIdentifier}. Fetching fresh data.`,
         );
-        return await _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+        return await _fetchFreshListDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          logIdentifier,
+        );
       } else {
         console.log(
-          `[Cache] Cache outdated for ${logIdentifier} (Server: ${serverLastModified}, Cached: ${cachedTimestamp}). Fetching fresh data.`
+          `[Cache] Cache outdated for ${logIdentifier} (Server: ${serverLastModified}, Cached: ${cachedTimestamp}). Fetching fresh data.`,
         );
-        return await _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+        return await _fetchFreshListDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          logIdentifier,
+        );
       }
     } catch (error) {
-      console.error(`[Cache] Error during HEAD request validation for ${logIdentifier}:`, error);
-      return await _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+      console.error(
+        `[Cache] Error during HEAD request validation for ${logIdentifier}:`,
+        error,
+      );
+      return await _fetchFreshListDataWithHeadGet(
+        apiUrl,
+        cacheKey,
+        timestampKey,
+        logIdentifier,
+      );
     }
   } else {
-    console.log(`[Cache] No valid cache found for ${logIdentifier}. Fetching fresh data.`);
+    console.log(
+      `[Cache] No valid cache found for ${logIdentifier}. Fetching fresh data.`,
+    );
     // 4. Fetch fresh data (if no cache)
-    return await _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+    return await _fetchFreshListDataWithHeadGet(
+      apiUrl,
+      cacheKey,
+      timestampKey,
+      logIdentifier,
+    );
   }
 }
 
@@ -97,8 +134,15 @@ async function fetchArmyData(armyId) {
  * @returns {Promise<object|null>} A promise that resolves to the JSON data object, or null if the fetch fails.
  * @private
  */
-async function _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier) {
-  console.log(`[Cache] Fetching fresh list data via HEAD+GET for ${logIdentifier} from ${apiUrl}`);
+async function _fetchFreshListDataWithHeadGet(
+  apiUrl,
+  cacheKey,
+  timestampKey,
+  logIdentifier,
+) {
+  console.log(
+    `[Cache] Fetching fresh list data via HEAD+GET for ${logIdentifier} from ${apiUrl}`,
+  );
   let lastModifiedFromHead = null;
   let dataFromGet = null;
 
@@ -111,20 +155,23 @@ async function _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
         lastModifiedFromHead = headResponse.headers.get("Last-Modified");
         if (lastModifiedFromHead) {
           console.log(
-            `[Cache] HEAD successful for ${logIdentifier}, Last-Modified: ${lastModifiedFromHead}`
+            `[Cache] HEAD successful for ${logIdentifier}, Last-Modified: ${lastModifiedFromHead}`,
           );
         } else {
           console.warn(
-            `[Cache] HEAD successful but no Last-Modified header found for ${logIdentifier}.`
+            `[Cache] HEAD successful but no Last-Modified header found for ${logIdentifier}.`,
           );
         }
       } else {
         console.warn(
-          `[Cache] HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Proceeding with GET.`
+          `[Cache] HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Proceeding with GET.`,
         );
       }
     } catch (headError) {
-      console.error(`[Cache] Error during initial HEAD request for ${logIdentifier}:`, headError);
+      console.error(
+        `[Cache] Error during initial HEAD request for ${logIdentifier}:`,
+        headError,
+      );
     }
 
     // --- GET Request ---
@@ -132,7 +179,7 @@ async function _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
     const getResponse = await fetch(apiUrl); // Default is GET
     if (!getResponse.ok) {
       throw new Error(
-        `GET request failed! status: ${getResponse.status} - ${getResponse.statusText}`
+        `GET request failed! status: ${getResponse.status} - ${getResponse.statusText}`,
       );
     }
     dataFromGet = await getResponse.json();
@@ -144,21 +191,26 @@ async function _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
         try {
           sessionStorage.setItem(cacheKey, JSON.stringify(dataFromGet));
           sessionStorage.setItem(timestampKey, lastModifiedFromHead);
-          console.log(`[Cache] Stored fresh list data and timestamp for ${logIdentifier}.`);
+          console.log(
+            `[Cache] Stored fresh list data and timestamp for ${logIdentifier}.`,
+          );
         } catch (storageError) {
           console.error(
             `[Cache] Error saving list data to sessionStorage for ${logIdentifier}:`,
-            storageError
+            storageError,
           );
           if (storageError.name === "QuotaExceededError") {
-            showToast("Cache storage full. Could not save army list data.", "Cache Warning");
+            showToast(
+              "Cache storage full. Could not save army list data.",
+              "Cache Warning",
+            );
           }
           sessionStorage.removeItem(cacheKey);
           sessionStorage.removeItem(timestampKey);
         }
       } else {
         console.warn(
-          `[Cache] Fetched list data via GET but failed to get Last-Modified via HEAD for ${logIdentifier}. Cannot cache timestamp.`
+          `[Cache] Fetched list data via GET but failed to get Last-Modified via HEAD for ${logIdentifier}. Cannot cache timestamp.`,
         );
         sessionStorage.removeItem(cacheKey);
         sessionStorage.removeItem(timestampKey);
@@ -170,9 +222,12 @@ async function _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
   } catch (error) {
     console.error(
       `[Cache] Could not fetch fresh army list data via HEAD+GET for ${logIdentifier}:`,
-      error
+      error,
     );
-    showToast(`Failed to fetch army list data for ${logIdentifier}.`, "Fetch Error");
+    showToast(
+      `Failed to fetch army list data for ${logIdentifier}.`,
+      "Fetch Error",
+    );
     sessionStorage.removeItem(cacheKey);
     sessionStorage.removeItem(timestampKey);
     return null;
@@ -191,7 +246,9 @@ async function _fetchFreshListDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
  */
 async function fetchArmyBookData(factionId, gameSystem) {
   if (!factionId || gameSystem === undefined || gameSystem === null) {
-    console.error("[Cache] No factionId or gameSystem provided for army book fetch.");
+    console.error(
+      "[Cache] No factionId or gameSystem provided for army book fetch.",
+    );
     return null;
   }
 
@@ -202,7 +259,7 @@ async function fetchArmyBookData(factionId, gameSystem) {
   const logIdentifier = `Book ${factionId} (GS:${gameSystem})`;
 
   console.log(
-    `[Cache] Attempting to fetch data for ${logIdentifier} using keys: Data='${cacheKey}', Timestamp='${timestampKey}'`
+    `[Cache] Attempting to fetch data for ${logIdentifier} using keys: Data='${cacheKey}', Timestamp='${timestampKey}'`,
   );
 
   // 1. Check Session Storage
@@ -210,55 +267,92 @@ async function fetchArmyBookData(factionId, gameSystem) {
   const cachedTimestamp = sessionStorage.getItem(timestampKey);
 
   if (cachedDataJSON && cachedTimestamp) {
-    console.log(`[Cache] Found cached data and timestamp for ${logIdentifier}. Validating...`);
+    console.log(
+      `[Cache] Found cached data and timestamp for ${logIdentifier}. Validating...`,
+    );
     try {
       // 2. Make HEAD request for validation
       const headResponse = await fetch(apiUrl, { method: "HEAD" });
 
       if (!headResponse.ok) {
         console.warn(
-          `[Cache] Validation HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Fetching fresh data.`
+          `[Cache] Validation HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Fetching fresh data.`,
         );
-        return await _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+        return await _fetchFreshBookDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          logIdentifier,
+        );
       }
 
       const serverLastModified = headResponse.headers.get("Last-Modified");
 
       // 3. Compare Last-Modified timestamps
       if (serverLastModified && serverLastModified === cachedTimestamp) {
-        console.log(`[Cache] Cache is valid for ${logIdentifier}. Returning cached data.`);
+        console.log(
+          `[Cache] Cache is valid for ${logIdentifier}. Returning cached data.`,
+        );
         try {
           return JSON.parse(cachedDataJSON);
         } catch (parseError) {
-          console.error(`[Cache] Error parsing cached JSON for ${logIdentifier}:`, parseError);
+          console.error(
+            `[Cache] Error parsing cached JSON for ${logIdentifier}:`,
+            parseError,
+          );
           sessionStorage.removeItem(cacheKey);
           sessionStorage.removeItem(timestampKey);
           return await _fetchFreshBookDataWithHeadGet(
             apiUrl,
             cacheKey,
             timestampKey,
-            logIdentifier
+            logIdentifier,
           );
         }
       } else if (!serverLastModified) {
         console.warn(
-          `[Cache] No Last-Modified header found during validation HEAD for ${logIdentifier}. Fetching fresh data.`
+          `[Cache] No Last-Modified header found during validation HEAD for ${logIdentifier}. Fetching fresh data.`,
         );
-        return await _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+        return await _fetchFreshBookDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          logIdentifier,
+        );
       } else {
         console.log(
-          `[Cache] Cache outdated for ${logIdentifier} (Server: ${serverLastModified}, Cached: ${cachedTimestamp}). Fetching fresh data.`
+          `[Cache] Cache outdated for ${logIdentifier} (Server: ${serverLastModified}, Cached: ${cachedTimestamp}). Fetching fresh data.`,
         );
-        return await _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+        return await _fetchFreshBookDataWithHeadGet(
+          apiUrl,
+          cacheKey,
+          timestampKey,
+          logIdentifier,
+        );
       }
     } catch (error) {
-      console.error(`[Cache] Error during HEAD request validation for ${logIdentifier}:`, error);
-      return await _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+      console.error(
+        `[Cache] Error during HEAD request validation for ${logIdentifier}:`,
+        error,
+      );
+      return await _fetchFreshBookDataWithHeadGet(
+        apiUrl,
+        cacheKey,
+        timestampKey,
+        logIdentifier,
+      );
     }
   } else {
-    console.log(`[Cache] No valid cache found for ${logIdentifier}. Fetching fresh data.`);
+    console.log(
+      `[Cache] No valid cache found for ${logIdentifier}. Fetching fresh data.`,
+    );
     // 4. Fetch fresh data (if no cache)
-    return await _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier);
+    return await _fetchFreshBookDataWithHeadGet(
+      apiUrl,
+      cacheKey,
+      timestampKey,
+      logIdentifier,
+    );
   }
 }
 
@@ -272,8 +366,15 @@ async function fetchArmyBookData(factionId, gameSystem) {
  * @returns {Promise<object|null>} A promise that resolves to the JSON data object, or null if the fetch fails.
  * @private
  */
-async function _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, logIdentifier) {
-  console.log(`[Cache] Fetching fresh book data via HEAD+GET for ${logIdentifier} from ${apiUrl}`);
+async function _fetchFreshBookDataWithHeadGet(
+  apiUrl,
+  cacheKey,
+  timestampKey,
+  logIdentifier,
+) {
+  console.log(
+    `[Cache] Fetching fresh book data via HEAD+GET for ${logIdentifier} from ${apiUrl}`,
+  );
   let lastModifiedFromHead = null;
   let dataFromGet = null;
 
@@ -286,20 +387,23 @@ async function _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
         lastModifiedFromHead = headResponse.headers.get("Last-Modified");
         if (lastModifiedFromHead) {
           console.log(
-            `[Cache] HEAD successful for ${logIdentifier}, Last-Modified: ${lastModifiedFromHead}`
+            `[Cache] HEAD successful for ${logIdentifier}, Last-Modified: ${lastModifiedFromHead}`,
           );
         } else {
           console.warn(
-            `[Cache] HEAD successful but no Last-Modified header found for ${logIdentifier}.`
+            `[Cache] HEAD successful but no Last-Modified header found for ${logIdentifier}.`,
           );
         }
       } else {
         console.warn(
-          `[Cache] HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Proceeding with GET.`
+          `[Cache] HEAD request failed for ${logIdentifier} (Status: ${headResponse.status}). Proceeding with GET.`,
         );
       }
     } catch (headError) {
-      console.error(`[Cache] Error during initial HEAD request for ${logIdentifier}:`, headError);
+      console.error(
+        `[Cache] Error during initial HEAD request for ${logIdentifier}:`,
+        headError,
+      );
     }
 
     // --- GET Request ---
@@ -307,7 +411,7 @@ async function _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
     const getResponse = await fetch(apiUrl); // Default is GET
     if (!getResponse.ok) {
       throw new Error(
-        `GET request failed! status: ${getResponse.status} - ${getResponse.statusText}`
+        `GET request failed! status: ${getResponse.status} - ${getResponse.statusText}`,
       );
     }
     dataFromGet = await getResponse.json();
@@ -319,21 +423,26 @@ async function _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
         try {
           sessionStorage.setItem(cacheKey, JSON.stringify(dataFromGet));
           sessionStorage.setItem(timestampKey, lastModifiedFromHead);
-          console.log(`[Cache] Stored fresh book data and timestamp for ${logIdentifier}.`);
+          console.log(
+            `[Cache] Stored fresh book data and timestamp for ${logIdentifier}.`,
+          );
         } catch (storageError) {
           console.error(
             `[Cache] Error saving book data to sessionStorage for ${logIdentifier}:`,
-            storageError
+            storageError,
           );
           if (storageError.name === "QuotaExceededError") {
-            showToast("Cache storage full. Could not save army book data.", "Cache Warning");
+            showToast(
+              "Cache storage full. Could not save army book data.",
+              "Cache Warning",
+            );
           }
           sessionStorage.removeItem(cacheKey);
           sessionStorage.removeItem(timestampKey);
         }
       } else {
         console.warn(
-          `[Cache] Fetched book data via GET but failed to get Last-Modified via HEAD for ${logIdentifier}. Cannot cache timestamp.`
+          `[Cache] Fetched book data via GET but failed to get Last-Modified via HEAD for ${logIdentifier}. Cannot cache timestamp.`,
         );
         sessionStorage.removeItem(cacheKey);
         sessionStorage.removeItem(timestampKey);
@@ -345,9 +454,12 @@ async function _fetchFreshBookDataWithHeadGet(apiUrl, cacheKey, timestampKey, lo
   } catch (error) {
     console.error(
       `[Cache] Could not fetch fresh army book data via HEAD+GET for ${logIdentifier}:`,
-      error
+      error,
     );
-    showToast(`Failed to fetch army book data for ${logIdentifier}.`, "Fetch Error");
+    showToast(
+      `Failed to fetch army book data for ${logIdentifier}.`,
+      "Fetch Error",
+    );
     sessionStorage.removeItem(cacheKey);
     sessionStorage.removeItem(timestampKey);
     return null;

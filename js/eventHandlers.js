@@ -1634,7 +1634,6 @@ export function handleInteractionClick(event) {
       "#confirm-opponent-selection-btn",
     );
     if (confirmOpponentButton) {
-      console.debug("DEBUG: Click detected on confirm button via delegation.");
       _handleConfirmOpponentSelection(event);
       return;
     }
@@ -1781,9 +1780,6 @@ export function updateGameControlButtons() {
       endGameBtn.classList.add("d-none");
       endGameBtn.disabled = true;
   }
-  console.debug(
-    `DEBUG: Control buttons updated. phase=${phase}, round=${round}`,
-  );
 }
 
 /**
@@ -1923,14 +1919,6 @@ function _handleConfirmOpponentSelection(event) {
 
     const victimBaseDetails = getUnitDetails(victimArmyId, victimUnitId);
     const attackerBaseDetails = getUnitDetails(attackerArmyId, attackerUnitId);
-    console.debug(
-      "DEBUG: Victim and attacker details:",
-      {
-        victimBaseDetails,
-        attackerBaseDetails,
-      },
-      { victimArmyId, victimUnitId, attackerArmyId, attackerUnitId },
-    );
 
     if (!victimBaseDetails || !attackerBaseDetails) {
       console.log("Error: Could not find unit details for KilledBy update.", {

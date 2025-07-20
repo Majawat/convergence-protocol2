@@ -176,9 +176,6 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
           if (rule.name === "Caster" && !isNaN(ratingValue)) {
             processedUnit.casterLevel = ratingValue;
             statProcessedRuleInstances.add(instanceKey);
-            console.debug(
-              `Applied Caster(${ratingValue}) upgrade to ${processedUnit.selectionId}`,
-            );
           } else if (rule.name === "Tough" && !isNaN(ratingValue)) {
             optionGrantsTough = true;
             optionToughValue = ratingValue;
@@ -270,10 +267,6 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
   // Apply final calculated stats
   processedUnit.quality = finalQuality;
   processedUnit.defense = finalDefense;
-
-  console.debug(
-    `Final Caster Level for ${processedUnit.selectionId}: ${processedUnit.casterLevel}`,
-  );
 }
 
 /**

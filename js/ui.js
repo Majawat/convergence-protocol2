@@ -2,7 +2,12 @@
  * @fileoverview Handles displaying army data and UI elements for interaction.
  */
 
-import { config, UI_ICONS, ACTION_BUTTON_CONFIG, DEPLOYMENT_BUTTON_CONFIG } from "./config.js"; // Configuration constants
+import {
+  config,
+  UI_ICONS,
+  ACTION_BUTTON_CONFIG,
+  DEPLOYMENT_BUTTON_CONFIG,
+} from "./config.js"; // Configuration constants
 import { calculateMovement } from "./gameLogic.js";
 import {
   getUnitStateValue,
@@ -20,8 +25,17 @@ import {
 
 function _formatRule(rule, filterCaster) {
   const baseName = rule.name || rule.label;
-  if (!baseName || rule.name === "Tough" || (filterCaster && rule.name === "Caster")) return null;
-  if (rule.rating !== null && rule.rating !== undefined && String(rule.rating).trim().length > 0)
+  if (
+    !baseName ||
+    rule.name === "Tough" ||
+    (filterCaster && rule.name === "Caster")
+  )
+    return null;
+  if (
+    rule.rating !== null &&
+    rule.rating !== undefined &&
+    String(rule.rating).trim().length > 0
+  )
     return `${baseName}(${rule.rating})`;
   return baseName;
 }
@@ -42,7 +56,8 @@ function _createWeaponTableHTML(loadout, formatRuleFn) {
     const weaponKey = `${weapon.name}|${weapon.range || "-"}|${
       weapon.attacks || "-"
     }|${apValue}|${otherRules}`;
-    if (aggregatedWeapons[weaponKey]) aggregatedWeapons[weaponKey].count += weapon.count || 1;
+    if (aggregatedWeapons[weaponKey])
+      aggregatedWeapons[weaponKey].count += weapon.count || 1;
     else
       aggregatedWeapons[weaponKey] = {
         data: weapon,
@@ -51,7 +66,8 @@ function _createWeaponTableHTML(loadout, formatRuleFn) {
         otherRulesString: otherRules || "-",
       };
   });
-  let tableHtml = '<table class="table table-sm table-borderless table-striped mb-0">';
+  let tableHtml =
+    '<table class="table table-sm table-borderless table-striped mb-0">';
   tableHtml += `<thead>
       <tr>
         <th>Weapon</th>
@@ -80,7 +96,8 @@ function _createWeaponTableHTML(loadout, formatRuleFn) {
 function _createCasterControlsHTML(casterLevel, initialTokens) {
   if (casterLevel <= 0) return "";
   const currentTokens = Math.min(initialTokens, config.MAX_SPELL_TOKENS);
-  const addDisabled = currentTokens >= config.MAX_SPELL_TOKENS ? "disabled" : "";
+  const addDisabled =
+    currentTokens >= config.MAX_SPELL_TOKENS ? "disabled" : "";
   const removeDisabled = currentTokens <= 0 ? "disabled" : "";
   return `<div class="caster-section">
     <div class="caster-controls">
@@ -122,7 +139,6 @@ function _createUnitCardHeaderHTML(baseUnit, hero, armyId) {
   const title = hero
     ? `${hero.customName || hero.originalName} w/ ${baseUnit.customName || baseUnit.originalName}`
     : baseUnit.customName || baseUnit.originalName;
-  console.debug(`DEBUG: Creating header for unit - ${title}`);
   const subtitle = hero
     ? `${hero.originalName} and ${baseUnit.originalName}`
     : baseUnit.originalName;
@@ -220,7 +236,6 @@ function updateKillCountBadge(armyId, unitId) {
  * @param {string} unitId - The ID of the unit.
  */
 function updateKilledByStatusDisplay(armyId, unitId) {
-  console.debug(`DEBUG: updateKilledByStatusDisplay for ${armyId}/${unitId}`);
   const cardElement = document.getElementById(`unit-card-${unitId}`);
   if (!cardElement) return;
 
@@ -230,9 +245,6 @@ function updateKilledByStatusDisplay(armyId, unitId) {
   if (!statusOverlay) {
     // Optional: You could add logic here to ensure the killedBy state is null
     // if the unit isn't actually destroyed/routed, but for now, just exit.
-    console.debug(
-      `DEBUG: No .status-text-overlay found for ${unitId}, skipping killedBy display update.`
-    );
     return;
   }
 
@@ -248,7 +260,6 @@ function updateKilledByStatusDisplay(armyId, unitId) {
 
     if (!statusDisplayElement) {
       // Element doesn't exist *inside the overlay*, create and append it there
-      console.debug(`DEBUG: Creating ${displayClass} element inside overlay for ${unitId}`);
       statusDisplayElement = document.createElement("div");
       // Add appropriate classes - smaller text, maybe margin top
       statusDisplayElement.className = `${displayClass} text-muted small mt-1`;
@@ -267,7 +278,6 @@ function updateKilledByStatusDisplay(armyId, unitId) {
   } else {
     // No data exists, ensure the element inside the overlay is removed
     if (statusDisplayElement) {
-      console.debug(`DEBUG: Removing ${displayClass} element from overlay for ${unitId}`);
       statusDisplayElement.remove(); // Remove the element entirely if it exists but shouldn't
     }
   }
@@ -295,7 +305,11 @@ function _createActionControlsHTML(baseUnit, hero) {
     if (!config) return;
     const icon = UI_ICONS[config.iconKey] || "";
     let text = config.baseText;
-    if (actionName === "Advance" || actionName === "Rush" || actionName === "Charge") {
+    if (
+      actionName === "Advance" ||
+      actionName === "Rush" ||
+      actionName === "Charge"
+    ) {
       const moveValue = calculateMovement(movementUnit, actionName);
       text += ` (${moveValue}")`;
     }
@@ -336,12 +350,17 @@ function createModelsDisplay(unit, hero = null) {
     else if (hpPercentage < 50) bgColorClass = "bg-danger";
     if (isRemoved) bgColorClass = "bg-secondary";
     const isHeroModel = model.isHero;
-    const modelIcon = isHeroModel ? UI_ICONS.hero : model.isTough ? UI_ICONS.tough : UI_ICONS.hero;
+    const modelIcon = isHeroModel
+      ? UI_ICONS.hero
+      : model.isTough
+        ? UI_ICONS.tough
+        : UI_ICONS.hero;
     const heroColorClass = isHeroModel ? "hero-icon-color" : "";
     let modelBaseName;
     const sourceUnit = isHeroModel ? hero || unit : unit;
     if (!sourceUnit) modelBaseName = "Error";
-    else if (isHeroModel) modelBaseName = sourceUnit.customName || sourceUnit.originalName;
+    else if (isHeroModel)
+      modelBaseName = sourceUnit.customName || sourceUnit.originalName;
     else if (sourceUnit.size === 1 && !hero)
       modelBaseName = sourceUnit.customName || sourceUnit.originalName;
     else if (model.isTough) modelBaseName = `Tough ${toughCounter++}`;
@@ -410,7 +429,9 @@ function updateTokenDisplay(unitId, currentTokens, casterLevel) {
 function updateActionButtonsUI(unitId, activeAction, isShaken = false) {
   const cardElement = document.getElementById(`unit-card-${unitId}`);
   if (!cardElement) return;
-  const actionButtons = cardElement.querySelectorAll(".action-btn:not(.recover-btn)");
+  const actionButtons = cardElement.querySelectorAll(
+    ".action-btn:not(.recover-btn)",
+  );
   const recoverButton = cardElement.querySelector(".recover-btn");
   cardElement.classList.toggle("unit-activated", !!activeAction && !isShaken);
   cardElement.classList.toggle("unit-shaken", isShaken);
@@ -419,23 +440,39 @@ function updateActionButtonsUI(unitId, activeAction, isShaken = false) {
       button.style.display = "none";
       button.disabled = true;
       const buttonAction = button.dataset.action;
-      const colorTheme = ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary";
-      button.classList.remove("action-selected", `btn-${colorTheme}`, `btn-outline-${colorTheme}`);
+      const colorTheme =
+        ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary";
+      button.classList.remove(
+        "action-selected",
+        `btn-${colorTheme}`,
+        `btn-outline-${colorTheme}`,
+      );
       button.classList.add(`btn-outline-${colorTheme}`);
     });
     if (recoverButton) {
       recoverButton.style.display = "inline-block";
       recoverButton.disabled = false;
-      recoverButton.classList.toggle("action-selected", activeAction === "Recover");
+      recoverButton.classList.toggle(
+        "action-selected",
+        activeAction === "Recover",
+      );
       recoverButton.classList.toggle("btn-warning", activeAction === "Recover");
-      recoverButton.classList.toggle("btn-outline-warning", activeAction !== "Recover");
+      recoverButton.classList.toggle(
+        "btn-outline-warning",
+        activeAction !== "Recover",
+      );
     }
   } else {
     actionButtons.forEach((button) => {
       button.style.display = "inline-block";
       const buttonAction = button.dataset.action;
-      const colorTheme = ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary";
-      button.classList.remove("action-selected", `btn-${colorTheme}`, `btn-outline-${colorTheme}`);
+      const colorTheme =
+        ACTION_BUTTON_CONFIG[buttonAction]?.colorTheme || "secondary";
+      button.classList.remove(
+        "action-selected",
+        `btn-${colorTheme}`,
+        `btn-outline-${colorTheme}`,
+      );
       if (activeAction) {
         if (buttonAction === activeAction) {
           button.classList.add("action-selected", `btn-${colorTheme}`);
@@ -506,7 +543,7 @@ export function updateDeploymentButtonsUI(unitId, deploymentStatus) {
       "btn-outline-success",
       "btn-outline-info",
       "btn-outline-warning",
-      "btn-outline-secondary"
+      "btn-outline-secondary",
     );
 
     if (deploymentStatus === buttonDeployment) {
@@ -526,10 +563,6 @@ export function updateUnitControlsForPhase(unitId, armyId) {
   const actionControls = cardElement.querySelector(".action-controls");
   const deploymentControls = cardElement.querySelector(".deployment-controls");
   const manualControls = cardElement.querySelector(".manual-triggers");
-
-  console.debug(
-    `Deployment: currentRound=${currentRound}, currentPhase:${currentPhase}, unitId=${unitId}, armyId=${armyId}`
-  );
   if (currentPhase === "pregame") {
     if (actionControls) actionControls.style.display = "none";
     if (deploymentControls) deploymentControls.style.display = "none";
@@ -580,7 +613,12 @@ function resetAllActionButtonsUI() {
   allCards.forEach((card) => {
     const unitId = card.dataset.unitId;
     if (unitId && !card.classList.contains("unit-is-inactive")) {
-      const isShaken = getUnitStateValue(getCurrentArmyId(), unitId, "shaken", false);
+      const isShaken = getUnitStateValue(
+        getCurrentArmyId(),
+        unitId,
+        "shaken",
+        false,
+      );
       updateActionButtonsUI(unitId, null, isShaken);
     }
   });
@@ -588,17 +626,22 @@ function resetAllActionButtonsUI() {
 
 function updateFatiguedStatusUI(cardUnitId, isFatigued) {
   const indicator = document.querySelector(
-    `.header-status-indicators[data-unit-id="${cardUnitId}"] .fatigue-indicator`
+    `.header-status-indicators[data-unit-id="${cardUnitId}"] .fatigue-indicator`,
   );
   if (indicator) indicator.style.display = isFatigued ? "inline" : "none";
 }
 
 function updateShakenStatusUI(cardUnitId, isShaken) {
   const indicator = document.querySelector(
-    `.header-status-indicators[data-unit-id="${cardUnitId}"] .shaken-indicator`
+    `.header-status-indicators[data-unit-id="${cardUnitId}"] .shaken-indicator`,
   );
   if (indicator) indicator.style.display = isShaken ? "inline" : "none";
-  const currentAction = getUnitStateValue(getCurrentArmyId(), cardUnitId, "action", null);
+  const currentAction = getUnitStateValue(
+    getCurrentArmyId(),
+    cardUnitId,
+    "action",
+    null,
+  );
   updateActionButtonsUI(cardUnitId, currentAction, isShaken);
 }
 
@@ -610,14 +653,15 @@ function updateShakenStatusUI(cardUnitId, isShaken) {
  */
 function setUnitInactiveUI(cardUnitId, statusText) {
   const cardElement = document.getElementById(`unit-card-${cardUnitId}`);
-  if (!cardElement || cardElement.classList.contains("unit-is-inactive")) return;
+  if (!cardElement || cardElement.classList.contains("unit-is-inactive"))
+    return;
 
   const cardBody = cardElement.querySelector(".card-body");
 
   // Add inactive class for general styling (opacity, filter, pointer-events on body)
   cardElement.classList.add("unit-is-inactive");
   cardElement.classList.add(
-    statusText === "DESTROYED" ? "unit-destroyed-style" : "unit-routed-style"
+    statusText === "DESTROYED" ? "unit-destroyed-style" : "unit-routed-style",
   ); // Add specific class
 
   // Add overlay text if it doesn't exist
@@ -667,7 +711,7 @@ function resetCardUI(cardUnitId) {
     "unit-destroyed-style",
     "unit-routed-style",
     "unit-shaken",
-    "unit-activated"
+    "unit-activated",
   );
 
   // Reset status indicators in header
@@ -718,10 +762,18 @@ function populateOpponentUnitDropdown(unitSelectElement, opponentArmyId) {
  * @param {string} triggeringArmyId - The ID of the army initiating the action.
  * @param {'recordKill' | 'setKilledBy'} actionType - The type of action being performed.
  */
-function createOpponentSelectionModal(triggeringUnitId, triggeringArmyId, actionType) {
-  const modalContainer = document.getElementById("opponent-select-modal-container");
+function createOpponentSelectionModal(
+  triggeringUnitId,
+  triggeringArmyId,
+  actionType,
+) {
+  const modalContainer = document.getElementById(
+    "opponent-select-modal-container",
+  );
   if (!modalContainer) {
-    console.error("Modal container #opponent-select-modal-container not found.");
+    console.error(
+      "Modal container #opponent-select-modal-container not found.",
+    );
     return;
   }
 
@@ -739,7 +791,10 @@ function createOpponentSelectionModal(triggeringUnitId, triggeringArmyId, action
     modalTitle = `Who killed ${triggeringUnitName}?`;
     confirmButtonText = "Confirm Killer";
   } else {
-    console.error("Invalid actionType for opponent selection modal:", actionType);
+    console.error(
+      "Invalid actionType for opponent selection modal:",
+      actionType,
+    );
     return;
   }
 
@@ -749,7 +804,10 @@ function createOpponentSelectionModal(triggeringUnitId, triggeringArmyId, action
 
   let opponentArmyOptionsHTML =
     '<option value="" selected disabled>-- Select Opponent Army --</option>';
-  console.log("Building opponent options. Triggering Army ID:", triggeringArmyId);
+  console.log(
+    "Building opponent options. Triggering Army ID:",
+    triggeringArmyId,
+  );
 
   if (allArmies) {
     Object.entries(allArmies).forEach(([armyId, armyData]) => {
@@ -844,10 +902,14 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
   const initialStatesToApply = [];
 
   processedArmy.units.forEach((currentUnit) => {
-    if (currentUnit.isHero && processedArmy.heroJoinTargets?.[currentUnit.selectionId]) return;
+    if (
+      currentUnit.isHero &&
+      processedArmy.heroJoinTargets?.[currentUnit.selectionId]
+    )
+      return;
     let hero = null;
     const joinedHeroId = Object.keys(processedArmy.heroJoinTargets || {}).find(
-      (key) => processedArmy.heroJoinTargets[key] === currentUnit.selectionId
+      (key) => processedArmy.heroJoinTargets[key] === currentUnit.selectionId,
     );
     if (joinedHeroId && processedArmy.unitMap?.[joinedHeroId])
       hero = processedArmy.unitMap[joinedHeroId];
@@ -869,12 +931,32 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
       armyId,
       actualCasterUnitId || baseUnit.selectionId,
       "tokens",
-      0
+      0,
     );
-    const initialAction = getUnitStateValue(armyId, baseUnit.selectionId, "action", null);
-    const initialShaken = getUnitStateValue(armyId, baseUnit.selectionId, "shaken", false);
-    const initialFatigued = getUnitStateValue(armyId, baseUnit.selectionId, "fatigued", false);
-    const initialStatus = getUnitStateValue(armyId, baseUnit.selectionId, "status", "active");
+    const initialAction = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "action",
+      null,
+    );
+    const initialShaken = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "shaken",
+      false,
+    );
+    const initialFatigued = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "fatigued",
+      false,
+    );
+    const initialStatus = getUnitStateValue(
+      armyId,
+      baseUnit.selectionId,
+      "status",
+      "active",
+    );
     initialStatesToApply.push({
       unitId: baseUnit.selectionId,
       armyId: armyId,
@@ -890,7 +972,8 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
     cardDiv.id = `unit-card-${baseUnit.selectionId}`;
     cardDiv.dataset.armyId = armyId;
     cardDiv.dataset.unitId = baseUnit.selectionId;
-    cardDiv.className = "card unit-card shadow-sm border-secondary-subtle flex-fill";
+    cardDiv.className =
+      "card unit-card shadow-sm border-secondary-subtle flex-fill";
     const cardHeaderHTML = _createUnitCardHeaderHTML(baseUnit, hero, armyId);
     const effectiveStatsHTML = _createEffectiveStatsHTML(baseUnit, hero);
     const actionControlsHTML = _createActionControlsHTML(baseUnit, hero);
@@ -924,7 +1007,12 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
       // Joined unit display logic...
       const heroBase = hero.bases?.round || hero.bases?.square;
       const heroRules = hero.rules
-        .map((rule) => _formatRule(rule, unitIsCaster && actualCasterUnitId === hero.selectionId))
+        .map((rule) =>
+          _formatRule(
+            rule,
+            unitIsCaster && actualCasterUnitId === hero.selectionId,
+          ),
+        )
         .filter(Boolean)
         .sort()
         .join(", ");
@@ -987,7 +1075,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         <div class="mt-2 flex-grow-1">
           <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
             hero.loadout,
-            _formatRule
+            _formatRule,
           )}
         </div>
         ${
@@ -1057,7 +1145,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         <div class="mt-2 flex-grow-1">
           <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
             baseUnit.loadout,
-            _formatRule
+            _formatRule,
           )}
         </div>
         ${
@@ -1077,10 +1165,6 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
       const unitSkills = baseUnit.skills.sort().join(", ");
       const unitInjuries = baseUnit.injuries.sort().join(", ");
       const unitTalents = baseUnit.talents.sort().join(", ");
-      console.debug(
-        `DEBUG: unitTraits ${baseUnit.traits} for selectionId: ${baseUnit.selectionId} - ${baseUnit.customName || baseUnit.originalName}.`
-      );
-      console.debug(`Debug: unitTraits after formatting: ${unitTraits}`);
       cardBodyContentHTML += `<div class="normal-unit-details">
         ${unitIsCaster ? _createCasterControlsHTML(casterLevel, initialTokens) : ""}
         <div class="mb-2">
@@ -1111,7 +1195,7 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
         <div class="mb-0 flex-grow-1">
           <strong class="d-block">Weapons:</strong> ${_createWeaponTableHTML(
             baseUnit.loadout,
-            _formatRule
+            _formatRule,
           )}
         </div>
         ${
@@ -1137,18 +1221,20 @@ function displayArmyUnits(processedArmy, displayContainerRow) {
   });
 
   requestAnimationFrame(() => {
-    initialStatesToApply.forEach(({ unitId, armyId, action, isShaken, isFatigued, status }) => {
-      updateActionButtonsUI(unitId, action, isShaken); // Handles shaken buttons
-      updateFatiguedStatusUI(unitId, isFatigued); // Handles fatigue indicator
-      // Apply inactive state if needed
-      if (status === "destroyed") {
-        setUnitInactiveUI(unitId, "DESTROYED");
-      } else if (status === "routed") {
-        setUnitInactiveUI(unitId, "ROUTED");
-      }
-      updateKillCountBadge(armyId, unitId);
-      updateKilledByStatusDisplay(armyId, unitId);
-    });
+    initialStatesToApply.forEach(
+      ({ unitId, armyId, action, isShaken, isFatigued, status }) => {
+        updateActionButtonsUI(unitId, action, isShaken); // Handles shaken buttons
+        updateFatiguedStatusUI(unitId, isFatigued); // Handles fatigue indicator
+        // Apply inactive state if needed
+        if (status === "destroyed") {
+          setUnitInactiveUI(unitId, "DESTROYED");
+        } else if (status === "routed") {
+          setUnitInactiveUI(unitId, "ROUTED");
+        }
+        updateKillCountBadge(armyId, unitId);
+        updateKilledByStatusDisplay(armyId, unitId);
+      },
+    );
   });
 }
 

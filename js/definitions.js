@@ -14,7 +14,9 @@ export function initializeDefinitionsSystem() {
   console.log("Initializing definitions system...");
   const definitions = getDefinitions(); // Get definitions from state/sessionStorage
   if (!definitions || Object.keys(definitions).length === 0) {
-    console.warn("Definitions not available or empty. Skipping popover initialization.");
+    console.warn(
+      "Definitions not available or empty. Skipping popover initialization.",
+    );
     return;
   }
 
@@ -29,11 +31,12 @@ export function initializeDefinitionsSystem() {
   }
 
   const elementsToProcess = document.querySelectorAll(".allow-definitions");
-  console.log(`Found ${elementsToProcess.length} elements to process for definitions.`);
+  console.log(
+    `Found ${elementsToProcess.length} elements to process for definitions.`,
+  );
 
   elementsToProcess.forEach((element) => {
     if (element.dataset.definitionsProcessed === "true") {
-      // console.debug("Skipping already processed element:", element);
       return; // Skip already processed elements
     }
     processElementForPopovers(element, definitions, sortedTerms);
@@ -42,7 +45,6 @@ export function initializeDefinitionsSystem() {
 
   // Initialize Bootstrap Popovers on the newly added spans
   initializeBootstrapPopovers();
-  console.debug("Definitions system initialization complete.");
 }
 
 /**
@@ -68,7 +70,7 @@ function processElementForPopovers(element, definitions, sortedTerms) {
         }
         return NodeFilter.FILTER_ACCEPT;
       },
-    }
+    },
   );
 
   let node;
@@ -110,7 +112,9 @@ function wrapTermsInTextNode(textNode, definitions, sortedTerms) {
     // Find the *first* occurrence of *any* term in the remaining text
     for (const term of sortedTerms) {
       // Case-insensitive search, but preserve original case for wrapping
-      const termIndexInRemaining = remainingText.toLowerCase().indexOf(term.toLowerCase());
+      const termIndexInRemaining = remainingText
+        .toLowerCase()
+        .indexOf(term.toLowerCase());
 
       if (termIndexInRemaining !== -1) {
         const actualIndex = lastIndex + termIndexInRemaining;
@@ -139,7 +143,9 @@ function wrapTermsInTextNode(textNode, definitions, sortedTerms) {
       // Add text before the match
       if (bestMatch.index > lastIndex) {
         fragment.appendChild(
-          document.createTextNode(currentText.substring(lastIndex, bestMatch.index))
+          document.createTextNode(
+            currentText.substring(lastIndex, bestMatch.index),
+          ),
         );
       }
 
@@ -147,7 +153,10 @@ function wrapTermsInTextNode(textNode, definitions, sortedTerms) {
       const definition = definitions[bestMatch.term];
       const span = document.createElement("span");
       span.className = "definition"; // Class for styling
-      span.textContent = currentText.substring(bestMatch.index, bestMatch.index + bestMatch.length); // Use original casing
+      span.textContent = currentText.substring(
+        bestMatch.index,
+        bestMatch.index + bestMatch.length,
+      ); // Use original casing
 
       // Set Bootstrap Popover attributes
       span.dataset.bsToggle = "popover";
@@ -168,7 +177,9 @@ function wrapTermsInTextNode(textNode, definitions, sortedTerms) {
     // If no match was found in the remaining text, add the rest and break
     if (!foundMatch) {
       if (lastIndex < currentText.length) {
-        fragment.appendChild(document.createTextNode(currentText.substring(lastIndex)));
+        fragment.appendChild(
+          document.createTextNode(currentText.substring(lastIndex)),
+        );
       }
       break;
     }
@@ -185,8 +196,9 @@ function wrapTermsInTextNode(textNode, definitions, sortedTerms) {
  * Prevents re-initializing on the same element.
  */
 function initializeBootstrapPopovers() {
-  // console.debug("Initializing Bootstrap Popovers...");
-  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+  const popoverTriggerList = document.querySelectorAll(
+    '[data-bs-toggle="popover"]',
+  );
   let initializedCount = 0;
 
   popoverTriggerList.forEach((popoverTriggerEl) => {
@@ -199,7 +211,11 @@ function initializeBootstrapPopovers() {
         initializedPopovers.add(popoverTriggerEl); // Mark as initialized
         initializedCount++;
       } catch (e) {
-        console.error("Error initializing Bootstrap popover:", e, popoverTriggerEl);
+        console.error(
+          "Error initializing Bootstrap popover:",
+          e,
+          popoverTriggerEl,
+        );
       }
     }
   });

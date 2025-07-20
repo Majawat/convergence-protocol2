@@ -85,7 +85,9 @@ async function loadBattleReport(reportPath) {
         console.warn(`Battle report not found at: ${reportPath}`);
         return null;
       }
-      throw new Error(`HTTP error loading battle report ${reportPath}! status: ${response.status}`);
+      throw new Error(
+        `HTTP error loading battle report ${reportPath}! status: ${response.status}`,
+      );
     }
     const data = await response.json();
     console.log(`Battle report loaded successfully from ${reportPath}.`);
@@ -141,7 +143,9 @@ async function _loadDoctrinesDataInternal() {
 /** Fetches custom definitions. */
 async function _loadCustomDefinitionsDataInternal() {
   try {
-    console.log(`Fetching custom definitions from: ${config.CUSTOM_DEFINITIONS_URL}`);
+    console.log(
+      `Fetching custom definitions from: ${config.CUSTOM_DEFINITIONS_URL}`,
+    );
     const response = await fetch(config.CUSTOM_DEFINITIONS_URL);
     if (!response.ok) {
       if (response.status === 404) {
@@ -187,7 +191,9 @@ async function _loadCommonDataInternal(gameSystemId) {
 
 /** Fetches army book data from API using the caching mechanism in api.js. */
 async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
-  console.log(`Requesting army book data for ${factionName} (${factionId}) - GS: ${gameSystem}`);
+  console.log(
+    `Requesting army book data for ${factionName} (${factionId}) - GS: ${gameSystem}`,
+  );
   try {
     // Use the caching fetch function from api.js
     const bookData = await fetchArmyBookData(factionId, gameSystem); // <-- USE THE NEW FUNCTION
@@ -195,12 +201,14 @@ async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
     if (!bookData) {
       // fetchArmyBookData returns null on failure and logs the error internally
       console.warn(
-        `Failed to fetch or load cached army book ${factionName} (${factionId}) after fetch attempt.`
+        `Failed to fetch or load cached army book ${factionName} (${factionId}) after fetch attempt.`,
       );
       return null; // Propagate failure
     }
 
-    console.log(`Successfully loaded army book data for ${factionName} (${factionId})`);
+    console.log(
+      `Successfully loaded army book data for ${factionName} (${factionId})`,
+    );
     // Add factionName to the result for easier access later if needed by the caller
     return { factionId, bookData, factionName };
   } catch (error) {
@@ -208,7 +216,7 @@ async function _loadArmyBookDataInternal(factionId, gameSystem, factionName) {
     // but can catch unexpected issues during the call itself.
     console.error(
       `Unexpected error calling fetchArmyBookData for ${factionName} (${factionId}):`,
-      error
+      error,
     );
     return null;
   }
@@ -289,10 +297,11 @@ async function loadGameData(campaignData) {
         parsedDefs &&
         typeof parsedDefs === "object" &&
         Object.keys(parsedDefs).length > 0 &&
-        (!firstKey || (parsedDefs[firstKey] && Array.isArray(parsedDefs[firstKey].sources))) // Check if first item has sources array
+        (!firstKey ||
+          (parsedDefs[firstKey] && Array.isArray(parsedDefs[firstKey].sources))) // Check if first item has sources array
       ) {
         console.log(
-          `Definitions loaded from sessionStorage cache (${Object.keys(parsedDefs).length} terms).`
+          `Definitions loaded from sessionStorage cache (${Object.keys(parsedDefs).length} terms).`,
         );
         definitions = parsedDefs;
 
@@ -314,9 +323,9 @@ async function loadGameData(campaignData) {
               _loadArmyBookDataInternal(
                 faction.id,
                 faction.gameSystem,
-                faction.name || faction.id // Use name if available, fallback to id
-              )
-            )
+                faction.name || faction.id, // Use name if available, fallback to id
+              ),
+            ),
           );
         }
 
@@ -326,7 +335,8 @@ async function loadGameData(campaignData) {
         ]);
         doctrinesDataResult = doctrinesResult;
         bookResults.forEach((result) => {
-          if (result && result.bookData) armyBooks[result.factionId] = result.bookData;
+          if (result && result.bookData)
+            armyBooks[result.factionId] = result.bookData;
         });
 
         // Return cached definitions along with newly fetched books/doctrines
@@ -338,7 +348,7 @@ async function loadGameData(campaignData) {
         };
       } else {
         console.warn(
-          "Invalid or outdated definitions data found in cache. Clearing and fetching fresh."
+          "Invalid or outdated definitions data found in cache. Clearing and fetching fresh.",
         );
         sessionStorage.removeItem(definitionsCacheKey);
         definitions = {}; // Reset definitions object
@@ -367,20 +377,44 @@ async function loadGameData(campaignData) {
   // Custom definitions take priority for description/type if names clash
   if (customDefsData) {
     (customDefsData.rules || []).forEach((rule) => {
-      addOrUpdateDefinition(definitions, rule.name, rule.description, "Rules", "Custom");
+      addOrUpdateDefinition(
+        definitions,
+        rule.name,
+        rule.description,
+        "Rules",
+        "Custom",
+      );
     });
     (customDefsData.traits || []).forEach((trait) => {
-      addOrUpdateDefinition(definitions, trait.name, trait.description, "Traits", "Custom");
+      addOrUpdateDefinition(
+        definitions,
+        trait.name,
+        trait.description,
+        "Traits",
+        "Custom",
+      );
     });
   }
   // Add common rules/traits, adding 'Common' source if term exists, creating if not
   if (commonData) {
     commonRulesResult = { [requiredGsId]: commonData }; // Store for return if needed
     (commonData.rules || []).forEach((rule) => {
-      addOrUpdateDefinition(definitions, rule.name, rule.description, "Rules", "Common");
+      addOrUpdateDefinition(
+        definitions,
+        rule.name,
+        rule.description,
+        "Rules",
+        "Common",
+      );
     });
     (commonData.traits || []).forEach((trait) => {
-      addOrUpdateDefinition(definitions, trait.name, trait.description, "Traits", "Common");
+      addOrUpdateDefinition(
+        definitions,
+        trait.name,
+        trait.description,
+        "Traits",
+        "Common",
+      );
     });
   }
 
@@ -400,9 +434,9 @@ async function loadGameData(campaignData) {
         _loadArmyBookDataInternal(
           faction.id,
           faction.gameSystem,
-          faction.name || faction.id // Use name for source tracking
-        )
-      )
+          faction.name || faction.id, // Use name for source tracking
+        ),
+      ),
     );
   }
   const bookResults = await Promise.all(factionPromises);
@@ -420,14 +454,20 @@ async function loadGameData(campaignData) {
           rule.name,
           rule.description,
           "Special Rules",
-          factionName
+          factionName,
         );
       });
 
       // Process spells
       (bookData.spells || []).forEach((spell) => {
         // Use spell name directly as the term for potential merging across factions
-        addOrUpdateDefinition(definitions, spell.name, spell.effect, "Spells", factionName);
+        addOrUpdateDefinition(
+          definitions,
+          spell.name,
+          spell.effect,
+          "Spells",
+          factionName,
+        );
         // If threshold needs storing, add it to the definition object if creating new
         if (
           spell.threshold &&
@@ -445,7 +485,7 @@ async function loadGameData(campaignData) {
   setDefinitions(definitions); // setDefinitions handles logging and error catching
 
   console.log(
-    `Finished loading game data. Total unique definitions: ${Object.keys(definitions).length}`
+    `Finished loading game data. Total unique definitions: ${Object.keys(definitions).length}`,
   );
 
   // Return all loaded data

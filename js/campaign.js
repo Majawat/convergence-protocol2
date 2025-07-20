@@ -277,10 +277,6 @@ function displayLeaderboard(campaignData) {
     const maxArmyPoints =
       basePoints + 150 * wins + 300 * losses + earnedPts + 75 * objectives;
     //show calculation for each army leaderboard
-    console.debug(
-      `Army: ${army.player} (${army.armyName}) - Position Score: ${positionScore}`,
-      `BasePoints: ${basePoints} + (150*Wins: ${wins}) + (300*Losses: ${losses}) + (EarnedPts: ${earnedPts}) + (75*Objectives: ${objectives}) = Max Points: ${maxArmyPoints}`,
-    );
     return {
       player: army.player || "N/A",
       armyName: army.armyName || "Unnamed Army",

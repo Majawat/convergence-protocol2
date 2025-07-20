@@ -32,7 +32,9 @@ const renderHTML = (content) => {
  */
 function initializeUIReferences() {
   missionSnapshotElement = document.getElementById("dashboard-current-mission");
-  leaderboardSnapshotElement = document.getElementById("dashboard-leaderboard-snapshot");
+  leaderboardSnapshotElement = document.getElementById(
+    "dashboard-leaderboard-snapshot",
+  );
 }
 
 // --- Data Loading ---
@@ -61,7 +63,9 @@ async function loadDashboardData() {
 function displayMissionSnapshot(missionsData) {
   if (!missionSnapshotElement) return;
 
-  const currentMission = missionsData?.missions?.find((m) => m.status === "current");
+  const currentMission = missionsData?.missions?.find(
+    (m) => m.status === "current",
+  );
 
   if (currentMission) {
     // Now calls the globally accessible renderHTML helper
@@ -80,7 +84,7 @@ function displayMissionSnapshot(missionsData) {
       ${
         currentMission.objective?.primary
           ? `<p class="small"><strong>Objective:</strong> ${renderHTML(
-              currentMission.objective.primary.substring(0, 100)
+              currentMission.objective.primary.substring(0, 100),
             )}...</p>`
           : ""
       }
@@ -97,7 +101,11 @@ function displayMissionSnapshot(missionsData) {
 function displayLeaderboardSnapshot(campaignData) {
   if (!leaderboardSnapshotElement) return;
 
-  if (!campaignData || !campaignData.armies || campaignData.armies.length === 0) {
+  if (
+    !campaignData ||
+    !campaignData.armies ||
+    campaignData.armies.length === 0
+  ) {
     leaderboardSnapshotElement.innerHTML = `<p class="text-muted p-3">No campaign data available for leaderboard.</p>`; // Added padding
     return;
   }
@@ -126,7 +134,8 @@ function displayLeaderboardSnapshot(campaignData) {
 
   // Sort
   leaderboardData.sort((a, b) => {
-    if (b.positionScore !== a.positionScore) return b.positionScore - a.positionScore;
+    if (b.positionScore !== a.positionScore)
+      return b.positionScore - a.positionScore;
     if (b.vp !== a.vp) return b.vp - a.vp;
     return b.wins - a.wins;
   });
@@ -153,11 +162,20 @@ function displayLeaderboardSnapshot(campaignData) {
       </thead>
       <tbody>
   `;
+  // Calculate positions handling ties
+  let currentPosition = 1;
   leaderboardData.forEach((player, index) => {
-    // Iterate over leaderboardData
+    // If this player has a different position score than the previous one, update position
+    if (
+      index > 0 &&
+      player.positionScore !== leaderboardData[index - 1].positionScore
+    ) {
+      currentPosition = index + 1;
+    }
+
     tableHTML += `
       <tr>
-        <td><span class="badge bg-secondary rounded-pill">${index + 1}</span></td>
+        <td><span class="badge bg-secondary rounded-pill">${currentPosition}</span></td>
         <td>${renderHTML(player.player)}</td>
         <td>${renderHTML(player.armyName)}</td>
         <td><span class="badge bg-primary rounded-pill">${player.vp}</span></td>

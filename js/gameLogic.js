@@ -3,7 +3,12 @@
  * @fileoverview Contains game rule specific logic functions.
  */
 
-import { getArmyState, getUnitState, getAllLoadedArmyData, getArmyNameById } from "./state.js"; // Adjust path if needed
+import {
+  getArmyState,
+  getUnitState,
+  getAllLoadedArmyData,
+  getArmyNameById,
+} from "./state.js"; // Adjust path if needed
 
 /**
  * Finds the next model in the combined unit (base + hero) to apply a wound to automatically.
@@ -15,7 +20,9 @@ export function findTargetModelForWound(baseUnit, heroUnit = null) {
   if (!baseUnit || !baseUnit.models) return null;
 
   // Combine models from base unit and hero (if present)
-  const combinedModels = heroUnit ? [...baseUnit.models, ...heroUnit.models] : [...baseUnit.models];
+  const combinedModels = heroUnit
+    ? [...baseUnit.models, ...heroUnit.models]
+    : [...baseUnit.models];
   const activeModels = combinedModels.filter((m) => m.currentHp > 0);
 
   if (activeModels.length === 0) return null; // No models left to wound
@@ -25,7 +32,7 @@ export function findTargetModelForWound(baseUnit, heroUnit = null) {
   if (nonHeroNonTough.length > 0) {
     // Find one within the baseUnit first if possible (arbitrary tie-break)
     const target = nonHeroNonTough.find((m) =>
-      baseUnit.models.some((bm) => bm.modelId === m.modelId)
+      baseUnit.models.some((bm) => bm.modelId === m.modelId),
     );
     return target || nonHeroNonTough[0];
   }
@@ -82,30 +89,18 @@ export function calculateMovement(unitData, actionType) {
 
   if (hasFast) {
     // Fast units: +2" Advance / +4" Rush/Charge
-    console.debug(
-      `DEBUG: Fast unit detected, increasing movement by 2"/4" for action ${actionType}`
-    );
     baseMovement = baseMovement === 6 ? baseMovement + 2 : baseMovement + 4;
   }
   if (hasAgile) {
     // Agile units: +1" Advance / +2" Rush/Charge
-    console.debug(
-      `DEBUG: Agile unit detected, increasing movement by 1"/2" for action ${actionType}`
-    );
     baseMovement = baseMovement === 6 ? baseMovement + 1 : baseMovement + 2;
   }
   if (hasSlow) {
     // Slow units decrease movement
-    console.debug(
-      `DEBUG: Slow unit detected, decreasing movement by 2"/4" for action ${actionType}`
-    );
     baseMovement = baseMovement === 6 ? baseMovement - 2 : baseMovement - 4;
   }
   if (hasMusician) {
     // Musician units add +1" to all movement types
-    console.debug(
-      `DEBUG: Musician rule detected, increasing movement by 1" for action ${actionType}`
-    );
     baseMovement = baseMovement + 1;
   }
 
@@ -120,13 +115,16 @@ export function calculateMovement(unitData, actionType) {
  * casualty outcome, and killedBy info. Returns null if data is missing.
  */
 export function calculateArmyXP(armyId) {
-  console.debug(`DEBUG: Calculating XP for army ${armyId}`);
   const armyState = getArmyState(armyId); // Gets the final state from localStorage
   const allProcessedArmies = getAllLoadedArmyData();
-  const processedArmyData = allProcessedArmies ? allProcessedArmies[armyId] : null;
+  const processedArmyData = allProcessedArmies
+    ? allProcessedArmies[armyId]
+    : null;
 
   if (!armyState || !processedArmyData || !processedArmyData.units) {
-    console.error(`Cannot calculate XP: Missing state or processed data for army ${armyId}`);
+    console.error(
+      `Cannot calculate XP: Missing state or processed data for army ${armyId}`,
+    );
     return null;
   }
 
@@ -173,7 +171,8 @@ export function calculateArmyXP(armyId) {
     if (unitState.killedBy) {
       killedByInfo = {
         attackerUnitName: unitState.killedBy.attackerUnitName || "Unknown Unit",
-        attackerArmyName: getArmyNameById(unitState.killedBy.attackerArmyId) || "Unknown Army",
+        attackerArmyName:
+          getArmyNameById(unitState.killedBy.attackerArmyId) || "Unknown Army",
       };
     }
 
@@ -191,7 +190,6 @@ export function calculateArmyXP(armyId) {
     };
   });
 
-  console.debug(`DEBUG: XP Calculation Results for ${armyId}:`, xpResults);
   return xpResults;
 }
 

@@ -133,12 +133,12 @@ function displayRandomEvents(eventsData) {
         <div class="card event-card shadow-sm w-100">
           <div class="card-header">
             <span class="badge bg-secondary me-2">${renderHTML(
-              event.id
+              event.id,
             )}</span> ${renderHTML(event.title)}
           </div>
           <div class="card-body d-flex flex-column">
             <p class="text-muted fst-italic mb-2">${renderHTML(
-              event.description
+              event.description,
             )}</p>
             ${
               formattedEffect
@@ -176,10 +176,10 @@ function displayDoctrines(doctrinesData) {
 
   let doctrinesHTML = "";
   const universalDoctrine = doctrinesData.doctrines.find(
-    (d) => d.id === "universal"
+    (d) => d.id === "universal",
   );
   const selectableDoctrines = doctrinesData.doctrines.filter(
-    (d) => d.id !== "universal"
+    (d) => d.id !== "universal",
   );
 
   // Helper to create stratagem list HTML for a doctrine
@@ -198,7 +198,7 @@ function displayDoctrines(doctrinesData) {
           <div class="me-auto">
             <strong>${renderHTML(stratName)}</strong>
             <small class="d-block text-muted allow-definitions">${renderHTML(
-              stratDesc
+              stratDesc,
             )}</small>
           </div>
           <div class="stratagem-actions d-flex align-items-center gap-2">
@@ -265,7 +265,7 @@ function displayDoctrines(doctrinesData) {
 function renderGlossary(defs, container) {
   if (!defs || !container) {
     console.error(
-      "RenderGlossary called with invalid definitions or container."
+      "RenderGlossary called with invalid definitions or container.",
     );
     return;
   }
@@ -296,7 +296,7 @@ function renderGlossary(defs, container) {
     const lowerDescriptionAndSources = escapeHtml(
       `${(definition.description || "").toLowerCase()} ${definition.sources
         .join(" ")
-        .toLowerCase()}`
+        .toLowerCase()}`,
     );
 
     // Generate source badges HTML
@@ -315,7 +315,7 @@ function renderGlossary(defs, container) {
           }
           // Add more conditions here for specific army book names if desired
           return `<span class="badge ${badgeClass} border rounded-pill me-1 small">${escapeHtml(
-            source
+            source,
           )}</span>`;
         })
         .join("");
@@ -362,7 +362,7 @@ function renderGlossary(defs, container) {
 function filterGlossary(query, container, noResultsEl) {
   if (!container || !noResultsEl) {
     console.error(
-      "FilterGlossary called with invalid container or noResults element."
+      "FilterGlossary called with invalid container or noResults element.",
     );
     return;
   }
@@ -404,7 +404,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     !glossaryNoResultsElement
   ) {
     console.error(
-      "One or more essential UI elements for rules page not found. Aborting initialization."
+      "One or more essential UI elements for rules page not found. Aborting initialization.",
     );
     showToast("Error initializing rules page UI.", "Error");
     return;
@@ -416,7 +416,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const campaignData = await loadCampaignData();
     if (!campaignData) {
       console.warn(
-        "Failed to load campaign data. Definitions might be incomplete."
+        "Failed to load campaign data. Definitions might be incomplete.",
       );
     }
 
@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       filterGlossary(
         glossarySearchInput.value,
         glossaryItemsContainer,
-        glossaryNoResultsElement
+        glossaryNoResultsElement,
       );
     });
 
