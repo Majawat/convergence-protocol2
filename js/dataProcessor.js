@@ -101,9 +101,14 @@ function _initializeProcessedUnit(rawUnit) {
     canJoinUnitId: null,
     casterLevel: 0,
     xp: rawUnit.xp || 0,
+    notes: rawUnit.notes || null,
     toughnessUpgrades: [],
-    _baseToughValue: (rawUnit.rules || []).find((rule) => rule.name === "Tough")?.rating
-      ? parseInt((rawUnit.rules || []).find((rule) => rule.name === "Tough").rating, 10) || 0
+    _baseToughValue: (rawUnit.rules || []).find((rule) => rule.name === "Tough")
+      ?.rating
+      ? parseInt(
+          (rawUnit.rules || []).find((rule) => rule.name === "Tough").rating,
+          10,
+        ) || 0
       : 0,
   };
 }
@@ -118,8 +123,12 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
   let finalQuality = processedUnit.quality;
   let finalDefense = processedUnit.defense;
   let defenseModifiedByUpgrade = false;
-  const addedRuleIdentifiers = new Set(processedUnit.rules.map((r) => r.id || r.label || r.name));
-  const addedItemIdentifiers = new Set(processedUnit.items.map((i) => i.id || i.label || i.name));
+  const addedRuleIdentifiers = new Set(
+    processedUnit.rules.map((r) => r.id || r.label || r.name),
+  );
+  const addedItemIdentifiers = new Set(
+    processedUnit.items.map((i) => i.id || i.label || i.name),
+  );
   const statProcessedRuleInstances = new Set();
   const toughUpgradeOptionCounts = {};
   const allRules = [...processedUnit.rules]; // Collect all rules for accumulation
@@ -129,7 +138,9 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
     if (!option) return;
 
     // --- Accumulate Cost ---
-    const upgradeCostEntry = (option.costs || []).find((c) => c.unitId === processedUnit.id);
+    const upgradeCostEntry = (option.costs || []).find(
+      (c) => c.unitId === processedUnit.id,
+    );
     if (upgradeCostEntry?.cost) {
       processedUnit.cost += parseInt(upgradeCostEntry.cost, 10) || 0;
     } else if (option.cost) {
@@ -165,13 +176,22 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
           if (rule.name === "Caster" && !isNaN(ratingValue)) {
             processedUnit.casterLevel = ratingValue;
             statProcessedRuleInstances.add(instanceKey);
-            console.debug(`Applied Caster(${ratingValue}) upgrade to ${processedUnit.selectionId}`);
+            console.debug(
+              `Applied Caster(${ratingValue}) upgrade to ${processedUnit.selectionId}`,
+            );
           } else if (rule.name === "Tough" && !isNaN(ratingValue)) {
             optionGrantsTough = true;
             optionToughValue = ratingValue;
             statProcessedRuleInstances.add(instanceKey);
-          } else if (rule.name === "Defense" && !isNaN(ratingValue) && !defenseModifiedByUpgrade) {
-            finalDefense = Math.max(2, processedUnit._initialBaseDefense - ratingValue);
+          } else if (
+            rule.name === "Defense" &&
+            !isNaN(ratingValue) &&
+            !defenseModifiedByUpgrade
+          ) {
+            finalDefense = Math.max(
+              2,
+              processedUnit._initialBaseDefense - ratingValue,
+            );
             defenseModifiedByUpgrade = true;
             statProcessedRuleInstances.add(instanceKey);
           } else if (rule.name === "Quality" && !isNaN(ratingValue)) {
@@ -200,13 +220,19 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
 
           newItem.content.forEach((contentRule, idx) => {
             if (contentRule.type === "ArmyBookRule") {
-              processGainedRule(contentRule, `${gainInstanceKey}_content_${idx}`);
+              processGainedRule(
+                contentRule,
+                `${gainInstanceKey}_content_${idx}`,
+              );
             }
           });
         } else {
           (gain.content || []).forEach((contentRule, idx) => {
             if (contentRule.type === "ArmyBookRule") {
-              processGainedRule(contentRule, `${gainInstanceKey}_content_${idx}`);
+              processGainedRule(
+                contentRule,
+                `${gainInstanceKey}_content_${idx}`,
+              );
             }
           });
         }
@@ -217,8 +243,13 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
 
     // Track toughness upgrades
     if (optionGrantsTough) {
-      toughUpgradeOptionCounts[option.uid] = (toughUpgradeOptionCounts[option.uid] || 0) + 1;
-      if (!processedUnit.toughnessUpgrades.some((upg) => upg.optionUid === option.uid)) {
+      toughUpgradeOptionCounts[option.uid] =
+        (toughUpgradeOptionCounts[option.uid] || 0) + 1;
+      if (
+        !processedUnit.toughnessUpgrades.some(
+          (upg) => upg.optionUid === option.uid,
+        )
+      ) {
         processedUnit.toughnessUpgrades.push({
           optionUid: option.uid,
           count: 0,
@@ -241,7 +272,7 @@ function _applyUpgradesToUnit(processedUnit, rawUnit) {
   processedUnit.defense = finalDefense;
 
   console.debug(
-    `Final Caster Level for ${processedUnit.selectionId}: ${processedUnit.casterLevel}`
+    `Final Caster Level for ${processedUnit.selectionId}: ${processedUnit.casterLevel}`,
   );
 }
 
@@ -256,9 +287,11 @@ function _processUnitLoadout(processedUnit, rawUnit) {
   const finalLoadoutWeapons = [];
   const finalLoadoutItems = processedUnit.items;
   const finalLoadoutItemIdentifiers = new Set(
-    processedUnit.items.map((i) => i.id || i.label || i.name)
+    processedUnit.items.map((i) => i.id || i.label || i.name),
   );
-  const addedRuleIdentifiers = new Set(processedUnit.rules.map((r) => r.id || r.label || r.name));
+  const addedRuleIdentifiers = new Set(
+    processedUnit.rules.map((r) => r.id || r.label || r.name),
+  );
 
   (rawUnit.loadout || []).forEach((loadoutItem) => {
     if (loadoutItem.type === "ArmyBookWeapon") {
@@ -267,11 +300,12 @@ function _processUnitLoadout(processedUnit, rawUnit) {
         specialRules: (loadoutItem.specialRules || []).map((r) => ({ ...r })),
       });
     } else if (loadoutItem.type === "ArmyBookItem") {
-      const itemIdentifier = loadoutItem.id || loadoutItem.label || loadoutItem.name;
+      const itemIdentifier =
+        loadoutItem.id || loadoutItem.label || loadoutItem.name;
       if (loadoutItem.bases) processedUnit.bases = { ...loadoutItem.bases };
 
       let existingItem = finalLoadoutItems.find(
-        (i) => (i.id || i.label || i.name) === itemIdentifier
+        (i) => (i.id || i.label || i.name) === itemIdentifier,
       );
       if (!existingItem) {
         existingItem = {
@@ -286,10 +320,13 @@ function _processUnitLoadout(processedUnit, rawUnit) {
         if (contentItem.type === "ArmyBookWeapon") {
           finalLoadoutWeapons.push({
             ...contentItem,
-            specialRules: (contentItem.specialRules || []).map((r) => ({ ...r })),
+            specialRules: (contentItem.specialRules || []).map((r) => ({
+              ...r,
+            })),
           });
         } else if (contentItem.type === "ArmyBookRule") {
-          const ruleIdentifier = contentItem.id || contentItem.label || contentItem.name;
+          const ruleIdentifier =
+            contentItem.id || contentItem.label || contentItem.name;
           if (!addedRuleIdentifiers.has(ruleIdentifier)) {
             processedUnit.rules.push({ ...contentItem });
             addedRuleIdentifiers.add(ruleIdentifier);
@@ -311,15 +348,18 @@ function _processUnitLoadout(processedUnit, rawUnit) {
  */
 function _createModelsForUnit(processedUnit) {
   let totalModelsCreated = 0;
+  const unitId = processedUnit.selectionId;
   let modelIdCounter = 1;
 
   // Base models (without toughness upgrades)
   const baseModelCount =
-    processedUnit.size - processedUnit.toughnessUpgrades.reduce((sum, upg) => sum + upg.count, 0);
+    processedUnit.size -
+    processedUnit.toughnessUpgrades.reduce((sum, upg) => sum + upg.count, 0);
   for (let i = 0; i < baseModelCount; i++) {
-    const maxHp = processedUnit._baseToughValue > 0 ? processedUnit._baseToughValue : 1;
+    const maxHp =
+      processedUnit._baseToughValue > 0 ? processedUnit._baseToughValue : 1;
     processedUnit.models.push({
-      modelId: `model-${modelIdCounter++}`,
+      modelId: `${unitId}-model-${modelIdCounter++}`,
       maxHp: maxHp,
       currentHp: maxHp,
       baseStats: {
@@ -337,7 +377,7 @@ function _createModelsForUnit(processedUnit) {
     for (let i = 0; i < upgrade.count; i++) {
       const maxHp = upgrade.toughValue > 0 ? upgrade.toughValue : 1;
       processedUnit.models.push({
-        modelId: `model-${modelIdCounter++}`,
+        modelId: `${unitId}-model-${modelIdCounter++}`,
         maxHp: maxHp,
         currentHp: maxHp,
         baseStats: {
@@ -367,7 +407,9 @@ function _createModelsForUnit(processedUnit) {
  * @private
  */
 function _mergeCombinedUnits(unitA, unitB) {
-  console.log(`Merging combined units: ${unitA.customName} into ${unitB.customName}`);
+  console.log(
+    `Merging combined units: ${unitA.customName} into ${unitB.customName}`,
+  );
 
   const mergedUnit = unitB;
 
@@ -390,8 +432,14 @@ function _mergeCombinedUnits(unitA, unitB) {
   // Combine arrays (traits, skills, etc.)
   mergedUnit.traits = [...(mergedUnit.traits || []), ...(unitA.traits || [])];
   mergedUnit.skills = [...(mergedUnit.skills || []), ...(unitA.skills || [])];
-  mergedUnit.injuries = [...(mergedUnit.injuries || []), ...(unitA.injuries || [])];
-  mergedUnit.talents = [...(mergedUnit.talents || []), ...(unitA.talents || [])];
+  mergedUnit.injuries = [
+    ...(mergedUnit.injuries || []),
+    ...(unitA.injuries || []),
+  ];
+  mergedUnit.talents = [
+    ...(mergedUnit.talents || []),
+    ...(unitA.talents || []),
+  ];
 
   // Combine rules using accumulation
   const allCombinedRules = [...mergedUnit.rules, ...unitA.rules];
@@ -478,7 +526,8 @@ function processArmyData(rawData) {
 
     if (processedUnit.isHero && rawUnit.joinToUnit) {
       processedUnit.canJoinUnitId = rawUnit.joinToUnit;
-      processedArmy.heroJoinTargets[processedUnit.selectionId] = rawUnit.joinToUnit;
+      processedArmy.heroJoinTargets[processedUnit.selectionId] =
+        rawUnit.joinToUnit;
     }
 
     tempProcessedUnits[processedUnit.selectionId] = processedUnit;
@@ -489,12 +538,16 @@ function processArmyData(rawData) {
     if (unitA.isCombined && unitA.joinToUnitId) {
       const unitB = tempProcessedUnits[unitA.joinToUnitId];
 
-      if (unitB && unitB.isCombined && !unitsMergedInto.has(unitB.selectionId)) {
+      if (
+        unitB &&
+        unitB.isCombined &&
+        !unitsMergedInto.has(unitB.selectionId)
+      ) {
         _mergeCombinedUnits(unitA, unitB);
         unitsMergedInto.add(unitA.selectionId);
       } else if (!unitB || !unitB.isCombined) {
         console.warn(
-          `Combined unit ${unitA.customName} (${unitA.selectionId}) points to invalid target ${unitA.joinToUnitId}. Treating as separate.`
+          `Combined unit ${unitA.customName} (${unitA.selectionId}) points to invalid target ${unitA.joinToUnitId}. Treating as separate.`,
         );
         unitA.isCombined = false;
         unitA.joinToUnitId = null;
@@ -513,7 +566,10 @@ function processArmyData(rawData) {
   });
 
   // Step 4: Final Adjustments
-  processedArmy.meta.modelCount = processedArmy.units.reduce((sum, unit) => sum + unit.size, 0);
+  processedArmy.meta.modelCount = processedArmy.units.reduce(
+    (sum, unit) => sum + unit.size,
+    0,
+  );
   processedArmy.meta.activationCount = processedArmy.units.length;
 
   processedArmy.units.forEach((unit) => {
