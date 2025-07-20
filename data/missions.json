@@ -219,7 +219,7 @@
       "points": 1800,
       "datetime": "2025-05-25T10:00:00-05:00",
       "month": "July",
-      "status": "current",
+      "status": "completed",
       "overview": "The AI's reality experiments have torn open a dimensional rift. Hostile entities pour through, threatening to destroy the very intelligence all factions seek to control. Protect the AI while fighting for dominance—if it falls, everyone loses.",
       "objective": {
         "primary": "Control the AI Objective at game end to win. If the AI Objective is destroyed, all players lose.",
@@ -263,17 +263,17 @@
           }
         ]
       },
-      "battleReportFile": null,
-      "winner": null,
-      "winningArmy": null
+      "battleReportFile": "data/battle-reports/mission5.json",
+      "winner": "Claire",
+      "winningArmy": "Hive Fleet Tarvos"
     },
     {
       "number": 6,
       "title": "The Siege of the Core",
       "points": 2000,
-      "datetime": null,
+      "datetime": "2025-08-09T10:00:00-05:00",
       "month": "August",
-      "status": "upcoming",
+      "status": "current",
       "overview": "One faction makes a bold play to seize the Nexus' heart, forcing others into a desperate defense or counterattack.",
       "objective": {
         "primary": "",

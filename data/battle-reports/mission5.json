@@ -1,0 +1,82 @@
+{
+  "missionId": 5,
+  "title": "The Rift Unleashed",
+  "participants": [
+    {
+      "player": "Claire",
+      "army": "Hive Fleet Tarvos",
+      "result": "winner"
+    },
+    {
+      "player": "Cody",
+      "army": "The Ashen Pact",
+      "result": "participant"
+    },
+    {
+      "player": "Victoria",
+      "army": "Galdoo'o naahlk wildigitkw",
+      "result": "participant"
+    },
+    {
+      "player": "Alex",
+      "army": "van Louen's Roughnecks",
+      "result": "participant"
+    }
+  ],
+  "rounds": [
+    {
+      "number": 1,
+      "title": "Deployment and the Calm Before the Storm",
+      "description": "The deployment phase unfolded like a careful chess match, with commanders positioning their forces while otherworldly energies crackled ominously overhead. Cody's Ashen Pact took an aggressive stance, with Zerek Thal vanishing into ambush positions while his Stormfang Riders deployed boldly in the corner, eyes fixed on the AI core objective. Claire's Hive Fleet Tarvos mirrored this approach, her Invasion Carrier preparing spore drops while Mossbacks skulked into hidden positions.\n\nVictoria's woodland forces spread across the battlefield like a green tide, Aloria taking point while Treemen and their ancient Elder sought the shelter of natural cover. Alex's Roughnecks deployed with characteristic military precision, the RT Team slipping into ambush while the legendary \"One Way Ticket\" transport took an intimidating position facing Claire's emerging Splintermaw.\n\nThe final moments of deployment saw heavy assets lumber into position: Cody's Lord Taker claiming high ground, Claire's Grinder Truck rumbling behind the Splintermaw, and Alex's mighty \"Diplomacy\" tank barely squeezing into the deployment zone. Most significantly, Cody successfully negotiated a game-long alliance with Victoria—a pact that would fundamentally alter the battle's dynamics. Not to be outdone, Claire and Alex quickly followed suit, forging their own non-aggression pact shortly thereafter. With two major alliances now dividing the battlefield, what had begun as a four-way free-for-all transformed into a tense standoff between two allied blocs.\n\nThe scout round saw Claire's Sanctus scaling hills into bunkered cover while Victoria's deer riders surged forward. Claire's biker gang prepared for the inevitable clash, their engines growling with anticipation."
+    },
+    {
+      "number": 2,
+      "title": "First Blood and Rifts Unleashed",
+      "description": "The battle commenced ominously. The first random event check yielded no immediate chaos, but reality itself seemed to rebel—a dimensional portal tore open at board edge, disgorging Rift Spawn and Rift Horrors onto the battlefield like unwelcome harbingers of the catastrophe to come.\n\nCody's Stormfang Riders immediately proved their worth, surging forward to engage the emerging Rift Spawn. In a display of supernatural coordination, they systematically eliminated all five otherworldly creatures, though not without cost—taking a solid hit in return. Claire's forces responded with devastating efficiency: her mini bikers unleashed grenade launcher volleys into Cody's Dustborn Mauraders, reducing eight of the hardy warriors to smoking craters.\n\nVictoria's forces moved with the fluid grace of the forest itself, her champions moving to lance the Rift Horrors while Alex's snipers opened fire on the massive Treeman—though the ancient guardian absorbed the gunfire like rain on bark. The Rift Horrors proved their malevolent nature by utterly annihilating Victoria's Mounted Weavers before surging forward with inhuman speed.\n\nThe round continued with tactical maneuvering: Cody's \"Embers of Judgement\" drifted sideways, unleashing fire that claimed two bikers before missiles and machine guns targeted the Brackenlord—though the creature's unnatural resilience saw it shrug off the assault. Claire retaliated by advancing her Brackenlord and weaving psychic energies with the Mindworm's assistance, the combined Overwhelm spell scoring three critical hits on the \"Embers of Judgement.\"\n\nVictoria's champion Aloria proved her mettle against the Rift Horrors, her breath attack preceding a brutal melee that claimed two of the creatures. The surviving Horror struck back, landing a blow that Aloria weathered with supernatural fortitude. The round concluded with Alex's methodical advance and the systematic elimination of the remaining Rift threat, setting the stage for the greater chaos to come."
+    },
+    {
+      "number": 3,
+      "title": "Blood, Ambushes, and Dimensional Catastrophe",
+      "description": "The second round opened with a catastrophic random event: Alex's 1st Mechanized Squad found themselves \"Covered in Blood,\" while reality convulsed again. The dimensional rift relocated between Alex and Victoria's forces, vomiting forth an even more terrifying array: two Rift Spawn units, a Rift Horror, and most ominously, a hulking Rift Monstrosity.\n\nThe ambush phase erupted into coordinated chaos. Cody's Serephine and her consort materialized behind defensive walls near Lord Taker, while Claire's Invasion Carrier spore dropped directly into the battlefield's heart. Victoria's Forest Watch emerged to reinforce her lines, and Alex's Recon Team took advantageous positions. In a second wave, Zarek and his crew flanked Lord Taker while Claire's Mossbacks took cover \"like little bitches\" behind rocky outcroppings.\n\nCombat resumed with Cody's tank methodically eliminating Emerald Tide forces before targeting the Brackenlord. Claire's response was devastating: the Brackenlord channeled Overwhelm energies, the spell's power amplified despite Serephine's counter-tokens. The psychic blast eliminated the Resolute Wardens entirely before the creature charged the \"Embers of Judgement,\" dealing three critical hits.\n\nAlex's blood-soaked mechanized squad proved their enhanced ferocity by obliterating Rift Spawn and scoring hits on the Monstrosity with plasma fire. Victoria's beetle champion engaged the towering Rift Monstrosity in brutal combat while the otherworldly creatures struck back with vengeance. The Monstrosity claimed the remaining deerman that Alex had been targeting, while Rift Spawn and Horrors carved into both Alex and Victoria's forces.\n\nThe brutal melee continued with Lord Taker charging the Brackenlord in a clash of titans, their combat ending in a deadly stalemate. Claire's mini bikers found their attacks frustrated by the Thunder Klaws' protective abilities, while Alex's normally unreliable Hunter Missiles finally found their mark against a Rift Horror—proving that even the most temperamental weapons sometimes achieve their moment of glory.\n\nThe round's climax saw the Splintermaw charge the Rift Monstrosity in a spectacular display of alien-on-alien violence, both creatures savaging each other before Alex's combined firepower and Victoria's Treestomp spell eliminated the remaining dimensional threats.\n\nThe battle's conclusion saw desperate positioning around the AI core. Cody's Stormfang Riders claimed the objective area, but Claire's Mossbacks struck with devastating precision, eliminating the riders and clearing the way. The Grinder Truck's firepower finished what the infantry had started, leaving Claire's forces as the final guardians of the mysterious AI core. In a last-ditch effort to claim victory, Cody unleashed his remaining champions. Seraphine Calder's Quill Blast failed to find its mark, but Zerek Thal moved with deadly purpose, his weapon finally silencing the resilient Brackenlord. However, the damage was done—Claire's Hive Fleet Tarvos had established dominance over the AI core, their alien consciousness proving most compatible with the ancient artificial intelligence."
+    }
+  ],
+  "keyMoments": [
+    {
+      "title": "The Twin Alliances",
+      "description": "Cody successfully negotiated a game-long non-hostility pact with Victoria, fundamentally altering the battlefield dynamics. Claire and Alex quickly responded by forging their own alliance, transforming the four-way battle into a tense standoff between two allied blocs."
+    },
+    {
+      "title": "Stormfang Riders' Heroic Stand",
+      "description": "Cody's elite cavalry proved their supernatural prowess by systematically eliminating all five Rift Spawn in the opening engagement, though not without paying a bloody price."
+    },
+    {
+      "title": "Dustborn Mauraders Decimation",
+      "description": "Claire's mini bikers delivered a devastating grenade launcher barrage that reduced eight of Cody's hardy Dustborn Mauraders to smoking craters in a single devastating volley."
+    },
+    {
+      "title": "Covered in Blood",
+      "description": "The second round's catastrophic random event saw Alex's 1st Mechanized Squad become \"Covered in Blood,\" while reality itself convulsed to spawn even more terrifying dimensional horrors."
+    },
+    {
+      "title": "Battle of the Titans",
+      "description": "The spectacular clash between Claire's Splintermaw and the otherworldly Rift Monstrosity showcased alien-on-alien violence at its most brutal, with both creatures savaging each other in a display of supernatural fury."
+    },
+    {
+      "title": "Hunter Missiles' Moment of Glory",
+      "description": "Alex's notoriously unreliable Hunter Missiles finally found their mark against a Rift Horror, proving that even the most temperamental weapons can achieve their moment of vindication."
+    },
+    {
+      "title": "BAMBI Down",
+      "description": "Alex's mighty \"Diplomacy\" tank unleashed eight devastating attacks against Victoria's deer riders, yet managed to kill only one—leading to the immortal battlefield cry of \"BAMBI!\" as the lone casualty fell."
+    },
+    {
+      "title": "Mossbacks Strike",
+      "description": "Claire's forces, previously hidden \"like little bitches\" behind rocky cover, emerged to deliver the killing blow against Cody's Stormfang Riders with devastating precision."
+    },
+    {
+      "title": "Zerek Thal's Last Stand",
+      "description": "In a final desperate gambit, Cody's champion moved alone against the resilient Brackenlord, his weapon finally silencing the psychic creature in a moment of personal glory—though too late to change the battle's outcome."
+    }
+  ],
+  "conclusion": "As dimensional rifts sealed themselves and otherworldly energies dissipated, Claire's Hive Fleet emerged victorious. The AI core, now under Tyranid influence, would undoubtedly shape the Nexus' future development in ways none could predict. The twin alliances had created a fascinating strategic dynamic, but it was the adaptability and alien resilience of Hive Fleet Tarvos that proved most compatible with the chaotic dimensional energies.\n\nThe Rift Unleashed had claimed its toll on all factions, but it was Claire's relentless advance and her forces' natural affinity for the otherworldly that would carry the day—and influence the AI's emerging consciousness for battles yet to come. The dimensional horrors that plagued the battlefield served as a grim reminder of the Nexus' growing instability, and the consequences of meddling with forces beyond mortal comprehension.\n\nWith the AI core now singing with alien harmonics, the campaign had reached a new and terrifying threshold. Each faction would need to adapt their strategies not only to face each other, but to contend with the growing threat of dimensional incursions that seemed drawn to the Nexus' escalating power."
+}

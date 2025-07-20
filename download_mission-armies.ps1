@@ -34,7 +34,7 @@ $ApiBaseUrl = "https://army-forge.onepagerules.com/api/tts?id="
 # Function to sanitize a string for use as a filename
 function Format-FileName {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Name
     )
     # Remove characters invalid for Windows filenames and replace spaces
@@ -80,8 +80,9 @@ if (-not (Test-Path $TargetDirectory -PathType Container)) {
         Write-Error "Failed to create target directory '$TargetDirectory'. Please check permissions. Error: $($_.Exception.Message)"
         exit 1
     }
-} else {
-     Write-Host "Target directory already exists."
+}
+else {
+    Write-Host "Target directory already exists."
 }
 
 # 3. Load Campaign Data
@@ -101,8 +102,8 @@ catch {
 }
 
 if (-not $CampaignData.armies) {
-     Write-Error "Campaign data does not contain an 'armies' array."
-     exit 1
+    Write-Error "Campaign data does not contain an 'armies' array."
+    exit 1
 }
 
 # 4. Download Army Lists
@@ -113,9 +114,10 @@ $skipCount = 0
 foreach ($army in $CampaignData.armies) {
     $armyId = $army.armyForgeID
     $armyName = $army.armyName
+    $armyHidden = $army.idden
     $armyFileNameBase = $army.armyURL # Prefer armyURL for filename
 
-    if (-not $armyId) {
+    if (-not $armyId -or $armyHidden) {
         Write-Warning "Skipping army '$armyName' - Missing 'armyForgeID'."
         continue
     }
@@ -124,8 +126,8 @@ foreach ($army in $CampaignData.armies) {
         Write-Warning "Army '$armyName' (ID: $armyId) is missing 'armyURL'. Falling back to sanitized 'armyName' for filename."
         $armyFileNameBase = Format-FileName $armyName
         if (-not $armyFileNameBase) {
-             Write-Warning "Could not generate a valid filename base for army '$armyName' (ID: $armyId). Skipping."
-             continue
+            Write-Warning "Could not generate a valid filename base for army '$armyName' (ID: $armyId). Skipping."
+            continue
         }
     }
 
