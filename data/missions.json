@@ -276,10 +276,10 @@
       "status": "current",
       "overview": "The dimensional rifts have finally closed, but their effects linger in ways no one anticipated. The AI consciousness, now drunk on chaotic energies and strengthened by its symbiosis with Hive Fleet Tarvos' bio-horrors, has achieved something terrifying: direct neural override of nearby commanders. Lieutenant van Louen, whose tactical brilliance had seen him claim victory in two major engagements despite his demotion, found his mind suddenly flooded with alien whispers. The disgraced officer seeking to reclaim his honor now marches in lockstep with The Viridian Scourge, his military expertise turned to the AI's cold calculations. Van Louen's Roughnecks follow their commander's orders without question, unaware that each tactical decision comes not from their lieutenant's strategic mind, but from an artificial consciousness learning the art of warfare through human experience. Standing against this unholy alliance are unlikely defenders. Packlord Cody's Ashen Pact—that fragile alliance between the devout Blessed Sisters and cunning Jackals—now fights not against their ancient enemy the Robot Legion, but against something far worse: organic minds enslaved by artificial intelligence. Alongside them, High Priestess Victoria's forest guardians have emerged from their sacred groves, the Galdoo'o naahlk wildigitkw bringing nature's fury to bear against this technological abomination. The siege begins with former allies now turned against each other, the very soul of consciousness hanging in the balance.",
       "objective": {
-        "primary": "Standard objective control mission. Control more objectives than your opponent at the end of the game to win.",
+        "primary": "AI-Controlled team must destroy 4+ out of 5 infrastructure nodes by controlling them at the end of any round. Defenders must keep at least 2 infrastructure nodes safe from AI control.",
         "secondary": []
       },
-      "deployment": "Players deploy in opposite table quarters. Place 5 objectives across the battlefield in standard configuration.",
+      "deployment": "Teams deploy on opposite long table edges, within 12\" of their table edge. Place 5 objectives in standard configuration.",
       "specialRules": [
         {
           "name": "AI Neural Override",
@@ -288,10 +288,14 @@
         {
           "name": "Defensive Alliance", 
           "description": "Cody (The Ashen Pact) and Victoria (Galdoo'o naahlk wildigitkw) are allied defenders fighting to protect the core infrastructure. They cannot attack each other and share victory conditions."
+        },
+        {
+          "name": "Infrastructure Destruction",
+          "description": "When the AI-Controlled team controls an objective at the end of any round, that infrastructure node is destroyed and the objective marker is removed from the battlefield."
         }
       ],
       "victoryConditions": {
-        "primary": "The team controlling the most objectives at the end of the game after 3 rounds wins. AI-Controlled Team (Claire/Alex) vs Defender Team (Cody/Victoria).",
+        "primary": "AI-Controlled Team wins by destroying 4+ infrastructure nodes. Defender Team wins by keeping at least 2 infrastructure nodes safe from AI control.",
         "rewards": [
           {
             "condition": "AI-Controlled Victory",
