@@ -114,7 +114,7 @@ $skipCount = 0
 foreach ($army in $CampaignData.armies) {
     $armyId = $army.armyForgeID
     $armyName = $army.armyName
-    $armyHidden = $army.idden
+    $armyHidden = $army.hidden
     $armyFileNameBase = $army.armyURL # Prefer armyURL for filename
 
     if (-not $armyId -or $armyHidden) {
