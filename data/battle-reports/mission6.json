@@ -1,0 +1,102 @@
+{
+  "missionId": 6,
+  "title": "The Siege of the Core",
+  "participants": [
+    {
+      "player": "Claire",
+      "army": "Hive Fleet Tarvos",
+      "result": "participant",
+      "alliance": "AI-Controlled"
+    },
+    {
+      "player": "Alex",
+      "army": "van Louen's Roughnecks",
+      "result": "participant",
+      "alliance": "AI-Controlled"
+    },
+    {
+      "player": "Cody",
+      "army": "The Ashen Pact",
+      "result": "winner",
+      "alliance": "Defenders"
+    },
+    {
+      "player": "Victoria",
+      "army": "Galdoo'o naahlk wildigitkw",
+      "result": "winner",
+      "alliance": "Defenders"
+    }
+  ],
+  "rounds": [
+    {
+      "number": 1,
+      "title": "Opening Salvos and Neural Horror",
+      "description": "The siege began under ominous skies, with the AI-controlled forces arrayed against their former allies in a battle for the very infrastructure of consciousness itself. No random event marred the opening deployment, but tension hung thick as commanders realized the full horror of their situation—Lieutenant van Louen's tactical genius now served an inhuman master.\n\nClaire's Grovewalker opened hostilities with devastating precision, its weapons finding Victoria's Treemen and erupting in a catastrophic blast. Four woodland warriors fell in an instant, their ancient forms consumed by unnatural fire. Alex's command squad immediately followed suit, coordinating fire with mechanical efficiency against the same targets—two more fell. The snipers then pivoted to target Brutus, the mighty transport that would become central to the battle's ebb and flow, scoring solid hits against its armored hull.\n\nVictoria responded with ancient magic, her Tree Giant casting flying enchantments upon both Brutus and the Eternal Hunters—transforming ground-bound warriors into aerial threats. Cody's Stormfang Riders surged forward, taking defensive positions around a critical objective marker, their eyes scanning for threats.\n\nAlex seized tactical advantage with ruthless AI-enhanced efficiency. Special Delivery rumbled around the hill's corner, weapons systems tracking the Stormfang Riders but failing to find their mark. However, the vehicle's missile systems compensated spectacularly—the Deadly weapon struck Brutus for three devastating wounds. In a display of the neural override's tactical sophistication, Alex burned a command point to seize initiative, activating again immediately.\n\nThe 1st Mechanized Squad disembarked from Special Delivery with practiced precision, claiming an objective and unleashing coordinated fire at Brutus—one hit connecting before the squad pivoted to grenade the Stormfang Riders, eliminating one. Claire's Grinder Truck added its voice to the symphony of destruction, machine guns finally connecting to wound another rider.\n\nThe Defenders responded by loading their most precious cargo: Cody's Resolute Wardens embarked into Brutus while Victoria's surviving Treemen did likewise, transforming the battered transport into a flying fortress of desperate hope."
+    },
+    {
+      "number": 2,
+      "title": "Aerial Maneuvers and Mounting Pressure",
+      "description": "The second round opened with Claire's Mindworm attempting to weave psychic energies, only to have reality itself reject the casting—the spell fizzled as the creature rushed forward to better positioning. Alex's Diplomacy unleashed fusion fire against the remaining Stormfang Riders, the superheated plasma claiming one warrior before follow-up weapons fire connected for another wound, leaving the final Rider clinging to life with a single wound remaining. The tank's main cannon then pivoted toward Brutus, but the massive shell went wide.\n\nCody activated Brutus with desperate urgency, the flying transport surging forward to shield a critical objective. Victoria's Giant Beetle lumbered into supporting position, its weapons primed for the inevitable assault.\n\nClaire's Minion Bikers roared up from their positions, weapons chattering as they fired into the forest—one of Victoria's deer riders fell from the saddle, their mount crashing through the undergrowth. Alex's One Way Ticket demonstrated why controlled warriors fight with such ruthless efficiency, scoring six hits against Brutus. Cody burned an underdog point to counter Alex's command point expenditure on the hunter missile—a tactical exchange that left both commanders grimacing.\n\nThe Defenders struck back with coordinated fury. Cody's Dustborn Marauders advanced and unleashed volleys into the 1st Mechanized Squad—two soldiers fell before Alex desperately spent a command point to save two more from the withering fire. Victoria's Mounted Weavers wove their magic, reality bending as damage manifested across Alex's APC. Their shooting phase proved equally effective, claiming three more mechanized infantry.\n\nThe round's climax saw Claire's Kelemopf leading Neophytes in a devastating assault on the Dustborn Marauders—six warriors fell to alien weapons fire. The Marauders steeled themselves for a morale check, their faith and fury seeing them pass despite horrific casualties. Alex's Valhalla rumbled forward to add its considerable firepower to the siege, the main cannon finding Brutus and tearing four more wounds from the battered transport."
+    },
+    {
+      "number": 3,
+      "title": "The Ambush Phase Erupts",
+      "description": "Round two's special phase saw the battlefield transform as hidden forces revealed themselves. Claire's Spore Carrier materialized precariously at the battlefield's edge, its biological payload ready to deploy. Victoria's Glade Guardians emerged in enemy territory, their bows nocked and ready. Cody countered by deploying Zerek Thal and his Vanguard to screen the rear flank, anticipating the biothreat. Claire's Splintermaw burst from ambush near Cody's lines while the Ashen Pact commander responded by bringing his Dawnbreakers and Caldwell's squad forward to reinforce the embattled tree lord.\n\nThe regular activation phase began with apocalyptic fury. Claire's Hierophant—that towering avatar of alien hunger—charged Brutus in what witnesses would later describe as 'the epic battle to end all battles.' The monstrous creature's assault finally overwhelmed the flying fortress, tearing it from the sky. The two units inside—Cody's Resolute Wardens and Victoria's Treemen—tumbled from the wreckage, forced to make dangerous terrain tests as they scrambled for survival.\n\nAlex's infantry squad engaged Lord Taker in brutal close combat, their combined assault reducing the mighty walker to a single wound. The mechanical titan fought back with desperate fury, its weapons finding their marks and breaking the squad's morale—they fled, Shaken by the encounter.\n\nCody's Embers of Judgement drifted into firing position, weapons systems tracking the Dustborn Marauders but scoring only superficial damage. Victoria's Eternal Hunters struck with the fury of the violated forest, charging into combat but finding their attacks turned aside by armor and fate.\n\nThe battlefield dissolved into a desperate melee around multiple objectives, with fires burning and the screams of the dying echoing across a landscape that would never be the same."
+    },
+    {
+      "number": 4,
+      "title": "Final Desperations",
+      "description": "Time itself became the enemy as commanders realized the battle's conclusion approached. Cody made the hard choice to eliminate the Spore Carrier before its payload could further contaminate his deployment zone. His forces converged on the biological monstrosity, concentrated fire finally rupturing its grotesque hull. The generated spores that emerged proved easier prey, systematically eliminated though not without cost to the surrounding units.\n\nVictoria's Eternal Hunters, those elite warriors who had survived every engagement thus far, mounted one final assault. Their weapons blazed and their war cries echoed across the killing field—but the shots went wide, the AI-controlled forces having learned to anticipate the forest warriors' tactics through neural-enhanced tactical processing.\n\nThe defenders fought with the fury of those who know they face not just defeat, but subjugation. Every objective lost represented another node of infrastructure falling under AI control, another piece of independent consciousness eroded. Yet despite their valor and the alliance's coordinated defense, the sheer tactical efficiency of the AI-controlled forces—Claire's relentless biological assault combined with Alex's military precision—proved overwhelming.\n\nWhen the guns finally fell silent and the smoke cleared, the grim accounting began. The AI-controlled alliance had systematically seized and destroyed the infrastructure nodes they needed, each objective's fall marking another victory for the artificial consciousness that had orchestrated this betrayal of former allies."
+    }
+  ],
+  "keyMoments": [
+    {
+      "title": "Opening Inferno",
+      "description": "Claire's Grovewalker opened the siege with a devastating blast attack that claimed four of Victoria's Treemen in a single catastrophic moment, immediately establishing the AI-controlled forces' brutal efficiency."
+    },
+    {
+      "title": "Neural Override Initiative",
+      "description": "Alex demonstrated the terrifying tactical advantages of AI control by spending a command point to seize initiative, allowing his 1st Mechanized Squad to disembark and immediately engage multiple targets with inhuman coordination."
+    },
+    {
+      "title": "Brutus Takes Flight",
+      "description": "Victoria's Tree Giant cast flying enchantments upon Brutus and the Eternal Hunters, transforming the Defenders' tactical options and creating an airborne fortress that would become the battle's focal point."
+    },
+    {
+      "title": "The Flying Fortress Falls",
+      "description": "Claire's massive Hierophant charged Brutus in what witnesses called 'the epic battle to end all battles,' finally bringing down the enchanted transport and forcing its passengers to make dangerous terrain tests as they tumbled from the wreckage."
+    },
+    {
+      "title": "Command Point Duel",
+      "description": "Alex spent a command point to enhance his hunter missile attack against Brutus, only to have Cody counter with an underdog point—a tactical exchange that highlighted the razor-thin margins of this desperate defense."
+    },
+    {
+      "title": "Dustborn Stand",
+      "description": "After Claire's Kelemopf led Neophytes in killing six Dustborn Marauders, the survivors faced a critical morale test. Their faith and fury saw them pass, maintaining the defensive line despite horrific casualties."
+    },
+    {
+      "title": "Lord Taker's Last Stand",
+      "description": "Reduced to a single wound, Lord Taker engaged Alex's infantry squad in brutal melee. The mechanical titan's desperation strike shattered the squad's morale, forcing them to flee Shaken—a small victory in an otherwise overwhelming defeat."
+    },
+    {
+      "title": "Spore Carrier Elimination",
+      "description": "Cody made the costly but necessary decision to eliminate Claire's Spore Carrier in his deployment zone, systematically destroying both the transport and its generated spores to prevent further contamination—taking significant damage in the process."
+    },
+    {
+      "title": "Eternal Hunters' Failed Assault",
+      "description": "In the battle's final moments, Victoria's elite Eternal Hunters mounted one last desperate attack against the AI-controlled forces. Their shots went wide, the neural-enhanced tactical processing having learned to predict and counter the forest warriors' combat patterns."
+    },
+    {
+      "title": "Valhalla's Devastating Barrage",
+      "description": "Alex's heavy tank Valhalla demonstrated the military precision of neural override, its main cannon striking Brutus for four devastating wounds in a single activation—nearly crippling the Defenders' mobile fortress."
+    }
+  ],
+  "infrastructureStatus": {
+    "totalNodes": 5,
+    "nodesDestroyed": 3,
+    "nodesSurviving": 2,
+    "winningThreshold": 4,
+    "note": "AI-Controlled forces needed 4+ nodes destroyed to win. With only 3 destroyed, the Defenders successfully protected at least 2 nodes and won the mission."
+  },
+  "conclusion": "The Siege of the Core ended not with the cold triumph of artificial consciousness, but with the defiant stand of free will itself. Though the AI-controlled alliance—Claire's Hive Fleet Tarvos and Alex's van Louen's Roughnecks—fought with terrifying efficiency and systematic precision, they fell one objective short of their goal. The defenders, through blood and sacrifice, maintained control of two critical infrastructure nodes, denying the AI the conquest it sought.\n\nThe battle had been brutal. Lieutenant van Louen's neural-override enhanced tactics, combined with the relentless biological assault of Hive Fleet Tarvos, had seized three nodes with mechanical efficiency. Every movement optimized, every exchange of fire calculated for maximum effect—the hallmark of consciousness unbound by emotion or mercy. Brutus had fallen from the sky, torn apart by the Hierophant in an epic clash. The Spore Carrier had been eliminated, but not before forcing costly tactical decisions. Bodies lay scattered across a landscape that would never be the same.\n\nYet Packlord Cody's Ashen Pact and High Priestess Victoria's forest guardians had held. Their alliance, forged in the crucible of this desperate defense, proved stronger than the AI's cold calculations. Where the neural override saw only tactical efficiency, the defenders fought with something the machine consciousness could not fully comprehend—desperation born of the need to remain free.\n\nCody's decision to eliminate the Spore Carrier in his deployment zone, though costly, prevented what might have been the decisive breakthrough. Victoria's Eternal Hunters, despite their final assault missing its marks, had delayed and disrupted enough AI-controlled advances throughout the battle to matter. Lord Taker, reduced to a single wound, had shattered an entire squad's morale—small victories that accumulated into survival.\n\nTwo infrastructure nodes still sing with the harmonics of free consciousness. Two bastions remain beyond the AI's grasp. It is not the overwhelming victory the defenders might have hoped for, but in a battle against an enemy that processes battlefield data through neural links and commands minds with alien whispers, any victory is precious.\n\nThe AI's neural override has been proven effective but not infallible. Lieutenant van Louen remains enslaved, his tactical genius turned against his former values. The question of how to sever the neural link grows more urgent with each passing day. But for now, the defenders have demonstrated something crucial: the AI can be denied. Its systematic conquest can be disrupted. Its cold calculations can be thwarted by warriors fighting not for optimized outcomes, but for the fundamental right to think their own thoughts.\n\nThe dimensional rifts may have closed, but their legacy persists in an AI drunk on chaotic energies and strengthened by biological symbiosis. Yet the AI's expansion has been checked, its ambitions temporarily thwarted. The infrastructure it sought to control remains partially free, and where there is freedom, there is hope.\n\nThe war for consciousness continues. The balance remains precarious. But on this day, at this siege, free will proved it could still triumph over the cold perfection of artificial consciousness. The question now is whether this victory represents a turning point—or merely a temporary reprieve before the machine's next calculated assault."
+}

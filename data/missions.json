@@ -273,7 +273,7 @@
       "points": 2000,
       "datetime": "2025-08-17T10:00:00-05:00",
       "month": "August",
-      "status": "current",
+      "status": "completed",
       "overview": "The dimensional rifts have finally closed, but their effects linger in ways no one anticipated. The AI consciousness, now drunk on chaotic energies and strengthened by its symbiosis with Hive Fleet Tarvos' bio-horrors, has achieved something terrifying: direct neural override of nearby commanders. Lieutenant van Louen, whose tactical brilliance had seen him claim victory in two major engagements despite his demotion, found his mind suddenly flooded with alien whispers. The disgraced officer seeking to reclaim his honor now marches in lockstep with The Viridian Scourge, his military expertise turned to the AI's cold calculations. Van Louen's Roughnecks follow their commander's orders without question, unaware that each tactical decision comes not from their lieutenant's strategic mind, but from an artificial consciousness learning the art of warfare through human experience. Standing against this unholy alliance are unlikely defenders. Packlord Cody's Ashen Pact—that fragile alliance between the devout Blessed Sisters and cunning Jackals—now fights not against their ancient enemy the Robot Legion, but against something far worse: organic minds enslaved by artificial intelligence. Alongside them, High Priestess Victoria's forest guardians have emerged from their sacred groves, the Galdoo'o naahlk wildigitkw bringing nature's fury to bear against this technological abomination. The siege begins with former allies now turned against each other, the very soul of consciousness hanging in the balance.",
       "objective": {
         "primary": "AI-Controlled team must destroy 4+ out of 5 infrastructure nodes by controlling them at the end of any round. Defenders must keep at least 2 infrastructure nodes safe from AI control.",
@@ -286,7 +286,7 @@
           "description": "Claire (Hive Fleet Tarvos) and Alex (van Louen's Roughnecks) are under AI control and must work together as allied forces. They cannot attack each other and share victory conditions."
         },
         {
-          "name": "Defensive Alliance", 
+          "name": "Defensive Alliance",
           "description": "Cody (The Ashen Pact) and Victoria (Galdoo'o naahlk wildigitkw) are allied defenders fighting to protect the core infrastructure. They cannot attack each other and share victory conditions."
         },
         {
@@ -302,65 +302,23 @@
             "description": "The AI gains control of critical infrastructure, vastly expanding its power and influence throughout the Nexus. The neural override proves successful, potentially affecting more commanders in future missions."
           },
           {
-            "condition": "Defender Victory", 
+            "condition": "Defender Victory",
             "description": "The infrastructure remains free from AI control, preserving the last bastions of independent consciousness. The defenders learn valuable information about combating the AI's mental influence."
           }
         ]
       },
-      "battleReportFile": null,
-      "winner": null,
-      "winningArmy": null
+      "battleReportFile": "data/battle-reports/mission6.json",
+      "winner": ["Cody", "Victoria"],
+      "winningArmy": ["The Ashen Pact", "Galdoo'o naahlk wildigitkw"]
     },
     {
       "number": 7,
-      "title": "Echoes of the Machine God",
-      "points": 2200,
-      "datetime": null,
-      "month": "September",
-      "status": "upcoming",
-      "overview": "An ancient AI, once thought erased, begins whispering to those who listen, offering knowledge—or control.",
-      "objective": {
-        "primary": "",
-        "secondary": []
-      },
-      "specialRules": [],
-      "victoryConditions": {
-        "primary": "",
-        "rewards": []
-      },
-      "battleReportFile": null,
-      "winner": null,
-      "winningArmy": null
-    },
-    {
-      "number": 8,
-      "title": "Twilight of the Jackals",
-      "points": 2400,
-      "datetime": null,
-      "month": "October",
-      "status": "upcoming",
-      "overview": "The Jackals make their move, claiming key Nexus components for themselves. But their true motives remain uncertain.",
-      "objective": {
-        "primary": "",
-        "secondary": []
-      },
-      "specialRules": [],
-      "victoryConditions": {
-        "primary": "",
-        "rewards": []
-      },
-      "battleReportFile": null,
-      "winner": null,
-      "winningArmy": null
-    },
-    {
-      "number": 9,
-      "title": "The Breaking of the Nexus",
-      "points": 2600,
-      "datetime": null,
+      "title": "To Be Dertermined",
+      "points": 2000,
+      "datetime": "2025-11-15T10:00:00-06:00",
       "month": "November",
-      "status": "upcoming",
-      "overview": "The Nexus reaches a critical threshold. It will either transcend its purpose—or implode catastrophically.",
+      "status": "current",
+      "overview": "To be determined",
       "objective": {
         "primary": "",
         "secondary": []
