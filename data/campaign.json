@@ -21,9 +21,9 @@
       "imagePosition": "center 25%",
       "armyURL": "the-ashen-pact",
       "armyForgeID": "vMzljLVC6ZGv",
-      "wins": 1,
+      "wins": 2,
       "losses": 4,
-      "objectives": 3,
+      "objectives": 4,
       "earnedVP": 0,
       "earnedPts": 0
     },
@@ -48,8 +48,8 @@
       "armyURL": "roughnecks",
       "armyForgeID": "Xo19MAwQPGbs",
       "wins": 2,
-      "losses": 3,
-      "objectives": 2,
+      "losses": 4,
+      "objectives": 3,
       "earnedVP": 0,
       "earnedPts": 0
     },
@@ -79,7 +79,7 @@
       "armyURL": "tarvos",
       "armyForgeID": "Un3_pRTu2xBO",
       "wins": 1,
-      "losses": 4,
+      "losses": 5,
       "objectives": 3,
       "earnedVP": 0,
       "earnedPts": 0
@@ -96,9 +96,9 @@
       "faction": [{ "id": "qtuyeoRfXKlNflK0", "gameSystem": "4", "name": "Wood Elves" }],
       "armyURL": "galdoo",
       "armyForgeID": "OKOrilTDQs6P",
-      "wins": 1,
+      "wins": 2,
       "losses": 4,
-      "objectives": 2,
+      "objectives": 3,
       "earnedVP": 0,
       "earnedPts": 0
     },

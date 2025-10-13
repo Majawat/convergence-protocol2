@@ -493,6 +493,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Step 3: Display Selection or Proceed
   if (!armyIdToLoad || !armyInfo) {
     // Hide army-specific UI elements
+
     const elementsToHide = [
       "round-display",
       "command-points-display",
@@ -509,6 +510,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const element = document.getElementById(id);
       if (element) element.style.display = "none";
     });
+
+    document.getElementById("controls-row").classList.add("d-none");
 
     displayArmySelection(campaignArmies, mainListContainer);
     document.title = "Select Army - OPR Army Tracker";
