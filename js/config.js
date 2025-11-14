@@ -5,6 +5,12 @@
 
 // Main configuration settings
 export const config = {
+  // Local Mode Configuration (for using local army data instead of Army Forge API)
+  USE_LOCAL_ARMY_DATA: true, // Set to true to load armies from local JSON files
+  LOCAL_ARMY_DATA_PATH: "./data/battle-reports/mission6-armies/", // Path to local army JSON files
+  USE_LOCAL_COMMON_RULES: true, // Set to true to use local common rules file
+  LOCAL_COMMON_RULES_PATH: "./data/rules/common-rules.json", // Path to local common rules file
+
   // Storage Keys
   ARMY_BOOKS_DATA_PREFIX: "oprArmyBooksCache_",
   ARMY_BOOKS_TIMESTAMP_PREFIX: "oprArmyBooksTimestamp_",

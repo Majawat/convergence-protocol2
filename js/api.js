@@ -12,16 +12,38 @@ import { showToast } from "./uiHelpers.js"; // For cache notifications
 /**
  * Fetches army LIST data from the One Page Rules Army Forge API, using sessionStorage for caching.
  * Validates cache using HEAD request and Last-Modified header.
+ * Can also load from local JSON files if config.USE_LOCAL_ARMY_DATA is enabled.
  *
  * @param {string} armyId - The specific ID of the army list on Army Forge.
+ * @param {string} [armyURL] - Optional: The army URL slug for loading local files (e.g., "the-ashen-pact").
  * @returns {Promise<object|null>} A promise that resolves to the JSON data object, or null if the fetch fails.
  */
-async function fetchArmyData(armyId) {
+async function fetchArmyData(armyId, armyURL = null) {
   if (!armyId) {
     console.error("[Cache] No armyId provided for army list fetch.");
     return null;
   }
 
+  // --- LOCAL MODE: Load from local JSON file ---
+  if (config.USE_LOCAL_ARMY_DATA && armyURL) {
+    console.log(`[Local] Loading army data from local file for ${armyURL}`);
+    const localPath = `${config.LOCAL_ARMY_DATA_PATH}${armyURL}.json`;
+    try {
+      const response = await fetch(localPath);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(`[Local] Successfully loaded army data from ${localPath}`);
+      return data;
+    } catch (error) {
+      console.error(`[Local] Failed to load army data from ${localPath}:`, error);
+      console.log(`[Local] Falling back to Army Forge API...`);
+      // Fall through to API fetch below
+    }
+  }
+
+  // --- API MODE: Fetch from Army Forge API ---
   const apiUrl = `${config.ARMYFORGE_LIST_API_URL_BASE}${armyId}`;
   // Use updated prefixes from config.js
   const cacheKey = `${config.ARMY_LIST_DATA_PREFIX}${armyId}`;

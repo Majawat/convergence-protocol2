@@ -550,7 +550,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const allArmyIds = new Set([...nonHiddenArmyIds, armyIdToLoad]);
     const armyIdsArray = Array.from(allArmyIds);
 
-    const armyDataPromises = armyIdsArray.map((id) => fetchArmyData(id));
+    // Create a mapping from armyForgeID to armyURL for local file loading
+    const armyIdToUrlMap = {};
+    campaignArmies.forEach((army) => {
+      if (army.armyForgeID && army.armyURL) {
+        armyIdToUrlMap[army.armyForgeID] = army.armyURL;
+      }
+    });
+
+    const armyDataPromises = armyIdsArray.map((id) =>
+      fetchArmyData(id, armyIdToUrlMap[id])
+    );
     const allRawDataResults = await Promise.allSettled(armyDataPromises);
 
     const allProcessedArmies = {}; // Store successfully processed armies

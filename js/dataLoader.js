@@ -164,8 +164,34 @@ async function _loadCustomDefinitionsDataInternal() {
   }
 }
 
-/** Fetches common rules and traits from API. */
+/** Fetches common rules and traits from API or local file. */
 async function _loadCommonDataInternal(gameSystemId) {
+  // --- LOCAL MODE: Load from local JSON file ---
+  if (config.USE_LOCAL_COMMON_RULES) {
+    console.log(`[Local] Loading common rules from local file for game system ${gameSystemId}`);
+    try {
+      const response = await fetch(config.LOCAL_COMMON_RULES_PATH);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const allData = await response.json();
+      const data = allData[gameSystemId.toString()];
+      if (data && (Array.isArray(data.rules) || Array.isArray(data.traits))) {
+        console.log(`[Local] Common rules/traits loaded successfully for game system ${gameSystemId}.`);
+        return data;
+      } else {
+        console.warn(`[Local] No data found for game system ${gameSystemId} in local file.`);
+        console.log(`[Local] Falling back to Army Forge API...`);
+        // Fall through to API fetch below
+      }
+    } catch (error) {
+      console.error(`[Local] Failed to load common rules from local file:`, error);
+      console.log(`[Local] Falling back to Army Forge API...`);
+      // Fall through to API fetch below
+    }
+  }
+
+  // --- API MODE: Fetch from Army Forge API ---
   const commonRulesUrl = `${config.ARMYFORGE_COMMON_RULES_API_URL_BASE}${gameSystemId}`;
   try {
     console.log(`Fetching common rules/traits from: ${commonRulesUrl}`);
